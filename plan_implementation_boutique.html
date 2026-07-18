@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan d'Implémentation Technique V3 - Module Boutique Professionnelle</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #F8FAFC;
+            color: #1E293B;
+            margin: 0;
+            padding: 40px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #FFFFFF;
+            padding: 50px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            border: 1px solid #E2E8F0;
+        }
+        .header {
+            border-bottom: 2px solid #EAB308;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        .project-tag {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #A16207;
+            font-weight: 700;
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: #0F172A;
+            margin: 8px 0 4px 0;
+        }
+        .subtitle {
+            font-size: 18px;
+            font-weight: 600;
+            color: #EAB308;
+            margin-top: 0;
+        }
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            background-color: #F8FAFC;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            font-size: 14px;
+            border: 1px solid #F1F5F9;
+        }
+        .metadata-item strong {
+            color: #475569;
+        }
+        .status-badge {
+            display: inline-block;
+            background-color: #DCFCE7;
+            color: #166534;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 12px;
+        }
+        h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0F172A;
+            margin-top: 30px;
+            border-bottom: 1px solid #E2E8F0;
+            padding-bottom: 8px;
+        }
+        p {
+            font-size: 15px;
+            color: #475569;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #E2E8F0;
+        }
+        th {
+            background-color: #F8FAFC;
+            color: #0F172A;
+            font-weight: 700;
+        }
+        .field-name {
+            font-family: monospace;
+            font-weight: 700;
+            color: #A16207;
+            background-color: #FEFCE8;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .step-box {
+            background-color: #FFFFFF;
+            border-left: 4px solid #EAB308;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border-top: 1px solid #F1F5F9;
+            border-right: 1px solid #F1F5F9;
+            border-bottom: 1px solid #F1F5F9;
+        }
+        .step-title {
+            font-weight: 700;
+            font-size: 16px;
+            color: #0F172A;
+            margin-bottom: 4px;
+        }
+        .step-desc {
+            font-size: 14px;
+            color: #475569;
+            margin: 0;
+        }
+        .print-btn {
+            display: inline-block;
+            background-color: #0F172A;
+            color: #FFFFFF;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            border: none;
+        }
+        @media print {
+            body {
+                background-color: #FFFFFF;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                border: none;
+                padding: 0;
+            }
+            .print-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="print-btn" onclick="window.print()">Imprimer / Enregistrer en PDF</button>
+    <div class="container">
+        <div class="header">
+            <span class="project-tag">Sellify.me - Confidentiel</span>
+            <h1>PLAN D'IMPLÉMENTATION TECHNIQUE (V3)</h1>
+            <div class="subtitle">Module Boutique Professionnelle (Alibaba-Style)</div>
+        </div>
+
+        <div class="metadata-grid">
+            <div class="metadata-item">
+                <strong>Projet :</strong> Sellify.me - Marketplace de Confiance
+            </div>
+            <div class="metadata-item">
+                <strong>Statut :</strong> <span class="status-badge">Validé pour Code</span>
+            </div>
+            <div class="metadata-item">
+                <strong>Abonnement par défaut :</strong> Pack Starter (1 Boutique, Max 30 Produits)
+            </div>
+            <div class="metadata-item">
+                <strong>Onboarding :</strong> Post-KYC obligatoire
+            </div>
+        </div>
+
+        <h2>1. Contexte &amp; Règles Métiers</h2>
+        <p>
+            Le module Boutique est l'élément central du parcours vendeur sur Sellify.me. Les vendeurs ne peuvent pas publier de produits ni effectuer de ventes sans avoir créé au préalable leur boutique.
+            Par défaut, tous les vendeurs possèdent le pack <strong>Starter</strong> (Gratuit). Ce pack n'est accessible qu'après validation du KYC. Sous ce forfait, chaque vendeur est limité à la création d'<strong>une seule boutique</strong> contenant au <strong>maximum 30 produits</strong>.
+            L'objectif est d'implémenter un module de création de boutique moderne de type Alibaba, avec des informations d'identité visuelle, de certification d'entreprise et des horaires de contact.
+        </p>
+
+        <h2>2. Structure de la Base de Données (Table: <code>shops</code>)</h2>
+        <p>La table <code>shops</code> sera liée de manière exclusive à la table <code>sellers</code> (relation 1-to-1) pour appliquer la restriction d'une seule boutique sous le pack Starter.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Champ</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="field-name">id</span></td>
+                    <td>BIGINT (PK)</td>
+                    <td>Identifiant unique de la boutique.</td>
+                </tr>
+                <tr>
+                    <td><span class="field-name">seller_id</span></td>
+                    <td>BIGINT (FK, Unique)</td>
+                    <td>Référence vers le vendeur propriétaire (Lien unique).</td>
+                </tr>
+                <tr>
+                    <td><span class="field-name">name</span></td>
+                    <td>VARCHAR(255)</td>
+                    <td>Nom commercial affiché de la boutique.</td>
+                </tr>
+                <tr>
+                    <td><span class="field-name">slug</span></td>
+                    <td>VARCHAR(255) (Unique)</td>
+                    <td>Slug unique pour l'URL publique (ex: <code>sellify.me/boutique/nom-boutique</code>).</td>
+                </tr>
+                <tr>
+                    <td><span class="field-name">slogan</span></td>
+                    <td>VARCHAR(255)</td>
+                    <td>Slogan ou phrase d'accroche commerciale.</td>
+                </tr>
+                <tr>
+                    <td><span class="field-name">description</span></td>
+                    <td>TEXT</td>
+                    <td>Description détaillée de l'activité.</td>
+                </tr>
+                <tr>
+                    <td><span class="field-name">logo_path</span></td>
+                    <td>VARCHAR(255)</td>
+                    <td>Chemin de l'image de logo (format carré 1:1).</td>
+                </tr>
+                <tr>
+                    <td><span class="field-name">banner_path</span></td>
+                    <td>VARCHAR(255)</td>
+                    <td>Chemin de la bannière de couverture (format paysage 16:9).</td>
+                </tr>
+                <tr>
+                    <td><span class="field-name">company_name</span></td>
+                    <td>VARCHAR(255)</td>
+                    <td>Raison sociale officielle / Nom légal de l'entreprise.</td>
+                </tr>
+                <tr>
+                    <td><span class="field-name">registration_number</span></td>
+                    <td>VARCHAR(100)</td>
+                    <td>Numéro de registre du commerce (RCCM) ou Patente.</td>
+                </tr>
+                <tr>
+                    <td><span class="field-name">address</span></td>
+                    <td>VARCHAR(255)</td>
+                    <td>Adresse physique de l'entrepôt ou de la boutique.</td>
+                </tr>
+                <tr>
+                    <td><span class="field-name">phone_contact</span></td>
+                    <td>VARCHAR(50)</td>
+                    <td>Téléphone client direct (compatible WhatsApp).</td>
+                </tr>
+                <tr>
+                    <td><span class="field-name">email_contact</span></td>
+                    <td>VARCHAR(255)</td>
+                    <td>E-mail professionnel pour la boutique.</td>
+                </tr>
+                <tr>
+                    <td><span class="field-name">opening_hours</span></td>
+                    <td>JSONB</td>
+                    <td>Jours et heures d'ouverture (ex: Lundi-Vendredi 8h-18h).</td>
+                </tr>
+                <tr>
+                    <td><span class="field-name">social_links</span></td>
+                    <td>JSONB</td>
+                    <td>Liens sociaux (WhatsApp, Facebook, Instagram).</td>
+                </tr>
+                <tr>
+                    <td><span class="field-name">theme_color</span></td>
+                    <td>VARCHAR(10)</td>
+                    <td>Couleur de thème primaire personnalisable (défaut: <code>#EAB308</code>).</td>
+                </tr>
+                <tr>
+                    <td><span class="field-name">is_active</span></td>
+                    <td>BOOLEAN</td>
+                    <td>Statut d'ouverture de la boutique (mode vacances).</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>3. Étapes d'Implémentation</h2>
+        
+        <div class="step-box">
+            <div class="step-title">Étape 1 : Migrations et Modèles Eloquent</div>
+            <p class="step-desc">
+                Créer la migration pour la table <code>shops</code> avec toutes les contraintes. Ajouter le modèle <code>Shop.php</code>.
+                Configurer les relations <code>hasOne(Shop::class)</code> dans <code>Seller.php</code> et <code>belongsTo(Seller::class)</code> dans <code>Shop.php</code>.
+            </p>
+        </div>
+
+        <div class="step-box">
+            <div class="step-title">Étape 2 : Filtre de protection (EnsureKycVerified)</div>
+            <p class="step-desc">
+                S'assurer que le middleware <code>EnsureKycVerified</code> restreint l'accès à la route <code>/seller/shop/create</code> (GET) et <code>/seller/shop</code> (POST) en redirigeant les utilisateurs dont le statut KYC n'est pas validé.
+            </p>
+        </div>
+
+        <div class="step-box">
+            <div class="step-title">Étape 3 : Contrôleur de Boutique (Seller/ShopController)</div>
+            <p class="step-desc">
+                Développer le contrôleur gérant la création et mise à jour. Il appliquera la validation stricte des champs professionnels, la génération de slug unique, l'enregistrement des images dans le stockage et l'encodage des paramètres JSONb (horaires et réseaux sociaux).
+            </p>
+        </div>
+
+        <div class="step-box">
+            <div class="step-title">Étape 4 : Interface Utilisateur Professionnelle (React / Inertia)</div>
+            <p class="step-desc">
+                Intégrer le formulaire de création en 3 onglets (Identité Visuelle, Infos Entreprise/RCCM, Paramètres Opérationnels). Inclure une prévisualisation de la boutique en temps réel (Alibaba Grid Layout).
+            </p>
+        </div>
+
+        <div class="step-box">
+            <div class="step-title">Étape 5 : Limitation à 30 Produits (Pack Starter)</div>
+            <p class="step-desc">
+                Dans le contrôleur de création de produits, ajouter une vérification du nombre de produits existants. Si la somme des produits de la boutique atteint 30, bloquer la création et retourner une erreur Inertia avec suggestion de mise à niveau de pack.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
