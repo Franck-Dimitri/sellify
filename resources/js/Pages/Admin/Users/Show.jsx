@@ -104,7 +104,7 @@ export default function Show({ targetUser }) {
         <AdminLayout title={`Détails Utilisateur : ${targetUser.first_name} ${targetUser.last_name}`}>
             <Head title={`${targetUser.first_name} ${targetUser.last_name}`} />
 
-            <div className="space-y-6 max-w-7xl mx-auto">
+            <div className="space-y-6 mx-auto">
                 {/* Back Link */}
                 <div>
                     <Link href={route('admin.users.all')} className="inline-flex items-center text-xs font-semibold text-surface-450 hover:text-surface-800 transition-colors">

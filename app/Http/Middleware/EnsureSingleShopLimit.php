@@ -18,8 +18,8 @@ class EnsureSingleShopLimit
         if ($user && $user->isSeller()) {
             $seller = $user->seller;
             
-            // Only block creations (POST/PUT/PATCH) if the limit is reached
-            if ($seller && $seller->shops()->exists() && !$request->isMethod('GET') && !$request->isMethod('HEAD')) {
+            // Only block creations (POST/PUT/PATCH) if the limit is reached for starter pack users
+            if ($seller && $seller->pack === 'starter' && $seller->shops()->exists() && !$request->isMethod('GET') && !$request->isMethod('HEAD')) {
                 if ($request->expectsJson()) {
                     return response()->json([
                         'message' => 'Vous possédez déjà une boutique. Le pack Starter ne permet de créer qu\'une seule boutique.'

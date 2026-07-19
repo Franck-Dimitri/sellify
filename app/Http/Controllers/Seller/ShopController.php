@@ -40,9 +40,9 @@ class ShopController extends Controller
             return redirect()->route('login')->with('error', 'Compte vendeur non trouvé.');
         }
 
-        if ($seller->shops()->exists()) {
+        if ($seller->pack === 'starter' && $seller->shops()->exists()) {
             return redirect()->route('seller.dashboard')
-                ->with('error', 'Vous possédez déjà une boutique.');
+                ->with('error', 'Vous possédez déjà une boutique. Le pack Starter ne permet de créer qu\'une seule boutique.');
         }
 
         $validated = $request->validate([
@@ -285,10 +285,15 @@ class ShopController extends Controller
         // Load seller & user for contact details if needed
         $shop->load(['seller.user']);
 
+        $products = $shop->products()
+            ->with(['promotions'])
+            ->where('is_active', true)
+            ->latest()
+            ->get();
+
         return Inertia::render('Shop/Show', [
             'shop' => $shop,
-            // In the future we will load products here:
-            'products' => []
+            'products' => $products
         ]);
     }
 }

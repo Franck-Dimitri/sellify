@@ -227,8 +227,110 @@ export default function Show({ shop, products = [] }) {
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            {/* Products mapping in the future */}
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                            {products.map((product) => {
+                                                const hasPromo = product.active_promotion !== null;
+                                                const firstImage = product.image_paths && product.image_paths.length > 0 
+                                                    ? `/storage/${product.image_paths[0]}` 
+                                                    : null;
+
+                                                const originalPrice = parseFloat(product.price);
+                                                const finalPrice = hasPromo 
+                                                    ? parseFloat(product.active_promotion.promo_price) 
+                                                    : originalPrice;
+
+                                                // Prepare WhatsApp message url safely
+                                                const whatsappNumber = shop.social_links?.whatsapp || shop.phone_contact;
+                                                const shopUrl = typeof window !== 'undefined' ? window.location.href : '';
+                                                const messageText = `Bonjour ${shop.name}, je suis intéressé par votre produit "${product.name}" au prix de ${finalPrice.toFixed(2)} € (lien: ${shopUrl})`;
+                                                const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(messageText)}`;
+
+                                                return (
+                                                    <div 
+                                                        key={product.id} 
+                                                        className="bg-white border border-surface-200 rounded-2xl overflow-hidden hover:shadow-md transition-all duration-300 flex flex-col group"
+                                                    >
+                                                        {/* Image Section */}
+                                                        <div className="h-44 bg-surface-50 relative overflow-hidden flex items-center justify-center border-b border-surface-150 shrink-0">
+                                                            {firstImage ? (
+                                                                <img 
+                                                                    src={firstImage} 
+                                                                    alt={product.name} 
+                                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                                                                />
+                                                            ) : (
+                                                                <ShoppingBag className="w-10 h-10 text-surface-200" />
+                                                            )}
+
+                                                            {/* Promo Badge */}
+                                                            {hasPromo && (
+                                                                <div className="absolute top-3 left-3 bg-red-600 text-white font-bold text-[10px] px-2.5 py-1 rounded-full shadow-sm">
+                                                                    -{product.active_promotion.discount_percentage}% OFF
+                                                                </div>
+                                                            )}
+
+                                                            {/* Stock Badge if low */}
+                                                            {product.stock === 0 ? (
+                                                                <div className="absolute top-3 right-3 bg-rose-50 text-rose-700 border border-rose-200 font-bold text-[9px] px-2 py-0.5 rounded-md">
+                                                                    Rupture de stock
+                                                                </div>
+                                                            ) : product.stock <= 3 ? (
+                                                                <div className="absolute top-3 right-3 bg-amber-50 text-amber-700 border border-amber-200 font-bold text-[9px] px-2 py-0.5 rounded-md animate-pulse">
+                                                                    Plus que {product.stock}
+                                                                </div>
+                                                            ) : null}
+                                                        </div>
+
+                                                        {/* Content Section */}
+                                                        <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
+                                                            <div className="space-y-1">
+                                                                <h4 className="font-bold text-surface-850 text-sm leading-snug tracking-tight group-hover:text-surface-900 transition-colors">
+                                                                    {product.name}
+                                                                </h4>
+                                                                <p className="text-[11px] text-surface-450 leading-relaxed font-normal line-clamp-2">
+                                                                    {product.description || 'Aucune description disponible.'}
+                                                                </p>
+                                                            </div>
+
+                                                            <div className="space-y-3 pt-2">
+                                                                {/* Price display */}
+                                                                <div className="flex items-baseline space-x-2">
+                                                                    {hasPromo ? (
+                                                                        <>
+                                                                            <span className="text-base font-extrabold text-red-600">
+                                                                                {finalPrice.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
+                                                                            </span>
+                                                                            <span className="text-xs text-surface-400 font-medium line-through">
+                                                                                {originalPrice.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
+                                                                            </span>
+                                                                        </>
+                                                                    ) : (
+                                                                        <span className="text-base font-extrabold text-surface-800">
+                                                                            {originalPrice.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+
+                                                                {/* WhatsApp Direct Order Button */}
+                                                                <a 
+                                                                    href={whatsappUrl}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="block"
+                                                                >
+                                                                    <button 
+                                                                        disabled={product.stock === 0}
+                                                                        className="w-full py-2 bg-emerald-500 hover:bg-emerald-600 disabled:bg-surface-100 disabled:text-surface-400 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center space-x-1.5 shadow-sm"
+                                                                    >
+                                                                        <MessageCircle className="w-3.5 h-3.5" />
+                                                                        <span>Commander sur WhatsApp</span>
+                                                                    </button>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
                                     )}
                                 </div>
