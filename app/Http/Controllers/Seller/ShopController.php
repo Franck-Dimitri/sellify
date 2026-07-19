@@ -20,8 +20,8 @@ class ShopController extends Controller
     public function create(Request $request): InertiaResponse|RedirectResponse
     {
         $seller = $request->user()->seller;
-
-        $reachedLimit = $seller && $seller->pack === 'starter' && $seller->shops()->exists();
+        $maxShops = $seller && $seller->pack === 'pro' ? 2 : 1;
+        $reachedLimit = $seller && $seller->shops()->count() >= $maxShops;
 
         return Inertia::render('Seller/Shop/Create', [
             'reachedLimit' => $reachedLimit
@@ -40,9 +40,10 @@ class ShopController extends Controller
             return redirect()->route('login')->with('error', 'Compte vendeur non trouvé.');
         }
 
-        if ($seller->pack === 'starter' && $seller->shops()->exists()) {
+        $maxShops = $seller->pack === 'pro' ? 2 : 1;
+        if ($seller->shops()->count() >= $maxShops) {
             return redirect()->route('seller.dashboard')
-                ->with('error', 'Vous possédez déjà une boutique. Le pack Starter ne permet de créer qu\'une seule boutique.');
+                ->with('error', "Vous possédez déjà {$maxShops} boutique(s). Votre pack actuel ne permet pas d'en créer d'autres.");
         }
 
         $validated = $request->validate([

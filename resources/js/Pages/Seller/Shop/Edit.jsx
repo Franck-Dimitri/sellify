@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Upload, Store, ShieldCheck, MapPin, Phone, Mail, Clock, Globe, HelpCircle, ExternalLink } from 'lucide-react';
 import Button from '../../../Components/ui/Button';
 import Input from '../../../Components/ui/Input';
@@ -459,7 +459,7 @@ export default function Edit({ shop }) {
                             <div className="absolute inset-0 bg-slate-900/20" />
                             <div className="absolute bottom-3 left-4 text-white z-10 flex items-center space-x-2">
                                 <span className="text-xs font-medium px-2 py-0.5 bg-slate-800/40 rounded-full border border-white/20">
-                                    Starter Plan
+                                    {usePage().props.auth.user.seller?.pack === 'pro' ? 'Pro Plan' : 'Starter Plan'}
                                 </span>
                             </div>
                         </div>

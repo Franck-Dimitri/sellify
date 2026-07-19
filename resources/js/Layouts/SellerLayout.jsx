@@ -159,7 +159,7 @@ export default function SellerLayout({ children, title }) {
                         <div className="truncate">
                             <p className="text-sm font-semibold text-surface-800 truncate">{user.first_name} {user.last_name}</p>
                             <p className="text-[10px] text-surface-400 font-bold uppercase tracking-wider">
-                                Starter Plan
+                                {seller?.pack === 'pro' ? 'Pro Plan' : 'Starter Plan'}
                             </p>
                         </div>
                     </div>

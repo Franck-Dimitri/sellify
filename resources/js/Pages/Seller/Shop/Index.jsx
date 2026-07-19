@@ -19,7 +19,9 @@ import {
 export default function Index({ shops = [], logs = [], pack = 'starter' }) {
     const primaryColor = '#CA8A04';
     const isStarter = pack === 'starter';
-    const reachedLimit = isStarter && shops.length >= 1;
+    const isPro = pack === 'pro';
+    const maxAllowed = isPro ? 2 : 1;
+    const reachedLimit = shops.length >= maxAllowed;
 
     const handleDelete = (shop) => {
         if (confirm(`Êtes-vous sûr de vouloir supprimer définitivement la boutique "${shop.name}" ? Cette action est irréversible et supprimera toutes les données associées.`)) {
@@ -51,7 +53,7 @@ export default function Index({ shops = [], logs = [], pack = 'starter' }) {
                 </div>
 
                 {/* Pack Limit Banner */}
-                {isStarter && (
+                {isStarter ? (
                     <div className="bg-yellow-50/50 border border-yellow-250 rounded-2xl p-5 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div className="flex items-start space-x-3.5">
                             <div className="p-2 bg-yellow-100/50 text-yellow-700 rounded-xl border border-yellow-200 mt-0.5">
@@ -60,7 +62,7 @@ export default function Index({ shops = [], logs = [], pack = 'starter' }) {
                             <div>
                                 <h4 className="text-sm font-bold text-yellow-800">Compte Limité • Pack Starter ({shops.length}/1 Boutique)</h4>
                                 <p className="text-xs text-yellow-700 mt-0.5 leading-relaxed font-normal">
-                                    Vous êtes actuellement sous l'abonnement gratuit Starter. Passez au pack Pro pour créer des boutiques illimitées et bénéficier de plus de fonctionnalités.
+                                    Vous êtes actuellement sous l'abonnement gratuit Starter. Passez au pack Pro pour créer jusqu'à 2 boutiques et bénéficier de plus de fonctionnalités.
                                 </p>
                             </div>
                         </div>
@@ -71,6 +73,20 @@ export default function Index({ shops = [], logs = [], pack = 'starter' }) {
                         >
                             Devenir Pro &rarr;
                         </Button>
+                    </div>
+                ) : (
+                    <div className="bg-emerald-50/50 border border-emerald-250 rounded-2xl p-5 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div className="flex items-start space-x-3.5">
+                            <div className="p-2 bg-emerald-100/50 text-emerald-700 rounded-xl border border-emerald-200 mt-0.5">
+                                <ShieldCheck className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <h4 className="text-sm font-bold text-emerald-800">Abonnement Pro Actif ({shops.length}/2 Boutiques)</h4>
+                                <p className="text-xs text-emerald-700 mt-0.5 leading-relaxed font-normal">
+                                    Vous bénéficiez de toutes les fonctionnalités Pro. Vous pouvez créer jusqu'à 2 boutiques professionnelles sur votre compte.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 )}
 

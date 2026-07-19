@@ -158,7 +158,7 @@ export default function ShopConsoleLayout({ children, shop, title }) {
                         <div className="truncate">
                             <p className="text-sm font-medium text-surface-700 truncate">{user.first_name} {user.last_name}</p>
                             <p className="text-[10px] text-surface-400 font-medium uppercase tracking-wider">
-                                Plan Starter
+                                {user.seller?.pack === 'pro' ? 'Plan Pro' : 'Plan Starter'}
                             </p>
                         </div>
                     </div>

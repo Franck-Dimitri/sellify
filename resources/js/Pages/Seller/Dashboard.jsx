@@ -30,7 +30,7 @@ export default function Dashboard({ shopsData = [], totalStock = 0, activityLogs
     const [timeframe, setTimeframe] = useState('week');
 
     // Primary Theme Accent Color
-    const primaryColor = '#CA8A04';
+    const primaryColor = '#ecd500ff';
 
     const selectedShop = shops.find(s => String(s.id) === String(selectedShopId));
 
@@ -151,7 +151,7 @@ export default function Dashboard({ shopsData = [], totalStock = 0, activityLogs
                             <select
                                 value={selectedShopId}
                                 onChange={(e) => setSelectedShopId(e.target.value)}
-                                className="appearance-none bg-white border border-surface-200 pl-4 pr-10 py-2 rounded-2xl text-xs font-semibold text-surface-700 shadow-sm focus:outline-none focus:border-yellow-600 focus:ring-1 focus:ring-yellow-600 cursor-pointer"
+                                className="appearance-none bg-white border border-surface-200 pl-4 pr-10 py-2 rounded-md text-xs font-meduim text-surface-700 focus:outline-none focus:border-yellow-600 focus:ring-1 focus:ring-yellow-600 cursor-pointer"
                             >
                                 <option value="general">Global (Toutes les boutiques)</option>
                                 {shops.map((s) => (
@@ -164,7 +164,7 @@ export default function Dashboard({ shopsData = [], totalStock = 0, activityLogs
                         </div>
 
                         {/* Timeframe */}
-                        <div className="flex items-center space-x-3 bg-white border border-surface-200 p-1 rounded-2xl shadow-sm">
+                        <div className="flex items-center space-x-3 bg-white border border-surface-200 p-1 rounded-md">
                             <div className="flex space-x-1">
                                 {[
                                     { id: 'week', label: 'Semaine' },
@@ -174,9 +174,9 @@ export default function Dashboard({ shopsData = [], totalStock = 0, activityLogs
                                     <button
                                         key={tab.id}
                                         onClick={() => setTimeframe(tab.id)}
-                                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all
+                                        className={`px-3 py-1.5 rounded-md text-xs transition-all
                                             ${timeframe === tab.id
-                                                ? 'text-yellow-650 bg-yellow-50 font-bold'
+                                                ? 'text-yellow-650 bg-yellow-50 font-meduim'
                                                 : 'text-surface-500 hover:text-surface-800'}`}
                                     >
                                         {tab.label}
@@ -184,7 +184,7 @@ export default function Dashboard({ shopsData = [], totalStock = 0, activityLogs
                                 ))}
                             </div>
                             <div className="h-4 w-px bg-surface-200" />
-                            <button className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-surface-650 hover:text-surface-900 transition-colors">
+                            <button className="flex items-center space-x-1.5 px-3 py-1.5 text-xs  text-surface-650 hover:text-surface-900 transition-colors">
                                 <Download className="w-3.5 h-3.5" />
                                 <span>Exporter</span>
                             </button>
@@ -193,7 +193,7 @@ export default function Dashboard({ shopsData = [], totalStock = 0, activityLogs
                 </div>
 
                 {/* 2. Welcome Banner */}
-                <div className="bg-yellow-600 text-white rounded-3xl p-6 shadow-sm flex flex-col justify-center min-h-[100px] relative overflow-hidden">
+                <div className="bg-yellow-500 text-white rounded-xl p-6 flex flex-col justify-center min-h-[100px] relative overflow-hidden">
                     <div className="absolute right-0 top-0 w-32 h-full opacity-10 bg-gradient-to-l from-white pointer-events-none" />
                     <div className="flex justify-between items-center z-10 w-full">
                         <div>
@@ -211,7 +211,7 @@ export default function Dashboard({ shopsData = [], totalStock = 0, activityLogs
 
                         {selectedShopId !== 'general' && selectedShop && (
                             <Link href={route('seller.shop.dashboard', selectedShop.slug)}>
-                                <Button size="sm" className="bg-white text-yellow-800 hover:bg-yellow-50 border-none font-medium flex items-center space-x-1">
+                                <Button size="sm" className="bg-white text-yellow-600 hover:bg-yellow-50 border-none  flex items-center space-x-1">
                                     <span>Gérer la boutique</span>
                                     <ArrowRight className="w-4 h-4" />
                                 </Button>
@@ -223,7 +223,7 @@ export default function Dashboard({ shopsData = [], totalStock = 0, activityLogs
                 {/* 3. Four Stats Cards Row */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {/* Card 1: Revenue */}
-                    <div className="bg-white border border-surface-200 rounded-3xl p-5 shadow-xs flex justify-between items-start">
+                    <div className="bg-white border border-surface-200 rounded-xl p-5 shadow-xs flex justify-between items-start">
                         <div className="space-y-1">
                             <span className="text-xs text-surface-400 font-semibold block">Chiffre d'affaires</span>
                             <span className="text-2xl font-bold text-surface-750 block">{activeStats.revenue}</span>
@@ -239,7 +239,7 @@ export default function Dashboard({ shopsData = [], totalStock = 0, activityLogs
                     </div>
 
                     {/* Card 2: Orders */}
-                    <div className="bg-white border border-surface-200 rounded-3xl p-5 shadow-xs flex justify-between items-start">
+                    <div className="bg-white border border-surface-200 rounded-xl p-5 shadow-xs flex justify-between items-start">
                         <div className="space-y-1">
                             <span className="text-xs text-surface-400 font-semibold block">Commandes reçues</span>
                             <span className="text-2xl font-bold text-surface-750 block">{activeStats.orders}</span>
@@ -257,7 +257,7 @@ export default function Dashboard({ shopsData = [], totalStock = 0, activityLogs
                     </div>
 
                     {/* Card 3: Products */}
-                    <div className="bg-white border border-surface-200 rounded-3xl p-5 shadow-xs flex justify-between items-start">
+                    <div className="bg-white border border-surface-200 rounded-xl p-5 shadow-xs flex justify-between items-start">
                         <div className="space-y-1">
                             <span className="text-xs text-surface-400 font-semibold block">Catalogue global</span>
                             <span className="text-2xl font-bold text-surface-750 block">{activeStats.products}</span>
@@ -273,7 +273,7 @@ export default function Dashboard({ shopsData = [], totalStock = 0, activityLogs
                     </div>
 
                     {/* Card 4: Customers */}
-                    <div className="bg-white border border-surface-200 rounded-3xl p-5 shadow-xs flex justify-between items-start">
+                    <div className="bg-white border border-surface-200 rounded-xl p-5 shadow-xs flex justify-between items-start">
                         <div className="space-y-1">
                             <span className="text-xs text-surface-400 font-semibold block">Clients uniques</span>
                             <span className="text-2xl font-bold text-surface-750 block">{activeStats.customers}</span>
@@ -292,7 +292,7 @@ export default function Dashboard({ shopsData = [], totalStock = 0, activityLogs
                 {/* 4. Charts Section */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Left: Sales & Orders Combination Chart */}
-                    <div className="lg:col-span-2 bg-white border border-surface-200 rounded-3xl p-5 shadow-xs">
+                    <div className="lg:col-span-2 bg-white border border-surface-200 rounded-xl p-5 shadow-xs">
                         <div className="flex justify-between items-start mb-6">
                             <div>
                                 <h4 className="text-sm font-bold text-surface-700">Aperçu des ventes</h4>
@@ -374,7 +374,7 @@ export default function Dashboard({ shopsData = [], totalStock = 0, activityLogs
                     </div>
 
                     {/* Right: Pie Category Sales Chart */}
-                    <div className="bg-white border border-surface-200 rounded-3xl p-5 shadow-xs flex flex-col justify-between">
+                    <div className="bg-white border border-surface-200 rounded-xl p-5 shadow-xs flex flex-col justify-between">
                         <div>
                             <h4 className="text-sm font-bold text-surface-700">Ventes par catégorie</h4>
                             <span className="text-[11px] text-surface-400 mt-0.5 block">Répartition sur le mois en cours</span>
@@ -420,7 +420,7 @@ export default function Dashboard({ shopsData = [], totalStock = 0, activityLogs
                     {/* Left: Commandes Récentes & Catalogue */}
                     <div className="lg:col-span-2 space-y-6">
                         {/* A. Commandes Récentes */}
-                        <div className="bg-white border border-surface-200 rounded-3xl p-5 shadow-xs">
+                        <div className="bg-white border border-surface-200 rounded-xl p-5 shadow-xs">
                             <div className="flex justify-between items-center border-b border-surface-100 pb-3 mb-4">
                                 <h4 className="text-sm font-bold text-surface-700 flex items-center space-x-2">
                                     <ShoppingBag className="w-4 h-4 text-blue-500" />
@@ -473,7 +473,7 @@ export default function Dashboard({ shopsData = [], totalStock = 0, activityLogs
                         </div>
 
                         {/* B. Catalogue / Produits Récents */}
-                        <div className="bg-white border border-surface-200 rounded-3xl p-5 shadow-xs">
+                        <div className="bg-white border border-surface-200 rounded-xl p-5 shadow-xs">
                             <div className="flex justify-between items-center border-b border-surface-100 pb-3 mb-4">
                                 <h4 className="text-sm font-bold text-surface-700 flex items-center space-x-2">
                                     <Package className="w-4 h-4 text-emerald-500" />
@@ -519,7 +519,7 @@ export default function Dashboard({ shopsData = [], totalStock = 0, activityLogs
                     {/* Right: Top Produits & Activités Récentes */}
                     <div className="space-y-6">
                         {/* A. Top Produits */}
-                        <div className="bg-white border border-surface-200 rounded-3xl p-5 shadow-xs">
+                        <div className="bg-white border border-surface-200 rounded-xl p-5 shadow-xs">
                             <div className="flex justify-between items-center border-b border-surface-100 pb-3 mb-4">
                                 <h4 className="text-sm font-bold text-surface-700 flex items-center space-x-2">
                                     <Award className="w-4 h-4 text-purple-500" />

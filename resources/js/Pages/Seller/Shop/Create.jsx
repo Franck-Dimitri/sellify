@@ -7,6 +7,9 @@ import { Card, CardContent } from '../../../Components/ui/Card';
 import SellerCentralLayout from '../../../Layouts/SellerCentralLayout';
 
 export default function Create({ reachedLimit }) {
+    const { auth } = usePage().props;
+    const isPro = auth.user.seller?.pack === 'pro';
+
     if (reachedLimit) {
         return (
             <SellerCentralLayout title="Créer ma boutique">
@@ -17,33 +20,40 @@ export default function Create({ reachedLimit }) {
                             <Store className="w-8 h-8" />
                         </div>
                         <div className="space-y-2">
-                            <h2 className="text-xl font-bold text-surface-800">Passez au Pack Pro</h2>
+                            <h2 className="text-xl font-bold text-surface-800">
+                                {isPro ? 'Limite de Boutiques Atteinte' : 'Passez au Pack Pro'}
+                            </h2>
                             <p className="text-xs text-surface-500 max-w-sm mx-auto">
-                                Vous possédez déjà une boutique sous le pack <strong>Starter</strong>. Ce pack est limité à une seule boutique par compte.
+                                {isPro 
+                                    ? "Vous possédez déjà 2 boutiques sous le pack Pro. Ce pack est limité à 2 boutiques au maximum." 
+                                    : "Vous possédez déjà une boutique sous le pack Starter. Ce pack est limité à une seule boutique par compte."
+                                }
                             </p>
                         </div>
                         
-                        <div className="bg-yellow-50/30 border border-yellow-200 rounded-2xl p-4 w-full text-left space-y-2.5">
-                            <h3 className="text-[10px] font-bold text-yellow-800 uppercase tracking-wider">Avantages du Pack Pro :</h3>
-                            <ul className="text-xs text-surface-600 space-y-1.5 font-medium">
-                                <li className="flex items-center space-x-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-600" />
-                                    <span>Boutiques professionnelles illimitées</span>
-                                </li>
-                                <li className="flex items-center space-x-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-600" />
-                                    <span>Jusqu'à 1 000 produits par boutique</span>
-                                </li>
-                                <li className="flex items-center space-x-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-600" />
-                                    <span>Statistiques avancées et rapports d'activité</span>
-                                </li>
-                                <li className="flex items-center space-x-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-600" />
-                                    <span>Support technique prioritaire 24/7</span>
-                                </li>
-                            </ul>
-                        </div>
+                        {!isPro && (
+                            <div className="bg-yellow-50/30 border border-yellow-200 rounded-2xl p-4 w-full text-left space-y-2.5">
+                                <h3 className="text-[10px] font-bold text-yellow-800 uppercase tracking-wider">Avantages du Pack Pro :</h3>
+                                <ul className="text-xs text-surface-600 space-y-1.5 font-medium">
+                                    <li className="flex items-center space-x-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-yellow-600" />
+                                        <span>Jusqu'à 2 boutiques professionnelles</span>
+                                    </li>
+                                    <li className="flex items-center space-x-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-yellow-600" />
+                                        <span>Jusqu'à 1 000 produits par boutique</span>
+                                    </li>
+                                    <li className="flex items-center space-x-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-yellow-600" />
+                                        <span>Statistiques avancées et rapports d'activité</span>
+                                    </li>
+                                    <li className="flex items-center space-x-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-yellow-600" />
+                                        <span>Support technique prioritaire 24/7</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        )}
 
                         <div className="flex flex-col sm:flex-row gap-3 w-full justify-center">
                             <Link href={route('seller.dashboard')} className="flex-1 sm:flex-none">
@@ -51,12 +61,14 @@ export default function Create({ reachedLimit }) {
                                     Retour
                                 </Button>
                             </Link>
-                            <Button 
-                                type="button" 
-                                className="flex-1 sm:flex-none text-white font-medium bg-yellow-600 hover:bg-yellow-750"
-                            >
-                                Souscrire au Pack Pro
-                            </Button>
+                            {!isPro && (
+                                <Button 
+                                    type="button" 
+                                    className="flex-1 sm:flex-none text-white font-medium bg-yellow-600 hover:bg-yellow-750"
+                                >
+                                    Souscrire au Pack Pro
+                                </Button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -500,7 +512,7 @@ export default function Create({ reachedLimit }) {
                             <div className="absolute inset-0 bg-slate-900/20" />
                             <div className="absolute bottom-3 left-4 text-white z-10 flex items-center space-x-2">
                                 <span className="text-xs font-medium px-2 py-0.5 bg-slate-800/40 rounded-full border border-white/20">
-                                    Starter Plan
+                                    {usePage().props.auth.user.seller?.pack === 'pro' ? 'Pro Plan' : 'Starter Plan'}
                                 </span>
                             </div>
                         </div>

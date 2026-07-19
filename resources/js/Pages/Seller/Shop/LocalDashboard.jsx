@@ -113,7 +113,7 @@ export default function LocalDashboard({ shop }) {
                                 <span className="text-xs text-surface-400 font-medium uppercase tracking-wider block">Produits en ligne</span>
                                 <span className="text-2xl font-bold text-surface-750 block">{stats.productsCount}</span>
                                 <span className="text-[10px] text-surface-400 font-normal block pt-1.5">
-                                    Limite Starter Pack : 30 max
+                                    Limite {auth.user.seller?.pack === 'pro' ? 'Pro' : 'Starter'} Pack : 30 max
                                 </span>
                             </div>
                             <div className="p-3 bg-surface-50 text-surface-655 rounded-2xl border border-surface-150">
