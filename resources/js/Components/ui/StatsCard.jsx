@@ -17,7 +17,7 @@ export default function StatsCard({
                     <h3 className="text-2xl md:text-3xl font-extrabold text-surface-900 tracking-tight">{value}</h3>
                 </div>
                 {Icon && (
-                    <div className="p-3 bg-primary-50 text-primary-600 rounded-xl">
+                    <div className="p-3 bg-primary-50 text-primary-600 rounded-md">
                         <Icon className="w-5 h-5" />
                     </div>
                 )}
