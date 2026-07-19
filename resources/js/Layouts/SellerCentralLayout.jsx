@@ -45,29 +45,30 @@ export default function SellerCentralLayout({ children, title }) {
         }
     ];
 
-    const primaryColor = '#EAB308'; // Default Sellify Yellow
+    // Primary Brand Color: Yellow 600 (soft golden yellow)
+    const primaryColor = '#CA8A04'; 
 
     return (
         <div className="h-screen w-screen flex bg-surface-50 overflow-hidden antialiased font-sans">
             {/* Sidebar Desktop & Mobile */}
-            <aside className={`bg-white text-surface-700 w-66 flex flex-col border-r border-surface-200 shadow-sm flex-shrink-0 z-30 fixed inset-y-0 left-0 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:static md:translate-x-0 transition-transform duration-200 ease-in-out`}>
+            <aside className={`bg-white text-surface-600 w-66 flex flex-col border-r border-surface-200 shadow-sm flex-shrink-0 z-30 fixed inset-y-0 left-0 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:static md:translate-x-0 transition-transform duration-200 ease-in-out`}>
                 
                 {/* Brand Header */}
                 <div className="h-16 flex items-center justify-between px-5 border-b border-surface-100 bg-white">
                     <Link href="/" className="flex items-center space-x-2.5">
-                        <span className="w-8.5 h-8.5 rounded-xl flex items-center justify-center font-black text-white shadow-md text-base" style={{ backgroundColor: primaryColor }}>
+                        <span className="w-8.5 h-8.5 rounded-xl flex items-center justify-center font-bold text-white shadow-sm text-sm" style={{ backgroundColor: primaryColor }}>
                             S
                         </span>
                         <div>
-                            <span className="font-extrabold text-base tracking-tight text-surface-900">
+                            <span className="font-semibold text-base tracking-tight text-surface-800">
                                 Sellify<span style={{ color: primaryColor }}>.me</span>
                             </span>
-                            <span className="block text-[10px] text-surface-400 font-bold uppercase tracking-wider leading-none mt-0.5">
+                            <span className="block text-[10px] text-surface-400 font-medium uppercase tracking-wider leading-none mt-0.5">
                                 Espace Central
                             </span>
                         </div>
                     </Link>
-                    <button onClick={() => setSidebarOpen(false)} className="md:hidden text-surface-400 hover:text-surface-900 transition-colors">
+                    <button onClick={() => setSidebarOpen(false)} className="md:hidden text-surface-400 hover:text-surface-700 transition-colors">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
@@ -78,10 +79,10 @@ export default function SellerCentralLayout({ children, title }) {
                         <Link
                             key={item.name}
                             href={item.href}
-                            className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150
+                            className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
                                 ${item.active
-                                    ? 'text-white shadow-md'
-                                    : 'hover:bg-surface-50 text-surface-600 hover:text-surface-900'
+                                    ? 'text-white shadow-sm'
+                                    : 'hover:bg-surface-50 text-surface-600 hover:text-surface-800'
                                 }`}
                             style={item.active ? { backgroundColor: primaryColor } : {}}
                         >
@@ -96,12 +97,12 @@ export default function SellerCentralLayout({ children, title }) {
                 {/* Sidebar Footer */}
                 <div className="p-4 border-t border-surface-100 space-y-4 bg-white">
                     <div className="flex items-center space-x-3 px-2">
-                        <div className="w-9 h-9 rounded-xl bg-surface-50 flex items-center justify-center text-surface-700 border border-surface-200 shadow-xs font-bold text-xs uppercase">
+                        <div className="w-9 h-9 rounded-xl bg-surface-50 flex items-center justify-center text-surface-600 border border-surface-200 shadow-xs font-medium text-xs uppercase">
                             {user.first_name[0]}{user.last_name[0]}
                         </div>
                         <div className="truncate">
-                            <p className="text-sm font-semibold text-surface-800 truncate">{user.first_name} {user.last_name}</p>
-                            <p className="text-[10px] text-surface-400 font-bold uppercase tracking-wider">
+                            <p className="text-sm font-medium text-surface-700 truncate">{user.first_name} {user.last_name}</p>
+                            <p className="text-[10px] text-surface-400 font-medium uppercase tracking-wider">
                                 Starter Plan
                             </p>
                         </div>
@@ -112,14 +113,14 @@ export default function SellerCentralLayout({ children, title }) {
                             href={route('logout')} 
                             method="post" 
                             as="button" 
-                            className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-bold text-red-650 hover:bg-red-50 transition-colors text-left"
+                            className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-medium text-red-650 hover:bg-red-50 transition-colors text-left"
                         >
                             <LogOut className="w-4 h-4" />
                             <span>Déconnexion</span>
                         </Link>
                     </div>
 
-                    <div className="text-center text-[10px] text-surface-400 font-medium pt-1 border-t border-surface-50">
+                    <div className="text-center text-[10px] text-surface-400 font-normal pt-1 border-t border-surface-50">
                         <span>Version 2.0.0</span>
                         <p className="mt-0.5">&copy; 2026 Sellify.me</p>
                     </div>
@@ -144,9 +145,9 @@ export default function SellerCentralLayout({ children, title }) {
                             <input
                                 type="text"
                                 placeholder="Rechercher des boutiques..."
-                                className="w-full bg-surface-50 text-sm pl-9 pr-12 py-1.5 rounded-xl border border-surface-200 focus:border-surface-400 focus:bg-white outline-none font-medium text-surface-700 transition-all placeholder-surface-400"
+                                className="w-full bg-surface-50 text-sm pl-9 pr-12 py-1.5 rounded-xl border border-surface-200 focus:border-surface-300 focus:bg-white outline-none font-normal text-surface-700 transition-all placeholder-surface-400"
                             />
-                            <div className="absolute right-2.5 top-1/2 transform -translate-y-1/2 bg-white px-1.5 py-0.5 border border-surface-200 rounded-md text-[10px] text-surface-400 font-semibold shadow-xs font-mono">
+                            <div className="absolute right-2.5 top-1/2 transform -translate-y-1/2 bg-white px-1.5 py-0.5 border border-surface-200 rounded-md text-[10px] text-surface-400 font-medium shadow-xs font-mono">
                                 ⌘K
                             </div>
                         </div>
@@ -163,10 +164,10 @@ export default function SellerCentralLayout({ children, title }) {
 
                         {/* User Display */}
                         <div className="flex items-center space-x-2.5">
-                            <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs border uppercase text-white shadow-sm" style={{ backgroundColor: primaryColor }}>
+                            <div className="w-8 h-8 rounded-full flex items-center justify-center font-medium text-xs border uppercase text-white shadow-sm" style={{ backgroundColor: primaryColor }}>
                                 {user.first_name[0]}
                             </div>
-                            <span className="text-sm font-semibold text-surface-800 hidden sm:inline-block">
+                            <span className="text-sm font-medium text-surface-700 hidden sm:inline-block">
                                 {user.first_name} {user.last_name}
                             </span>
                         </div>
@@ -178,14 +179,14 @@ export default function SellerCentralLayout({ children, title }) {
                     {/* Flash messages */}
                     {flash?.success && (
                         <div className="px-6 pt-4">
-                            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl flex items-center justify-between shadow-sm animate-slide-up text-sm font-semibold">
+                            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl flex items-center justify-between shadow-sm animate-slide-up text-sm font-medium">
                                 <span>{flash.success}</span>
                             </div>
                         </div>
                     )}
                     {flash?.error && (
                         <div className="px-6 pt-4">
-                            <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl flex items-center justify-between shadow-sm animate-slide-up text-sm font-semibold">
+                            <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl flex items-center justify-between shadow-sm animate-slide-up text-sm font-medium">
                                 <span>{flash.error}</span>
                             </div>
                         </div>

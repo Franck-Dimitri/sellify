@@ -19,7 +19,7 @@ import {
 
 export default function LocalDashboard({ shop }) {
     const { auth } = usePage().props;
-    const activeThemeColor = shop?.theme_color || '#EAB308';
+    const activeThemeColor = shop?.theme_color || '#CA8A04';
 
     // Mock stats specific to this shop
     const stats = {
@@ -54,20 +54,20 @@ export default function LocalDashboard({ shop }) {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h1 className="text-2xl font-black text-surface-900 tracking-tight">Tableau de bord local</h1>
-                        <p className="text-sm text-surface-500 font-medium">
-                            Gérez les ventes, produits et commandes de <span className="font-bold" style={{ color: activeThemeColor }}>{shop.name}</span>
+                        <h1 className="text-2xl font-bold text-surface-700 tracking-tight">Tableau de bord local</h1>
+                        <p className="text-sm text-surface-500 font-normal">
+                            Gérez les ventes, produits et commandes de <span className="font-semibold" style={{ color: activeThemeColor }}>{shop.name}</span>
                         </p>
                     </div>
 
                     <div className="flex items-center space-x-2">
                         <a href={route('shop.public', shop.slug)} target="_blank" rel="noopener noreferrer">
-                            <Button variant="outline" size="sm" className="space-x-1.5 font-bold">
+                            <Button variant="outline" size="sm" className="space-x-1.5 font-medium">
                                 <span>Voir ma boutique</span>
                                 <ExternalLink className="w-4 h-4" />
                             </Button>
                         </a>
-                        <Button size="sm" className="space-x-1.5 text-white font-bold" style={{ backgroundColor: activeThemeColor }}>
+                        <Button size="sm" className="space-x-1.5 text-white font-medium" style={{ backgroundColor: activeThemeColor }}>
                             <Plus className="w-4 h-4" />
                             <span>Ajouter un produit</span>
                         </Button>
@@ -79,11 +79,11 @@ export default function LocalDashboard({ shop }) {
                     <Card className="border-surface-200">
                         <div className="flex justify-between items-start">
                             <div className="space-y-1">
-                                <span className="text-xs text-surface-400 font-bold uppercase tracking-wider block">Chiffre d'affaires</span>
-                                <span className="text-2xl font-black text-surface-950 block">{stats.revenue}</span>
+                                <span className="text-xs text-surface-400 font-medium uppercase tracking-wider block">Chiffre d'affaires</span>
+                                <span className="text-2xl font-bold text-surface-750 block">{stats.revenue}</span>
                                 <div className="flex items-center space-x-1 pt-1">
                                     <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
-                                    <span className="text-xs font-bold text-emerald-500">+18.4% ce mois</span>
+                                    <span className="text-xs font-medium text-emerald-500">+18.4% ce mois</span>
                                 </div>
                             </div>
                             <div className="p-3 bg-surface-50 text-surface-655 rounded-2xl border border-surface-150">
@@ -95,9 +95,9 @@ export default function LocalDashboard({ shop }) {
                     <Card className="border-surface-200">
                         <div className="flex justify-between items-start">
                             <div className="space-y-1">
-                                <span className="text-xs text-surface-400 font-bold uppercase tracking-wider block">Commandes reçues</span>
-                                <span className="text-2xl font-black text-surface-950 block">{stats.ordersCount}</span>
-                                <span className="text-[10px] text-surface-400 font-bold block pt-1.5">
+                                <span className="text-xs text-surface-400 font-medium uppercase tracking-wider block">Commandes reçues</span>
+                                <span className="text-2xl font-bold text-surface-750 block">{stats.ordersCount}</span>
+                                <span className="text-[10px] text-surface-400 font-normal block pt-1.5">
                                     4 en attente de traitement
                                 </span>
                             </div>
@@ -110,9 +110,9 @@ export default function LocalDashboard({ shop }) {
                     <Card className="border-surface-200">
                         <div className="flex justify-between items-start">
                             <div className="space-y-1">
-                                <span className="text-xs text-surface-400 font-bold uppercase tracking-wider block">Produits en ligne</span>
-                                <span className="text-2xl font-black text-surface-950 block">{stats.productsCount}</span>
-                                <span className="text-[10px] text-surface-400 font-bold block pt-1.5">
+                                <span className="text-xs text-surface-400 font-medium uppercase tracking-wider block">Produits en ligne</span>
+                                <span className="text-2xl font-bold text-surface-750 block">{stats.productsCount}</span>
+                                <span className="text-[10px] text-surface-400 font-normal block pt-1.5">
                                     Limite Starter Pack : 30 max
                                 </span>
                             </div>
@@ -125,9 +125,9 @@ export default function LocalDashboard({ shop }) {
                     <Card className="border-surface-200">
                         <div className="flex justify-between items-start">
                             <div className="space-y-1">
-                                <span className="text-xs text-surface-400 font-bold uppercase tracking-wider block">Clients uniques</span>
-                                <span className="text-2xl font-black text-surface-950 block">{stats.customersCount}</span>
-                                <span className="text-[10px] text-surface-400 font-bold block pt-1.5">
+                                <span className="text-xs text-surface-400 font-medium uppercase tracking-wider block">Clients uniques</span>
+                                <span className="text-2xl font-bold text-surface-750 block">{stats.customersCount}</span>
+                                <span className="text-[10px] text-surface-400 font-normal block pt-1.5">
                                     Fidélité & Historique local
                                 </span>
                             </div>
@@ -148,7 +148,7 @@ export default function LocalDashboard({ shop }) {
                                     <CardTitle>Performance de la Boutique</CardTitle>
                                     <p className="text-xs text-surface-400">Courbe d'activité et ventes de la boutique courante</p>
                                 </div>
-                                <div className="text-xs font-bold text-surface-500 bg-surface-100 px-2.5 py-1 rounded-lg">
+                                <div className="text-xs font-medium text-surface-500 bg-surface-100 px-2.5 py-1 rounded-lg">
                                     7 derniers jours
                                 </div>
                             </CardHeader>
@@ -190,7 +190,7 @@ export default function LocalDashboard({ shop }) {
                                             <circle cx="600" cy="20" r="5" fill="white" stroke={activeThemeColor} strokeWidth="3" />
                                         </svg>
                                     </div>
-                                    <div className="flex justify-between items-center text-[10px] text-surface-400 font-bold uppercase tracking-wider pt-3 px-1">
+                                    <div className="flex justify-between items-center text-[10px] text-surface-400 font-medium uppercase tracking-wider pt-3 px-1">
                                         <span>Lun</span>
                                         <span>Mar</span>
                                         <span>Mer</span>
@@ -209,7 +209,7 @@ export default function LocalDashboard({ shop }) {
                         {/* Quick Settings Action Card */}
                         <Card className="border-surface-200 bg-white">
                             <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-extrabold text-surface-850">Visibilité & Design</CardTitle>
+                                <CardTitle className="text-sm font-semibold text-surface-700">Visibilité & Design</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <p className="text-xs text-surface-500 leading-relaxed">
@@ -218,14 +218,14 @@ export default function LocalDashboard({ shop }) {
                                 
                                 <div className="flex flex-col space-y-2">
                                     <Link href={route('seller.shop.edit', shop.slug)}>
-                                        <Button variant="outline" className="w-full text-xs font-bold py-2 flex items-center justify-center space-x-1.5">
+                                        <Button variant="outline" className="w-full text-xs font-medium py-2 flex items-center justify-center space-x-1.5">
                                             <span>Modifier la vitrine</span>
                                             <ChevronRight className="w-4.5 h-4.5" />
                                         </Button>
                                     </Link>
                                     
                                     <a href={route('shop.public', shop.slug)} target="_blank" rel="noopener noreferrer" className="w-full">
-                                        <Button className="w-full text-xs font-bold py-2 text-white flex items-center justify-center space-x-1.5" style={{ backgroundColor: activeThemeColor }}>
+                                        <Button className="w-full text-xs font-medium py-2 text-white flex items-center justify-center space-x-1.5" style={{ backgroundColor: activeThemeColor }}>
                                             <span>Ouvrir le lien public</span>
                                             <ArrowUpRight className="w-4 h-4" />
                                         </Button>
@@ -243,14 +243,14 @@ export default function LocalDashboard({ shop }) {
                             <CardTitle>Dernières Commandes Locales</CardTitle>
                             <p className="text-xs text-surface-400">Commandes passées spécifiquement sur cette boutique</p>
                         </div>
-                        <Button variant="outline" size="sm" className="font-bold text-xs">
+                        <Button variant="outline" size="sm" className="font-medium text-xs">
                             Voir tout
                         </Button>
                     </CardHeader>
                     <CardContent className="p-0 overflow-x-auto">
                         <table className="w-full text-left border-collapse text-sm">
                             <thead>
-                                <tr className="border-b border-surface-100 bg-surface-50/50 text-[10px] text-surface-400 font-bold uppercase tracking-wider">
+                                <tr className="border-b border-surface-100 bg-surface-50/50 text-[10px] text-surface-400 font-medium uppercase tracking-wider">
                                     <th className="px-6 py-3">Réf/Client</th>
                                     <th className="px-6 py-3">Date</th>
                                     <th className="px-6 py-3">Montant</th>
@@ -258,11 +258,11 @@ export default function LocalDashboard({ shop }) {
                                     <th className="px-6 py-3 text-right">Action</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-surface-100 font-medium text-surface-700">
+                            <tbody className="divide-y divide-surface-100 font-medium text-surface-600">
                                 {recentOrders.map((order) => (
                                     <tr key={order.id} className="hover:bg-surface-50/40 transition-colors">
                                         <td className="px-6 py-3.5">
-                                            <div className="font-bold text-surface-900">{order.id}</div>
+                                            <div className="font-semibold text-surface-750">{order.id}</div>
                                             <div className="text-xs text-surface-400">{order.customer}</div>
                                         </td>
                                         <td className="px-6 py-3.5 text-xs text-surface-500">
@@ -271,14 +271,14 @@ export default function LocalDashboard({ shop }) {
                                                 <span>{order.date}</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-3.5 font-bold text-surface-900">{order.amount}</td>
+                                        <td className="px-6 py-3.5 font-bold text-surface-750">{order.amount}</td>
                                         <td className="px-6 py-3.5">
                                             <Badge variant={getStatusVariant(order.status)}>
                                                 {order.statusText}
                                             </Badge>
                                         </td>
                                         <td className="px-6 py-3.5 text-right">
-                                            <Button variant="outline" size="sm" className="font-bold text-xs py-1.5 px-3">
+                                            <Button variant="outline" size="sm" className="font-medium text-xs py-1.5 px-3">
                                                 Gérer
                                             </Button>
                                         </td>

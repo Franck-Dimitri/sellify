@@ -12,6 +12,9 @@ export default function Edit({ shop }) {
     const [logoPreview, setLogoPreview] = useState(shop.logo_path ? `/storage/${shop.logo_path}` : null);
     const [bannerPreview, setBannerPreview] = useState(shop.banner_path ? `/storage/${shop.banner_path}` : null);
 
+    // Primary Brand Color fallback
+    const primaryColor = shop.theme_color || '#CA8A04';
+
     const { data, setData, post, processing, errors } = useForm({
         name: shop.name || '',
         slogan: shop.slogan || '',
@@ -23,7 +26,7 @@ export default function Edit({ shop }) {
         address: shop.address || '',
         phone_contact: shop.phone_contact || '',
         email_contact: shop.email_contact || '',
-        theme_color: shop.theme_color || '#EAB308',
+        theme_color: shop.theme_color || '#CA8A04',
         opening_hours: shop.opening_hours || {
             monday: { active: true, open: '08:00', close: '18:00' },
             tuesday: { active: true, open: '08:00', close: '18:00' },
@@ -79,13 +82,12 @@ export default function Edit({ shop }) {
 
     const submit = (e) => {
         e.preventDefault();
-        // Submit using the slug parameter for the route
         post(route('seller.shop.update', shop.slug));
     };
 
     // Preset theme colors (premium palette)
     const themePresets = [
-        { name: 'Jaune Or', value: '#EAB308' },
+        { name: 'Jaune Or', value: '#CA8A04' },
         { name: 'Émeraude', value: '#10B981' },
         { name: 'Bleu Royal', value: '#3B82F6' },
         { name: 'Rouge Corail', value: '#F43F5E' },
@@ -111,8 +113,8 @@ export default function Edit({ shop }) {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h1 className="text-2xl font-black text-surface-900 tracking-tight">Configuration de la boutique</h1>
-                        <p className="text-sm text-surface-500 font-medium">
+                        <h1 className="text-2xl font-bold text-surface-700 tracking-tight">Configuration de la boutique</h1>
+                        <p className="text-sm text-surface-500 font-normal">
                             Personnalisez les aspects visuels et légaux de votre boutique professionnelle
                         </p>
                     </div>
@@ -131,9 +133,9 @@ export default function Edit({ shop }) {
                                             onClick={() => setStep(s.id)}
                                             className="flex items-center space-x-2 focus:outline-none"
                                         >
-                                            <span className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs transition-all duration-200 
+                                            <span className={`w-7 h-7 rounded-lg flex items-center justify-center font-medium text-xs transition-all duration-200 
                                                 ${step === s.id 
-                                                    ? 'text-white shadow-md ring-2 ring-opacity-20' 
+                                                    ? 'text-white shadow-sm ring-2 ring-opacity-20' 
                                                     : step > s.id 
                                                         ? 'bg-emerald-500 text-white' 
                                                         : 'bg-surface-100 text-surface-500'
@@ -142,7 +144,7 @@ export default function Edit({ shop }) {
                                             >
                                                 {s.id}
                                             </span>
-                                            <span className={`text-xs font-bold hidden sm:inline ${step === s.id ? 'text-surface-900' : 'text-surface-400'}`}>
+                                            <span className={`text-xs font-medium hidden sm:inline ${step === s.id ? 'text-surface-700 font-semibold' : 'text-surface-450'}`}>
                                                 {s.name}
                                             </span>
                                         </button>
@@ -154,391 +156,394 @@ export default function Edit({ shop }) {
                             </div>
                         </div>
 
-                        {/* Form Card */}
-                        <Card className="border-surface-200">
-                            <form onSubmit={submit} className="space-y-6">
-                                {step === 1 && (
-                                    <div className="space-y-5">
-                                        <div className="border-b border-surface-100 pb-3">
-                                            <h2 className="text-base font-bold text-surface-900 flex items-center space-x-2">
-                                                <Store className="w-5 h-5" style={{ color: shop.theme_color }} />
-                                                <span>Identité Visuelle & Thème</span>
-                                            </h2>
-                                            <p className="text-xs text-surface-400">Configurez le nom public et le style graphique de votre boutique.</p>
-                                        </div>
+                    {/* Form Card */}
+                    <Card className="border-surface-200">
+                        <form onSubmit={submit} className="space-y-6">
+                            {step === 1 && (
+                                <div className="space-y-5">
+                                    <div className="border-b border-surface-100 pb-3">
+                                        <h2 className="text-base font-semibold text-surface-700 flex items-center space-x-2">
+                                            <Store className="w-5 h-5" style={{ color: shop.theme_color }} />
+                                            <span>Identité Visuelle & Thème</span>
+                                        </h2>
+                                        <p className="text-xs text-surface-400">Configurez le nom public et le style graphique de votre boutique.</p>
+                                    </div>
 
-                                        <Input
-                                            label="Nom de la boutique"
-                                            name="name"
-                                            value={data.name}
-                                            onChange={e => setData('name', e.target.value)}
-                                            placeholder="Ex: Electro World"
-                                            required
-                                            error={errors.name}
+                                    <Input
+                                        label="Nom de la boutique"
+                                        name="name"
+                                        value={data.name}
+                                        onChange={e => setData('name', e.target.value)}
+                                        placeholder="Ex: Electro World"
+                                        required
+                                        error={errors.name}
+                                    />
+
+                                    <Input
+                                        label="Slogan Commercial"
+                                        name="slogan"
+                                        value={data.slogan}
+                                        onChange={e => setData('slogan', e.target.value)}
+                                        placeholder="Ex: Le meilleur de la technologie aux meilleurs prix"
+                                        error={errors.slogan}
+                                    />
+
+                                    <div className="flex flex-col space-y-1.5">
+                                        <label className="text-sm font-medium text-surface-600">Description</label>
+                                        <textarea
+                                            className="w-full px-3.5 py-2 text-surface-700 bg-white border border-surface-200 rounded-lg outline-none text-sm min-h-[100px] focus:border-yellow-600 focus:ring-2 focus:ring-yellow-100 transition-all duration-200"
+                                            placeholder="Présentez votre entreprise, vos valeurs, vos gammes de produits..."
+                                            value={data.description}
+                                            onChange={e => setData('description', e.target.value)}
                                         />
+                                        {errors.description && <p className="text-xs text-accent-500 font-medium">{errors.description}</p>}
+                                    </div>
 
-                                        <Input
-                                            label="Slogan Commercial"
-                                            name="slogan"
-                                            value={data.slogan}
-                                            onChange={e => setData('slogan', e.target.value)}
-                                            placeholder="Ex: Le meilleur de la technologie aux meilleurs prix"
-                                            error={errors.slogan}
-                                        />
-
-                                        <div className="flex flex-col space-y-1.5">
-                                            <label className="text-sm font-semibold text-surface-700">Description</label>
-                                            <textarea
-                                                className="w-full px-3.5 py-2 text-surface-900 bg-white border border-surface-200 rounded-lg outline-none text-sm min-h-[100px] focus:border-surface-400 focus:ring-2 focus:ring-surface-100 transition-all duration-200"
-                                                placeholder="Présentez votre entreprise, vos valeurs, vos gammes de produits..."
-                                                value={data.description}
-                                                onChange={e => setData('description', e.target.value)}
-                                            />
-                                            {errors.description && <p className="text-xs text-accent-500 font-medium">{errors.description}</p>}
+                                    {/* File upload slots */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-1.5">
+                                            <label className="text-sm font-medium text-surface-600">Logo de la boutique (1:1)</label>
+                                            <div className="border-2 border-dashed border-surface-200 rounded-xl p-4 flex flex-col items-center justify-center hover:border-yellow-500 transition-all bg-surface-50 cursor-pointer relative overflow-hidden group">
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={e => handleFileChange(e, 'logo')}
+                                                    className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                                                />
+                                                <Upload className="w-6 h-6 text-surface-400 mb-2 group-hover:text-yellow-600 transition-colors" />
+                                                <span className="text-xs font-medium text-surface-600">Remplacer le logo</span>
+                                                <span className="text-[10px] text-surface-400 mt-1">PNG, JPG (Max 2 Mo)</span>
+                                            </div>
+                                            {errors.logo && <p className="text-xs text-accent-500 font-medium">{errors.logo}</p>}
                                         </div>
 
-                                        {/* File upload slots */}
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="space-y-1.5">
-                                                <label className="text-sm font-semibold text-surface-700">Logo de la boutique (1:1)</label>
-                                                <div className="border-2 border-dashed border-surface-200 rounded-xl p-4 flex flex-col items-center justify-center hover:border-surface-300 transition-all bg-surface-50 cursor-pointer relative overflow-hidden group">
-                                                    <input
-                                                        type="file"
-                                                        accept="image/*"
-                                                        onChange={e => handleFileChange(e, 'logo')}
-                                                        className="absolute inset-0 opacity-0 cursor-pointer z-10"
-                                                    />
-                                                    <Upload className="w-6 h-6 text-surface-400 mb-2 group-hover:text-surface-600 transition-colors" />
-                                                    <span className="text-xs font-semibold text-surface-600">Remplacer le logo</span>
-                                                    <span className="text-[10px] text-surface-400 mt-1">PNG, JPG (Max 2 Mo)</span>
-                                                </div>
-                                                {errors.logo && <p className="text-xs text-accent-500 font-medium">{errors.logo}</p>}
+                                        <div className="space-y-1.5">
+                                            <label className="text-sm font-medium text-surface-600">Bannière (16:9)</label>
+                                            <div className="border-2 border-dashed border-surface-200 rounded-xl p-4 flex flex-col items-center justify-center hover:border-yellow-500 transition-all bg-surface-50 cursor-pointer relative overflow-hidden group">
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={e => handleFileChange(e, 'banner')}
+                                                    className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                                                />
+                                                <Upload className="w-6 h-6 text-surface-400 mb-2 group-hover:text-yellow-600 transition-colors" />
+                                                <span className="text-xs font-medium text-surface-600">Remplacer la bannière</span>
+                                                <span className="text-[10px] text-surface-400 mt-1">Format paysage (Max 5 Mo)</span>
                                             </div>
-
-                                            <div className="space-y-1.5">
-                                                <label className="text-sm font-semibold text-surface-700">Bannière (16:9)</label>
-                                                <div className="border-2 border-dashed border-surface-200 rounded-xl p-4 flex flex-col items-center justify-center hover:border-surface-300 transition-all bg-surface-50 cursor-pointer relative overflow-hidden group">
-                                                    <input
-                                                        type="file"
-                                                        accept="image/*"
-                                                        onChange={e => handleFileChange(e, 'banner')}
-                                                        className="absolute inset-0 opacity-0 cursor-pointer z-10"
-                                                    />
-                                                    <Upload className="w-6 h-6 text-surface-400 mb-2 group-hover:text-surface-600 transition-colors" />
-                                                    <span className="text-xs font-semibold text-surface-600">Remplacer la bannière</span>
-                                                    <span className="text-[10px] text-surface-400 mt-1">Format paysage (Max 5 Mo)</span>
-                                                </div>
-                                                {errors.banner && <p className="text-xs text-accent-500 font-medium">{errors.banner}</p>}
-                                            </div>
-                                        </div>
-
-                                        {/* Theme color presets picker */}
-                                        <div className="space-y-2.5">
-                                            <label className="text-sm font-semibold text-surface-700">Couleur d'accentuation (Style de la page)</label>
-                                            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                                                {themePresets.map((preset) => (
-                                                    <button
-                                                        key={preset.value}
-                                                        type="button"
-                                                        onClick={() => setData('theme_color', preset.value)}
-                                                        className={`flex flex-col items-center justify-center p-2 rounded-xl border text-xs font-bold transition-all duration-200
-                                                            ${data.theme_color === preset.value 
-                                                                ? 'border-surface-900 bg-surface-50 shadow-sm ring-1 ring-surface-900' 
-                                                                : 'border-surface-200 bg-white hover:bg-surface-50'
-                                                            }`}
-                                                    >
-                                                        <span className="w-5 h-5 rounded-md mb-1 shadow-inner border border-black/10" style={{ backgroundColor: preset.value }} />
-                                                        <span className="text-[10px] tracking-tight">{preset.name}</span>
-                                                    </button>
-                                                ))}
-                                            </div>
+                                            {errors.banner && <p className="text-xs text-accent-500 font-medium">{errors.banner}</p>}
                                         </div>
                                     </div>
-                                )}
 
-                                {step === 2 && (
-                                    <div className="space-y-5">
-                                        <div className="border-b border-surface-100 pb-3">
-                                            <h2 className="text-base font-bold text-surface-900 flex items-center space-x-2">
-                                                <ShieldCheck className="w-5 h-5 text-emerald-500" />
-                                                <span>Informations Légales & Certification</span>
-                                            </h2>
-                                            <p className="text-xs text-surface-400">Ces détails augmentent la confiance des acheteurs (style Alibaba Verified Profile).</p>
-                                        </div>
-
-                                        <Input
-                                            label="Nom légal de l'entreprise / Raison sociale"
-                                            name="company_name"
-                                            value={data.company_name}
-                                            onChange={e => setData('company_name', e.target.value)}
-                                            placeholder="Ex: Electro World S.A.R.L"
-                                            required
-                                            error={errors.company_name}
-                                        />
-
-                                        <Input
-                                            label="Numéro RCCM / Patente / ID Unique"
-                                            name="registration_number"
-                                            value={data.registration_number}
-                                            onChange={e => setData('registration_number', e.target.value)}
-                                            placeholder="Ex: RC/DLA/2026/B/1024 (Optionnel)"
-                                            error={errors.registration_number}
-                                        />
-
-                                        <Input
-                                            label="Adresse physique de l'entrepôt ou du magasin"
-                                            name="address"
-                                            value={data.address}
-                                            onChange={e => setData('address', e.target.value)}
-                                            placeholder="Ex: Akwa, Rue Pavée, Douala, Cameroun"
-                                            required
-                                            error={errors.address}
-                                        />
-                                    </div>
-                                )}
-
-                                {step === 3 && (
-                                    <div className="space-y-5">
-                                        <div className="border-b border-surface-100 pb-3">
-                                            <h2 className="text-base font-bold text-surface-900 flex items-center space-x-2">
-                                                <Clock className="w-5 h-5" style={{ color: shop.theme_color }} />
-                                                <span>Horaires d'Ouverture & Contacts Directs</span>
-                                            </h2>
-                                            <p className="text-xs text-surface-400">Permettez aux clients de vous contacter directement via WhatsApp ou e-mail.</p>
-                                        </div>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <Input
-                                                label="Téléphone / WhatsApp de contact"
-                                                name="phone_contact"
-                                                value={data.phone_contact}
-                                                onChange={e => setData('phone_contact', e.target.value)}
-                                                placeholder="Ex: +237 677 888 999"
-                                                required
-                                                error={errors.phone_contact}
-                                            />
-                                            <Input
-                                                label="E-mail de support client"
-                                                name="email_contact"
-                                                type="email"
-                                                value={data.email_contact}
-                                                onChange={e => setData('email_contact', e.target.value)}
-                                                placeholder="Ex: contact@electroworld.com"
-                                                required
-                                                error={errors.email_contact}
-                                            />
-                                        </div>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <Input
-                                                label="Lien WhatsApp direct (Numéro au format international)"
-                                                name="whatsapp"
-                                                value={data.social_links.whatsapp}
-                                                onChange={e => handleSocialLinksChange('whatsapp', e.target.value)}
-                                                placeholder="Ex: 237677888999"
-                                            />
-                                            <Input
-                                                label="Lien de page Facebook"
-                                                name="facebook"
-                                                value={data.social_links.facebook}
-                                                onChange={e => handleSocialLinksChange('facebook', e.target.value)}
-                                                placeholder="Ex: facebook.com/electroworld"
-                                            />
-                                        </div>
-
-                                        {/* Opening Hours Grid */}
-                                        <div className="space-y-2.5">
-                                            <label className="text-sm font-semibold text-surface-700 flex items-center space-x-1.5">
-                                                <span>Grille Horaires d'Ouverture</span>
-                                            </label>
-                                            <div className="border border-surface-200 rounded-xl divide-y divide-surface-100 overflow-hidden">
-                                                {Object.keys(data.opening_hours).map((day) => (
-                                                    <div key={day} className="flex items-center justify-between p-3 bg-white text-sm hover:bg-surface-50 transition-colors">
-                                                        <div className="flex items-center space-x-3">
-                                                            <input
-                                                                type="checkbox"
-                                                                id={`check-${day}`}
-                                                                checked={data.opening_hours[day].active}
-                                                                onChange={e => handleOpeningHoursChange(day, 'active', e.target.checked)}
-                                                                className="w-4.5 h-4.5 rounded border-surface-300 focus:ring-surface-400"
-                                                                style={{ color: shop.theme_color }}
-                                                            />
-                                                            <label htmlFor={`check-${day}`} className="font-bold text-surface-700 select-none min-w-[70px]">
-                                                                {daysTranslation[day]}
-                                                            </label>
-                                                        </div>
-
-                                                        {data.opening_hours[day].active ? (
-                                                            <div className="flex items-center space-x-2">
-                                                                 <input
-                                                                    type="time"
-                                                                    value={data.opening_hours[day].open}
-                                                                    onChange={e => handleOpeningHoursChange(day, 'open', e.target.value)}
-                                                                    className="px-2 py-1 border border-surface-200 rounded-md text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary-500"
-                                                                />
-                                                                <span className="text-surface-400">à</span>
-                                                                <input
-                                                                    type="time"
-                                                                    value={data.opening_hours[day].close}
-                                                                    onChange={e => handleOpeningHoursChange(day, 'close', e.target.value)}
-                                                                    className="px-2 py-1 border border-surface-200 rounded-md text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary-500"
-                                                                />
-                                                            </div>
-                                                        ) : (
-                                                            <span className="text-xs font-bold text-red-500 uppercase pr-4">Fermé</span>
-                                                        )}
-                                                    </div>
-                                                ))}
-                                            </div>
+                                    {/* Theme color presets picker */}
+                                    <div className="space-y-2.5">
+                                        <label className="text-sm font-medium text-surface-600">Couleur d'accentuation (Style de la page)</label>
+                                        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                                            {themePresets.map((preset) => (
+                                                <button
+                                                    key={preset.value}
+                                                    type="button"
+                                                    onClick={() => setData('theme_color', preset.value)}
+                                                    className={`flex flex-col items-center justify-center p-2 rounded-xl border text-xs font-medium transition-all duration-200
+                                                        ${data.theme_color === preset.value 
+                                                            ? 'border-yellow-600 bg-surface-50 shadow-sm ring-1 ring-yellow-600' 
+                                                            : 'border-surface-200 bg-white hover:bg-surface-50'
+                                                        }`}
+                                                >
+                                                    <span className="w-5 h-5 rounded-md mb-1 shadow-inner border border-black/10" style={{ backgroundColor: preset.value }} />
+                                                    <span className="text-[10px] tracking-tight">{preset.name}</span>
+                                                </button>
+                                            ))}
                                         </div>
                                     </div>
-                                )}
-
-                                {/* Step navigation actions */}
-                                <div className="border-t border-surface-100 pt-4 flex justify-between">
-                                    {step > 1 ? (
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => setStep(step - 1)}
-                                        >
-                                            Précédent
-                                        </Button>
-                                    ) : (
-                                        <div />
-                                    )}
-
-                                    {step < 3 ? (
-                                        <Button
-                                            type="button"
-                                            variant="primary"
-                                            onClick={() => setStep(step + 1)}
-                                        >
-                                            Suivant
-                                        </Button>
-                                    ) : (
-                                        <Button
-                                            type="submit"
-                                            variant="primary"
-                                            className="text-white font-bold"
-                                            style={{ backgroundColor: shop.theme_color }}
-                                            disabled={processing}
-                                        >
-                                            {processing ? 'Enregistrement...' : 'Sauvegarder les modifications'}
-                                        </Button>
-                                    )}
                                 </div>
-                            </form>
-                        </Card>
+                            )}
+
+                            {step === 2 && (
+                                <div className="space-y-5">
+                                    <div className="border-b border-surface-100 pb-3">
+                                        <h2 className="text-base font-semibold text-surface-700 flex items-center space-x-2">
+                                            <ShieldCheck className="w-5 h-5 text-emerald-500" />
+                                            <span>Informations Légales & Certification</span>
+                                        </h2>
+                                        <p className="text-xs text-surface-400">Ces détails augmentent la confiance des acheteurs (style Alibaba Verified Profile).</p>
+                                    </div>
+
+                                    <Input
+                                        label="Nom de l'entreprise / Raison sociale"
+                                        name="company_name"
+                                        value={data.company_name}
+                                        onChange={e => setData('company_name', e.target.value)}
+                                        placeholder="Ex: Electro World S.A.R.L"
+                                        required
+                                        error={errors.company_name}
+                                    />
+
+                                    <Input
+                                        label="Numéro RCCM / Patente / ID Unique"
+                                        name="registration_number"
+                                        value={data.registration_number}
+                                        onChange={e => setData('registration_number', e.target.value)}
+                                        placeholder="Ex: RC/DLA/2026/B/1024 (Optionnel)"
+                                        error={errors.registration_number}
+                                    />
+
+                                    <Input
+                                        label="Adresse physique de l'entrepôt ou du magasin"
+                                        name="address"
+                                        value={data.address}
+                                        onChange={e => setData('address', e.target.value)}
+                                        placeholder="Ex: Akwa, Rue Pavée, Douala, Cameroun"
+                                        required
+                                        error={errors.address}
+                                    />
+                                </div>
+                            )}
+
+                            {step === 3 && (
+                                <div className="space-y-5">
+                                    <div className="border-b border-surface-100 pb-3">
+                                        <h2 className="text-base font-semibold text-surface-700 flex items-center space-x-2">
+                                            <Clock className="w-5 h-5" style={{ color: shop.theme_color }} />
+                                            <span>Horaires d'Ouverture & Contacts Directs</span>
+                                        </h2>
+                                        <p className="text-xs text-surface-400">Permettez aux clients de vous contacter directement via WhatsApp ou e-mail.</p>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <Input
+                                            label="Téléphone / WhatsApp de contact"
+                                            name="phone_contact"
+                                            value={data.phone_contact}
+                                            onChange={e => setData('phone_contact', e.target.value)}
+                                            placeholder="Ex: +237 677 888 999"
+                                            required
+                                            error={errors.phone_contact}
+                                        />
+                                        <Input
+                                            label="E-mail de support client"
+                                            name="email_contact"
+                                            type="email"
+                                            value={data.email_contact}
+                                            onChange={e => setData('email_contact', e.target.value)}
+                                            placeholder="Ex: contact@electroworld.com"
+                                            required
+                                            error={errors.email_contact}
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <Input
+                                            label="Lien WhatsApp direct (Numéro format international)"
+                                            name="whatsapp"
+                                            value={data.social_links.whatsapp}
+                                            onChange={e => handleSocialLinksChange('whatsapp', e.target.value)}
+                                            placeholder="Ex: 237677888999"
+                                        />
+                                        <Input
+                                            label="Lien de page Facebook"
+                                            name="facebook"
+                                            value={data.social_links.facebook}
+                                            onChange={e => handleSocialLinksChange('facebook', e.target.value)}
+                                            placeholder="Ex: facebook.com/electroworld"
+                                        />
+                                    </div>
+
+                                    {/* Opening Hours Grid */}
+                                    <div className="space-y-2.5">
+                                        <label className="text-sm font-medium text-surface-600 flex items-center space-x-1.5">
+                                            <span>Grille Horaires d'Ouverture</span>
+                                        </label>
+                                        <div className="border border-surface-200 rounded-xl divide-y divide-surface-100 overflow-hidden">
+                                            {Object.keys(data.opening_hours).map((day) => (
+                                                <div key={day} className="flex items-center justify-between p-3 bg-white text-sm hover:bg-surface-50 transition-colors">
+                                                    <div className="flex items-center space-x-3">
+                                                        <input
+                                                            type="checkbox"
+                                                            id={`check-${day}`}
+                                                            checked={data.opening_hours[day].active}
+                                                            onChange={e => handleOpeningHoursChange(day, 'active', e.target.checked)}
+                                                            className="w-4.5 h-4.5 rounded border-surface-300 focus:ring-yellow-500"
+                                                            style={{ color: shop.theme_color }}
+                                                        />
+                                                        <label htmlFor={`check-${day}`} className="font-medium text-surface-600 select-none min-w-[70px]">
+                                                            {daysTranslation[day]}
+                                                        </label>
+                                                    </div>
+
+                                                    {data.opening_hours[day].active ? (
+                                                        <div className="flex items-center space-x-2">
+                                                             <input
+                                                                type="time"
+                                                                value={data.opening_hours[day].open}
+                                                                onChange={e => handleOpeningHoursChange(day, 'open', e.target.value)}
+                                                                className="px-2 py-1 border border-surface-200 rounded-md text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-yellow-500"
+                                                            />
+                                                            <span className="text-surface-400">à</span>
+                                                            <input
+                                                                type="time"
+                                                                value={data.opening_hours[day].close}
+                                                                onChange={e => handleOpeningHoursChange(day, 'close', e.target.value)}
+                                                                className="px-2 py-1 border border-surface-200 rounded-md text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-yellow-500"
+                                                            />
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-xs font-medium text-red-500 uppercase pr-4">Fermé</span>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Step navigation actions */}
+                            <div className="border-t border-surface-100 pt-4 flex justify-between">
+                                {step > 1 ? (
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => setStep(step - 1)}
+                                        className="font-medium text-xs"
+                                    >
+                                        Précédent
+                                    </Button>
+                                ) : (
+                                    <div />
+                                )}
+
+                                {step < 3 ? (
+                                    <Button
+                                        type="button"
+                                        variant="primary"
+                                        onClick={() => setStep(step + 1)}
+                                        className="font-medium text-xs text-white"
+                                        style={{ backgroundColor: shop.theme_color }}
+                                    >
+                                        Suivant
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        type="submit"
+                                        variant="primary"
+                                        className="text-white font-medium text-xs"
+                                        style={{ backgroundColor: shop.theme_color }}
+                                        disabled={processing}
+                                    >
+                                        {processing ? 'Enregistrement...' : 'Sauvegarder les modifications'}
+                                    </Button>
+                                )}
+                            </div>
+                        </form>
+                    </Card>
+                </div>
+
+                {/* Preview Panel (5 columns) */}
+                <div className="lg:col-span-5 lg:sticky lg:top-24 h-fit space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-medium text-surface-400 uppercase tracking-wider">Aperçu en temps réel</h3>
+                        <span className="text-[10px] text-surface-400 font-medium flex items-center space-x-1">
+                            <HelpCircle className="w-3.5 h-3.5" />
+                            <span>Alibaba-Style Storefront</span>
+                        </span>
                     </div>
 
-                    {/* Preview Panel (5 columns) */}
-                    <div className="lg:col-span-5 lg:sticky lg:top-24 h-fit space-y-4">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-sm font-extrabold text-surface-400 uppercase tracking-wider">Aperçu en temps réel</h3>
-                            <span className="text-[10px] text-surface-400 font-semibold flex items-center space-x-1">
-                                <HelpCircle className="w-3.5 h-3.5" />
-                                <span>Alibaba-Style Storefront</span>
-                            </span>
+                    {/* The Mock Store Card */}
+                    <div className="bg-white border border-surface-200 rounded-3xl overflow-hidden shadow-sm flex flex-col min-h-[480px]">
+                        {/* Banner area */}
+                        <div className="h-32 w-full relative bg-surface-850 overflow-hidden flex items-center justify-center">
+                            {bannerPreview ? (
+                                <img src={bannerPreview} alt="Aperçu Bannière" className="w-full h-full object-cover" />
+                            ) : (
+                                <div className="absolute inset-0 bg-gradient-to-r opacity-20" style={{ backgroundImage: `linear-gradient(135deg, ${data.theme_color} 0%, #1e293b 100%)` }} />
+                            )}
+                            <div className="absolute inset-0 bg-slate-900/20" />
+                            <div className="absolute bottom-3 left-4 text-white z-10 flex items-center space-x-2">
+                                <span className="text-xs font-medium px-2 py-0.5 bg-slate-800/40 rounded-full border border-white/20">
+                                    Starter Plan
+                                </span>
+                            </div>
                         </div>
 
-                        {/* The Mock Store Card */}
-                        <div className="bg-white border border-surface-200 rounded-3xl overflow-hidden shadow-md flex flex-col min-h-[480px]">
-                            {/* Banner area */}
-                            <div className="h-32 w-full relative bg-surface-800 overflow-hidden flex items-center justify-center">
-                                {bannerPreview ? (
-                                    <img src={bannerPreview} alt="Aperçu Bannière" className="w-full h-full object-cover" />
-                                ) : (
-                                    <div className="absolute inset-0 bg-gradient-to-r opacity-20" style={{ backgroundImage: `linear-gradient(135deg, ${data.theme_color} 0%, #111827 100%)` }} />
+                        {/* Store Header bar */}
+                        <div className="px-6 pb-6 relative flex-1 flex flex-col justify-between">
+                            {/* Logo container (shifted up) */}
+                            <div className="flex justify-between items-end -mt-10 mb-4 z-10">
+                                <div className="w-20 h-20 bg-white rounded-2xl p-1 shadow-md border border-surface-100 overflow-hidden flex items-center justify-center">
+                                    {logoPreview ? (
+                                        <img src={logoPreview} alt="Aperçu Logo" className="w-full h-full object-cover rounded-xl" />
+                                    ) : (
+                                        <Store className="w-10 h-10 text-surface-300" />
+                                    )}
+                                </div>
+                                <Badge variant="success" className="h-6 flex items-center space-x-1 bg-yellow-50 text-yellow-800 border-yellow-250 font-medium">
+                                    <span className="w-2 h-2 rounded-full bg-yellow-600 animate-pulse" />
+                                    <span>Verified Supplier</span>
+                                </Badge>
+                            </div>
+
+                            {/* Store Identity Info */}
+                            <div className="space-y-1.5 flex-1">
+                                <h4 className="text-xl font-semibold text-surface-750 tracking-tight">
+                                    {data.name || 'Nom de ma boutique'}
+                                </h4>
+                                <p className="text-sm text-surface-450 italic font-normal">
+                                    "{data.slogan || 'Votre slogan commercial ici...'}"
+                                </p>
+                                <p className="text-xs text-surface-400 line-clamp-3 leading-relaxed mt-2 pt-2 border-t border-surface-100">
+                                    {data.description || 'Description courte du catalogue et des services offerts par votre entreprise...'}
+                                </p>
+                            </div>
+
+                            {/* Certification details (Alibaba style) */}
+                            <div className="mt-4 pt-3 border-t border-surface-100 space-y-2 text-xs">
+                                <div className="flex items-center space-x-2 text-surface-600">
+                                    <ShieldCheck className="w-4.5 h-4.5 text-secondary-500 shrink-0" />
+                                    <span className="font-medium">{data.company_name || 'Raison Sociale de l\'entreprise'}</span>
+                                </div>
+                                {data.registration_number && (
+                                    <div className="text-[10px] text-surface-400 pl-6">
+                                        RCCM: <span className="font-medium">{data.registration_number}</span>
+                                    </div>
                                 )}
-                                <div className="absolute inset-0 bg-black/30" />
-                                <div className="absolute bottom-3 left-4 text-white z-10 flex items-center space-x-2">
-                                    <span className="text-xs font-bold px-2 py-0.5 bg-black/40 rounded-full border border-white/20">
-                                        Starter Plan
-                                    </span>
+                                <div className="flex items-center space-x-2 text-surface-600">
+                                    <MapPin className="w-4.5 h-4.5 text-surface-400 shrink-0" />
+                                    <span>{data.address || 'Adresse de l\'entrepôt'}</span>
+                                </div>
+                                <div className="flex items-center space-x-2 text-surface-600">
+                                    <Phone className="w-4.5 h-4.5 text-surface-400 shrink-0" />
+                                    <span>{data.phone_contact || 'Téléphone contact'}</span>
+                                </div>
+                                <div className="flex items-center space-x-2 text-surface-600">
+                                    <Mail className="w-4.5 h-4.5 text-surface-400 shrink-0" />
+                                    <span>{data.email_contact || 'E-mail support'}</span>
                                 </div>
                             </div>
 
-                            {/* Store Header bar */}
-                            <div className="px-6 pb-6 relative flex-1 flex flex-col justify-between">
-                                {/* Logo container (shifted up) */}
-                                <div className="flex justify-between items-end -mt-10 mb-4 z-10">
-                                    <div className="w-20 h-20 bg-white rounded-2xl p-1 shadow-md border border-surface-100 overflow-hidden flex items-center justify-center">
-                                        {logoPreview ? (
-                                            <img src={logoPreview} alt="Aperçu Logo" className="w-full h-full object-cover rounded-xl" />
-                                        ) : (
-                                            <Store className="w-10 h-10 text-surface-300" />
-                                        )}
-                                    </div>
-                                    <Badge variant="success" className="h-6 flex items-center space-x-1 bg-yellow-50 text-yellow-800 border-yellow-300">
-                                        <span className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
-                                        <span>Verified Supplier</span>
-                                    </Badge>
-                                </div>
-
-                                {/* Store Identity Info */}
-                                <div className="space-y-1.5 flex-1">
-                                    <h4 className="text-xl font-extrabold text-surface-900 tracking-tight">
-                                        {data.name || 'Nom de ma boutique'}
-                                    </h4>
-                                    <p className="text-sm text-surface-500 italic font-medium">
-                                        "{data.slogan || 'Votre slogan commercial ici...'}"
-                                    </p>
-                                    <p className="text-xs text-surface-400 line-clamp-3 leading-relaxed mt-2 pt-2 border-t border-surface-100">
-                                        {data.description || 'Description courte du catalogue et des services offerts par votre entreprise...'}
-                                    </p>
-                                </div>
-
-                                {/* Certification details (Alibaba style) */}
-                                <div className="mt-4 pt-3 border-t border-surface-100 space-y-2 text-xs">
-                                    <div className="flex items-center space-x-2 text-surface-600">
-                                        <ShieldCheck className="w-4.5 h-4.5 text-secondary-500 shrink-0" />
-                                        <span className="font-semibold">{data.company_name || 'Raison Sociale de l\'entreprise'}</span>
-                                    </div>
-                                    {data.registration_number && (
-                                        <div className="text-[10px] text-surface-400 pl-6">
-                                            RCCM: <span className="font-bold">{data.registration_number}</span>
-                                        </div>
-                                    )}
-                                    <div className="flex items-center space-x-2 text-surface-600">
-                                        <MapPin className="w-4.5 h-4.5 text-surface-400 shrink-0" />
-                                        <span>{data.address || 'Adresse de l\'entrepôt'}</span>
-                                    </div>
-                                    <div className="flex items-center space-x-2 text-surface-600">
-                                        <Phone className="w-4.5 h-4.5 text-surface-400 shrink-0" />
-                                        <span>{data.phone_contact || 'Téléphone contact'}</span>
-                                    </div>
-                                    <div className="flex items-center space-x-2 text-surface-600">
-                                        <Mail className="w-4.5 h-4.5 text-surface-400 shrink-0" />
-                                        <span>{data.email_contact || 'E-mail support'}</span>
-                                    </div>
-                                </div>
-
-                                {/* Call to action preview */}
-                                <div className="mt-6 flex space-x-2">
-                                    <button 
-                                        type="button" 
-                                        disabled 
-                                        className="flex-1 py-2 text-xs font-bold rounded-xl border border-surface-200 bg-white text-surface-700 flex items-center justify-center space-x-1 cursor-default"
-                                    >
-                                        <Clock className="w-3.5 h-3.5" />
-                                        <span>Horaires</span>
-                                    </button>
-                                    <button 
-                                        type="button" 
-                                        disabled 
-                                        className="flex-1 py-2 text-xs font-bold rounded-xl text-white flex items-center justify-center space-x-1.5 shadow-sm opacity-90 cursor-default"
-                                        style={{ backgroundColor: data.theme_color }}
-                                    >
-                                        <Globe className="w-3.5 h-3.5" />
-                                        <span>Contacter</span>
-                                    </button>
-                                </div>
+                            {/* Call to action preview */}
+                            <div className="mt-6 flex space-x-2">
+                                <button 
+                                    type="button" 
+                                    disabled 
+                                    className="flex-1 py-2 text-xs font-medium rounded-xl border border-surface-200 bg-white text-surface-600 flex items-center justify-center space-x-1 cursor-default"
+                                >
+                                    <Clock className="w-3.5 h-3.5" />
+                                    <span>Horaires</span>
+                                </button>
+                                <button 
+                                    type="button" 
+                                    disabled 
+                                    className="flex-1 py-2 text-xs font-medium rounded-xl text-white flex items-center justify-center space-x-1.5 shadow-sm opacity-90 cursor-default"
+                                    style={{ backgroundColor: data.theme_color }}
+                                >
+                                    <Globe className="w-3.5 h-3.5" />
+                                    <span>Contacter</span>
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
         </ShopConsoleLayout>
     );
 }
