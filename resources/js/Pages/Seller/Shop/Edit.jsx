@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { ArrowLeft, Upload, Store, ShieldCheck, MapPin, Phone, Mail, Clock, Globe, HelpCircle, CheckCircle, AlertCircle } from 'lucide-react';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { Upload, Store, ShieldCheck, MapPin, Phone, Mail, Clock, Globe, HelpCircle, ExternalLink } from 'lucide-react';
 import Button from '../../../Components/ui/Button';
 import Input from '../../../Components/ui/Input';
 import { Card, CardContent } from '../../../Components/ui/Card';
 import Badge from '../../../Components/ui/Badge';
+import ShopConsoleLayout from '../../../Layouts/ShopConsoleLayout';
 
 export default function Edit({ shop }) {
     const [step, setStep] = useState(1);
@@ -78,7 +79,8 @@ export default function Edit({ shop }) {
 
     const submit = (e) => {
         e.preventDefault();
-        post(route('seller.shop.update'));
+        // Submit using the slug parameter for the route
+        post(route('seller.shop.update', shop.slug));
     };
 
     // Preset theme colors (premium palette)
@@ -102,47 +104,23 @@ export default function Edit({ shop }) {
     };
 
     return (
-        <>
-            <Head title="Gérer ma boutique" />
-            <div className="min-h-screen bg-surface-50 font-sans flex flex-col">
-                {/* Header */}
-                <header className="bg-white border-b border-surface-200 h-16 flex items-center justify-between px-6 sticky top-0 z-20">
-                    <div className="flex items-center space-x-4">
-                        <Link href={route('seller.dashboard')} className="p-2 text-surface-500 hover:text-surface-800 hover:bg-surface-100 rounded-xl transition-all">
-                            <ArrowLeft className="w-5 h-5" />
-                        </Link>
-                        <span className="font-extrabold text-lg tracking-tight text-surface-900">Modifier ma Boutique</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                        <a href={route('shop.public', shop.slug)} target="_blank" rel="noopener noreferrer" className="hidden sm:inline-block">
-                            <Button variant="outline" size="sm">
-                                Voir boutique publique
-                            </Button>
-                        </a>
-                        <div className="hidden md:flex items-center space-x-2 text-xs font-semibold text-surface-400 bg-surface-100 px-3 py-1.5 rounded-full border border-surface-200">
-                            <ShieldCheck className="w-4 h-4 text-secondary-500" />
-                            <span>Profil Vendeur Vérifié</span>
-                        </div>
-                    </div>
-                </header>
+        <ShopConsoleLayout shop={shop} title={`Configuration - ${shop.name}`}>
+            <Head title={`Configuration - ${shop.name}`} />
 
-                <div className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="space-y-6">
+                {/* Header */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h1 className="text-2xl font-black text-surface-900 tracking-tight">Configuration de la boutique</h1>
+                        <p className="text-sm text-surface-500 font-medium">
+                            Personnalisez les aspects visuels et légaux de votre boutique professionnelle
+                        </p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     {/* Form Panel (8 columns) */}
                     <div className="lg:col-span-7 space-y-6">
-                        {/* Status Messages */}
-                        {usePage().props.flash?.success && (
-                            <div className="bg-secondary-50 border border-secondary-200 text-secondary-800 px-4 py-3 rounded-xl flex items-center space-x-2 text-sm font-semibold animate-fade-in">
-                                <CheckCircle className="w-5 h-5 text-secondary-500" />
-                                <span>{usePage().props.flash.success}</span>
-                            </div>
-                        )}
-                        {usePage().props.flash?.error && (
-                            <div className="bg-accent-50 border border-accent-200 text-accent-800 px-4 py-3 rounded-xl flex items-center space-x-2 text-sm font-semibold animate-fade-in">
-                                <AlertCircle className="w-5 h-5 text-accent-500" />
-                                <span>{usePage().props.flash.error}</span>
-                            </div>
-                        )}
-
                         {/* Step Navigation Card */}
                         <div className="bg-white border border-surface-200 rounded-2xl p-4 shadow-sm">
                             <div className="flex justify-between items-center">
@@ -155,11 +133,12 @@ export default function Edit({ shop }) {
                                         >
                                             <span className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs transition-all duration-200 
                                                 ${step === s.id 
-                                                    ? 'bg-primary-500 text-surface-950 shadow-md ring-2 ring-primary-200' 
+                                                    ? 'text-white shadow-md ring-2 ring-opacity-20' 
                                                     : step > s.id 
-                                                        ? 'bg-secondary-500 text-white' 
+                                                        ? 'bg-emerald-500 text-white' 
                                                         : 'bg-surface-100 text-surface-500'
                                                 }`}
+                                            style={step === s.id ? { backgroundColor: shop.theme_color, '--tw-ring-color': shop.theme_color } : {}}
                                             >
                                                 {s.id}
                                             </span>
@@ -179,10 +158,10 @@ export default function Edit({ shop }) {
                         <Card className="border-surface-200">
                             <form onSubmit={submit} className="space-y-6">
                                 {step === 1 && (
-                                    <div className="space-y-5 animate-scale-in">
+                                    <div className="space-y-5">
                                         <div className="border-b border-surface-100 pb-3">
                                             <h2 className="text-base font-bold text-surface-900 flex items-center space-x-2">
-                                                <Store className="w-5 h-5 text-primary-500" />
+                                                <Store className="w-5 h-5" style={{ color: shop.theme_color }} />
                                                 <span>Identité Visuelle & Thème</span>
                                             </h2>
                                             <p className="text-xs text-surface-400">Configurez le nom public et le style graphique de votre boutique.</p>
@@ -210,7 +189,7 @@ export default function Edit({ shop }) {
                                         <div className="flex flex-col space-y-1.5">
                                             <label className="text-sm font-semibold text-surface-700">Description</label>
                                             <textarea
-                                                className="w-full px-3.5 py-2 text-surface-900 bg-white border border-surface-200 rounded-lg outline-none text-sm min-h-[100px] focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all duration-200"
+                                                className="w-full px-3.5 py-2 text-surface-900 bg-white border border-surface-200 rounded-lg outline-none text-sm min-h-[100px] focus:border-surface-400 focus:ring-2 focus:ring-surface-100 transition-all duration-200"
                                                 placeholder="Présentez votre entreprise, vos valeurs, vos gammes de produits..."
                                                 value={data.description}
                                                 onChange={e => setData('description', e.target.value)}
@@ -222,17 +201,15 @@ export default function Edit({ shop }) {
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div className="space-y-1.5">
                                                 <label className="text-sm font-semibold text-surface-700">Logo de la boutique (1:1)</label>
-                                                <div className="border-2 border-dashed border-surface-200 rounded-xl p-4 flex flex-col items-center justify-center hover:border-primary-400 transition-all bg-surface-50 cursor-pointer relative overflow-hidden group">
+                                                <div className="border-2 border-dashed border-surface-200 rounded-xl p-4 flex flex-col items-center justify-center hover:border-surface-300 transition-all bg-surface-50 cursor-pointer relative overflow-hidden group">
                                                     <input
                                                         type="file"
                                                         accept="image/*"
                                                         onChange={e => handleFileChange(e, 'logo')}
                                                         className="absolute inset-0 opacity-0 cursor-pointer z-10"
                                                     />
-                                                    <Upload className="w-6 h-6 text-surface-400 mb-2 group-hover:text-primary-500 transition-colors" />
-                                                    <span className="text-xs font-semibold text-surface-600">
-                                                        {shop.logo_path ? 'Remplacer le logo' : 'Choisir un logo'}
-                                                    </span>
+                                                    <Upload className="w-6 h-6 text-surface-400 mb-2 group-hover:text-surface-600 transition-colors" />
+                                                    <span className="text-xs font-semibold text-surface-600">Remplacer le logo</span>
                                                     <span className="text-[10px] text-surface-400 mt-1">PNG, JPG (Max 2 Mo)</span>
                                                 </div>
                                                 {errors.logo && <p className="text-xs text-accent-500 font-medium">{errors.logo}</p>}
@@ -240,17 +217,15 @@ export default function Edit({ shop }) {
 
                                             <div className="space-y-1.5">
                                                 <label className="text-sm font-semibold text-surface-700">Bannière (16:9)</label>
-                                                <div className="border-2 border-dashed border-surface-200 rounded-xl p-4 flex flex-col items-center justify-center hover:border-primary-400 transition-all bg-surface-50 cursor-pointer relative overflow-hidden group">
+                                                <div className="border-2 border-dashed border-surface-200 rounded-xl p-4 flex flex-col items-center justify-center hover:border-surface-300 transition-all bg-surface-50 cursor-pointer relative overflow-hidden group">
                                                     <input
                                                         type="file"
                                                         accept="image/*"
                                                         onChange={e => handleFileChange(e, 'banner')}
                                                         className="absolute inset-0 opacity-0 cursor-pointer z-10"
                                                     />
-                                                    <Upload className="w-6 h-6 text-surface-400 mb-2 group-hover:text-primary-500 transition-colors" />
-                                                    <span className="text-xs font-semibold text-surface-600">
-                                                        {shop.banner_path ? 'Remplacer la bannière' : 'Choisir une bannière'}
-                                                    </span>
+                                                    <Upload className="w-6 h-6 text-surface-400 mb-2 group-hover:text-surface-600 transition-colors" />
+                                                    <span className="text-xs font-semibold text-surface-600">Remplacer la bannière</span>
                                                     <span className="text-[10px] text-surface-400 mt-1">Format paysage (Max 5 Mo)</span>
                                                 </div>
                                                 {errors.banner && <p className="text-xs text-accent-500 font-medium">{errors.banner}</p>}
@@ -282,10 +257,10 @@ export default function Edit({ shop }) {
                                 )}
 
                                 {step === 2 && (
-                                    <div className="space-y-5 animate-scale-in">
+                                    <div className="space-y-5">
                                         <div className="border-b border-surface-100 pb-3">
                                             <h2 className="text-base font-bold text-surface-900 flex items-center space-x-2">
-                                                <ShieldCheck className="w-5 h-5 text-secondary-500" />
+                                                <ShieldCheck className="w-5 h-5 text-emerald-500" />
                                                 <span>Informations Légales & Certification</span>
                                             </h2>
                                             <p className="text-xs text-surface-400">Ces détails augmentent la confiance des acheteurs (style Alibaba Verified Profile).</p>
@@ -323,10 +298,10 @@ export default function Edit({ shop }) {
                                 )}
 
                                 {step === 3 && (
-                                    <div className="space-y-5 animate-scale-in">
+                                    <div className="space-y-5">
                                         <div className="border-b border-surface-100 pb-3">
                                             <h2 className="text-base font-bold text-surface-900 flex items-center space-x-2">
-                                                <Clock className="w-5 h-5 text-primary-500" />
+                                                <Clock className="w-5 h-5" style={{ color: shop.theme_color }} />
                                                 <span>Horaires d'Ouverture & Contacts Directs</span>
                                             </h2>
                                             <p className="text-xs text-surface-400">Permettez aux clients de vous contacter directement via WhatsApp ou e-mail.</p>
@@ -385,7 +360,8 @@ export default function Edit({ shop }) {
                                                                 id={`check-${day}`}
                                                                 checked={data.opening_hours[day].active}
                                                                 onChange={e => handleOpeningHoursChange(day, 'active', e.target.checked)}
-                                                                className="w-4.5 h-4.5 text-primary-500 rounded border-surface-300 focus:ring-primary-400"
+                                                                className="w-4.5 h-4.5 rounded border-surface-300 focus:ring-surface-400"
+                                                                style={{ color: shop.theme_color }}
                                                             />
                                                             <label htmlFor={`check-${day}`} className="font-bold text-surface-700 select-none min-w-[70px]">
                                                                 {daysTranslation[day]}
@@ -394,7 +370,7 @@ export default function Edit({ shop }) {
 
                                                         {data.opening_hours[day].active ? (
                                                             <div className="flex items-center space-x-2">
-                                                                <input
+                                                                 <input
                                                                     type="time"
                                                                     value={data.opening_hours[day].open}
                                                                     onChange={e => handleOpeningHoursChange(day, 'open', e.target.value)}
@@ -409,7 +385,7 @@ export default function Edit({ shop }) {
                                                                 />
                                                             </div>
                                                         ) : (
-                                                            <span className="text-xs font-bold text-accent-500 uppercase pr-4">Fermé</span>
+                                                            <span className="text-xs font-bold text-red-500 uppercase pr-4">Fermé</span>
                                                         )}
                                                     </div>
                                                 ))}
@@ -422,6 +398,7 @@ export default function Edit({ shop }) {
                                 <div className="border-t border-surface-100 pt-4 flex justify-between">
                                     {step > 1 ? (
                                         <Button
+                                            type="button"
                                             variant="outline"
                                             onClick={() => setStep(step - 1)}
                                         >
@@ -433,6 +410,7 @@ export default function Edit({ shop }) {
 
                                     {step < 3 ? (
                                         <Button
+                                            type="button"
                                             variant="primary"
                                             onClick={() => setStep(step + 1)}
                                         >
@@ -441,7 +419,9 @@ export default function Edit({ shop }) {
                                     ) : (
                                         <Button
                                             type="submit"
-                                            variant="success"
+                                            variant="primary"
+                                            className="text-white font-bold"
+                                            style={{ backgroundColor: shop.theme_color }}
                                             disabled={processing}
                                         >
                                             {processing ? 'Enregistrement...' : 'Sauvegarder les modifications'}
@@ -559,6 +539,6 @@ export default function Edit({ shop }) {
                     </div>
                 </div>
             </div>
-        </>
+        </ShopConsoleLayout>
     );
 }

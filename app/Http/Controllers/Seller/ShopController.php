@@ -111,16 +111,30 @@ class ShopController extends Controller
     }
 
     /**
-     * Show the form for editing the shop.
+     * Show the local shop dashboard.
      */
-    public function edit(Request $request): InertiaResponse|RedirectResponse
+    public function localDashboard(Request $request, Shop $shop): InertiaResponse|RedirectResponse
     {
         $seller = $request->user()->seller;
-        $shop = $seller ? $seller->shop : null;
 
-        if (!$shop) {
-            return redirect()->route('seller.shop.create')
-                ->with('error', 'Veuillez créer une boutique avant de pouvoir la modifier.');
+        if (!$seller || $shop->seller_id !== $seller->id) {
+            abort(403, 'Accès non autorisé.');
+        }
+
+        return Inertia::render('Seller/Shop/LocalDashboard', [
+            'shop' => $shop
+        ]);
+    }
+
+    /**
+     * Show the form for editing the shop.
+     */
+    public function edit(Request $request, Shop $shop): InertiaResponse|RedirectResponse
+    {
+        $seller = $request->user()->seller;
+
+        if (!$seller || $shop->seller_id !== $seller->id) {
+            abort(403, 'Accès non autorisé.');
         }
 
         return Inertia::render('Seller/Shop/Edit', [
@@ -131,15 +145,13 @@ class ShopController extends Controller
     /**
      * Update the shop details.
      */
-    public function update(Request $request): RedirectResponse
+    public function update(Request $request, Shop $shop): RedirectResponse
     {
         $user = $request->user();
         $seller = $user->seller;
-        $shop = $seller ? $seller->shop : null;
 
-        if (!$shop) {
-            return redirect()->route('seller.shop.create')
-                ->with('error', 'Boutique introuvable.');
+        if (!$seller || $shop->seller_id !== $seller->id) {
+            abort(403, 'Accès non autorisé.');
         }
 
         $validated = $request->validate([
@@ -204,7 +216,7 @@ class ShopController extends Controller
             "Mise à jour de la boutique professionnelle : {$shop->name}."
         );
 
-        return redirect()->route('seller.shop.edit')
+        return redirect()->route('seller.shop.edit', $shop->slug)
             ->with('success', 'Votre boutique a été mise à jour avec succès.');
     }
 

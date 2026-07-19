@@ -10,6 +10,8 @@ class Seller extends Model
 {
     use HasFactory;
 
+    protected $appends = ['shop'];
+
     protected $fillable = [
         'user_id',
         'status',
@@ -41,9 +43,14 @@ class Seller extends Model
         return $this->belongsTo(User::class, 'verified_by');
     }
 
-    public function shop(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function shops(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasOne(Shop::class);
+        return $this->hasMany(Shop::class);
+    }
+
+    public function getShopAttribute()
+    {
+        return $this->shops()->first();
     }
 
     public function isPending(): bool

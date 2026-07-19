@@ -111,10 +111,16 @@ Route::middleware(['auth', 'account.active'])->group(function () {
 
             // Actions liées à la boutique, restreintes par le KYC
             Route::middleware('kyc.verified')->group(function () {
+                // Central shop creation
                 Route::get('/shop/create', [ShopController::class, 'create'])->middleware('shop.limit')->name('shop.create');
                 Route::post('/shop', [ShopController::class, 'store'])->middleware('shop.limit')->name('shop.store');
-                Route::get('/shop/edit', [ShopController::class, 'edit'])->name('shop.edit');
-                Route::post('/shop/update', [ShopController::class, 'update'])->name('shop.update');
+
+                // Local shop management (isolated by slug)
+                Route::prefix('shop/{shop:slug}')->name('shop.')->group(function () {
+                    Route::get('/dashboard', [ShopController::class, 'localDashboard'])->name('dashboard');
+                    Route::get('/edit', [ShopController::class, 'edit'])->name('edit');
+                    Route::post('/update', [ShopController::class, 'update'])->name('update');
+                });
             });
         });
 

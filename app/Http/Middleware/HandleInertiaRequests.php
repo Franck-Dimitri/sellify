@@ -38,7 +38,7 @@ class HandleInertiaRequests extends Middleware
         $user = $request->user();
         if ($user) {
             // Load relations if they exist
-            $user->loadMissing(['seller.shop', 'driver']);
+            $user->loadMissing(['seller.shops', 'driver']);
         }
 
         $sidebarCounts = null;

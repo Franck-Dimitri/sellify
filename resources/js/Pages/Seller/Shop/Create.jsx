@@ -4,6 +4,7 @@ import { ArrowLeft, Upload, Store, ShieldCheck, MapPin, Phone, Mail, Clock, Glob
 import Button from '../../../Components/ui/Button';
 import Input from '../../../Components/ui/Input';
 import { Card, CardContent } from '../../../Components/ui/Card';
+import SellerCentralLayout from '../../../Layouts/SellerCentralLayout';
 
 export default function Create() {
     const [step, setStep] = useState(1);
@@ -101,24 +102,9 @@ export default function Create() {
     };
 
     return (
-        <>
-            <Head title="Créer ma boutique professionnelle" />
-            <div className="min-h-screen bg-surface-50 font-sans flex flex-col">
-                {/* Header */}
-                <header className="bg-white border-b border-surface-200 h-16 flex items-center justify-between px-6 sticky top-0 z-20">
-                    <div className="flex items-center space-x-4">
-                        <Link href={route('seller.dashboard')} className="p-2 text-surface-500 hover:text-surface-800 hover:bg-surface-100 rounded-xl transition-all">
-                            <ArrowLeft className="w-5 h-5" />
-                        </Link>
-                        <span className="font-extrabold text-lg tracking-tight text-surface-900">Configuration de la Boutique</span>
-                    </div>
-                    <div className="hidden md:flex items-center space-x-2 text-xs font-semibold text-surface-400 bg-surface-100 px-3 py-1.5 rounded-full border border-surface-200">
-                        <ShieldCheck className="w-4 h-4 text-secondary-500" />
-                        <span>Profil Vendeur Vérifié</span>
-                    </div>
-                </header>
-
-                <div className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <SellerCentralLayout title="Créer ma boutique">
+            <Head title="Créer ma boutique professionnelle - Sellify" />
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     {/* Form Panel (8 columns) */}
                     <div className="lg:col-span-7 space-y-6">
                         {/* Step Navigation Card */}
@@ -532,7 +518,6 @@ export default function Create() {
                         </div>
                     </div>
                 </div>
-            </div>
-        </>
+        </SellerCentralLayout>
     );
 }
