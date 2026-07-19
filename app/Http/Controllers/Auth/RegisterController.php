@@ -89,7 +89,7 @@ class RegisterController extends Controller
                     'phone' => $validated['phone'],
                     'password' => Hash::make($validated['password']),
                     'role' => $role,
-                    'kyc_status' => in_array($role, ['seller', 'driver']) ? 'pending' : 'none',
+                    'kyc_status' => $role === 'seller' ? 'verified' : (in_array($role, ['driver']) ? 'pending' : 'none'),
                     'otp_code' => $otp,
                     'otp_expires_at' => now()->addMinutes(15),
                 ]);
@@ -98,7 +98,7 @@ class RegisterController extends Controller
                 if ($role === 'seller') {
                     Seller::create([
                         'user_id' => $user->id,
-                        'status' => 'pending',
+                        'status' => 'active',
                         'pack' => 'starter', // Default pack
                     ]);
 

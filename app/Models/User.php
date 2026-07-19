@@ -22,6 +22,7 @@ class User extends Authenticatable
         'avatar',
         'kyc_status',
         'kyc_verified_at',
+        'email_verified_at',
         'status',
         'is_active',
         'loyalty_points',
@@ -36,6 +37,11 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    protected $attributes = [
+        'status' => 'active',
+        'is_active' => true,
     ];
 
     protected function casts(): array
