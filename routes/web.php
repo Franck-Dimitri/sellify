@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\KycController as AdminKycController;
 use App\Http\Controllers\Admin\KycDocumentController as AdminKycDocumentController;
 use App\Http\Controllers\Seller\ShopController;
+use App\Http\Controllers\Seller\ProductController;
+use App\Http\Controllers\Seller\PromotionController;
 use Inertia\Inertia;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -105,12 +107,32 @@ Route::middleware(['auth', 'account.active'])->group(function () {
         // ─────────────────────────────────────────────────────────────────────────
         Route::middleware('role:seller')->prefix('seller')->name('seller.')->group(function () {
             // Dashboard vendeur
-            Route::get('/dashboard', function () {
-                return Inertia::render('Seller/Dashboard');
+            Route::get('/dashboard', function (\Illuminate\Http\Request $request) {
+                $seller = $request->user()->seller;
+                $shops = $seller ? $seller->shops()->with('products.promotions')->get() : [];
+                $totalStock = $seller ? $seller->totalStock() : 0;
+                
+                $logs = \App\Models\ActivityLog::where('user_id', $request->user()->id)
+                    ->latest()
+                    ->take(10)
+                    ->get();
+
+                return Inertia::render('Seller/Dashboard', [
+                    'shopsData' => $shops,
+                    'totalStock' => $totalStock,
+                    'activityLogs' => $logs,
+                ]);
             })->name('dashboard');
 
             // Actions liées à la boutique, restreintes par le KYC
             Route::middleware('kyc.verified')->group(function () {
+                // Central shop list and management
+                Route::get('/shops', [ShopController::class, 'index'])->name('shop.index');
+                Route::delete('/shop/{shop:slug}', [ShopController::class, 'destroy'])->name('shop.destroy');
+
+                // Central promotions (consolidated view)
+                Route::get('/promotions', [PromotionController::class, 'globalIndex'])->name('promotions.global');
+
                 // Central shop creation
                 Route::get('/shop/create', [ShopController::class, 'create'])->middleware('shop.limit')->name('shop.create');
                 Route::post('/shop', [ShopController::class, 'store'])->middleware('shop.limit')->name('shop.store');
@@ -120,6 +142,19 @@ Route::middleware(['auth', 'account.active'])->group(function () {
                     Route::get('/dashboard', [ShopController::class, 'localDashboard'])->name('dashboard');
                     Route::get('/edit', [ShopController::class, 'edit'])->name('edit');
                     Route::post('/update', [ShopController::class, 'update'])->name('update');
+
+                    // Products management
+                    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+                    Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
+                    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+                    Route::get('/products/{product:slug}/edit', [ProductController::class, 'edit'])->name('products.edit');
+                    Route::post('/products/{product:slug}/update', [ProductController::class, 'update'])->name('products.update');
+                    Route::delete('/products/{product:slug}', [ProductController::class, 'destroy'])->name('products.destroy');
+
+                    // Promotions management
+                    Route::get('/promotions', [PromotionController::class, 'index'])->name('promotions.index');
+                    Route::post('/promotions', [PromotionController::class, 'store'])->name('promotions.store');
+                    Route::delete('/promotions/{promotion}', [PromotionController::class, 'destroy'])->name('promotions.destroy');
                 });
             });
         });

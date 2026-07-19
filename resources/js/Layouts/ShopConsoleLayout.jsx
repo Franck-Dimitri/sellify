@@ -13,7 +13,8 @@ import {
     X,
     Bell,
     Search,
-    ExternalLink
+    ExternalLink,
+    Percent
 } from 'lucide-react';
 
 export default function ShopConsoleLayout({ children, shop, title }) {
@@ -23,7 +24,7 @@ export default function ShopConsoleLayout({ children, shop, title }) {
     const user = auth.user;
     const activeThemeColor = shop?.theme_color || '#EAB308';
 
-    // 7 Tabs inside Shop Workspace
+    // Navigation items inside Shop Workspace
     const navigation = [
         { 
             name: 'Tableau de bord', 
@@ -39,10 +40,15 @@ export default function ShopConsoleLayout({ children, shop, title }) {
         },
         { 
             name: 'Produits', 
-            href: '#', 
+            href: route('seller.shop.products.index', shop.slug), 
             icon: Package, 
-            active: false,
-            badge: '0/30'
+            active: route().current('seller.shop.products.*', { shop: shop.slug })
+        },
+        { 
+            name: 'Promotions', 
+            href: route('seller.shop.promotions.index', shop.slug), 
+            icon: Percent, 
+            active: route().current('seller.shop.promotions.*', { shop: shop.slug })
         },
         { 
             name: 'Commandes', 

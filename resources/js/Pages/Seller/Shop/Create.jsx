@@ -6,7 +6,64 @@ import Input from '../../../Components/ui/Input';
 import { Card, CardContent } from '../../../Components/ui/Card';
 import SellerCentralLayout from '../../../Layouts/SellerCentralLayout';
 
-export default function Create() {
+export default function Create({ reachedLimit }) {
+    if (reachedLimit) {
+        return (
+            <SellerCentralLayout title="Créer ma boutique">
+                <Head title="Créer ma boutique - Limite atteinte" />
+                <div className="max-w-xl mx-auto py-12 px-4 text-center">
+                    <div className="bg-white border border-surface-200 rounded-3xl p-8 shadow-sm flex flex-col items-center space-y-6">
+                        <div className="w-16 h-16 bg-yellow-50 text-yellow-600 rounded-2xl flex items-center justify-center border border-yellow-250">
+                            <Store className="w-8 h-8" />
+                        </div>
+                        <div className="space-y-2">
+                            <h2 className="text-xl font-bold text-surface-800">Passez au Pack Pro</h2>
+                            <p className="text-xs text-surface-500 max-w-sm mx-auto">
+                                Vous possédez déjà une boutique sous le pack <strong>Starter</strong>. Ce pack est limité à une seule boutique par compte.
+                            </p>
+                        </div>
+                        
+                        <div className="bg-yellow-50/30 border border-yellow-200 rounded-2xl p-4 w-full text-left space-y-2.5">
+                            <h3 className="text-[10px] font-bold text-yellow-800 uppercase tracking-wider">Avantages du Pack Pro :</h3>
+                            <ul className="text-xs text-surface-600 space-y-1.5 font-medium">
+                                <li className="flex items-center space-x-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-600" />
+                                    <span>Boutiques professionnelles illimitées</span>
+                                </li>
+                                <li className="flex items-center space-x-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-600" />
+                                    <span>Jusqu'à 1 000 produits par boutique</span>
+                                </li>
+                                <li className="flex items-center space-x-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-600" />
+                                    <span>Statistiques avancées et rapports d'activité</span>
+                                </li>
+                                <li className="flex items-center space-x-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-600" />
+                                    <span>Support technique prioritaire 24/7</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row gap-3 w-full justify-center">
+                            <Link href={route('seller.dashboard')} className="flex-1 sm:flex-none">
+                                <Button variant="outline" className="w-full font-medium">
+                                    Retour
+                                </Button>
+                            </Link>
+                            <Button 
+                                type="button" 
+                                className="flex-1 sm:flex-none text-white font-medium bg-yellow-600 hover:bg-yellow-750"
+                            >
+                                Souscrire au Pack Pro
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </SellerCentralLayout>
+        );
+    }
+
     const [step, setStep] = useState(1);
     const [logoPreview, setLogoPreview] = useState(null);
     const [bannerPreview, setBannerPreview] = useState(null);

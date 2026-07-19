@@ -18,19 +18,15 @@ class EnsureSingleShopLimit
         if ($user && $user->isSeller()) {
             $seller = $user->seller;
             
-            // Check if seller already has a shop
-            if ($seller && $seller->shop()->exists()) {
-                if ($request->isMethod('post')) {
-                    if ($request->expectsJson()) {
-                        return response()->json([
-                            'message' => 'Vous possédez déjà une boutique. Le pack Starter ne permet de créer qu\'une seule boutique.'
-                        ], 403);
-                    }
-                    
-                    return back()->with('error', 'Vous possédez déjà une boutique. Le pack Starter ne permet de créer qu\'une seule boutique.');
+            // Only block creations (POST/PUT/PATCH) if the limit is reached
+            if ($seller && $seller->shops()->exists() && !$request->isMethod('GET') && !$request->isMethod('HEAD')) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'message' => 'Vous possédez déjà une boutique. Le pack Starter ne permet de créer qu\'une seule boutique.'
+                    ], 403);
                 }
                 
-                return redirect()->route('seller.dashboard')->with('error', 'Vous possédez déjà une boutique. Le pack Starter ne permet de créer qu\'une seule boutique.');
+                return redirect()->route('seller.shop.index')->with('error', 'Vous possédez déjà une boutique. Le pack Starter ne permet de créer qu\'une seule boutique.');
             }
         }
 

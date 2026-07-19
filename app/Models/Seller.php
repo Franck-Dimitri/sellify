@@ -48,6 +48,16 @@ class Seller extends Model
         return $this->hasMany(Shop::class);
     }
 
+    public function products(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    {
+        return $this->hasManyThrough(Product::class, Shop::class);
+    }
+
+    public function totalStock(): int
+    {
+        return $this->products()->sum('stock');
+    }
+
     public function getShopAttribute()
     {
         return $this->shops()->first();

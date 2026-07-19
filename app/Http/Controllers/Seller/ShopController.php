@@ -21,12 +21,11 @@ class ShopController extends Controller
     {
         $seller = $request->user()->seller;
 
-        if ($seller && $seller->shop()->exists()) {
-            return redirect()->route('seller.dashboard')
-                ->with('error', 'Vous possédez déjà une boutique. Le pack Starter est limité à une seule boutique.');
-        }
+        $reachedLimit = $seller && $seller->pack === 'starter' && $seller->shops()->exists();
 
-        return Inertia::render('Seller/Shop/Create');
+        return Inertia::render('Seller/Shop/Create', [
+            'reachedLimit' => $reachedLimit
+        ]);
     }
 
     /**
@@ -41,7 +40,7 @@ class ShopController extends Controller
             return redirect()->route('login')->with('error', 'Compte vendeur non trouvé.');
         }
 
-        if ($seller->shop()->exists()) {
+        if ($seller->shops()->exists()) {
             return redirect()->route('seller.dashboard')
                 ->with('error', 'Vous possédez déjà une boutique.');
         }
@@ -218,6 +217,60 @@ class ShopController extends Controller
 
         return redirect()->route('seller.shop.edit', $shop->slug)
             ->with('success', 'Votre boutique a été mise à jour avec succès.');
+    }
+
+    /**
+     * Display a list of the seller's shops.
+     */
+    public function index(Request $request): InertiaResponse
+    {
+        $seller = $request->user()->seller;
+        $shops = $seller ? $seller->shops()->get() : [];
+        
+        // Fetch activity logs for these shops
+        $logs = ActivityLog::where('user_id', $request->user()->id)
+            ->whereIn('action', ['shop_created', 'shop_updated', 'shop_deleted'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return Inertia::render('Seller/Shop/Index', [
+            'shops' => $shops,
+            'logs' => $logs,
+            'pack' => $seller ? $seller->pack : 'starter'
+        ]);
+    }
+
+    /**
+     * Delete a shop.
+     */
+    public function destroy(Request $request, Shop $shop): RedirectResponse
+    {
+        $user = $request->user();
+        $seller = $user->seller;
+
+        if (!$seller || $shop->seller_id !== $seller->id) {
+            abort(403, 'Accès non autorisé.');
+        }
+
+        // Delete logo and banner if they exist
+        if ($shop->logo_path) {
+            Storage::disk('public')->delete($shop->logo_path);
+        }
+        if ($shop->banner_path) {
+            Storage::disk('public')->delete($shop->banner_path);
+        }
+
+        $shopName = $shop->name;
+        $shop->delete();
+
+        ActivityLog::log(
+            $user->id,
+            'shop_deleted',
+            "Suppression de la boutique professionnelle : {$shopName}."
+        );
+
+        return redirect()->route('seller.shop.index')
+            ->with('success', "La boutique \"{$shopName}\" a été supprimée avec succès.");
     }
 
     /**

@@ -9,7 +9,11 @@ import {
     Menu,
     X,
     Bell,
-    Search
+    Search,
+    Plus,
+    History,
+    Settings,
+    Percent
 } from 'lucide-react';
 
 export default function SellerCentralLayout({ children, title }) {
@@ -20,16 +24,28 @@ export default function SellerCentralLayout({ children, title }) {
 
     const navigation = [
         { 
-            name: 'Sellify Central', 
+            name: 'Tableau de bord', 
             href: route('seller.dashboard'), 
             icon: LayoutDashboard, 
             active: route().current('seller.dashboard') 
         },
         { 
+            name: 'Mes Boutiques', 
+            href: route('seller.shop.index'), 
+            icon: Store, 
+            active: route().current('seller.shop.index') 
+        },
+        { 
             name: 'Créer une boutique', 
             href: route('seller.shop.create'), 
-            icon: Store, 
+            icon: Plus, 
             active: route().current('seller.shop.create') 
+        },
+        { 
+            name: 'Promotions', 
+            href: route('seller.promotions.global'), 
+            icon: Percent, 
+            active: route().current('seller.promotions.global') 
         },
         { 
             name: 'Profil Vendeur', 
