@@ -12,6 +12,16 @@ use App\Http\Controllers\Admin\KycDocumentController as AdminKycDocumentControll
 use App\Http\Controllers\Seller\ShopController;
 use App\Http\Controllers\Seller\ProductController;
 use App\Http\Controllers\Seller\PromotionController;
+use App\Http\Controllers\Seller\InventoryController;
+use App\Http\Controllers\Seller\SubscriptionController;
+use App\Http\Controllers\Seller\WalletController;
+use App\Http\Controllers\Seller\SmartLinkController;
+use App\Http\Controllers\Seller\SellifyPayController;
+use App\Http\Controllers\Seller\AnalyticsController;
+use App\Http\Controllers\Seller\DisputeController;
+use App\Http\Controllers\Public\SmartLinkCheckoutController;
+use App\Http\Controllers\Public\OrderTrackingController;
+use App\Http\Controllers\AiChatController;
 use Inertia\Inertia;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -23,6 +33,13 @@ Route::get('/', function () {
 })->name('welcome');
 
 Route::get('/boutique/{slug}', [ShopController::class, 'showPublic'])->name('shop.public');
+
+// Fast Checkout via Smart-Link
+Route::get('/pay/{token}', [SmartLinkCheckoutController::class, 'show'])->name('smartlink.checkout');
+Route::post('/pay/{token}', [SmartLinkCheckoutController::class, 'processPayment'])->name('smartlink.pay');
+
+// Suivi de colis public sans compte
+Route::get('/track/{tracking_code}', [OrderTrackingController::class, 'show'])->name('public.order_tracking');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Routes Invité (Guest Auth)
@@ -133,6 +150,33 @@ Route::middleware(['auth', 'account.active'])->group(function () {
                 // Central promotions (consolidated view)
                 Route::get('/promotions', [PromotionController::class, 'globalIndex'])->name('promotions.global');
 
+                // Inventaire
+                Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
+                Route::post('/inventory/batch', [InventoryController::class, 'updateBatch'])->name('inventory.batch');
+
+                // Abonnements SaaS
+                Route::get('/subscription', [SubscriptionController::class, 'index'])->name('subscription.index');
+                Route::post('/subscription/upgrade', [SubscriptionController::class, 'upgrade'])->name('subscription.upgrade');
+
+                // Portefeuille & Retraits
+                Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
+                Route::post('/wallet/withdraw', [WalletController::class, 'requestWithdrawal'])->name('wallet.withdraw');
+
+                // Smart-Links
+                Route::get('/smart-links', [SmartLinkController::class, 'index'])->name('smart_links.index');
+                Route::post('/smart-links', [SmartLinkController::class, 'store'])->name('smart_links.store');
+
+                // SellifyPay (Micro-prêts)
+                Route::get('/loans', [SellifyPayController::class, 'index'])->name('loans.index');
+                Route::post('/loans/request', [SellifyPayController::class, 'requestLoan'])->name('loans.request');
+
+                // Analytics & Rapports IA
+                Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+
+                // Litiges (Vendeur)
+                Route::get('/disputes', [DisputeController::class, 'index'])->name('disputes.index');
+                Route::post('/disputes/{dispute}/defense', [DisputeController::class, 'submitDefense'])->name('disputes.defense');
+
                 // Central shop creation
                 Route::get('/shop/create', [ShopController::class, 'create'])->middleware('shop.limit')->name('shop.create');
                 Route::post('/shop', [ShopController::class, 'store'])->middleware('shop.limit')->name('shop.store');
@@ -149,6 +193,8 @@ Route::middleware(['auth', 'account.active'])->group(function () {
                     Route::post('/products', [ProductController::class, 'store'])->name('products.store');
                     Route::get('/products/{product:slug}/edit', [ProductController::class, 'edit'])->name('products.edit');
                     Route::post('/products/{product:slug}/update', [ProductController::class, 'update'])->name('products.update');
+                    Route::post('/products/{product:slug}/duplicate', [ProductController::class, 'duplicate'])->name('products.duplicate');
+                    Route::post('/products/{product:slug}/archive', [ProductController::class, 'archive'])->name('products.archive');
                     Route::delete('/products/{product:slug}', [ProductController::class, 'destroy'])->name('products.destroy');
 
                     // Promotions management
@@ -158,6 +204,9 @@ Route::middleware(['auth', 'account.active'])->group(function () {
                 });
             });
         });
+
+        // Chatbot IA Flottant
+        Route::post('/ai/chat', [AiChatController::class, 'handle'])->name('ai.chat');
 
         // ─────────────────────────────────────────────────────────────────────────
         // Espace Livreur (Dashboard & Actions)

@@ -166,8 +166,11 @@ class ShopController extends Controller
             'phone_contact' => 'required|string|max:50',
             'email_contact' => 'required|email|max:255',
             'opening_hours' => 'nullable|array',
+            'return_policy' => 'nullable|array',
+            'shipping_settings' => 'nullable|array',
             'social_links' => 'nullable|array',
             'theme_color' => ['nullable', 'string', 'regex:/^#[a-fA-F0-9]{6}$/'],
+            'is_holiday_mode' => 'nullable|boolean',
         ]);
 
         // Generate unique slug only if name changes
@@ -206,8 +209,11 @@ class ShopController extends Controller
             'phone_contact' => $validated['phone_contact'],
             'email_contact' => $validated['email_contact'],
             'opening_hours' => $validated['opening_hours'] ?? null,
+            'return_policy' => $validated['return_policy'] ?? null,
+            'shipping_settings' => $validated['shipping_settings'] ?? null,
             'social_links' => $validated['social_links'] ?? null,
             'theme_color' => $validated['theme_color'] ?? '#EAB308',
+            'is_holiday_mode' => $validated['is_holiday_mode'] ?? $shop->is_holiday_mode,
         ]);
 
         ActivityLog::log(

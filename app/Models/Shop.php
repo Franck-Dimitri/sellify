@@ -25,17 +25,23 @@ class Shop extends Model
         'phone_contact',
         'email_contact',
         'opening_hours',
+        'return_policy',
+        'shipping_settings',
         'social_links',
         'theme_color',
         'is_active',
+        'is_holiday_mode',
     ];
 
     protected function casts(): array
     {
         return [
             'opening_hours' => 'array',
+            'return_policy' => 'array',
+            'shipping_settings' => 'array',
             'social_links' => 'array',
             'is_active' => 'boolean',
+            'is_holiday_mode' => 'boolean',
         ];
     }
 
@@ -52,5 +58,10 @@ class Shop extends Model
     public function promotions(): HasMany
     {
         return $this->hasMany(Promotion::class);
+    }
+
+    public function promoCodes(): HasMany
+    {
+        return $this->hasMany(PromoCode::class);
     }
 }

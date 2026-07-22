@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, Upload, Store, ShieldCheck, MapPin, Phone, Mail, Clock, Globe, HelpCircle, Badge } from 'lucide-react';
 import Button from '../../../Components/ui/Button';
 import Input from '../../../Components/ui/Input';

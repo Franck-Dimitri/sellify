@@ -34,6 +34,8 @@ class DatabaseSeeder extends Seeder
             'is_active' => true,
         ]);
 
+        $this->call(SubscriptionPackSeeder::class);
+
         ActivityLog::log($admin->id, 'system_seed', 'Initialisation de la base de données avec l\'administrateur.');
 
         // 2. Create Clients (Customers)
@@ -88,6 +90,13 @@ class DatabaseSeeder extends Seeder
             'verified_at' => now()->subDays(2),
             'verified_by' => $admin->id,
             'pack' => 'pro',
+        ]);
+
+        \App\Models\SellerWallet::create([
+            'seller_id' => $sellerApproved->id,
+            'balance' => 250000.00,
+            'pending_balance' => 45000.00,
+            'currency' => 'FCFA',
         ]);
 
         $this->seedKycDocs($sellerApprovedUser, 'seller', 'approved', $admin);

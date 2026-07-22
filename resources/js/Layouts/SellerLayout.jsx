@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, usePage } from '@inertiajs/react';
+import AIAssistantWidget from '../Components/AIAssistantWidget';
 import {
     LayoutDashboard,
     Store,
@@ -260,6 +261,9 @@ export default function SellerLayout({ children, title }) {
                     </main>
                 </div>
             </div>
+
+            {/* Universal Floating AI Assistant Widget */}
+            <AIAssistantWidget />
         </div>
     );
 }

@@ -72,4 +72,34 @@ class Seller extends Model
     {
         return $this->status === 'approved' && $this->is_verified;
     }
+
+    public function wallet(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(SellerWallet::class);
+    }
+
+    public function subscriptions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(SellerSubscription::class);
+    }
+
+    public function activeSubscription(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(SellerSubscription::class)->where('status', 'active');
+    }
+
+    public function smartLinks(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(SmartLink::class);
+    }
+
+    public function loans(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(SellerLoan::class);
+    }
+
+    public function disputes(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Dispute::class);
+    }
 }

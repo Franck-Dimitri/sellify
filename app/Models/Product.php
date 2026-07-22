@@ -15,18 +15,30 @@ class Product extends Model
         'shop_id',
         'name',
         'slug',
+        'sku',
         'description',
         'price',
+        'weight',
+        'dimensions',
         'stock',
+        'alert_threshold',
+        'stock_status',
+        'variants',
         'image_paths',
         'is_active',
+        'is_archived',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
+        'weight' => 'decimal:2',
+        'dimensions' => 'array',
         'stock' => 'integer',
+        'alert_threshold' => 'integer',
+        'variants' => 'array',
         'image_paths' => 'array',
         'is_active' => 'boolean',
+        'is_archived' => 'boolean',
     ];
 
     protected $appends = ['active_promotion'];
