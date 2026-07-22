@@ -53,6 +53,15 @@ class Product extends Model
         return $this->hasMany(Promotion::class);
     }
 
+    public function activePromotion()
+    {
+        $today = now()->toDateString();
+        return $this->hasOne(Promotion::class)
+            ->where('promotions.is_active', true)
+            ->where('promotions.start_date', '<=', $today)
+            ->where('promotions.end_date', '>=', $today);
+    }
+
     /**
      * Get the active promotion for this product.
      */

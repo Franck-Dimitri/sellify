@@ -21,6 +21,7 @@ use App\Http\Controllers\Seller\AnalyticsController;
 use App\Http\Controllers\Seller\DisputeController;
 use App\Http\Controllers\Public\SmartLinkCheckoutController;
 use App\Http\Controllers\Public\OrderTrackingController;
+use App\Http\Controllers\Public\StoreController;
 use App\Http\Controllers\AiChatController;
 use Inertia\Inertia;
 
@@ -31,6 +32,11 @@ use Inertia\Inertia;
 Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('welcome');
+
+// Public Store & Marketplace Routes
+Route::get('/store', [StoreController::class, 'indexProducts'])->name('public.products.index');
+Route::get('/produit/{slug}', [StoreController::class, 'showProduct'])->name('public.products.show');
+Route::get('/boutiques', [StoreController::class, 'indexShops'])->name('public.shops.index');
 
 Route::get('/boutique/{slug}', [ShopController::class, 'showPublic'])->name('shop.public');
 Route::post('/boutique/checkout/direct', [ShopController::class, 'directCheckout'])->name('shop.direct_checkout');

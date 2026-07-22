@@ -1,65 +1,88 @@
 import React from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import Button from '../Components/ui/Button';
-import { LogOut, User as UserIcon, LayoutDashboard, Menu, X } from 'lucide-react';
+import { LogOut, User as UserIcon, LayoutDashboard, Menu, X, ShoppingBag, Store, Home } from 'lucide-react';
 
 export default function PublicLayout({ children }) {
     const { auth } = usePage().props;
     const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
     return (
-        <div className="min-h-screen bg-surface-50 flex flex-col antialiased">
+        <div className="min-h-screen bg-stone-50 flex flex-col antialiased font-sans text-stone-800">
             {/* Header / Navbar */}
-            <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-surface-200">
+            <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-stone-200/80 shadow-2xs">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16 items-center">
                         {/* Logo */}
                         <div className="flex items-center">
-                            <Link href="/" className="flex items-center space-x-2">
-                                <span className="w-9 h-9 rounded-xl bg-primary-500 flex items-center justify-center font-extrabold text-surface-950 shadow-sm">S</span>
-                                <span className="font-extrabold text-xl tracking-tight text-surface-900">
-                                    Sellify<span className="text-primary-600">.me</span>
+                            <Link href="/" className="flex items-center space-x-2.5">
+                                <span className="w-8.5 h-8.5 rounded-xl bg-amber-500 flex items-center justify-center font-bold text-amber-950 shadow-xs text-base">S</span>
+                                <span className="font-semibold text-xl tracking-tight text-stone-900">
+                                    Sellify<span className="text-amber-600">.me</span>
                                 </span>
                             </Link>
                         </div>
 
                         {/* Desktop Navigation */}
-                        <nav className="hidden md:flex space-x-8 text-sm font-semibold text-surface-600">
-                            <Link href="/" className="hover:text-primary-600 transition-colors">Accueil</Link>
-                            <a href="#piliers" className="hover:text-primary-600 transition-colors">Piliers</a>
-                            <a href="#vendeurs" className="hover:text-primary-600 transition-colors">Pour Vendeurs</a>
-                            <a href="#livreurs" className="hover:text-primary-600 transition-colors">Pour Livreurs</a>
+                        <nav className="hidden md:flex items-center space-x-7 text-xs font-medium text-stone-600">
+                            <Link 
+                                href="/" 
+                                className={`flex items-center space-x-1.5 transition-colors ${route().current('welcome') ? 'text-amber-700 font-semibold' : 'hover:text-stone-900'}`}
+                            >
+                                <Home className="w-3.5 h-3.5" />
+                                <span>Accueil</span>
+                            </Link>
+
+                            <Link 
+                                href={route('public.products.index')} 
+                                className={`flex items-center space-x-1.5 transition-colors ${route().current('public.products.*') ? 'text-amber-700 font-semibold' : 'hover:text-stone-900'}`}
+                            >
+                                <ShoppingBag className="w-3.5 h-3.5" />
+                                <span>Catalogue Produits</span>
+                            </Link>
+
+                            <Link 
+                                href={route('public.shops.index')} 
+                                className={`flex items-center space-x-1.5 transition-colors ${route().current('public.shops.*') ? 'text-amber-700 font-semibold' : 'hover:text-stone-900'}`}
+                            >
+                                <Store className="w-3.5 h-3.5" />
+                                <span>Boutiques Vérifiées</span>
+                            </Link>
                         </nav>
 
                         {/* Actions (Login / Dashboard) */}
-                        <div className="hidden md:flex items-center space-x-4">
+                        <div className="hidden md:flex items-center space-x-3">
                             {auth?.user ? (
                                 <>
                                     {auth.user.role !== 'customer' && (
                                         <Link href={route(auth.user.role + '.dashboard')}>
-                                            <Button variant="outline" size="sm" className="space-x-2">
-                                                <LayoutDashboard className="w-4 h-4" />
+                                            <button className="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-amber-950 text-xs font-semibold rounded-lg shadow-xs flex items-center space-x-1.5 transition-colors">
+                                                <LayoutDashboard className="w-3.5 h-3.5" />
                                                 <span>Mon Tableau de Bord</span>
-                                            </Button>
+                                            </button>
                                         </Link>
                                     )}
                                     <Link 
                                         href={route('logout')} 
                                         method="post" 
                                         as="button" 
-                                        className="inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 rounded-lg cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 bg-accent-500 hover:bg-accent-600 text-white focus:ring-accent-500 px-3 py-1.5 text-sm space-x-1"
+                                        className="px-3 py-2 border border-stone-200 hover:bg-stone-100 text-stone-600 text-xs font-medium rounded-lg transition-colors flex items-center space-x-1"
                                     >
-                                        <LogOut className="w-4 h-4" />
+                                        <LogOut className="w-3.5 h-3.5" />
                                         <span>Déconnexion</span>
                                     </Link>
                                 </>
                             ) : (
                                 <>
                                     <Link href={route('login')}>
-                                        <Button variant="outline" size="sm">Connexion</Button>
+                                        <button className="px-3.5 py-2 border border-stone-200 hover:bg-stone-50 text-stone-700 text-xs font-medium rounded-lg transition-colors">
+                                            Connexion
+                                        </button>
                                     </Link>
                                     <Link href={route('register')}>
-                                        <Button variant="primary" size="sm">Créer mon compte</Button>
+                                        <button className="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-amber-950 text-xs font-semibold rounded-lg shadow-xs transition-colors">
+                                            Créer une boutique
+                                        </button>
                                     </Link>
                                 </>
                             )}
@@ -69,7 +92,7 @@ export default function PublicLayout({ children }) {
                         <div className="md:hidden flex items-center">
                             <button
                                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                                className="text-surface-500 hover:text-surface-600 p-2 focus:outline-none"
+                                className="text-stone-500 hover:text-stone-700 p-2 focus:outline-none"
                             >
                                 {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                             </button>
@@ -79,27 +102,25 @@ export default function PublicLayout({ children }) {
 
                 {/* Mobile Menu */}
                 {mobileMenuOpen && (
-                    <div className="md:hidden bg-white border-b border-surface-200 px-4 pt-2 pb-4 space-y-3 shadow-inner">
-                        <Link href="/" className="block py-2 text-base font-medium text-surface-700 hover:text-primary-600">Accueil</Link>
-                        <a href="#piliers" className="block py-2 text-base font-medium text-surface-700 hover:text-primary-600" onClick={() => setMobileMenuOpen(false)}>Piliers</a>
-                        <a href="#vendeurs" className="block py-2 text-base font-medium text-surface-700 hover:text-primary-600" onClick={() => setMobileMenuOpen(false)}>Pour Vendeurs</a>
-                        <a href="#livreurs" className="block py-2 text-base font-medium text-surface-700 hover:text-primary-600" onClick={() => setMobileMenuOpen(false)}>Pour Livreurs</a>
-                        <div className="pt-4 border-t border-surface-100 flex flex-col space-y-2">
+                    <div className="md:hidden bg-white border-b border-stone-200 px-4 pt-2 pb-4 space-y-2 shadow-inner text-xs font-medium">
+                        <Link href="/" className="block py-2 text-stone-700 hover:text-amber-700">Accueil</Link>
+                        <Link href={route('public.products.index')} className="block py-2 text-stone-700 hover:text-amber-700">Catalogue Produits</Link>
+                        <Link href={route('public.shops.index')} className="block py-2 text-stone-700 hover:text-amber-700">Boutiques Vérifiées</Link>
+                        <div className="pt-3 border-t border-stone-100 flex flex-col space-y-2">
                             {auth?.user ? (
                                 <>
                                     {auth.user.role !== 'customer' && (
                                         <Link href={route(auth.user.role + '.dashboard')} className="w-full">
-                                            <Button variant="outline" className="w-full space-x-2">
-                                                <LayoutDashboard className="w-4 h-4" />
-                                                <span>Mon Dashboard</span>
-                                            </Button>
+                                            <button className="w-full py-2 bg-amber-500 text-amber-950 font-semibold rounded-lg shadow-xs text-xs">
+                                                Mon Dashboard
+                                            </button>
                                         </Link>
                                     )}
                                     <Link 
                                         href={route('logout')} 
                                         method="post" 
                                         as="button" 
-                                        className="w-full inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 rounded-lg cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 bg-accent-500 hover:bg-accent-600 text-white focus:ring-accent-500 px-4 py-2 text-sm"
+                                        className="w-full py-2 border border-stone-200 text-stone-600 rounded-lg text-xs"
                                     >
                                         Déconnexion
                                     </Link>
@@ -107,10 +128,10 @@ export default function PublicLayout({ children }) {
                             ) : (
                                 <>
                                     <Link href={route('login')} className="w-full">
-                                        <Button variant="outline" className="w-full">Connexion</Button>
+                                        <button className="w-full py-2 border border-stone-200 text-stone-700 rounded-lg text-xs">Connexion</button>
                                     </Link>
                                     <Link href={route('register')} className="w-full">
-                                        <Button variant="primary" className="w-full">Créer mon compte</Button>
+                                        <button className="w-full py-2 bg-amber-500 text-amber-950 font-semibold rounded-lg shadow-xs text-xs">Créer une boutique</button>
                                     </Link>
                                 </>
                             )}
@@ -122,15 +143,15 @@ export default function PublicLayout({ children }) {
             {/* Flash Messages */}
             {usePage().props.flash?.success && (
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 w-full">
-                    <div className="bg-secondary-50 border border-secondary-200 text-secondary-800 px-4 py-3 rounded-xl flex items-center justify-between shadow-sm animate-slide-up">
-                        <span className="text-sm font-semibold">{usePage().props.flash.success}</span>
+                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-2.5 rounded-xl flex items-center justify-between shadow-xs text-xs font-medium">
+                        <span>{usePage().props.flash.success}</span>
                     </div>
                 </div>
             )}
             {usePage().props.flash?.error && (
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 w-full">
-                    <div className="bg-accent-50 border border-accent-200 text-accent-800 px-4 py-3 rounded-xl flex items-center justify-between shadow-sm animate-slide-up">
-                        <span className="text-sm font-semibold">{usePage().props.flash.error}</span>
+                    <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-2.5 rounded-xl flex items-center justify-between shadow-xs text-xs font-medium">
+                        <span>{usePage().props.flash.error}</span>
                     </div>
                 </div>
             )}
@@ -141,45 +162,43 @@ export default function PublicLayout({ children }) {
             </main>
 
             {/* Footer */}
-            <footer className="bg-surface-100 text-surface-600 py-12 border-t border-surface-200">
+            <footer className="bg-white text-stone-600 py-10 border-t border-stone-200/80 text-xs">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                         {/* Brand Column */}
-                        <div className="space-y-4">
-                            <div className="flex items-center space-x-2 text-surface-900">
-                                <span className="w-9 h-9 rounded-xl bg-primary-500 flex items-center justify-center font-extrabold text-surface-950">S</span>
-                                <span className="font-extrabold text-xl tracking-tight">Sellify.me</span>
+                        <div className="space-y-3">
+                            <div className="flex items-center space-x-2 text-stone-900">
+                                <span className="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center font-bold text-amber-950 text-sm">S</span>
+                                <span className="font-semibold text-lg tracking-tight">Sellify.me</span>
                             </div>
-                            <p className="text-sm text-surface-500">
-                                La première plateforme SaaS et Escrow pour le commerce africain. Securisé, propulsé par l'IA logistique.
+                            <p className="text-xs text-stone-500 font-normal leading-relaxed">
+                                Plateforme e-commerce sécurisée avec protection Escrow et paiements Mobile Money (Orange / MTN MoMo).
                             </p>
                         </div>
                         {/* Links Columns */}
                         <div>
-                            <h4 className="text-surface-900 font-bold text-sm uppercase tracking-wider mb-4">Plateforme</h4>
-                            <ul className="space-y-2 text-sm text-surface-500">
-                                <li><a href="#piliers" className="hover:text-primary-600 transition-colors">Comment ça marche</a></li>
-                                <li><Link href={route('register')} className="hover:text-primary-600 transition-colors">Créer une boutique</Link></li>
-                                <li><Link href={route('register')} className="hover:text-primary-600 transition-colors">Devenir Livreur</Link></li>
+                            <h4 className="text-stone-900 font-semibold text-xs uppercase tracking-wider mb-3">Acheteurs & Marketplace</h4>
+                            <ul className="space-y-2 text-xs text-stone-500 font-normal">
+                                <li><Link href={route('public.products.index')} className="hover:text-amber-700 transition-colors">Catalogue Produits</Link></li>
+                                <li><Link href={route('public.shops.index')} className="hover:text-amber-700 transition-colors">Boutiques Certifiées</Link></li>
                             </ul>
                         </div>
                         <div>
-                            <h4 className="text-surface-900 font-bold text-sm uppercase tracking-wider mb-4">Légal</h4>
-                            <ul className="space-y-2 text-sm text-surface-500">
-                                <li><a href="#" className="hover:text-primary-600 transition-colors">Conditions Générales</a></li>
-                                <li><a href="#" className="hover:text-primary-600 transition-colors">Politique de Confidentialité</a></li>
-                                <li><a href="#" className="hover:text-primary-600 transition-colors">Mentions Légales</a></li>
+                            <h4 className="text-stone-900 font-semibold text-xs uppercase tracking-wider mb-3">Vendeurs & Partenaires</h4>
+                            <ul className="space-y-2 text-xs text-stone-500 font-normal">
+                                <li><Link href={route('register')} className="hover:text-amber-700 transition-colors">Ouvrir une boutique</Link></li>
+                                <li><Link href={route('register')} className="hover:text-amber-700 transition-colors">Devenir Livreur</Link></li>
                             </ul>
                         </div>
                         <div>
-                            <h4 className="text-surface-900 font-bold text-sm uppercase tracking-wider mb-4">Contact</h4>
-                            <p className="text-sm text-surface-500">
-                                support@sellify.me<br />
-                                Douala / Yaoundé, Cameroun
+                            <h4 className="text-stone-900 font-semibold text-xs uppercase tracking-wider mb-3">Assistance & Sécurité</h4>
+                            <p className="text-xs text-stone-500 font-normal leading-relaxed">
+                                Paiement Séquestre Escrow Garanti.<br />
+                                Support client : support@sellify.me
                             </p>
                         </div>
                     </div>
-                    <div className="border-t border-surface-200 mt-8 pt-8 text-center text-sm text-surface-400">
+                    <div className="border-t border-stone-100 mt-8 pt-6 text-center text-[11px] text-stone-400 font-normal">
                         &copy; {new Date().getFullYear()} Sellify.me. Tous droits réservés.
                     </div>
                 </div>
