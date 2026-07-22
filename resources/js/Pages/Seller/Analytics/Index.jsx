@@ -1,98 +1,138 @@
 import React from 'react';
 import { Head } from '@inertiajs/react';
-import SellerCentralLayout from '@/Layouts/SellerCentralLayout';
+import SellerCentralLayout from '../../../Layouts/SellerCentralLayout';
+import { 
+    Sparkles, 
+    TrendingUp, 
+    Award, 
+    Boxes, 
+    Lightbulb, 
+    CheckCircle2, 
+    ArrowUpRight,
+    Search,
+    BarChart2
+} from 'lucide-react';
 
 export default function AnalyticsIndex({ report }) {
-    return (
-        <SellerCentralLayout header="Rapport IA Vendeur & Produits Gagnants">
-            <Head title="Analytics IA - Seller Central" />
+    const summary = report?.summary || { total_analyzed: 0, top_performers: 0 };
+    const marketTrends = report?.market_trends || [];
+    const products = report?.products || [];
 
-            <div className="space-y-8">
-                {/* Intro AI Banner */}
-                <div className="bg-gradient-to-r from-purple-900 to-indigo-800 text-white p-6 rounded-2xl shadow-lg flex flex-col md:flex-row items-center justify-between gap-4">
-                    <div>
-                        <span className="bg-white/20 text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full">
-                            Moteur IA Central
-                        </span>
-                        <h2 className="text-2xl font-black mt-2">Analyse Intelligente des Ventes & Tendances</h2>
-                        <p className="text-sm text-purple-200 mt-1">
-                            L'IA analyse le comportement des consommateurs et vous conseille pour maximiser vos revenus.
+    return (
+        <SellerCentralLayout title="Rapports IA & Qualité des Ventes">
+            <Head title="Rapports IA & Analytics - Sellify" />
+
+            <div className="w-full space-y-6 pb-16 text-stone-800">
+                
+                {/* Header Banner Shariow Style */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-amber-500/10 border border-amber-500/20 p-6 rounded-2xl">
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-amber-800 font-medium text-xs uppercase tracking-wide">
+                            <Sparkles className="w-4 h-4 text-amber-600" />
+                            <span>Moteur d'Intelligence Artificielle Vendeur</span>
+                        </div>
+                        <h1 className="text-xl font-semibold text-stone-900">
+                            Rapports IA & Optimisation des Fiches Produits
+                        </h1>
+                        <p className="text-xs text-stone-600">
+                            L'IA analyse vos fiches produits, détecte les opportunités de marché et vous conseille pour maximiser vos conversions.
                         </p>
                     </div>
-                    <div className="flex gap-4">
-                        <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl text-center">
-                            <span className="text-xs text-purple-200 block">Produits Analysés</span>
-                            <span className="text-xl font-bold">{report.summary.total_analyzed}</span>
+
+                    <div className="flex items-center gap-3">
+                        <div className="px-4 py-2 bg-amber-50 rounded-xl border border-amber-200 text-center">
+                            <span className="text-[10px] text-amber-800 block font-medium">Analyses Effectuées</span>
+                            <span className="text-base font-semibold text-amber-950">{summary.total_analyzed} produit(s)</span>
                         </div>
-                        <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl text-center">
-                            <span className="text-xs text-purple-200 block">Top Performers</span>
-                            <span className="text-xl font-bold text-green-400">{report.summary.top_performers}</span>
+                        <div className="px-4 py-2 bg-emerald-50 rounded-xl border border-emerald-200 text-center">
+                            <span className="text-[10px] text-emerald-800 block font-medium">Top Performers</span>
+                            <span className="text-base font-semibold text-emerald-700">{summary.top_performers} produit(s)</span>
                         </div>
                     </div>
                 </div>
 
-                {/* Market Trends Tips */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-3">
-                    <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                        <span>💡</span> Tendances de Marché Locales (IA)
-                    </h3>
-                    <ul className="space-y-2 text-sm text-gray-700">
-                        {report.market_trends.map((trend, i) => (
-                            <li key={i} className="flex items-start gap-2 bg-purple-50 p-3 rounded-xl text-purple-900 text-xs sm:text-sm">
-                                <span>✦</span>
+                {/* Market Trends & Recommendations Card */}
+                <div className="bg-white border border-stone-200/70 rounded-2xl p-6 shadow-sm space-y-4">
+                    <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
+                        <Lightbulb className="w-4 h-4 text-amber-600" />
+                        <h2 className="font-semibold text-stone-900 text-sm">Recommandations & Tendances de Marché Locales</h2>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {marketTrends.map((trend, i) => (
+                            <div key={i} className="flex items-start gap-2.5 bg-amber-50/50 border border-amber-200/60 p-3.5 rounded-xl text-xs text-stone-700 font-normal">
+                                <Sparkles className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
                                 <span>{trend}</span>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-
-                {/* Product Scores List */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="p-6 border-b border-gray-100">
-                        <h3 className="text-lg font-bold text-gray-900">Score de Qualité des Fiches Produits (0 - 100)</h3>
-                    </div>
-                    <div className="divide-y divide-gray-100">
-                        {report.products.map(item => (
-                            <div key={item.id} className="p-6 hover:bg-gray-50/50 transition flex flex-col md:flex-row justify-between gap-4">
-                                <div className="space-y-1 flex-1">
-                                    <div className="flex items-center gap-3">
-                                        <h4 className="font-bold text-gray-900 text-base">{item.name}</h4>
-                                        <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-700">
-                                            {item.potential}
-                                        </span>
-                                    </div>
-                                    <p className="text-xs text-gray-500">
-                                        Prix actuel : <span className="font-semibold text-gray-800">{item.price} FCFA</span> • Prix suggéré IA : <span className="font-semibold text-indigo-600">{item.suggested_price} FCFA</span>
-                                    </p>
-
-                                    {item.optimization_tips.length > 0 && (
-                                        <div className="mt-3 space-y-1">
-                                            <p className="text-xs font-bold text-gray-600">Recommandations d'optimisation :</p>
-                                            <ul className="space-y-1">
-                                                {item.optimization_tips.map((tip, idx) => (
-                                                    <li key={idx} className="text-xs text-amber-700 flex items-center gap-1">
-                                                        <span>•</span> {tip}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="flex items-center gap-4">
-                                    <div className="text-right">
-                                        <span className="text-xs text-gray-400 block">Score Qualité</span>
-                                        <span className={`text-2xl font-black ${
-                                            item.quality_score >= 80 ? 'text-green-600' : item.quality_score >= 60 ? 'text-amber-500' : 'text-red-500'
-                                        }`}>
-                                            {item.quality_score} <span className="text-xs font-normal text-gray-400">/ 100</span>
-                                        </span>
-                                    </div>
-                                </div>
                             </div>
                         ))}
                     </div>
                 </div>
+
+                {/* Product Quality Scores List */}
+                <div className="bg-white border border-stone-200/70 rounded-2xl shadow-sm overflow-hidden">
+                    <div className="p-5 border-b border-stone-100 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <BarChart2 className="w-4 h-4 text-amber-600" />
+                            <h3 className="font-semibold text-stone-900 text-sm">Score de Qualité des Fiches Produits (0 - 100)</h3>
+                        </div>
+                    </div>
+
+                    <div className="divide-y divide-stone-100">
+                        {products.length === 0 ? (
+                            <div className="p-8 text-center text-stone-400 text-xs font-normal">
+                                Aucune fiche produit analysée. Ajoutez des articles dans votre catalogue pour générer un rapport IA.
+                            </div>
+                        ) : (
+                            products.map(item => {
+                                let scoreColor = 'text-emerald-600 bg-emerald-50 border-emerald-200';
+                                if (item.quality_score < 60) scoreColor = 'text-red-600 bg-red-50 border-red-200';
+                                else if (item.quality_score < 80) scoreColor = 'text-amber-700 bg-amber-50 border-amber-200';
+
+                                return (
+                                    <div key={item.id} className="p-5 hover:bg-stone-50/80 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs">
+                                        <div className="space-y-1.5 flex-1">
+                                            <div className="flex items-center gap-2">
+                                                <h4 className="font-semibold text-stone-900 text-sm">{item.name}</h4>
+                                                <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-stone-100 text-stone-600">
+                                                    {item.potential || 'Potentiel Fort'}
+                                                </span>
+                                            </div>
+
+                                            <div className="flex items-center gap-3 text-stone-500 font-normal">
+                                                <span>Prix actuel : <strong className="font-medium text-stone-900">{Number(item.price).toLocaleString()} FCFA</strong></span>
+                                                <span>•</span>
+                                                <span>Prix suggéré IA : <strong className="font-medium text-amber-900">{Number(item.suggested_price || item.price).toLocaleString()} FCFA</strong></span>
+                                            </div>
+
+                                            {item.optimization_tips && item.optimization_tips.length > 0 && (
+                                                <div className="pt-2 space-y-1">
+                                                    <span className="text-[11px] font-medium text-stone-600">Conseils d'optimisation IA :</span>
+                                                    <div className="flex flex-wrap gap-1.5">
+                                                        {item.optimization_tips.map((tip, idx) => (
+                                                            <span key={idx} className="bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-md text-[11px] font-normal">
+                                                                • {tip}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="flex items-center gap-3">
+                                            <div className="text-right">
+                                                <span className="text-[10px] text-stone-400 block font-normal">Score Qualité</span>
+                                                <span className={`inline-block px-3 py-1 rounded-xl text-sm font-semibold border ${scoreColor}`}>
+                                                    {item.quality_score} / 100
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+                </div>
+
             </div>
         </SellerCentralLayout>
     );

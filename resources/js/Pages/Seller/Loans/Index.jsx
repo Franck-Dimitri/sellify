@@ -60,7 +60,7 @@ export default function LoansIndex({ creditData, loans = [], pack }) {
         <SellerCentralLayout title="SellifyPay — Micro-Financement Vendeur">
             <Head title="SellifyPay Prêts - Sellify" />
 
-            <div className="max-w-7xl mx-auto space-y-6 pb-16 text-stone-800">
+            <div className="w-full space-y-6 pb-16 text-stone-800">
                 
                 {/* Header Banner Shariow Style */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-amber-500/10 border border-amber-500/20 p-6 rounded-2xl">
