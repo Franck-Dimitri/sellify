@@ -121,8 +121,32 @@ class ShopController extends Controller
             abort(403, 'Accès non autorisé.');
         }
 
+        $products = $shop->products()->with('promotions')->latest()->get();
+        $totalStock = $products->sum('stock');
+        $outOfStockCount = $products->where('stock', 0)->count();
+        $promotionsCount = $products->filter(fn($p) => $p->promotions->where('is_active', true)->count() > 0)->count();
+
+        // Fetch recent smart links / orders for this shop's products
+        $productIds = $products->pluck('id');
+        $recentOrders = \App\Models\SmartLink::whereIn('product_id', $productIds)
+            ->where('status', 'paid')
+            ->latest()
+            ->take(6)
+            ->get();
+
+        $totalRevenue = \App\Models\SmartLink::whereIn('product_id', $productIds)
+            ->where('status', 'paid')
+            ->sum('total_price');
+
         return Inertia::render('Seller/Shop/LocalDashboard', [
-            'shop' => $shop
+            'shop' => $shop,
+            'productsCount' => $products->count(),
+            'totalStock' => $totalStock,
+            'outOfStockCount' => $outOfStockCount,
+            'promotionsCount' => $promotionsCount,
+            'totalRevenue' => $totalRevenue,
+            'recentOrders' => $recentOrders,
+            'recentProducts' => $products->take(5),
         ]);
     }
 

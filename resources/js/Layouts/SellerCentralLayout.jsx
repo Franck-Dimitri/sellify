@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import AIAssistantWidget from '@/Components/AIAssistantWidget';
 import {
@@ -23,7 +23,7 @@ import {
 
 export default function SellerCentralLayout({ children, title }) {
     const { auth, flash } = usePage().props;
-    const [sidebarOpen, setSidebarOpen] = React.useState(true);
+    const [sidebarOpen, setSidebarOpen] = useState(true);
 
     const user = auth.user;
 
@@ -108,12 +108,12 @@ export default function SellerCentralLayout({ children, title }) {
     return (
         <div className="h-screen w-screen flex bg-stone-50 overflow-hidden antialiased font-sans text-stone-800">
             {/* Sidebar Desktop & Mobile */}
-            <aside className={`bg-white text-stone-600 w-64 flex flex-col border-r border-stone-200/70 shadow-sm flex-shrink-0 z-30 fixed inset-y-0 left-0 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:static md:translate-x-0 transition-transform duration-200 ease-in-out`}>
+            <aside className={`bg-white text-stone-600 w-64 flex flex-col border-r border-stone-200/70 shadow-xs flex-shrink-0 z-30 fixed inset-y-0 left-0 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:static md:translate-x-0 transition-transform duration-200 ease-in-out`}>
                 
                 {/* Brand Header */}
                 <div className="h-16 flex items-center justify-between px-5 border-b border-stone-100 bg-white">
                     <Link href="/" className="flex items-center space-x-2.5">
-                        <span className="w-8.5 h-8.5 rounded-xl flex items-center justify-center font-bold text-amber-950 bg-amber-500 shadow-sm text-sm">
+                        <span className="w-8 h-8 rounded-xl flex items-center justify-center font-semibold text-amber-950 bg-amber-500 shadow-xs text-sm">
                             S
                         </span>
                         <div>
@@ -131,9 +131,9 @@ export default function SellerCentralLayout({ children, title }) {
                 </div>
 
                 {/* Categorized Sidebar Navigation */}
-                <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-6">
+                <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-5">
                     {navSections.map((section, sIdx) => (
-                        <div key={sIdx} className="space-y-1.5">
+                        <div key={sIdx} className="space-y-1">
                             <h3 className="px-3 text-[10px] font-semibold text-stone-400 uppercase tracking-wider">
                                 {section.title}
                             </h3>

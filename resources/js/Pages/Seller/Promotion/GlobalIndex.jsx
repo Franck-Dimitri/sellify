@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 
 export default function GlobalIndex({ promotions = [] }) {
-    // Computations
     const totalPromotions = promotions.length;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -33,118 +32,105 @@ export default function GlobalIndex({ promotions = [] }) {
         ? Math.max(...promotions.map(p => p.discount_percentage))
         : 0;
 
-    // Group promotions by shop
-    const shopPromoCounts = promotions.reduce((acc, p) => {
-        const name = p.shop?.name || 'Boutique';
-        acc[name] = (acc[name] || 0) + 1;
-        return acc;
-    }, {});
-
-    const shopPromoData = Object.keys(shopPromoCounts).map(name => ({
-        name,
-        count: shopPromoCounts[name]
-    }));
-
     return (
         <SellerCentralLayout title="Promotions Centralisées">
             <Head title="Espace Promotions - Sellify" />
 
-            <div className="w-full space-y-6 pb-16 text-stone-800">
+            <div className="w-full space-y-5 text-stone-800 antialiased font-sans pb-16">
                 
-                {/* Header Banner Shariow Style */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-amber-500/10 border border-amber-500/20 p-6 rounded-2xl">
+                {/* COMPACT & ELEGANT TOP BANNER */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-amber-50/70 border border-amber-200/60 p-5 rounded-xl">
                     <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-amber-800 font-medium text-xs uppercase tracking-wide">
-                            <Tag className="w-4 h-4 text-amber-600" />
+                        <div className="flex items-center gap-1.5 text-amber-800 font-medium text-xs uppercase tracking-wide">
+                            <Tag className="w-3.5 h-3.5 text-amber-600" />
                             <span>Ventes Flash & Remises Commerciales</span>
                         </div>
-                        <h1 className="text-xl font-semibold text-stone-900">
+                        <h1 className="text-lg font-semibold text-stone-900">
                             Promotions Centralisées Multi-Boutiques
                         </h1>
-                        <p className="text-xs text-stone-600">
-                            Pilotez et analysez les campagnes de réductions sur l'ensemble de vos vitrines.
+                        <p className="text-xs text-stone-600 font-normal">
+                            Supervisez et analysez l'ensemble des campagnes promotionnelles sur vos boutiques.
                         </p>
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <div className="px-3.5 py-1.5 bg-amber-500/20 text-amber-900 font-medium rounded-xl text-xs flex items-center gap-2">
-                            <Sparkles className="w-4 h-4 text-amber-700" />
-                            <span>Offres Spéciales Vendeur</span>
+                        <div className="px-3 py-1.5 bg-amber-500/20 text-amber-950 font-medium rounded-lg text-xs flex items-center gap-1.5">
+                            <Sparkles className="w-3.5 h-3.5 text-amber-700" />
+                            <span>Remises Vendeur Active</span>
                         </div>
                     </div>
                 </div>
 
-                {/* 4 Stats Cards Row */}
+                {/* 4 COMPACT REFINED KPI METRICS */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-white border border-stone-200/70 p-4 rounded-xl shadow-sm">
+                    <div className="bg-white border border-stone-200/70 p-4 rounded-xl shadow-xs space-y-1">
                         <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium text-stone-500">Campagnes créées</span>
-                            <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center text-amber-700">
-                                <Gift className="w-4 h-4" />
+                            <span className="text-xs font-medium text-stone-500">Campagnes Créées</span>
+                            <div className="w-7 h-7 bg-amber-50 rounded-lg flex items-center justify-center text-amber-700">
+                                <Gift className="w-3.5 h-3.5" />
                             </div>
                         </div>
-                        <p className="text-xl font-semibold text-stone-900 mt-2">{totalPromotions}</p>
+                        <p className="text-lg font-semibold text-stone-900">{totalPromotions}</p>
                     </div>
 
-                    <div className="bg-white border border-stone-200/70 p-4 rounded-xl shadow-sm">
+                    <div className="bg-white border border-stone-200/70 p-4 rounded-xl shadow-xs space-y-1">
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-medium text-stone-500">Promotions Actives</span>
-                            <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600">
-                                <Clock className="w-4 h-4" />
+                            <div className="w-7 h-7 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600">
+                                <Clock className="w-3.5 h-3.5" />
                             </div>
                         </div>
-                        <p className="text-xl font-semibold text-emerald-600 mt-2">{activePromotions}</p>
+                        <p className="text-lg font-semibold text-emerald-600">{activePromotions}</p>
                     </div>
 
-                    <div className="bg-white border border-stone-200/70 p-4 rounded-xl shadow-sm">
+                    <div className="bg-white border border-stone-200/70 p-4 rounded-xl shadow-xs space-y-1">
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-medium text-stone-500">Remise Moyenne</span>
-                            <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600">
-                                <Percent className="w-4 h-4" />
+                            <div className="w-7 h-7 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600">
+                                <Percent className="w-3.5 h-3.5" />
                             </div>
                         </div>
-                        <p className="text-xl font-semibold text-stone-900 mt-2">{averageDiscount}%</p>
+                        <p className="text-lg font-semibold text-stone-900">{averageDiscount}%</p>
                     </div>
 
-                    <div className="bg-white border border-stone-200/70 p-4 rounded-xl shadow-sm">
+                    <div className="bg-white border border-stone-200/70 p-4 rounded-xl shadow-xs space-y-1">
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-medium text-stone-500">Remise Maximale</span>
-                            <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center text-purple-600">
-                                <Sparkles className="w-4 h-4" />
+                            <div className="w-7 h-7 bg-purple-50 rounded-lg flex items-center justify-center text-purple-600">
+                                <Sparkles className="w-3.5 h-3.5" />
                             </div>
                         </div>
-                        <p className="text-xl font-semibold text-purple-700 mt-2">-{maxDiscount}%</p>
+                        <p className="text-lg font-semibold text-purple-700">-{maxDiscount}%</p>
                     </div>
                 </div>
 
-                {/* Promotions Table */}
-                <div className="bg-white border border-stone-200/70 rounded-2xl shadow-sm overflow-hidden space-y-0">
-                    <div className="p-5 border-b border-stone-100 flex items-center justify-between">
+                {/* PROMOTIONS TABLE */}
+                <div className="bg-white border border-stone-200/70 rounded-xl shadow-xs overflow-hidden">
+                    <div className="p-4 border-b border-stone-100 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Tag className="w-4 h-4 text-amber-600" />
-                            <h3 className="font-semibold text-stone-900 text-sm">Liste des Promotions en Cours</h3>
+                            <h3 className="font-semibold text-stone-900 text-sm">Offres Promotionnelles Multi-Boutiques</h3>
                         </div>
                     </div>
 
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs text-stone-600">
-                            <thead className="bg-stone-50 border-b border-stone-200/70 text-xs font-medium text-stone-500">
-                                <tr>
-                                    <th className="px-6 py-3.5">Boutique</th>
-                                    <th className="px-6 py-3.5">Produit Concerné</th>
-                                    <th className="px-6 py-3.5 text-center">Remise</th>
-                                    <th className="px-6 py-3.5 text-right">Prix d'Origine</th>
-                                    <th className="px-6 py-3.5 text-right">Prix Réduit</th>
-                                    <th className="px-6 py-3.5 text-center">Période</th>
-                                    <th className="px-6 py-3.5 text-right">Gestion</th>
+                        <table className="w-full text-left border-collapse text-xs font-normal">
+                            <thead>
+                                <tr className="bg-stone-50 border-b border-stone-200/70 text-[11px] text-stone-500 font-medium">
+                                    <th className="px-5 py-3">Boutique</th>
+                                    <th className="px-5 py-3">Produit Concerné</th>
+                                    <th className="px-5 py-3 text-center">Remise</th>
+                                    <th className="px-5 py-3 text-right">Prix d'Origine</th>
+                                    <th className="px-5 py-3 text-right">Prix Réduit</th>
+                                    <th className="px-5 py-3 text-center">Période d'Activité</th>
+                                    <th className="px-5 py-3 text-right">Action</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-stone-100">
+                            <tbody className="divide-y divide-stone-100 text-stone-700">
                                 {promotions.length === 0 ? (
                                     <tr>
-                                        <td colSpan={7} className="px-6 py-10 text-center text-stone-400 font-normal">
-                                            <Percent className="w-8 h-8 text-stone-300 mx-auto mb-2 stroke-[1.5]" />
-                                            <p className="font-medium text-stone-700">Aucune promotion programmée pour l'instant.</p>
+                                        <td colSpan={7} className="px-5 py-8 text-center text-stone-400 font-normal">
+                                            Aucune promotion programmée pour l'instant.
                                         </td>
                                     </tr>
                                 ) : (
@@ -153,46 +139,46 @@ export default function GlobalIndex({ promotions = [] }) {
                                         const isExpired = end < today;
 
                                         return (
-                                            <tr key={promo.id} className="hover:bg-stone-50/80 transition-colors">
-                                                <td className="px-6 py-3.5">
-                                                    <div className="flex items-center gap-2 font-medium text-stone-900">
+                                            <tr key={promo.id} className="hover:bg-stone-50/70 transition-colors">
+                                                <td className="px-5 py-3">
+                                                    <div className="flex items-center gap-1.5 font-medium text-stone-900">
                                                         <Store className="w-3.5 h-3.5 text-amber-600" />
                                                         <span>{promo.shop?.name || 'Boutique'}</span>
                                                     </div>
                                                 </td>
 
-                                                <td className="px-6 py-3.5 font-medium text-stone-900">
+                                                <td className="px-5 py-3 font-medium text-stone-900">
                                                     {promo.product?.name}
                                                 </td>
 
-                                                <td className="px-6 py-3.5 text-center">
-                                                    <span className={`inline-block px-2 py-0.5 rounded-md text-[11px] font-medium ${
-                                                        isExpired ? 'bg-stone-100 text-stone-500' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                                <td className="px-5 py-3 text-center">
+                                                    <span className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold ${
+                                                        isExpired ? 'bg-stone-100 text-stone-500' : 'bg-red-50 text-red-700 border border-red-200'
                                                     }`}>
-                                                        -{promo.discount_percentage}%
+                                                        -{promo.discount_percentage}% OFF
                                                     </span>
                                                 </td>
 
-                                                <td className="px-6 py-3.5 text-right text-stone-400 font-normal line-through">
+                                                <td className="px-5 py-3 text-right text-stone-400 font-normal line-through">
                                                     {Number(promo.product?.price || 0).toLocaleString()} FCFA
                                                 </td>
 
-                                                <td className="px-6 py-3.5 text-right font-semibold text-stone-900">
+                                                <td className="px-5 py-3 text-right font-semibold text-stone-900">
                                                     {Number(promo.promo_price).toLocaleString()} FCFA
                                                 </td>
 
-                                                <td className="px-6 py-3.5 text-center text-stone-500 font-normal">
+                                                <td className="px-5 py-3 text-center text-stone-500 font-normal">
                                                     <div className="flex items-center justify-center gap-1">
                                                         <Calendar className="w-3 h-3 text-stone-400" />
                                                         <span>{formatDate(promo.start_date)} au {formatDate(promo.end_date)}</span>
                                                     </div>
                                                 </td>
 
-                                                <td className="px-6 py-3.5 text-right">
+                                                <td className="px-5 py-3 text-right">
                                                     {promo.shop?.slug && (
                                                         <Link 
                                                             href={route('seller.shop.promotions.index', promo.shop.slug)}
-                                                            className="inline-flex items-center gap-1 text-amber-700 hover:text-amber-800 font-medium text-xs"
+                                                            className="inline-flex items-center gap-1 text-amber-700 hover:underline font-medium text-xs"
                                                         >
                                                             <span>Gérer</span>
                                                             <ArrowRight className="w-3 h-3" />

@@ -4,27 +4,18 @@ import {
     LayoutDashboard,
     Store,
     Package,
-    ShoppingBag,
-    Users,
-    BarChart3,
     ArrowLeft,
     LogOut,
-    Menu,
-    X,
     Bell,
-    Search,
     ExternalLink,
     Percent
 } from 'lucide-react';
 
 export default function ShopConsoleLayout({ children, shop, title }) {
     const { auth, flash } = usePage().props;
-    const [sidebarOpen, setSidebarOpen] = React.useState(true);
-
     const user = auth.user;
-    const activeThemeColor = shop?.theme_color || '#EAB308';
+    const activeThemeColor = shop?.theme_color || '#F59E0B';
 
-    // Navigation items inside Shop Workspace
     const navigation = [
         { 
             name: 'Tableau de bord', 
@@ -39,220 +30,148 @@ export default function ShopConsoleLayout({ children, shop, title }) {
             active: route().current('seller.shop.edit', { shop: shop.slug }) 
         },
         { 
-            name: 'Produits', 
+            name: 'Catalogue Produits', 
             href: route('seller.shop.products.index', shop.slug), 
             icon: Package, 
             active: route().current('seller.shop.products.*', { shop: shop.slug })
         },
         { 
-            name: 'Promotions', 
+            name: 'Promotions Locales', 
             href: route('seller.shop.promotions.index', shop.slug), 
             icon: Percent, 
             active: route().current('seller.shop.promotions.*', { shop: shop.slug })
         },
-        { 
-            name: 'Commandes', 
-            href: '#', 
-            icon: ShoppingBag, 
-            active: false 
-        },
-        { 
-            name: 'Clients', 
-            href: '#', 
-            icon: Users, 
-            active: false 
-        },
-        { 
-            name: 'Statistiques', 
-            href: '#', 
-            icon: BarChart3, 
-            active: false 
-        },
-        { 
-            name: 'Retour au Central', 
-            href: route('seller.dashboard'), 
-            icon: ArrowLeft, 
-            active: false,
-            isBack: true
-        }
     ];
 
     return (
-        <div className="h-screen w-screen flex bg-surface-50 overflow-hidden antialiased font-sans">
-            {/* Sidebar Desktop & Mobile */}
-            <aside className={`bg-white text-surface-600 w-66 flex flex-col border-r border-surface-200 shadow-sm flex-shrink-0 z-30 fixed inset-y-0 left-0 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:static md:translate-x-0 transition-transform duration-200 ease-in-out`}>
-                
-                {/* Brand Header */}
-                <div className="h-16 flex items-center justify-between px-5 border-b border-surface-100 bg-white">
-                    <div className="flex items-center space-x-2.5">
-                        <span className="w-8.5 h-8.5 rounded-xl flex items-center justify-center font-bold text-white shadow-sm text-sm" style={{ backgroundColor: activeThemeColor }}>
-                            {shop.name[0].toUpperCase()}
-                        </span>
-                        <div className="truncate">
-                            <span className="font-semibold text-base tracking-tight text-surface-700 block truncate">
-                                {shop.name}
-                            </span>
-                            <span className="block text-[10px] text-surface-400 font-medium uppercase tracking-wider leading-none mt-0.5">
-                                Boutique active
-                            </span>
-                        </div>
-                    </div>
-                    <button onClick={() => setSidebarOpen(false)} className="md:hidden text-surface-400 hover:text-surface-700 transition-colors">
-                        <X className="w-5 h-5" />
-                    </button>
-                </div>
-
-                {/* Shop Quick Card */}
-                <div className="p-4 mx-4 mt-4 bg-surface-50 border border-surface-150 rounded-2xl flex items-center space-x-3">
-                    <div className="w-10 h-10 rounded-xl bg-white border border-surface-150 p-0.5 overflow-hidden flex items-center justify-center shrink-0">
-                        {shop.logo_path ? (
-                            <img src={`/storage/${shop.logo_path}`} alt={shop.name} className="w-full h-full object-cover rounded-lg" />
-                        ) : (
-                            <Store className="w-5 h-5 text-surface-300" />
-                        )}
-                    </div>
-                    <div className="truncate flex-1">
-                        <span className="text-xs font-medium text-surface-700 block truncate">{shop.name}</span>
-                        <a href={route('shop.public', shop.slug)} target="_blank" rel="noopener noreferrer" className="text-[10px] text-surface-400 font-medium hover:underline flex items-center space-x-0.5">
-                            <span>Visiter boutique</span>
-                            <ExternalLink className="w-2.5 h-2.5" />
-                        </a>
-                    </div>
-                </div>
-
-                {/* Sidebar Navigation */}
-                <nav className="flex-1 px-4 py-4 overflow-y-auto space-y-1">
-                    {navigation.map((item) => (
-                        <Link
-                            key={item.name}
-                            href={item.href}
-                            className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
-                                ${item.active
-                                    ? 'text-white shadow-sm'
-                                    : item.isBack
-                                        ? 'hover:bg-surface-100 text-surface-500 hover:text-surface-700 mt-4 border-t border-surface-100 pt-4 rounded-none'
-                                        : 'hover:bg-surface-50 text-surface-600 hover:text-surface-700'
-                                }`}
-                            style={item.active ? { backgroundColor: activeThemeColor } : {}}
-                        >
-                            <div className="flex items-center space-x-3">
-                                <item.icon className="w-4.5 h-4.5 flex-shrink-0" />
-                                <span>{item.name}</span>
-                            </div>
-                            {item.badge && (
-                                <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-medium uppercase tracking-wider
-                                    ${item.active ? 'bg-white/20 text-white' : 'bg-surface-100 text-surface-600'}`}>
-                                    {item.badge}
-                                </span>
+        <div className="h-screen w-screen flex flex-col bg-stone-50 overflow-hidden antialiased font-sans text-stone-800">
+            
+            {/* TOP HEADER FOR SHOP CONSOLE */}
+            <header className="h-16 bg-white border-b border-stone-200/70 px-6 flex-shrink-0 z-20">
+                <div className="max-w-7xl mx-auto h-full flex items-center justify-between">
+                    
+                    {/* Shop Brand & Status */}
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center font-semibold text-amber-950 shadow-xs text-sm" style={{ backgroundColor: activeThemeColor }}>
+                            {shop.logo_path ? (
+                                <img src={`/storage/${shop.logo_path}`} alt={shop.name} className="w-full h-full object-cover rounded-xl" />
+                            ) : (
+                                shop.name[0].toUpperCase()
                             )}
-                        </Link>
-                    ))}
-                </nav>
-
-                {/* Sidebar Footer */}
-                <div className="p-4 border-t border-surface-100 space-y-4 bg-white">
-                    <div className="flex items-center space-x-3 px-2">
-                        <div className="w-9 h-9 rounded-xl bg-surface-50 flex items-center justify-center text-surface-600 border border-surface-200 shadow-xs font-medium text-xs uppercase">
-                            {user.first_name[0]}{user.last_name[0]}
                         </div>
-                        <div className="truncate">
-                            <p className="text-sm font-medium text-surface-700 truncate">{user.first_name} {user.last_name}</p>
-                            <p className="text-[10px] text-surface-400 font-medium uppercase tracking-wider">
-                                {user.seller?.pack === 'pro' ? 'Plan Pro' : 'Plan Starter'}
-                            </p>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <h1 className="font-semibold text-sm tracking-tight text-stone-900 leading-tight">
+                                    {shop.name}
+                                </h1>
+                                <span className="text-[10px] bg-amber-50 text-amber-800 font-medium px-2 py-0.5 rounded-full border border-amber-200">
+                                    Console Boutique
+                                </span>
+                            </div>
+                            <a 
+                                href={route('shop.public', shop.slug)} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="text-[11px] text-amber-700 hover:underline flex items-center gap-1 font-normal"
+                            >
+                                <span>Visiter la vitrine publique</span>
+                                <ExternalLink className="w-3 h-3" />
+                            </a>
                         </div>
                     </div>
 
-                    <div className="pt-1">
+                    {/* Right side items & User info */}
+                    <div className="flex items-center space-x-3">
+                        {/* Return to Central Button */}
+                        <Link 
+                            href={route('seller.dashboard')} 
+                            className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 border border-stone-200/80"
+                        >
+                            <ArrowLeft className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">Retour au Central Vendeur</span>
+                        </Link>
+
+                        <div className="h-5 w-px bg-stone-200"></div>
+
+                        {/* Notifications */}
+                        <button className="p-2 text-stone-400 hover:text-stone-600 rounded-xl hover:bg-stone-50 transition-colors relative" title="Notifications">
+                            <Bell className="w-4.5 h-4.5 text-stone-500" />
+                            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-500"></span>
+                        </button>
+                        
+                        {/* User Display */}
+                        <div className="flex items-center space-x-2">
+                            <div className="w-7 h-7 rounded-lg bg-amber-500 flex items-center justify-center font-medium text-xs text-amber-950 uppercase shadow-xs">
+                                {user.first_name[0]}
+                            </div>
+                            <span className="text-xs font-medium text-stone-800 hidden md:inline-block">
+                                {user.first_name} {user.last_name}
+                            </span>
+                        </div>
+
                         <Link 
                             href={route('logout')} 
                             method="post" 
                             as="button" 
-                            className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-medium text-red-650 hover:bg-red-50 transition-colors text-left"
+                            className="p-2 text-stone-400 hover:text-red-600 rounded-xl hover:bg-red-50 transition-colors"
+                            title="Déconnexion"
                         >
                             <LogOut className="w-4 h-4" />
-                            <span>Déconnexion</span>
                         </Link>
                     </div>
+                </div>
+            </header>
 
-                    <div className="text-center text-[10px] text-surface-400 font-normal pt-1 border-t border-surface-50">
-                        <span>Version 2.0.0</span>
-                        <p className="mt-0.5">&copy; 2026 Sellify.me</p>
+            {/* HORIZONTAL CENTERED TAB NAVIGATION BAR */}
+            <div className="bg-white border-b border-stone-200/70 px-6 py-2 flex items-center justify-center shrink-0 shadow-2xs">
+                <div className="max-w-7xl mx-auto w-full flex items-center justify-center gap-2 overflow-x-auto no-scrollbar">
+                    <span className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider shrink-0 mr-2">
+                        Gestion Boutique :
+                    </span>
+                    <div className="flex items-center gap-2 overflow-x-auto py-0.5 no-scrollbar">
+                        {navigation.map((item) => {
+                            const Icon = item.icon;
+                            return (
+                                <Link
+                                    key={item.name}
+                                    href={item.href}
+                                    className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-medium transition-all shrink-0 border ${
+                                        item.active
+                                            ? 'bg-amber-500 text-amber-950 font-semibold border-amber-500 shadow-xs'
+                                            : 'bg-white text-stone-600 hover:bg-stone-50 border-stone-200/70 hover:border-stone-300'
+                                    }`}
+                                >
+                                    <Icon className={`w-3.5 h-3.5 ${item.active ? 'text-amber-950' : 'text-stone-400'}`} />
+                                    <span>{item.name}</span>
+                                </Link>
+                            );
+                        })}
                     </div>
                 </div>
-            </aside>
+            </div>
 
-            {/* Main Content Area */}
-            <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-                {/* Header / Topbar */}
-                <header className="h-16 bg-white border-b border-surface-200 flex items-center justify-between px-6 flex-shrink-0 z-20">
-                    <div className="flex items-center flex-1 max-w-lg">
-                        <button
-                            onClick={() => setSidebarOpen(!sidebarOpen)}
-                            className="text-surface-500 hover:text-surface-600 focus:outline-none md:hidden mr-4"
-                        >
-                            <Menu className="w-6 h-6" />
-                        </button>
-
-                        {/* Search Bar */}
-                        <div className="relative w-full hidden sm:block">
-                            <Search className="w-4 h-4 text-surface-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-                            <input
-                                type="text"
-                                placeholder={`Rechercher dans ${shop.name}...`}
-                                className="w-full bg-surface-50 text-sm pl-9 pr-12 py-1.5 rounded-xl border border-surface-200 focus:border-surface-300 focus:bg-white outline-none font-normal text-surface-700 transition-all placeholder-surface-400"
-                            />
-                            <div className="absolute right-2.5 top-1/2 transform -translate-y-1/2 bg-white px-1.5 py-0.5 border border-surface-200 rounded-md text-[10px] text-surface-400 font-medium shadow-xs font-mono">
-                                ⌘K
-                            </div>
+            {/* MAIN SCROLLABLE CONTENT AREA (MAX-W-7XL) */}
+            <div className="flex-1 overflow-y-auto">
+                {/* Flash messages */}
+                {flash?.success && (
+                    <div className="max-w-7xl mx-auto px-6 pt-4">
+                        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-2.5 rounded-xl flex items-center justify-between text-xs font-medium shadow-xs">
+                            <span>{flash.success}</span>
                         </div>
                     </div>
-
-                    {/* Right side items */}
-                    <div className="flex items-center space-x-4">
-                        {/* Notifications */}
-                        <button className="p-2 text-surface-400 hover:text-surface-600 rounded-xl hover:bg-surface-50 transition-colors relative" title="Notifications">
-                            <Bell className="w-5 h-5" />
-                            <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-white"></span>
-                        </button>
-                        
-                        <div className="h-6 w-px bg-surface-200"></div>
-
-                        {/* User Display */}
-                        <div className="flex items-center space-x-2.5">
-                            <div className="w-8 h-8 rounded-full flex items-center justify-center font-medium text-xs border uppercase text-white shadow-sm" style={{ backgroundColor: activeThemeColor }}>
-                                {user.first_name[0]}
-                            </div>
-                            <span className="text-sm font-medium text-surface-700 hidden sm:inline-block">
-                                {user.first_name} {user.last_name}
-                            </span>
+                )}
+                {flash?.error && (
+                    <div className="max-w-7xl mx-auto px-6 pt-4">
+                        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-2.5 rounded-xl flex items-center justify-between text-xs font-medium shadow-xs">
+                            <span>{flash.error}</span>
                         </div>
                     </div>
-                </header>
+                )}
 
-                {/* Scrollable View Content */}
-                <div className="flex-1 overflow-y-auto">
-                    {/* Flash messages */}
-                    {flash?.success && (
-                        <div className="px-6 pt-4">
-                            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl flex items-center justify-between shadow-sm animate-slide-up text-sm font-medium">
-                                <span>{flash.success}</span>
-                            </div>
-                        </div>
-                    )}
-                    {flash?.error && (
-                        <div className="px-6 pt-4">
-                            <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl flex items-center justify-between shadow-sm animate-slide-up text-sm font-medium">
-                                <span>{flash.error}</span>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Page Content */}
-                    <main className="p-6">
-                        {children}
-                    </main>
-                </div>
+                {/* Page Content Centered with max-w-7xl */}
+                <main className="p-6 max-w-7xl mx-auto w-full">
+                    {children}
+                </main>
             </div>
         </div>
     );

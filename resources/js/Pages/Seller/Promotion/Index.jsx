@@ -1,31 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { Head, Link, useForm, router } from '@inertiajs/react';
 import ShopConsoleLayout from '../../../Layouts/ShopConsoleLayout';
-import { Card, CardContent } from '../../../Components/ui/Card';
-import Input from '../../../Components/ui/Input';
-import Button from '../../../Components/ui/Button';
-import Badge from '../../../Components/ui/Badge';
 import { 
     Percent, 
     Trash2, 
     Calendar,
     Plus,
-    Info,
     Tag,
     X,
     TrendingUp,
     ShoppingBag,
-    CheckCircle,
+    CheckCircle2,
     Sparkles,
     ArrowUpRight
 } from 'lucide-react';
 
 export default function Index({ shop, promotions = [], products = [] }) {
-    const activeColor = shop.theme_color || '#CA8A04';
+    const activeColor = shop.theme_color || '#F59E0B';
     
     // Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
-    
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [discountPercentage, setDiscountPercentage] = useState(0);
 
@@ -53,7 +47,6 @@ export default function Index({ shop, promotions = [], products = [] }) {
 
     const eligibleCount = products.length;
 
-    // Recalculate percentage
     useEffect(() => {
         const product = products.find(p => p.id === parseInt(data.product_id));
         setSelectedProduct(product);
@@ -93,147 +86,131 @@ export default function Index({ shop, promotions = [], products = [] }) {
         <ShopConsoleLayout shop={shop} title="Promotions de la Boutique">
             <Head title={`Promotions - ${shop.name}`} />
 
-            <div className="space-y-6 px-1">
-                {/* Header Row */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="w-full space-y-5 text-stone-800 antialiased font-sans pb-16">
+                
+                {/* TOP HEADER BAR */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-stone-200/70 p-5 rounded-xl shadow-xs">
                     <div>
-                        <h2 className="text-xl font-bold text-surface-700 tracking-tight">Gestion des Promotions</h2>
-                        <p className="text-xs text-surface-450 mt-0.5">Créez et suivez les offres promotionnelles appliquées aux produits de cette boutique.</p>
+                        <h1 className="text-base font-semibold text-stone-900">Gestion des Promotions Locales</h1>
+                        <p className="text-xs text-stone-500 font-normal">
+                            Planifiez des réductions de prix temporaires pour stimuler les ventes de <span className="font-semibold text-stone-900">{shop.name}</span>
+                        </p>
                     </div>
 
-                    <Button 
+                    <button 
                         onClick={() => setIsModalOpen(true)}
-                        className="text-white font-medium flex items-center space-x-1.5 shadow-sm text-xs"
-                        style={{ backgroundColor: activeColor }}
+                        className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-amber-950 text-xs font-semibold rounded-lg shadow-xs flex items-center gap-1.5 transition-colors"
                     >
                         <Plus className="w-4 h-4" />
                         <span>Nouvelle promotion</span>
-                    </Button>
+                    </button>
                 </div>
 
-                {/* 3 Premium Stats Cards Row */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                    {/* Card 1: Active Promotions */}
-                    <div className="bg-white border border-surface-200 rounded-2xl p-5 shadow-xs flex justify-between items-start">
-                        <div className="space-y-1">
-                            <span className="text-[10px] text-surface-400 font-bold uppercase tracking-wider block">Promotions en cours</span>
-                            <span className="text-2xl font-bold text-surface-750 block">{activePromos} / {totalPromos}</span>
-                            <span className="text-xs text-emerald-600 font-semibold block pt-1">Actives aujourd'hui</span>
+                {/* 3 COMPACT REFINED KPI METRICS */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="bg-white border border-stone-200/70 rounded-xl p-4 shadow-xs flex items-center justify-between">
+                        <div>
+                            <span className="text-[10px] text-stone-400 font-medium uppercase tracking-wider block">Promotions en Cours</span>
+                            <span className="text-lg font-semibold text-stone-900 block mt-0.5">{activePromos} / {totalPromos}</span>
+                            <span className="text-[11px] text-emerald-600 font-medium block pt-0.5">Actives aujourd'hui</span>
                         </div>
-                        <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
-                            <CheckCircle className="w-5 h-5" />
-                        </div>
-                    </div>
-
-                    {/* Card 2: Average Discount */}
-                    <div className="bg-white border border-surface-200 rounded-2xl p-5 shadow-xs flex justify-between items-start">
-                        <div className="space-y-1">
-                            <span className="text-[10px] text-surface-400 font-bold uppercase tracking-wider block">Remise moyenne</span>
-                            <span className="text-2xl font-bold text-surface-750 block">{avgDiscount}%</span>
-                            <span className="text-xs text-surface-450 font-semibold block pt-1">Sur les prix d'origine</span>
-                        </div>
-                        <div className="p-3 bg-yellow-50 text-yellow-600 rounded-2xl">
-                            <TrendingUp className="w-5 h-5" />
+                        <div className="p-2.5 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200/60">
+                            <CheckCircle2 className="w-4 h-4" />
                         </div>
                     </div>
 
-                    {/* Card 3: Eligible Products */}
-                    <div className="bg-white border border-surface-200 rounded-2xl p-5 shadow-xs flex justify-between items-start">
-                        <div className="space-y-1">
-                            <span className="text-[10px] text-surface-400 font-bold uppercase tracking-wider block">Produits éligibles</span>
-                            <span className="text-2xl font-bold text-surface-750 block">{eligibleCount}</span>
-                            <span className="text-xs text-surface-450 font-semibold block pt-1">Disponibles en catalogue</span>
+                    <div className="bg-white border border-stone-200/70 rounded-xl p-4 shadow-xs flex items-center justify-between">
+                        <div>
+                            <span className="text-[10px] text-stone-400 font-medium uppercase tracking-wider block">Remise Moyenne</span>
+                            <span className="text-lg font-semibold text-stone-900 block mt-0.5">{avgDiscount}%</span>
+                            <span className="text-[11px] text-stone-400 font-normal block pt-0.5">Sur prix catalogue</span>
                         </div>
-                        <div className="p-3 bg-blue-50 text-blue-500 rounded-2xl">
-                            <ShoppingBag className="w-5 h-5" />
+                        <div className="p-2.5 bg-amber-50 text-amber-700 rounded-lg border border-amber-200/60">
+                            <TrendingUp className="w-4 h-4" />
+                        </div>
+                    </div>
+
+                    <div className="bg-white border border-stone-200/70 rounded-xl p-4 shadow-xs flex items-center justify-between">
+                        <div>
+                            <span className="text-[10px] text-stone-400 font-medium uppercase tracking-wider block">Produits Éligibles</span>
+                            <span className="text-lg font-semibold text-stone-900 block mt-0.5">{eligibleCount}</span>
+                            <span className="text-[11px] text-stone-400 font-normal block pt-0.5">Articles au catalogue</span>
+                        </div>
+                        <div className="p-2.5 bg-blue-50 text-blue-600 rounded-lg border border-blue-200/60">
+                            <ShoppingBag className="w-4 h-4" />
                         </div>
                     </div>
                 </div>
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                {/* MAIN PROMOTIONS TABLE AND IMPACT WIDGET */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                    
+                    {/* Table (8 Cols) */}
                     <div className="lg:col-span-8 space-y-3">
-                        <h3 className="text-sm font-bold text-surface-700">Toutes les offres</h3>
-
-                        {promotions.length === 0 ? (
-                            <div className="bg-white border border-surface-200 border-dashed rounded-2xl p-12 text-center flex flex-col items-center justify-center space-y-4">
-                                <div className="p-4 bg-surface-50 rounded-2xl border border-surface-150 text-surface-300">
-                                    <Percent className="w-9 h-9" style={{ color: activeColor }} />
-                                </div>
-                                <div className="space-y-1 max-w-sm">
-                                    <p className="text-sm font-semibold text-surface-700">Aucune promotion active</p>
-                                    <p className="text-xs text-surface-400 leading-relaxed font-normal">
-                                        Boostez vos ventes en créant votre première promotion temporaire.
-                                    </p>
-                                </div>
-                                <Button 
-                                    onClick={() => setIsModalOpen(true)}
-                                    className="text-white font-medium text-xs shadow-sm"
-                                    style={{ backgroundColor: activeColor }}
-                                >
-                                    Planifier une promotion
-                                </Button>
+                        <div className="bg-white border border-stone-200/70 rounded-xl shadow-xs overflow-hidden">
+                            <div className="p-4 border-b border-stone-100 flex items-center justify-between">
+                                <h3 className="font-semibold text-stone-900 text-sm">Toutes les Offres de la Boutique</h3>
                             </div>
-                        ) : (
-                            <div className="bg-white border border-surface-200 rounded-2xl overflow-hidden shadow-xs">
+
+                            {promotions.length === 0 ? (
+                                <div className="p-10 text-center space-y-3 font-normal">
+                                    <Percent className="w-8 h-8 text-stone-300 mx-auto stroke-[1.5]" />
+                                    <p className="text-xs text-stone-500">Aucune promotion active pour l'instant.</p>
+                                    <button 
+                                        onClick={() => setIsModalOpen(true)}
+                                        className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-amber-950 text-xs font-semibold rounded-lg shadow-xs transition-colors"
+                                    >
+                                        Planifier une promotion
+                                    </button>
+                                </div>
+                            ) : (
                                 <div className="overflow-x-auto">
-                                    <table className="w-full text-left border-collapse text-xs">
+                                    <table className="w-full text-left border-collapse text-xs font-normal">
                                         <thead>
-                                            <tr className="bg-surface-50 border-b border-surface-150 text-surface-400 font-bold uppercase tracking-wider">
-                                                <th className="p-4 font-semibold">Produit</th>
-                                                <th className="p-4 font-semibold text-center">Remise</th>
-                                                <th className="p-4 font-semibold text-right">Ancien prix</th>
-                                                <th className="p-4 font-semibold text-right">Prix soldé</th>
-                                                <th className="p-4 font-semibold text-center">Période</th>
-                                                <th className="p-4 font-semibold text-right">Actions</th>
+                                            <tr className="bg-stone-50 border-b border-stone-200/70 text-[11px] text-stone-500 font-medium uppercase tracking-wider">
+                                                <th className="p-4">Produit</th>
+                                                <th className="p-4 text-center">Remise</th>
+                                                <th className="p-4 text-right">Prix d'Origine</th>
+                                                <th className="p-4 text-right">Prix Soldé</th>
+                                                <th className="p-4 text-center">Période</th>
+                                                <th className="p-4 text-right">Action</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-surface-100 text-surface-600 font-semibold">
+                                        <tbody className="divide-y divide-stone-100 text-stone-700">
                                             {promotions.map((promo) => {
-                                                const start = new Date(promo.start_date);
                                                 const end = new Date(promo.end_date);
                                                 const isExpired = end < today;
                                                 return (
-                                                    <tr key={promo.id} className="hover:bg-surface-50/30 transition-colors">
-                                                        {/* Product */}
-                                                        <td className="p-4">
-                                                            <span className="font-bold text-surface-750 text-sm leading-snug">{promo.product?.name || 'Produit inconnu'}</span>
+                                                    <tr key={promo.id} className="hover:bg-stone-50/60 transition-colors">
+                                                        <td className="p-4 font-semibold text-stone-900">
+                                                            {promo.product?.name || 'Produit inconnu'}
                                                         </td>
 
-                                                        {/* Discount */}
                                                         <td className="p-4 text-center">
-                                                            <Badge variant={isExpired ? 'neutral' : 'success'} className="font-bold">
-                                                                -{promo.discount_percentage}%
-                                                            </Badge>
+                                                            <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold ${
+                                                                isExpired ? 'bg-stone-100 text-stone-500' : 'bg-red-50 text-red-700 border border-red-200'
+                                                            }`}>
+                                                                -{promo.discount_percentage}% OFF
+                                                            </span>
                                                         </td>
 
-                                                        {/* Old price */}
-                                                        <td className="p-4 text-right text-surface-400 font-normal line-through">
-                                                            {parseFloat(promo.product?.price || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
+                                                        <td className="p-4 text-right text-stone-400 font-normal line-through">
+                                                            {Number(promo.product?.price || 0).toLocaleString()} FCFA
                                                         </td>
 
-                                                        {/* Promo price */}
-                                                        <td className="p-4 text-right font-bold text-surface-750 text-sm">
-                                                            {parseFloat(promo.promo_price).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
+                                                        <td className="p-4 text-right font-semibold text-stone-900">
+                                                            {Number(promo.promo_price).toLocaleString()} FCFA
                                                         </td>
 
-                                                        {/* Period */}
-                                                        <td className="p-4 text-center text-[10px] text-surface-450 font-normal">
-                                                            <div className="flex items-center justify-center space-x-1.5">
-                                                                <Calendar className="w-3.5 h-3.5 text-surface-400 shrink-0" />
-                                                                <span>
-                                                                    {formatDate(promo.start_date)} au {formatDate(promo.end_date)}
-                                                                </span>
-                                                            </div>
-                                                            {isExpired && (
-                                                                <span className="text-red-500 font-semibold text-[8px] uppercase tracking-wider block mt-0.5">Expiré</span>
-                                                            )}
+                                                        <td className="p-4 text-center text-[11px] text-stone-500">
+                                                            <span>{formatDate(promo.start_date)} au {formatDate(promo.end_date)}</span>
                                                         </td>
 
-                                                        {/* Delete */}
                                                         <td className="p-4 text-right">
                                                             <button
                                                                 onClick={() => handleDelete(promo.id)}
                                                                 title="Supprimer la promotion"
-                                                                className="p-2 border border-red-200 hover:bg-red-50 text-red-500 hover:text-red-700 rounded-xl transition-colors bg-white shadow-xs"
+                                                                className="p-1.5 border border-red-200 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
                                                             >
                                                                 <Trash2 className="w-3.5 h-3.5" />
                                                             </button>
@@ -244,180 +221,137 @@ export default function Index({ shop, promotions = [], products = [] }) {
                                         </tbody>
                                     </table>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
 
-                    {/* Right side: Sidebar with campaign widgets */}
-                    <div className="lg:col-span-4 space-y-6">
-                        {/* Campaign Impact Widget */}
-                        <div className="bg-white border border-surface-200 rounded-2xl p-5 shadow-xs relative overflow-hidden">
-                            <div className="absolute top-0 left-0 right-0 h-1" style={{ backgroundColor: activeColor }} />
-
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-xs font-bold text-surface-700 uppercase tracking-wider">Impact Estimé</h3>
-                                <Badge variant="success" className="bg-emerald-50 text-emerald-700 border-emerald-100 flex items-center space-x-1">
-                                    <ArrowUpRight className="w-3 h-3" />
-                                    <span>+24% Trafic</span>
-                                </Badge>
-                            </div>
-
-                            <div className="mt-4 space-y-3">
-                                <div className="flex items-center justify-between text-xs">
-                                    <span className="text-surface-450 font-semibold">Taux de conversion</span>
-                                    <span className="font-bold text-surface-750">+3.8%</span>
+                    {/* Right Advisory Cards (4 Cols) */}
+                    <div className="lg:col-span-4 space-y-4">
+                        <div className="bg-white border border-stone-200/70 rounded-xl p-5 shadow-xs space-y-3">
+                            <h3 className="text-xs font-semibold text-stone-900 uppercase tracking-wider border-b border-stone-100 pb-2">
+                                Impact Estimé
+                            </h3>
+                            <div className="space-y-2 text-xs font-normal text-stone-600">
+                                <div className="flex justify-between items-center">
+                                    <span>Taux d'attractivité</span>
+                                    <span className="font-semibold text-emerald-600">+24% clics</span>
                                 </div>
-                                <div className="w-full bg-surface-50 h-2 rounded-full overflow-hidden border border-surface-150">
-                                    <div className="h-full rounded-full" style={{ width: '70%', backgroundColor: activeColor }} />
+                                <div className="w-full bg-stone-100 h-1.5 rounded-full overflow-hidden">
+                                    <div className="h-full bg-amber-500 rounded-full" style={{ width: '70%' }} />
                                 </div>
-                                <p className="text-[10px] text-surface-400 font-normal leading-relaxed mt-2">
-                                    Les produits à prix barrés attirent en moyenne 3 fois plus de clics sur les résultats de recherche.
+                                <p className="text-[11px] text-stone-400 leading-relaxed pt-1">
+                                    Les produits accompagnés de prix barrés enregistrent une conversion plus élevée sur la vitrine.
                                 </p>
                             </div>
                         </div>
-
-                        {/* Campaign Optimization tip */}
-                        <div className="bg-white border border-surface-200 rounded-2xl p-5 shadow-xs space-y-3">
-                            <div className="flex items-center space-x-2">
-                                <Sparkles className="w-4 h-4 text-yellow-600 animate-pulse" />
-                                <h3 className="text-xs font-bold text-surface-700 uppercase tracking-wider">Conseil Marketing</h3>
-                            </div>
-                            <p className="text-[11px] text-surface-450 leading-relaxed font-semibold">
-                                Privilégiez des réductions comprises entre <strong style={{ color: activeColor }}>15% et 35%</strong>. C’est la fourchette idéale pour déclencher l’achat impulsif sans dégrader votre marge nette.
-                            </p>
-                        </div>
                     </div>
-                </div>                {/* --- MODAL FORM --- */}
-                {isModalOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none">
-                        {/* Backdrop */}
-                        <div 
-                            className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity duration-300"
-                            onClick={() => setIsModalOpen(false)}
-                        />
 
-                        {/* Modal Content */}
-                        <div className="relative w-full max-w-md mx-auto my-6 z-55 px-4">
-                            <Card className="border-none shadow-2xl rounded-2xl overflow-hidden transform transition-all duration-300 scale-100 bg-white">
-                                <div className="border-b border-surface-100 p-5 flex justify-between items-center bg-surface-50/50">
-                                    <div className="flex items-center space-x-2">
-                                        <Tag className="w-4.5 h-4.5" style={{ color: activeColor }} />
-                                        <h3 className="text-sm font-bold text-surface-750">Planifier une Promotion</h3>
-                                    </div>
-                                    <button 
-                                        onClick={() => setIsModalOpen(false)}
-                                        className="text-surface-400 hover:text-surface-600 transition-colors p-1 hover:bg-surface-100 rounded-lg"
+                </div>
+
+                {/* MODAL FORM FOR NEW PROMOTION */}
+                {isModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
+                        <div className="bg-white rounded-xl max-w-md w-full p-5 shadow-xl space-y-4 text-stone-800">
+                            <div className="flex justify-between items-center border-b border-stone-100 pb-3">
+                                <div className="flex items-center gap-2">
+                                    <Tag className="w-4 h-4 text-amber-600" />
+                                    <h3 className="font-semibold text-stone-900 text-sm">Planifier une Promotion</h3>
+                                </div>
+                                <button onClick={() => setIsModalOpen(false)} className="text-stone-400 hover:text-stone-600">
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+
+                            <form onSubmit={submit} className="space-y-3 text-xs font-normal">
+                                <div>
+                                    <label className="block font-medium text-stone-700 mb-1">Sélectionner un produit *</label>
+                                    <select
+                                        className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
+                                        value={data.product_id}
+                                        onChange={e => setData('product_id', e.target.value)}
+                                        required
                                     >
-                                        <X className="w-4 h-4" />
-                                    </button>
+                                        <option value="">-- Choisir un produit du catalogue --</option>
+                                        {products.map(p => (
+                                            <option key={p.id} value={p.id}>
+                                                {p.name} ({Number(p.price).toLocaleString()} FCFA)
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {errors.product_id && <p className="text-[11px] text-red-600 mt-1">{errors.product_id}</p>}
                                 </div>
 
-                                <CardContent className="p-5">
-                                    <form onSubmit={submit} className="space-y-4">
-                                        {/* Product Selector */}
-                                        <div className="flex flex-col space-y-1.5">
-                                            <label className="text-xs font-semibold text-surface-650">Sélectionner un produit</label>
-                                            <select
-                                                className="w-full px-3 py-2 text-surface-700 bg-white border border-surface-200 rounded-lg outline-none text-xs h-9 focus:border-surface-300 transition-all font-semibold"
-                                                value={data.product_id}
-                                                onChange={e => setData('product_id', e.target.value)}
-                                                required
-                                            >
-                                                <option value="">-- Choisir un produit --</option>
-                                                {products.map(p => (
-                                                    <option key={p.id} value={p.id}>
-                                                        {p.name} ({parseFloat(p.price).toFixed(2)} €)
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            {errors.product_id && <p className="text-xs text-rose-600 font-medium">{errors.product_id}</p>}
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block font-medium text-stone-700 mb-1">Prix réduit (FCFA) *</label>
+                                        <input
+                                            type="number"
+                                            value={data.promo_price}
+                                            onChange={e => setData('promo_price', e.target.value)}
+                                            placeholder="ex: 18000"
+                                            className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
+                                            required
+                                            disabled={!data.product_id}
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col justify-end">
+                                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-2 text-center h-9 flex items-center justify-center">
+                                            {discountPercentage > 0 ? (
+                                                <span className="font-semibold text-red-600 text-xs">
+                                                    -{discountPercentage}% OFF
+                                                </span>
+                                            ) : (
+                                                <span className="text-[10px] text-stone-400">0% remise</span>
+                                            )}
                                         </div>
+                                    </div>
+                                </div>
 
-                                        {/* Promo Price & Percentage Display */}
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <Input
-                                                label="Prix réduit (€)"
-                                                name="promo_price"
-                                                type="number"
-                                                step="0.01"
-                                                value={data.promo_price}
-                                                onChange={e => setData('promo_price', e.target.value)}
-                                                placeholder="0.00"
-                                                required
-                                                disabled={!data.product_id}
-                                                error={errors.promo_price}
-                                            />
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block font-medium text-stone-700 mb-1">Date de début *</label>
+                                        <input
+                                            type="date"
+                                            value={data.start_date}
+                                            onChange={e => setData('start_date', e.target.value)}
+                                            className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block font-medium text-stone-700 mb-1">Date de fin *</label>
+                                        <input
+                                            type="date"
+                                            value={data.end_date}
+                                            onChange={e => setData('end_date', e.target.value)}
+                                            className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
+                                            required
+                                        />
+                                    </div>
+                                </div>
 
-                                            <div className="flex flex-col justify-end pb-2">
-                                                <div className="bg-surface-50 border border-surface-200 rounded-lg p-2 text-center h-9 flex items-center justify-center">
-                                                    {discountPercentage > 0 ? (
-                                                        <span className="text-xs font-bold text-emerald-600">
-                                                            -{discountPercentage}%
-                                                        </span>
-                                                    ) : (
-                                                        <span className="text-[10px] text-surface-400 font-medium">0% remise</span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Date selection */}
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <Input
-                                                label="Date de début"
-                                                name="start_date"
-                                                type="date"
-                                                value={data.start_date}
-                                                onChange={e => setData('start_date', e.target.value)}
-                                                required
-                                                error={errors.start_date}
-                                            />
-                                            <Input
-                                                label="Date de fin"
-                                                name="end_date"
-                                                type="date"
-                                                value={data.end_date}
-                                                onChange={e => setData('end_date', e.target.value)}
-                                                required
-                                                error={errors.end_date}
-                                            />
-                                        </div>
-
-                                        {/* Info warning */}
-                                        {selectedProduct && (
-                                            <div className="bg-surface-50 border border-surface-150 rounded-xl p-3 flex items-start space-x-2 text-[10px] text-surface-450 leading-relaxed font-normal">
-                                                <Info className="w-3.5 h-3.5 text-surface-400 shrink-0 mt-0.5" />
-                                                <div>
-                                                    <span>Tarif standard : <strong>{parseFloat(selectedProduct.price).toFixed(2)} €</strong>.</span>
-                                                    <span className="block mt-0.5">La promotion prendra effet aux dates indiquées.</span>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        <div className="border-t border-surface-100 pt-4 flex justify-end space-x-3">
-                                            <Button 
-                                                type="button" 
-                                                variant="outline" 
-                                                className="font-semibold text-xs py-1.5"
-                                                onClick={() => setIsModalOpen(false)}
-                                            >
-                                                Annuler
-                                            </Button>
-                                            <Button
-                                                type="submit"
-                                                disabled={processing || !data.product_id || discountPercentage <= 0}
-                                                className="text-white font-semibold text-xs py-1.5 shadow-sm"
-                                                style={{ backgroundColor: activeColor }}
-                                            >
-                                                {processing ? 'Enregistrement...' : 'Lancer l\'offre'}
-                                            </Button>
-                                        </div>
-                                    </form>
-                                </CardContent>
-                            </Card>
+                                <div className="pt-3 border-t border-stone-100 flex justify-end gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsModalOpen(false)}
+                                        className="px-4 py-2 border border-stone-200 rounded-lg text-stone-600 font-medium hover:bg-stone-50"
+                                    >
+                                        Annuler
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={processing || !data.product_id || discountPercentage <= 0}
+                                        className="px-5 py-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-amber-950 font-semibold rounded-lg shadow-xs transition-colors"
+                                    >
+                                        {processing ? 'Lancement...' : 'Lancer l\'Offre'}
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 )}
+
             </div>
         </ShopConsoleLayout>
     );
