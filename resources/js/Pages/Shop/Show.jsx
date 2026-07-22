@@ -1,12 +1,45 @@
 import React, { useState, useEffect } from 'react';
-import { Head, Link } from '@inertiajs/react';
-import { Store, ShieldCheck, MapPin, Phone, Mail, Clock, MessageCircle, Share2, Award, Calendar, ChevronRight, AlertCircle, ShoppingBag } from 'lucide-react';
-import Button from '../../Components/ui/Button';
-import Badge from '../../Components/ui/Badge';
+import { Head, router } from '@inertiajs/react';
+import { 
+    Store, 
+    ShieldCheck, 
+    MapPin, 
+    Clock, 
+    Share2, 
+    Award, 
+    ShoppingBag,
+    Truck,
+    Lock,
+    RotateCcw,
+    Star,
+    Flame,
+    Tag,
+    Search,
+    BadgeCheck,
+    X,
+    CreditCard,
+    Plus,
+    Minus,
+    CheckCircle2,
+    Shield
+} from 'lucide-react';
 
 export default function Show({ shop, products = [] }) {
     const [openStatus, setOpenStatus] = useState({ isOpen: false, text: 'Vérification...' });
-    const [activeTab, setActiveTab] = useState('home'); // 'home', 'about', 'contact'
+    const [activeTab, setActiveTab] = useState('all'); // 'all', 'promos', 'about', 'contact'
+    const [searchTerm, setSearchTerm] = useState('');
+
+    // Modal state for direct on-platform checkout
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [quantity, setQuantity] = useState(1);
+    const [customerName, setCustomerName] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [deliveryAddress, setDeliveryAddress] = useState('');
+    const [cityNeighborhood, setCityNeighborhood] = useState('');
+    const [paymentMethod, setPaymentMethod] = useState('orange_money');
+    const [submittingOrder, setSubmittingOrder] = useState(false);
+
+    const themeColor = shop.theme_color || '#F59E0B';
 
     useEffect(() => {
         const checkIsOpen = () => {
@@ -69,13 +102,86 @@ export default function Show({ shop, products = [] }) {
         }
     };
 
+    const handleOpenOrderModal = (product) => {
+        setSelectedProduct(product);
+        setQuantity(1);
+    };
+
+    const handleDirectOrderSubmit = (e) => {
+        e.preventDefault();
+        if (!selectedProduct) return;
+
+        setSubmittingOrder(true);
+
+        const payload = {
+            product_id: selectedProduct.id,
+            quantity: quantity,
+            customer_name: customerName,
+            phone_number: phoneNumber,
+            delivery_address: deliveryAddress,
+            city_neighborhood: cityNeighborhood,
+            payment_method: paymentMethod,
+        };
+
+        router.post(route('shop.direct_checkout'), payload, {
+            onSuccess: () => {
+                setSubmittingOrder(false);
+                setSelectedProduct(null);
+            },
+            onError: () => {
+                setSubmittingOrder(false);
+            }
+        });
+    };
+
+    // Filter products
+    const filteredProducts = products.filter(product => {
+        const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                               (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()));
+
+        if (activeTab === 'promos') {
+            return matchesSearch && (product.promotions && product.promotions.length > 0);
+        }
+        return matchesSearch;
+    });
+
+    const promoProductsCount = products.filter(p => p.promotions && p.promotions.length > 0).length;
+
     return (
         <>
-            <Head title={`${shop.name} - Boutique Professionnelle`} />
-            <div className="min-h-screen bg-surface-50 font-sans flex flex-col pb-16">
+            <Head title={`${shop.name} - Achats Sécurisés en Ligne`} />
+
+            <div className="min-h-screen bg-stone-50 font-sans text-stone-800 antialiased pb-20">
                 
-                {/* Cover Banner */}
-                <div className="h-48 md:h-64 w-full relative bg-surface-900 overflow-hidden">
+                {/* ALIBABA STYLE TOP ANNOUNCEMENT / REASSURANCE HEADER BAR */}
+                <div className="bg-stone-900 text-white text-xs py-2 px-4 border-b border-stone-800">
+                    <div className="w-full max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex items-center gap-3">
+                            <span className="flex items-center gap-1.5 text-amber-400 font-medium">
+                                <BadgeCheck className="w-4 h-4 text-amber-400" />
+                                <span>Vendeur Certifié Gold Sellify</span>
+                            </span>
+                            <span className="text-stone-500 hidden sm:inline">•</span>
+                            <span className="text-stone-300 hidden sm:inline">Achats 100% Sécurisés sur la Plateforme</span>
+                            <span className="text-stone-500 hidden md:inline">•</span>
+                            <span className="text-stone-300 hidden md:inline">Garantie Séquestre Escrow & Suivi Colis</span>
+                        </div>
+
+                        <div className="flex items-center gap-4 text-[11px] text-stone-400">
+                            <span className="flex items-center gap-1">
+                                <Lock className="w-3 h-3 text-emerald-400" />
+                                <span>Orange Money & MTN MoMo Certifiés</span>
+                            </span>
+                            <button onClick={handleShare} className="hover:text-white transition-colors flex items-center gap-1">
+                                <Share2 className="w-3 h-3" />
+                                <span>Partager</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* COVER BANNER HEADER */}
+                <div className="w-full h-48 md:h-64 relative bg-stone-900 overflow-hidden">
                     {shop.banner_path ? (
                         <img 
                             src={`/storage/${shop.banner_path}`} 
@@ -83,11 +189,10 @@ export default function Show({ shop, products = [] }) {
                             className="w-full h-full object-cover" 
                         />
                     ) : (
-                        <div className="absolute inset-0 bg-gradient-to-r opacity-30" style={{ backgroundImage: `linear-gradient(135deg, ${shop.theme_color} 0%, #171717 100%)` }} />
+                        <div className="absolute inset-0 bg-gradient-to-r" style={{ backgroundImage: `linear-gradient(135deg, ${themeColor} 0%, #171717 100%)` }} />
                     )}
-                    <div className="absolute inset-0 bg-black/45" />
-                    
-                    {/* Share button */}
+                    <div className="absolute inset-0 bg-black/40" />
+
                     <button 
                         onClick={handleShare}
                         className="absolute top-4 right-4 p-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-xl text-white border border-white/20 transition-all z-10"
@@ -97,356 +202,476 @@ export default function Show({ shop, products = [] }) {
                     </button>
                 </div>
 
-                {/* Shop profile header wrapper */}
-                <div className="max-w-6xl w-full mx-auto px-4 md:px-6 -mt-16 md:-mt-24 relative z-10 flex-1">
-                    <div className="bg-white border border-surface-200 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8">
-                        {/* Logo and store text */}
-                        <div className="flex flex-col md:flex-row items-center md:items-end gap-4 text-center md:text-left w-full md:w-auto">
-                            <div className="w-24 h-24 md:w-32 md:h-32 bg-white rounded-3xl p-1.5 shadow-lg border border-surface-200 flex items-center justify-center shrink-0">
-                                {shop.logo_path ? (
-                                    <img 
-                                        src={`/storage/${shop.logo_path}`} 
-                                        alt={shop.name} 
-                                        className="w-full h-full object-cover rounded-2xl" 
-                                    />
-                                ) : (
-                                    <Store className="w-12 h-12 text-surface-300" />
-                                )}
-                            </div>
+                {/* SHOP PROFILE HEADER & ALIBABA TRUST CARD */}
+                <div className="w-full max-w-7xl mx-auto px-4 md:px-6 -mt-16 md:-mt-20 relative z-10">
+                    <div className="bg-white border border-stone-200/70 rounded-2xl p-6 shadow-xl space-y-6">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                             
-                            <div className="space-y-1.5">
-                                <div className="flex flex-col sm:flex-row items-center gap-2">
-                                    <h1 className="text-2xl md:text-3xl font-extrabold text-surface-900 tracking-tight">{shop.name}</h1>
-                                    <div className="flex items-center space-x-1.5 bg-yellow-50 text-yellow-800 border border-yellow-200 px-2.5 py-0.5 rounded-full text-xs font-bold shadow-sm">
-                                        <Award className="w-3.5 h-3.5 text-yellow-600" />
-                                        <span>Verified Gold Supplier</span>
-                                    </div>
-                                </div>
-                                <p className="text-sm md:text-base text-surface-500 italic font-medium">
-                                    "{shop.slogan || 'Pas de slogan configuré'}"
-                                </p>
-                                <div className="flex flex-wrap justify-center md:justify-start items-center gap-3 pt-2 text-xs font-semibold">
-                                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border transition-colors
-                                        ${openStatus.isOpen 
-                                            ? 'bg-secondary-50 text-secondary-700 border-secondary-200' 
-                                            : 'bg-accent-50 text-accent-700 border-accent-200'
-                                        }`}
-                                    >
-                                        <span className={`w-2 h-2 rounded-full mr-1.5 ${openStatus.isOpen ? 'bg-secondary-500' : 'bg-accent-500'}`} />
-                                        {openStatus.text}
-                                    </span>
-                                    <span className="text-surface-400 font-bold">•</span>
-                                    <span className="text-surface-600 flex items-center space-x-1">
-                                        <MapPin className="w-3.5 h-3.5 text-surface-400" />
-                                        <span>{shop.address}</span>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Quick Action Button */}
-                        <div className="w-full md:w-auto flex flex-col gap-2 shrink-0">
-                            {shop.social_links?.whatsapp && (
-                                <a 
-                                    href={`https://wa.me/${shop.social_links.whatsapp}`}
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="w-full"
-                                >
-                                    <button 
-                                        className="w-full px-5 py-3 rounded-2xl text-white font-bold flex items-center justify-center space-x-2 shadow-lg transition-transform hover:scale-[1.02]"
-                                        style={{ backgroundColor: shop.theme_color }}
-                                    >
-                                        <MessageCircle className="w-5 h-5" />
-                                        <span>Contacter sur WhatsApp</span>
-                                    </button>
-                                </a>
-                            )}
-                            <a href={`tel:${shop.phone_contact}`} className="w-full">
-                                <Button variant="outline" className="w-full space-x-2 rounded-2xl border-surface-200">
-                                    <Phone className="w-4 h-4 text-surface-500" />
-                                    <span>Appeler la boutique</span>
-                                </Button>
-                            </a>
-                        </div>
-                    </div>
-
-                    {/* Navigation Tabs */}
-                    <div className="flex border-b border-surface-200 mb-6 font-semibold text-sm">
-                        <button 
-                            onClick={() => setActiveTab('home')}
-                            className={`pb-3 px-4 transition-colors relative focus:outline-none ${activeTab === 'home' ? 'text-surface-900 font-bold' : 'text-surface-400'}`}
-                        >
-                            <span>Catalogue</span>
-                            {activeTab === 'home' && (
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full" style={{ backgroundColor: shop.theme_color }} />
-                            )}
-                        </button>
-                        <button 
-                            onClick={() => setActiveTab('about')}
-                            className={`pb-3 px-4 transition-colors relative focus:outline-none ${activeTab === 'about' ? 'text-surface-900 font-bold' : 'text-surface-400'}`}
-                        >
-                            <span>Profil Entreprise</span>
-                            {activeTab === 'about' && (
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full" style={{ backgroundColor: shop.theme_color }} />
-                            )}
-                        </button>
-                        <button 
-                            onClick={() => setActiveTab('contact')}
-                            className={`pb-3 px-4 transition-colors relative focus:outline-none ${activeTab === 'contact' ? 'text-surface-900 font-bold' : 'text-surface-400'}`}
-                        >
-                            <span>Horaires & Contacts</span>
-                            {activeTab === 'contact' && (
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full" style={{ backgroundColor: shop.theme_color }} />
-                            )}
-                        </button>
-                    </div>
-
-                    {/* Tab contents */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        
-                        {/* Main Tab Content Column (2/3 width) */}
-                        <div className="lg:col-span-2 space-y-6">
-                            {activeTab === 'home' && (
-                                <div className="space-y-6 animate-fade-in">
-                                    <div className="flex justify-between items-center">
-                                        <h3 className="text-lg font-bold text-surface-900">Nos Articles</h3>
-                                        <span className="text-xs text-surface-400 font-semibold">{products.length} articles disponibles</span>
-                                    </div>
-
-                                    {products.length === 0 ? (
-                                        <div className="bg-white border border-surface-200 rounded-3xl p-12 text-center flex flex-col items-center justify-center space-y-4 min-h-[320px]">
-                                            <div className="p-4 bg-surface-50 text-surface-400 rounded-full border border-surface-100">
-                                                <ShoppingBag className="w-10 h-10" />
-                                            </div>
-                                            <div className="space-y-1">
-                                                <h4 className="text-lg font-bold text-surface-800">Catalogue en cours d'alimentation</h4>
-                                                <p className="text-sm text-surface-500 max-w-sm mx-auto">
-                                                    Cette boutique vient d'être configurée. Les articles du vendeur seront mis en ligne très prochainement.
-                                                </p>
-                                            </div>
-                                        </div>
+                            {/* Logo & Brand Identity */}
+                            <div className="flex flex-col sm:flex-row items-center sm:items-center gap-4 text-center sm:text-left w-full md:w-auto">
+                                <div className="w-24 h-24 md:w-28 md:h-28 bg-white rounded-2xl p-1.5 shadow-lg border border-stone-200 flex items-center justify-center shrink-0">
+                                    {shop.logo_path ? (
+                                        <img 
+                                            src={`/storage/${shop.logo_path}`} 
+                                            alt={shop.name} 
+                                            className="w-full h-full object-cover rounded-xl" 
+                                        />
                                     ) : (
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                            {products.map((product) => {
-                                                const hasPromo = product.active_promotion !== null;
-                                                const firstImage = product.image_paths && product.image_paths.length > 0 
-                                                    ? `/storage/${product.image_paths[0]}` 
-                                                    : null;
-
-                                                const originalPrice = parseFloat(product.price);
-                                                const finalPrice = hasPromo 
-                                                    ? parseFloat(product.active_promotion.promo_price) 
-                                                    : originalPrice;
-
-                                                // Prepare WhatsApp message url safely
-                                                const whatsappNumber = shop.social_links?.whatsapp || shop.phone_contact;
-                                                const shopUrl = typeof window !== 'undefined' ? window.location.href : '';
-                                                const messageText = `Bonjour ${shop.name}, je suis intéressé par votre produit "${product.name}" au prix de ${finalPrice.toFixed(2)} € (lien: ${shopUrl})`;
-                                                const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(messageText)}`;
-
-                                                return (
-                                                    <div 
-                                                        key={product.id} 
-                                                        className="bg-white border border-surface-200 rounded-2xl overflow-hidden hover:shadow-md transition-all duration-300 flex flex-col group"
-                                                    >
-                                                        {/* Image Section */}
-                                                        <div className="h-44 bg-surface-50 relative overflow-hidden flex items-center justify-center border-b border-surface-150 shrink-0">
-                                                            {firstImage ? (
-                                                                <img 
-                                                                    src={firstImage} 
-                                                                    alt={product.name} 
-                                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                                                                />
-                                                            ) : (
-                                                                <ShoppingBag className="w-10 h-10 text-surface-200" />
-                                                            )}
-
-                                                            {/* Promo Badge */}
-                                                            {hasPromo && (
-                                                                <div className="absolute top-3 left-3 bg-red-600 text-white font-bold text-[10px] px-2.5 py-1 rounded-full shadow-sm">
-                                                                    -{product.active_promotion.discount_percentage}% OFF
-                                                                </div>
-                                                            )}
-
-                                                            {/* Stock Badge if low */}
-                                                            {product.stock === 0 ? (
-                                                                <div className="absolute top-3 right-3 bg-rose-50 text-rose-700 border border-rose-200 font-bold text-[9px] px-2 py-0.5 rounded-md">
-                                                                    Rupture de stock
-                                                                </div>
-                                                            ) : product.stock <= 3 ? (
-                                                                <div className="absolute top-3 right-3 bg-amber-50 text-amber-700 border border-amber-200 font-bold text-[9px] px-2 py-0.5 rounded-md animate-pulse">
-                                                                    Plus que {product.stock}
-                                                                </div>
-                                                            ) : null}
-                                                        </div>
-
-                                                        {/* Content Section */}
-                                                        <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
-                                                            <div className="space-y-1">
-                                                                <h4 className="font-bold text-surface-850 text-sm leading-snug tracking-tight group-hover:text-surface-900 transition-colors">
-                                                                    {product.name}
-                                                                </h4>
-                                                                <p className="text-[11px] text-surface-450 leading-relaxed font-normal line-clamp-2">
-                                                                    {product.description || 'Aucune description disponible.'}
-                                                                </p>
-                                                            </div>
-
-                                                            <div className="space-y-3 pt-2">
-                                                                {/* Price display */}
-                                                                <div className="flex items-baseline space-x-2">
-                                                                    {hasPromo ? (
-                                                                        <>
-                                                                            <span className="text-base font-extrabold text-red-600">
-                                                                                {finalPrice.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
-                                                                            </span>
-                                                                            <span className="text-xs text-surface-400 font-medium line-through">
-                                                                                {originalPrice.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
-                                                                            </span>
-                                                                        </>
-                                                                    ) : (
-                                                                        <span className="text-base font-extrabold text-surface-800">
-                                                                            {originalPrice.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
-                                                                        </span>
-                                                                    )}
-                                                                </div>
-
-                                                                {/* WhatsApp Direct Order Button */}
-                                                                <a 
-                                                                    href={whatsappUrl}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                    className="block"
-                                                                >
-                                                                    <button 
-                                                                        disabled={product.stock === 0}
-                                                                        className="w-full py-2 bg-emerald-500 hover:bg-emerald-600 disabled:bg-surface-100 disabled:text-surface-400 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center space-x-1.5 shadow-sm"
-                                                                    >
-                                                                        <MessageCircle className="w-3.5 h-3.5" />
-                                                                        <span>Commander sur WhatsApp</span>
-                                                                    </button>
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
+                                        <Store className="w-12 h-12 text-stone-400" />
                                     )}
                                 </div>
-                            )}
 
-                            {activeTab === 'about' && (
-                                <div className="bg-white border border-surface-200 rounded-3xl p-6 space-y-6 animate-fade-in">
-                                    <div>
-                                        <h3 className="text-lg font-bold text-surface-900 border-b border-surface-100 pb-3 mb-4">
-                                            Présentation de la boutique
-                                        </h3>
-                                        <p className="text-sm text-surface-600 leading-relaxed whitespace-pre-line">
-                                            {shop.description || 'Aucune description disponible pour le moment.'}
-                                        </p>
+                                <div className="space-y-1.5">
+                                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                                        <h1 className="text-xl md:text-2xl font-semibold text-stone-900">{shop.name}</h1>
+                                        <span className="bg-amber-50 text-amber-900 border border-amber-200 px-2.5 py-0.5 rounded-full text-xs font-medium flex items-center gap-1">
+                                            <Award className="w-3.5 h-3.5 text-amber-600" />
+                                            <span>Vendeur Certifié Gold</span>
+                                        </span>
                                     </div>
 
-                                    <div className="pt-2">
-                                        <h3 className="text-lg font-bold text-surface-900 border-b border-surface-100 pb-3 mb-4 flex items-center space-x-2">
-                                            <ShieldCheck className="w-5 h-5 text-secondary-500" />
-                                            <span>Informations Légales Certifiées</span>
-                                        </h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                            <div className="bg-surface-50 p-4 rounded-2xl border border-surface-200">
-                                                <span className="text-xs text-surface-400 font-bold uppercase block mb-1">Raison Sociale</span>
-                                                <span className="font-bold text-surface-800">{shop.company_name}</span>
-                                            </div>
-                                            <div className="bg-surface-50 p-4 rounded-2xl border border-surface-200">
-                                                <span className="text-xs text-surface-400 font-bold uppercase block mb-1">RCCM / Enregistrement</span>
-                                                <span className="font-bold text-surface-800">{shop.registration_number || 'Non spécifié'}</span>
-                                            </div>
-                                            <div className="bg-surface-50 p-4 rounded-2xl border border-surface-200 md:col-span-2">
-                                                <span className="text-xs text-surface-400 font-bold uppercase block mb-1">Adresse de l'entrepôt</span>
-                                                <span className="font-semibold text-surface-800">{shop.address}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {activeTab === 'contact' && (
-                                <div className="bg-white border border-surface-200 rounded-3xl p-6 space-y-6 animate-fade-in">
-                                    <div>
-                                        <h3 className="text-lg font-bold text-surface-900 border-b border-surface-100 pb-3 mb-4">
-                                            Horaires d'Ouverture
-                                        </h3>
-                                        <div className="border border-surface-200 rounded-2xl divide-y divide-surface-100 overflow-hidden text-sm">
-                                            {shop.opening_hours && Object.keys(shop.opening_hours).map((day) => (
-                                                <div key={day} className="flex justify-between items-center p-3 hover:bg-surface-50/50">
-                                                    <span className="font-bold text-surface-700">{daysTranslation[day]}</span>
-                                                    {shop.opening_hours[day].active ? (
-                                                        <span className="font-semibold text-surface-800">
-                                                            {shop.opening_hours[day].open} - {shop.opening_hours[day].close}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="font-bold text-accent-500 uppercase">Fermé</span>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Sidebar details column (1/3 width) */}
-                        <div className="space-y-6">
-                            {/* Contact Box */}
-                            <div className="bg-white border border-surface-200 rounded-3xl p-6 space-y-4">
-                                <h4 className="text-sm font-extrabold text-surface-900 uppercase tracking-wider pb-2 border-b border-surface-100">
-                                    Coordonnées Directes
-                                </h4>
-                                <div className="space-y-3.5 text-sm">
-                                    <div className="flex items-start space-x-3">
-                                        <Phone className="w-5 h-5 text-surface-400 shrink-0 mt-0.5" />
-                                        <div>
-                                            <span className="text-[10px] text-surface-400 font-bold block uppercase">Téléphone</span>
-                                            <a href={`tel:${shop.phone_contact}`} className="font-semibold text-surface-800 hover:underline">{shop.phone_contact}</a>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-start space-x-3">
-                                        <Mail className="w-5 h-5 text-surface-400 shrink-0 mt-0.5" />
-                                        <div>
-                                            <span className="text-[10px] text-surface-400 font-bold block uppercase">E-mail Support</span>
-                                            <a href={`mailto:${shop.email_contact}`} className="font-semibold text-surface-800 hover:underline">{shop.email_contact}</a>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-start space-x-3">
-                                        <MapPin className="w-5 h-5 text-surface-400 shrink-0 mt-0.5" />
-                                        <div>
-                                            <span className="text-[10px] text-surface-400 font-bold block uppercase">Boutique Physique</span>
-                                            <span className="font-medium text-surface-700">{shop.address}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Trust badges */}
-                            <div className="bg-gradient-to-br from-surface-900 to-surface-950 text-white rounded-3xl p-6 space-y-4 border border-surface-800 shadow-md">
-                                <div className="w-10 h-10 rounded-xl bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center">
-                                    <Award className="w-5 h-5 text-yellow-500" />
-                                </div>
-                                <div className="space-y-1">
-                                    <h4 className="font-extrabold text-base tracking-tight text-white">Garantie Sellify Verified</h4>
-                                    <p className="text-xs text-surface-300 leading-relaxed">
-                                        Ce vendeur a passé avec succès les vérifications de KYC, de conformité commerciale et d'identité physique requises par Sellify.me.
+                                    <p className="text-xs md:text-sm text-stone-500 font-normal italic">
+                                        "{shop.slogan || 'Vitrine officielle de vente en ligne.'}"
                                     </p>
+
+                                    <div className="flex flex-wrap justify-center sm:justify-start items-center gap-3 pt-1 text-xs text-stone-600 font-normal">
+                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-medium border ${
+                                            openStatus.isOpen 
+                                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                                                : 'bg-stone-100 text-stone-600 border-stone-200'
+                                        }`}>
+                                            <span className={`w-2 h-2 rounded-full mr-1.5 ${openStatus.isOpen ? 'bg-emerald-500 animate-pulse' : 'bg-stone-400'}`} />
+                                            {openStatus.text}
+                                        </span>
+                                        <span>•</span>
+                                        <span className="flex items-center gap-1">
+                                            <MapPin className="w-3.5 h-3.5 text-stone-400" />
+                                            <span>{shop.address}</span>
+                                        </span>
+                                    </div>
                                 </div>
-                                <div className="pt-2 border-t border-surface-800 flex items-center space-x-2 text-[10px] font-bold text-surface-400 uppercase tracking-wider">
-                                    <ShieldCheck className="w-4.5 h-4.5 text-secondary-500" />
-                                    <span>Verified Profile Gold</span>
+                            </div>
+
+                            {/* Direct Platform Order Banner */}
+                            <div className="w-full md:w-auto flex flex-col sm:flex-row gap-2 shrink-0">
+                                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs font-medium text-amber-950 flex items-center gap-2">
+                                    <ShieldCheck className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                                    <span>Toutes les transactions sont protégées par le Séquestre Sellify</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        {/* REASSURANCE TRUST BADGES BAR (ALIBABA STYLE) */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-4 border-t border-stone-100 text-xs">
+                            <div className="flex items-center gap-2.5 p-3 bg-amber-50/50 border border-amber-200/60 rounded-xl">
+                                <Shield className="w-5 h-5 text-amber-700 flex-shrink-0" />
+                                <div>
+                                    <h4 className="font-semibold text-stone-900 text-xs">Achat 100% Sur Plateforme</h4>
+                                    <p className="text-[10px] text-stone-500 font-normal">Garantie anti-fraude intégrée</p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-2.5 p-3 bg-amber-50/50 border border-amber-200/60 rounded-xl">
+                                <Truck className="w-5 h-5 text-amber-700 flex-shrink-0" />
+                                <div>
+                                    <h4 className="font-semibold text-stone-900 text-xs">Suivi Colis Sans Compte</h4>
+                                    <p className="text-[10px] text-stone-500 font-normal">Code de suivi direct par SMS</p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-2.5 p-3 bg-amber-50/50 border border-amber-200/60 rounded-xl">
+                                <RotateCcw className="w-5 h-5 text-amber-700 flex-shrink-0" />
+                                <div>
+                                    <h4 className="font-semibold text-stone-900 text-xs">Arbitrage Litige 48h</h4>
+                                    <p className="text-[10px] text-stone-500 font-normal">Fonds bloqués jusqu'à réception</p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-2.5 p-3 bg-amber-50/50 border border-amber-200/60 rounded-xl">
+                                <Lock className="w-5 h-5 text-amber-700 flex-shrink-0" />
+                                <div>
+                                    <h4 className="font-semibold text-stone-900 text-xs">Mobile Money Certifié</h4>
+                                    <p className="text-[10px] text-stone-500 font-normal">Orange Money & MTN MoMo</p>
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
+
+                {/* STORE NAVIGATION TABS & TOOLBAR */}
+                <div className="w-full max-w-7xl mx-auto px-4 md:px-6 mt-6">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-stone-200 pb-3">
+                        <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0">
+                            <button
+                                onClick={() => setActiveTab('all')}
+                                className={`px-4 py-2 rounded-xl text-xs font-medium transition-all whitespace-nowrap ${
+                                    activeTab === 'all' 
+                                        ? 'bg-amber-500 text-amber-950 shadow-xs' 
+                                        : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-50'
+                                }`}
+                            >
+                                Tous les Produits ({products.length})
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('promos')}
+                                className={`px-4 py-2 rounded-xl text-xs font-medium transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                                    activeTab === 'promos' 
+                                        ? 'bg-amber-500 text-amber-950 shadow-xs' 
+                                        : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-50'
+                                }`}
+                            >
+                                <Flame className="w-3.5 h-3.5 text-amber-700" />
+                                <span>Promotions Flash ({promoProductsCount})</span>
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('about')}
+                                className={`px-4 py-2 rounded-xl text-xs font-medium transition-all whitespace-nowrap ${
+                                    activeTab === 'about' 
+                                        ? 'bg-amber-500 text-amber-950 shadow-xs' 
+                                        : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-50'
+                                }`}
+                            >
+                                Profil & Garanties Légales
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('contact')}
+                                className={`px-4 py-2 rounded-xl text-xs font-medium transition-all whitespace-nowrap ${
+                                    activeTab === 'contact' 
+                                        ? 'bg-amber-500 text-amber-950 shadow-xs' 
+                                        : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-50'
+                                }`}
+                            >
+                                Horaires d'Ouverture
+                            </button>
+                        </div>
+
+                        {/* Search Bar */}
+                        <div className="relative w-full sm:w-72">
+                            <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={e => setSearchTerm(e.target.value)}
+                                placeholder="Rechercher un produit..."
+                                className="w-full pl-9 pr-3.5 py-2 bg-white border border-stone-200 rounded-xl text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* MAIN CONTENT AREA */}
+                <div className="w-full max-w-7xl mx-auto px-4 md:px-6 mt-6">
+                    {activeTab === 'about' ? (
+                        /* ABOUT STORE TAB */
+                        <div className="bg-white border border-stone-200/70 rounded-2xl p-6 shadow-sm space-y-6">
+                            <div>
+                                <h3 className="text-base font-semibold text-stone-900 border-b border-stone-100 pb-3 mb-4">
+                                    Présentation de la Boutique
+                                </h3>
+                                <p className="text-xs text-stone-600 leading-relaxed font-normal whitespace-pre-line">
+                                    {shop.description || 'Aucune description rédigée pour le moment.'}
+                                </p>
+                            </div>
+
+                            <div>
+                                <h3 className="text-base font-semibold text-stone-900 border-b border-stone-100 pb-3 mb-4 flex items-center gap-2">
+                                    <ShieldCheck className="w-4.5 h-4.5 text-amber-600" />
+                                    <span>Informations Légales & Conformité Commerciale</span>
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-normal">
+                                    <div className="bg-stone-50 p-4 rounded-xl border border-stone-200/60">
+                                        <span className="text-[10px] text-stone-400 block font-medium uppercase">Raison Sociale</span>
+                                        <span className="font-semibold text-stone-900">{shop.company_name}</span>
+                                    </div>
+                                    <div className="bg-stone-50 p-4 rounded-xl border border-stone-200/60">
+                                        <span className="text-[10px] text-stone-400 block font-medium uppercase">Enregistrement Commercial</span>
+                                        <span className="font-semibold text-stone-900">{shop.registration_number || 'Conforme au registre commercial'}</span>
+                                    </div>
+                                    <div className="bg-stone-50 p-4 rounded-xl border border-stone-200/60 md:col-span-2">
+                                        <span className="text-[10px] text-stone-400 block font-medium uppercase">Adresse Officielle</span>
+                                        <span className="font-semibold text-stone-900">{shop.address}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ) : activeTab === 'contact' ? (
+                        /* CONTACT & OPENING HOURS TAB */
+                        <div className="bg-white border border-stone-200/70 rounded-2xl p-6 shadow-sm space-y-6">
+                            <h3 className="text-base font-semibold text-stone-900 border-b border-stone-100 pb-3">
+                                Horaires d'Ouverture
+                            </h3>
+                            <div className="border border-stone-200/70 rounded-xl divide-y divide-stone-100 text-xs">
+                                {shop.opening_hours && Object.keys(shop.opening_hours).map((day) => (
+                                    <div key={day} className="flex justify-between items-center p-3 font-normal">
+                                        <span className="font-medium text-stone-800">{daysTranslation[day]}</span>
+                                        {shop.opening_hours[day].active ? (
+                                            <span className="font-semibold text-stone-900">
+                                                {shop.opening_hours[day].open} - {shop.opening_hours[day].close}
+                                            </span>
+                                        ) : (
+                                            <span className="font-medium text-red-600 uppercase text-[11px]">Fermé</span>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        /* ALIBABA STYLE PRODUCT CATALOG GRID WITH DIRECT PLATFORM PURCHASE */
+                        <div className="space-y-4">
+                            {filteredProducts.length === 0 ? (
+                                <div className="bg-white border border-stone-200/70 rounded-2xl p-12 text-center space-y-3">
+                                    <ShoppingBag className="w-10 h-10 text-stone-300 mx-auto stroke-[1.5]" />
+                                    <h4 className="font-semibold text-stone-900 text-sm">Aucun produit disponible</h4>
+                                    <p className="text-xs text-stone-500 font-normal max-w-sm mx-auto">
+                                        {searchTerm ? 'Aucun article ne correspond à votre recherche.' : 'La boutique mettra à jour son catalogue très prochainement.'}
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                                    {filteredProducts.map(product => {
+                                        const hasPromo = product.promotions && product.promotions.length > 0;
+                                        const activePromo = hasPromo ? product.promotions[0] : null;
+                                        
+                                        const originalPrice = parseFloat(product.price);
+                                        const finalPrice = activePromo ? parseFloat(activePromo.promo_price) : originalPrice;
+                                        const discountPercentage = activePromo ? activePromo.discount_percentage : 0;
+
+                                        const firstImage = product.images && product.images[0] ? product.images[0] : null;
+
+                                        return (
+                                            <div 
+                                                key={product.id}
+                                                className="bg-white border border-stone-200/70 rounded-2xl overflow-hidden shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex flex-col justify-between group"
+                                            >
+                                                <div>
+                                                    {/* Image Box */}
+                                                    <div className="h-48 bg-stone-100 relative overflow-hidden flex items-center justify-center border-b border-stone-100">
+                                                        {firstImage ? (
+                                                            <img 
+                                                                src={firstImage} 
+                                                                alt={product.name} 
+                                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                            />
+                                                        ) : (
+                                                            <ShoppingBag className="w-10 h-10 text-stone-300 stroke-[1.5]" />
+                                                        )}
+
+                                                        {hasPromo && (
+                                                            <span className="absolute top-3 left-3 bg-red-600 text-white font-semibold text-[10px] px-2.5 py-0.5 rounded-full shadow-xs">
+                                                                -{discountPercentage}% OFF
+                                                            </span>
+                                                        )}
+
+                                                        <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-xs text-stone-800 font-medium text-[10px] px-2 py-0.5 rounded-md border border-stone-200">
+                                                            {product.stock > 0 ? `${product.stock} dispo` : 'Rupture'}
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Details Box */}
+                                                    <div className="p-4 space-y-2">
+                                                        <div className="flex items-center gap-1 text-amber-500 text-[11px]">
+                                                            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                                                            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                                                            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                                                            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                                                            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                                                            <span className="text-stone-400 ml-1 font-normal">(4.9)</span>
+                                                        </div>
+
+                                                        <h4 className="font-semibold text-stone-900 text-xs line-clamp-2 leading-snug">
+                                                            {product.name}
+                                                        </h4>
+
+                                                        <div className="pt-1 flex items-baseline gap-2">
+                                                            <span className="text-sm font-semibold text-stone-900">
+                                                                {finalPrice.toLocaleString()} FCFA
+                                                            </span>
+                                                            {hasPromo && (
+                                                                <span className="text-[11px] text-stone-400 line-through font-normal">
+                                                                    {originalPrice.toLocaleString()} FCFA
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* On-Platform Purchase Action */}
+                                                <div className="p-4 pt-0">
+                                                    <button
+                                                        onClick={() => handleOpenOrderModal(product)}
+                                                        disabled={product.stock === 0}
+                                                        className="w-full py-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-amber-950 text-xs font-medium rounded-xl transition-all shadow-xs flex items-center justify-center gap-1.5"
+                                                    >
+                                                        <ShoppingBag className="w-3.5 h-3.5" />
+                                                        <span>Acheter Maintenant</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* ON-PLATFORM FAST DIRECT ORDER MODAL */}
+                {selectedProduct && (
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+                        <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 text-stone-800 max-h-[90vh] overflow-y-auto">
+                            <div className="flex justify-between items-center border-b border-stone-100 pb-3">
+                                <div className="flex items-center gap-2">
+                                    <ShieldCheck className="w-5 h-5 text-amber-600" />
+                                    <h3 className="font-semibold text-stone-900 text-sm">Commande Sécurisée sur la Plateforme</h3>
+                                </div>
+                                <button onClick={() => setSelectedProduct(null)} className="text-stone-400 hover:text-stone-600">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            {/* Product Summary */}
+                            <div className="p-3 bg-amber-50/50 border border-amber-200/60 rounded-xl flex items-center gap-3">
+                                <div className="w-12 h-12 bg-white rounded-lg border border-stone-200 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                                    {selectedProduct.images && selectedProduct.images[0] ? (
+                                        <img src={selectedProduct.images[0]} alt={selectedProduct.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <ShoppingBag className="w-6 h-6 text-stone-400" />
+                                    )}
+                                </div>
+                                <div className="flex-1">
+                                    <h4 className="font-semibold text-stone-900 text-xs">{selectedProduct.name}</h4>
+                                    <p className="text-[11px] text-stone-500 font-normal">Boutique : {shop.name}</p>
+                                    <span className="font-semibold text-amber-900 text-xs">
+                                        {Number(selectedProduct.promotions && selectedProduct.promotions.length > 0 ? selectedProduct.promotions[0].promo_price : selectedProduct.price).toLocaleString()} FCFA / unité
+                                    </span>
+                                </div>
+                            </div>
+
+                            <form onSubmit={handleDirectOrderSubmit} className="space-y-4 text-xs font-normal">
+                                {/* Quantity Picker */}
+                                <div>
+                                    <label className="block font-medium text-stone-700 mb-1">Quantité désirable</label>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                                            className="w-8 h-8 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-800 flex items-center justify-center font-bold"
+                                        >
+                                            <Minus className="w-4 h-4" />
+                                        </button>
+                                        <span className="w-12 text-center font-semibold text-sm text-stone-900">{quantity}</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => setQuantity(q => Math.min(selectedProduct.stock || 99, q + 1))}
+                                            className="w-8 h-8 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-800 flex items-center justify-center font-bold"
+                                        >
+                                            <Plus className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Customer Info */}
+                                <div>
+                                    <label className="block font-medium text-stone-700 mb-1">Nom Complet du Destinataire *</label>
+                                    <input
+                                        type="text"
+                                        value={customerName}
+                                        onChange={e => setCustomerName(e.target.value)}
+                                        placeholder="ex: Jean Dupuis"
+                                        className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block font-medium text-stone-700 mb-1">Numéro de Téléphone (pour la livraison & suivi) *</label>
+                                    <input
+                                        type="tel"
+                                        value={phoneNumber}
+                                        onChange={e => setPhoneNumber(e.target.value)}
+                                        placeholder="ex: 690 12 34 56"
+                                        className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block font-medium text-stone-700 mb-1">Adresse de Livraison Précise *</label>
+                                    <input
+                                        type="text"
+                                        value={deliveryAddress}
+                                        onChange={e => setDeliveryAddress(e.target.value)}
+                                        placeholder="ex: Akwa, Rue Deido face Boulangerie"
+                                        className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block font-medium text-stone-700 mb-1">Ville / Quartier</label>
+                                    <input
+                                        type="text"
+                                        value={cityNeighborhood}
+                                        onChange={e => setCityNeighborhood(e.target.value)}
+                                        placeholder="ex: Douala / Akwa"
+                                        className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block font-medium text-stone-700 mb-1">Moyen de Paiement Séquestre *</label>
+                                    <select
+                                        value={paymentMethod}
+                                        onChange={e => setPaymentMethod(e.target.value)}
+                                        className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
+                                    >
+                                        <option value="orange_money">Orange Money (Séquestre Protégé)</option>
+                                        <option value="mtn_momo">MTN Mobile Money (Séquestre Protégé)</option>
+                                    </select>
+                                </div>
+
+                                {/* Escrow Guarantee Reassurance Box */}
+                                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900 font-normal space-y-1">
+                                    <div className="font-semibold flex items-center gap-1 text-amber-950">
+                                        <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
+                                        <span>Garantie de Sécurité Escrow Sellify</span>
+                                    </div>
+                                    <p>
+                                        Vos fonds restent bloqués sous séquestre jusqu'à la livraison complète et votre confirmation. Le vendeur ne sera payé qu'après validation.
+                                    </p>
+                                </div>
+
+                                {/* Order Total & Submit */}
+                                <div className="pt-3 border-t border-stone-100 flex items-center justify-between">
+                                    <div>
+                                        <span className="text-[10px] text-stone-400 block">Total à payer</span>
+                                        <span className="text-base font-semibold text-stone-900">
+                                            {Number((selectedProduct.promotions && selectedProduct.promotions.length > 0 ? selectedProduct.promotions[0].promo_price : selectedProduct.price) * quantity).toLocaleString()} FCFA
+                                        </span>
+                                    </div>
+
+                                    <div className="flex gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setSelectedProduct(null)}
+                                            className="px-4 py-2.5 border border-stone-200 rounded-xl text-stone-600 font-medium hover:bg-stone-50"
+                                        >
+                                            Annuler
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={submittingOrder}
+                                            className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-amber-950 font-medium rounded-xl shadow-xs transition-colors disabled:opacity-50"
+                                        >
+                                            {submittingOrder ? 'Validation...' : 'Payer & Commander'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
 
             </div>
         </>

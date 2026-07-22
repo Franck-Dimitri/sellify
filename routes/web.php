@@ -33,6 +33,7 @@ Route::get('/', function () {
 })->name('welcome');
 
 Route::get('/boutique/{slug}', [ShopController::class, 'showPublic'])->name('shop.public');
+Route::post('/boutique/checkout/direct', [ShopController::class, 'directCheckout'])->name('shop.direct_checkout');
 
 // Fast Checkout via Smart-Link
 Route::get('/pay/{token}', [SmartLinkCheckoutController::class, 'show'])->name('smartlink.checkout');

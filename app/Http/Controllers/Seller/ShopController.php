@@ -303,4 +303,67 @@ class ShopController extends Controller
             'products' => $products
         ]);
     }
+
+    /**
+     * Process direct on-platform order for shop products under Escrow.
+     */
+    public function directCheckout(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:1',
+            'customer_name' => 'required|string|max:255',
+            'phone_number' => 'required|string|min:8|max:20',
+            'delivery_address' => 'required|string|max:500',
+            'city_neighborhood' => 'nullable|string|max:255',
+            'delivery_notes' => 'nullable|string|max:1000',
+            'payment_method' => 'required|in:orange_money,mtn_momo',
+        ]);
+
+        $product = \App\Models\Product::with('shop', 'promotions')->findOrFail($validated['product_id']);
+
+        $hasPromo = $product->promotions()->where('is_active', true)->where('end_date', '>=', now()->toDateString())->first();
+        $unitPrice = $hasPromo ? $hasPromo->promo_price : $product->price;
+        $totalPrice = $unitPrice * $validated['quantity'];
+
+        $smartLinkService = app(\App\Services\SmartLinkService::class);
+        $trackingCode = $smartLinkService->generateTrackingCode();
+
+        $deliveryInfo = [
+            'customer_name' => $validated['customer_name'],
+            'phone_number' => $validated['phone_number'],
+            'delivery_address' => $validated['delivery_address'],
+            'city_neighborhood' => $validated['city_neighborhood'] ?? '',
+            'delivery_notes' => $validated['delivery_notes'] ?? '',
+            'payment_method' => $validated['payment_method'],
+            'paid_at' => now()->toDateTimeString(),
+            'current_step' => 'processing',
+        ];
+
+        \App\Models\SmartLink::create([
+            'seller_id' => $product->shop->seller_id,
+            'product_id' => $product->id,
+            'title' => "Commande en ligne - {$product->name}",
+            'token' => \Illuminate\Support\Str::random(32),
+            'items' => [
+                [
+                    'product_id' => $product->id,
+                    'name' => $product->name,
+                    'quantity' => $validated['quantity'],
+                    'unit_price' => $unitPrice,
+                    'total_price' => $totalPrice,
+                ]
+            ],
+            'total_price' => $totalPrice,
+            'status' => 'paid',
+            'tracking_code' => $trackingCode,
+            'delivery_info' => $deliveryInfo,
+        ]);
+
+        // Decrement stock
+        $product->decrement('stock', $validated['quantity']);
+
+        return redirect()->route('public.order_tracking', ['tracking_code' => $trackingCode])
+            ->with('success', 'Votre commande en ligne a été validée avec succès sous la garantie séquestre Sellify !');
+    }
 }
