@@ -10,7 +10,12 @@ import {
     ArrowRight, 
     MapPin, 
     User,
-    Sparkles
+    Sparkles,
+    CheckCircle2,
+    Building2,
+    BadgeCheck,
+    Clock,
+    Award
 } from 'lucide-react';
 
 export default function Index({ shops, filters = {} }) {
@@ -23,139 +28,158 @@ export default function Index({ shops, filters = {} }) {
 
     return (
         <PublicLayout>
-            <Head title="Annuaire des Boutiques Vérifiées - Sellify.me" />
+            <Head title="Annuaire des Fabricants Verified & Boutiques Certifiées - Sellify.me" />
 
-            <div className="w-full bg-stone-50 min-h-screen pb-20 antialiased font-sans text-stone-800">
+            <div className="w-full bg-[#f4f4f4] min-h-screen pb-20 antialiased font-sans text-stone-800">
                 
                 {/* HERO BANNER */}
-                <div className="bg-white border-b border-stone-200/70 py-10 px-4 sm:px-6 lg:px-8">
-                    <div className="max-w-7xl mx-auto space-y-3 text-center sm:text-left">
-                        <div className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full text-xs font-semibold text-amber-900">
-                            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                            <span>Boutiques Certifiées Gold Supplier</span>
+                <div className="bg-white border-b border-stone-200 py-8 px-4 sm:px-6 lg:px-8 shadow-2xs">
+                    <div className="max-w-[1400px] mx-auto space-y-3">
+                        <div className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full text-xs font-bold text-amber-900">
+                            <BadgeCheck className="w-4 h-4 text-amber-600" />
+                            <span>Boutiques & Fabricants Agréés (Verified Suppliers)</span>
                         </div>
-                        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-stone-900">
-                            Annuaire des Boutiques & Commerçants Vérifiés
+                        <h1 className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight">
+                            Annuaire des Fabricants & Boutiques Vérifiés sur Sellify.me
                         </h1>
-                        <p className="text-xs sm:text-sm text-stone-500 font-normal max-w-2xl">
-                            Explorez les vitrines officielles de nos vendeurs enregistrés avec leur numéro RCCM et leur localisation.
+                        <p className="text-xs sm:text-sm text-stone-500 font-normal max-w-3xl">
+                            Parcourez les vitrines officielles de nos commerçants immatriculés au Registre du Commerce (RCCM). Approvisionnez-vous en toute sérénité avec la garantie séquestre Escrow.
                         </p>
                     </div>
                 </div>
 
                 {/* MAIN CONTENT */}
-                <div className="mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-6">
+                <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
                     
-                    {/* SEARCH BAR */}
-                    <div className="bg-white border border-stone-200/70 rounded-xl p-4 shadow-xs">
+                    {/* SEARCH & FILTERS BAR */}
+                    <div className="bg-white border border-stone-200 rounded-2xl p-4 shadow-2xs">
                         <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row items-center gap-3">
                             <div className="relative flex-1 w-full">
-                                <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                                <Search className="w-4 h-4 text-stone-400 absolute left-4 top-1/2 -translate-y-1/2" />
                                 <input
                                     type="text"
-                                    placeholder="Rechercher une boutique par nom, slogan ou ville (ex: Douala)..."
+                                    placeholder="Rechercher une boutique par nom, slogan, ville (ex: Douala, Yaoundé) ou numéro RCCM..."
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    className="w-full pl-9 pr-4 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
                                 />
                             </div>
                             <button
                                 type="submit"
-                                className="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-amber-950 text-xs font-semibold rounded-lg shadow-xs transition-colors w-full sm:w-auto"
+                                className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-amber-950 text-xs font-bold rounded-xl shadow-xs transition-colors w-full sm:w-auto"
                             >
-                                Rechercher
+                                Rechercher Vendeur
                             </button>
                         </form>
                     </div>
 
-                    {/* SHOPS GRID */}
+                    {/* SHOPS LISTING GRID */}
                     {shops.data.length === 0 ? (
-                        <div className="bg-white border border-stone-200/70 border-dashed rounded-xl p-12 text-center flex flex-col items-center justify-center space-y-3 shadow-xs">
-                            <Store className="w-8 h-8 text-stone-300 stroke-[1.5]" />
-                            <div className="space-y-1">
-                                <p className="text-sm font-semibold text-stone-800">Aucune boutique trouvée</p>
-                                <p className="text-xs text-stone-500 font-normal">
-                                    Modifiez vos critères de recherche.
-                                </p>
-                            </div>
+                        <div className="bg-white border border-stone-200 rounded-2xl p-12 text-center space-y-3">
+                            <Store className="w-12 h-12 text-stone-300 mx-auto stroke-[1.5]" />
+                            <h4 className="font-bold text-stone-800 text-sm">Aucune boutique trouvée</h4>
+                            <p className="text-xs text-stone-500 font-normal">Modifiez vos mots-clés de recherche.</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {shops.data.map((shop) => {
                                 const sellerUser = shop.seller?.user;
-                                const activeProductsCount = shop.products ? shop.products.length : 0;
+                                const shopProductsPreview = shop.products ? shop.products.slice(0, 3) : [];
 
                                 return (
                                     <div 
                                         key={shop.id} 
-                                        className="bg-white border border-stone-200/70 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between"
+                                        className="bg-white border border-stone-200/80 rounded-2xl overflow-hidden shadow-2xs hover:border-amber-500 hover:shadow-md transition-all flex flex-col justify-between"
                                     >
                                         <div>
-                                            {/* Cover / Header Box */}
-                                            <div className="h-24 bg-stone-100 relative overflow-hidden flex items-center justify-center border-b border-stone-100">
+                                            {/* Cover Header */}
+                                            <div className="h-28 bg-stone-100 relative overflow-hidden flex items-center justify-center border-b border-stone-100">
                                                 {shop.banner_path ? (
                                                     <img src={`/storage/${shop.banner_path}`} alt={shop.name} className="w-full h-full object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full bg-gradient-to-r from-amber-500/10 to-amber-500/30 flex items-center justify-center">
-                                                        <Store className="w-8 h-8 text-amber-600/30 stroke-[1.5]" />
+                                                        <Building2 className="w-10 h-10 text-amber-600/30 stroke-[1.5]" />
                                                     </div>
                                                 )}
 
-                                                <span className="absolute top-2 right-2 bg-amber-50 text-amber-950 border border-amber-200 text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
-                                                    <ShieldCheck className="w-3 h-3 text-amber-600" />
-                                                    <span>Gold Supplier</span>
+                                                <span className="absolute top-2.5 right-2.5 bg-stone-900/90 text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-2xs">
+                                                    <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />
+                                                    <span>Verified Gold</span>
                                                 </span>
                                             </div>
 
-                                            {/* Logo & Shop Info */}
+                                            {/* Shop Identity & Logo */}
                                             <div className="p-5 space-y-3 relative pt-0">
-                                                {/* Floating Logo */}
-                                                <div className="-mt-8 w-14 h-14 rounded-xl bg-white border-2 border-white shadow-sm overflow-hidden flex items-center justify-center">
+                                                <div className="-mt-10 w-16 h-16 rounded-2xl bg-white border-2 border-white shadow-md overflow-hidden flex items-center justify-center">
                                                     {shop.logo_path ? (
-                                                        <img src={`/storage/${shop.logo_path}`} alt={shop.name} className="w-full h-full object-cover rounded-lg" />
+                                                        <img src={`/storage/${shop.logo_path}`} alt={shop.name} className="w-full h-full object-cover" />
                                                     ) : (
-                                                        <Store className="w-6 h-6 text-stone-400 stroke-[1.5]" />
+                                                        <Store className="w-7 h-7 text-stone-400 stroke-[1.5]" />
                                                     )}
                                                 </div>
 
-                                                <div>
-                                                    <h3 className="font-semibold text-stone-900 text-sm">{shop.name}</h3>
-                                                    <p className="text-xs text-stone-400 font-normal line-clamp-1 mt-0.5">
+                                                <div className="space-y-0.5">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <h3 className="font-bold text-stone-900 text-sm truncate">{shop.name}</h3>
+                                                        <BadgeCheck className="w-4 h-4 text-amber-600 shrink-0" />
+                                                    </div>
+                                                    <p className="text-xs text-stone-500 font-normal line-clamp-1">
                                                         {shop.slogan || 'Boutique Officielle Certifiée'}
                                                     </p>
                                                 </div>
 
-                                                <div className="space-y-1.5 text-xs text-stone-500 font-normal pt-2 border-t border-stone-100">
+                                                {/* Verification & RCCM Details Table */}
+                                                <div className="bg-stone-50 border border-stone-200/60 rounded-xl p-3 space-y-1.5 text-xs font-normal">
                                                     {sellerUser && (
-                                                        <div className="flex items-center gap-1.5 text-[11px]">
-                                                            <User className="w-3.5 h-3.5 text-stone-400 shrink-0" />
-                                                            <span>Gérant : <strong className="text-stone-700 font-semibold">{sellerUser.first_name} {sellerUser.last_name}</strong></span>
+                                                        <div className="flex justify-between text-[11px]">
+                                                            <span className="text-stone-400">Gérant responsable :</span>
+                                                            <strong className="text-stone-800 font-semibold">{sellerUser.first_name} {sellerUser.last_name}</strong>
                                                         </div>
                                                     )}
-                                                    {shop.city && (
-                                                        <div className="flex items-center gap-1.5 text-[11px]">
-                                                            <MapPin className="w-3.5 h-3.5 text-stone-400 shrink-0" />
-                                                            <span>{shop.city}</span>
+                                                    {shop.rccm_number && (
+                                                        <div className="flex justify-between text-[11px]">
+                                                            <span className="text-stone-400">RCCM / Patente :</span>
+                                                            <strong className="text-stone-700 font-mono">{shop.rccm_number}</strong>
                                                         </div>
                                                     )}
-                                                    <div className="flex items-center justify-between text-[11px] pt-1">
-                                                        <span className="flex items-center gap-1">
-                                                            <Package className="w-3.5 h-3.5 text-amber-600" />
-                                                            <strong>{activeProductsCount}</strong> articles
-                                                        </span>
-                                                        <span className="flex items-center gap-1 font-semibold text-stone-900">
-                                                            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                                                            <span>4.8 / 5</span>
-                                                        </span>
+                                                    <div className="flex justify-between text-[11px]">
+                                                        <span className="text-stone-400">Siège social :</span>
+                                                        <span className="font-medium text-stone-700">{shop.city || 'Douala'}</span>
+                                                    </div>
+                                                    <div className="flex justify-between items-center text-[11px] pt-1 border-t border-stone-200/50">
+                                                        <span className="text-stone-400">Taux de réponse :</span>
+                                                        <span className="font-bold text-emerald-700">98.8% (&lt; 1h)</span>
                                                     </div>
                                                 </div>
+
+                                                {/* Catalog Products Thumbnail Preview */}
+                                                {shopProductsPreview.length > 0 && (
+                                                    <div className="pt-2 space-y-1.5">
+                                                        <span className="text-[10px] text-stone-400 uppercase font-bold tracking-wider block">Aperçu du catalogue :</span>
+                                                        <div className="grid grid-cols-3 gap-2">
+                                                            {shopProductsPreview.map((prod) => {
+                                                                const pImg = prod.image_paths && prod.image_paths[0] ? `/storage/${prod.image_paths[0]}` : null;
+                                                                return (
+                                                                    <div key={prod.id} className="aspect-square bg-stone-100 rounded-lg overflow-hidden border border-stone-200 flex items-center justify-center p-1 text-center">
+                                                                        {pImg ? (
+                                                                            <img src={pImg} alt={prod.name} className="w-full h-full object-cover rounded" />
+                                                                        ) : (
+                                                                            <Package className="w-4 h-4 text-stone-300" />
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                )}
+
                                             </div>
                                         </div>
 
                                         <div className="p-5 pt-0">
                                             <Link href={route('shop.public', shop.slug)}>
-                                                <button className="w-full py-2 bg-amber-500 hover:bg-amber-600 text-amber-950 text-xs font-semibold rounded-lg shadow-xs transition-colors flex items-center justify-center gap-1.5">
-                                                    <span>Visiter la boutique</span>
+                                                <button className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-amber-950 text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5">
+                                                    <span>Visiter le Store Officiel</span>
                                                     <ArrowRight className="w-3.5 h-3.5" />
                                                 </button>
                                             </Link>
@@ -166,7 +190,7 @@ export default function Index({ shops, filters = {} }) {
                         </div>
                     )}
 
-                    {/* PAGINATION LINKS */}
+                    {/* PAGINATION */}
                     {shops.links && shops.links.length > 3 && (
                         <div className="flex justify-center items-center gap-1 pt-6">
                             {shops.links.map((link, idx) => (
@@ -174,11 +198,11 @@ export default function Index({ shops, filters = {} }) {
                                     key={idx}
                                     href={link.url || '#'}
                                     dangerouslySetInnerHTML={{ __html: link.label }}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                                    className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
                                         link.active
-                                            ? 'bg-amber-500 text-amber-950 border-amber-500 font-semibold'
+                                            ? 'bg-amber-500 text-amber-950 border-amber-500 font-bold'
                                             : link.url
-                                                ? 'bg-white text-stone-600 border-stone-200 hover:bg-stone-50'
+                                                ? 'bg-white text-stone-700 border-stone-200 hover:bg-stone-50'
                                                 : 'bg-stone-100 text-stone-300 border-stone-200 cursor-not-allowed'
                                     }`}
                                 />
