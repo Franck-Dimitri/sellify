@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\Dispute;
 use App\Models\Order;
 use App\Models\SellerWallet;

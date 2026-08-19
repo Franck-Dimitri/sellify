@@ -77,17 +77,29 @@ export default function Show({ order }) {
                         </div>
                     </div>
 
-                    {/* Direct Escrow Release Button */}
-                    {order.payment_status === 'escrow_held' && (
-                        <button
-                            onClick={handleConfirmDelivery}
-                            disabled={confirmProcessing}
-                            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs rounded-lg flex items-center gap-1.5 transition-colors shadow-xs"
+                    <div className="flex items-center gap-2">
+                        <a
+                            href={route('customer.orders.invoice', order.order_number)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-medium rounded-lg flex items-center gap-1.5 transition-colors"
                         >
-                            <CheckCircle2 className="w-4 h-4" />
-                            <span>Confirmer Réception (Débloquer)</span>
-                        </button>
-                    )}
+                            <FileText className="w-3.5 h-3.5" />
+                            <span>Facture PDF</span>
+                        </a>
+
+                        {/* Direct Escrow Release Button */}
+                        {order.payment_status === 'escrow_held' && (
+                            <button
+                                onClick={handleConfirmDelivery}
+                                disabled={confirmProcessing}
+                                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs rounded-lg flex items-center gap-1.5 transition-colors shadow-xs"
+                            >
+                                <CheckCircle2 className="w-4 h-4" />
+                                <span>Confirmer Réception (Débloquer)</span>
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Timeline Progress */}
