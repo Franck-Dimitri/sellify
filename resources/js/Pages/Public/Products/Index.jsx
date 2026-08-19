@@ -98,17 +98,17 @@ export default function Index({
                             <button 
                                 onClick={() => setActiveSearchTab('ai_mode')}
                                 className={`flex items-center gap-1.5 pb-1 border-b-2 transition-all ${
-                                    activeSearchTab === 'ai_mode' ? 'border-amber-500 text-amber-700 font-bold' : 'border-transparent hover:text-stone-900'
+                                    activeSearchTab === 'ai_mode' ? 'border-yellow-500 text-yellow-700 font-bold' : 'border-transparent hover:text-stone-900'
                                 }`}
                             >
-                                <Sparkles className="w-4 h-4 text-amber-500" />
+                                <Sparkles className="w-4 h-4 text-yellow-500" />
                                 <span>AI Mode ✨</span>
                             </button>
 
                             <button 
                                 onClick={() => setActiveSearchTab('produits')}
                                 className={`pb-1 border-b-2 transition-all ${
-                                    activeSearchTab === 'produits' ? 'border-amber-500 text-amber-700 font-bold' : 'border-transparent hover:text-stone-900'
+                                    activeSearchTab === 'produits' ? 'border-yellow-500 text-yellow-700 font-bold' : 'border-transparent hover:text-stone-900'
                                 }`}
                             >
                                 Produits
@@ -117,7 +117,7 @@ export default function Index({
                             <button 
                                 onClick={() => setActiveSearchTab('fabricants')}
                                 className={`pb-1 border-b-2 transition-all ${
-                                    activeSearchTab === 'fabricants' ? 'border-amber-500 text-amber-700 font-bold' : 'border-transparent hover:text-stone-900'
+                                    activeSearchTab === 'fabricants' ? 'border-yellow-500 text-yellow-700 font-bold' : 'border-transparent hover:text-stone-900'
                                 }`}
                             >
                                 Fabricants / Boutiques
@@ -126,7 +126,7 @@ export default function Index({
                             <button 
                                 onClick={() => setActiveSearchTab('mondial')}
                                 className={`pb-1 border-b-2 transition-all ${
-                                    activeSearchTab === 'mondial' ? 'border-amber-500 text-amber-700 font-bold' : 'border-transparent hover:text-stone-900'
+                                    activeSearchTab === 'mondial' ? 'border-yellow-500 text-yellow-700 font-bold' : 'border-transparent hover:text-stone-900'
                                 }`}
                             >
                                 Mondial
@@ -135,7 +135,7 @@ export default function Index({
 
                         {/* 2. Mega Search Input Container */}
                         <div className="max-w-3xl mx-auto">
-                            <form onSubmit={handleSearchSubmit} className="relative flex items-center bg-white border-2 border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20 rounded-full shadow-md p-1 pl-5">
+                            <form onSubmit={handleSearchSubmit} className="relative flex items-center bg-white border-2 border-yellow-400 focus-within:border-yellow-500 focus-within:ring-2 focus-within:ring-yellow-400/30 rounded-full shadow-md p-1 pl-5">
                                 <input
                                     type="text"
                                     placeholder={activeSearchTab === 'fabricants' ? "Nom de boutique, secteur ou ville (ex: Douala, Yaoundé)..." : "Entraîneurs, coiffeuse avec miroir, sacs, téléphones..."}
@@ -153,10 +153,10 @@ export default function Index({
                                     <span>Recherche par Image</span>
                                 </button>
 
-                                {/* Main Amber Search Button */}
+                                {/* Main Yellow Search Button */}
                                 <button
                                     type="submit"
-                                    className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-amber-950 text-xs font-bold rounded-full shadow-xs transition-colors shrink-0 flex items-center gap-1.5 ml-2"
+                                    className="px-6 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 text-xs font-black rounded-full shadow-xs transition-colors shrink-0 flex items-center gap-1.5 ml-2 border border-yellow-500"
                                 >
                                     <Search className="w-4 h-4" />
                                     <span>Rechercher</span>
@@ -167,12 +167,12 @@ export default function Index({
                         {/* 3. Hero Trust Tagline */}
                         <div className="text-center space-y-1 pt-1">
                             <p className="text-xs font-semibold text-stone-800">
-                                Contactez <strong className="text-amber-700 font-bold">34 000 fabricants Verified</strong>
+                                Contactez <strong className="text-yellow-700 font-bold">34 000 fabricants Verified</strong>
                             </p>
                             <div className="flex flex-wrap items-center justify-center gap-4 text-[11px] text-stone-500 font-normal">
-                                <span className="flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5 text-amber-500" /> + de 5 000 secteurs</span>
-                                <span className="flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5 text-amber-500" /> Prix d'usine & direct</span>
-                                <span className="flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5 text-amber-500" /> Échantillons et customisation possibles</span>
+                                <span className="flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5 text-yellow-500" /> + de 5 000 secteurs</span>
+                                <span className="flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5 text-yellow-500" /> Prix d'usine & direct</span>
+                                <span className="flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5 text-yellow-500" /> Échantillons et customisation possibles</span>
                             </div>
                         </div>
 
@@ -186,15 +186,15 @@ export default function Index({
                             Bienvenue sur Sellify.me
                         </div>
                         <div className="flex items-center gap-6 text-[11px] text-stone-600">
-                            <span className="flex items-center gap-1 cursor-pointer hover:text-amber-600">
+                            <span className="flex items-center gap-1 cursor-pointer hover:text-yellow-600">
                                 <FileText className="w-3.5 h-3.5 text-stone-500" />
                                 <span>Demander un devis</span>
                             </span>
-                            <span className="flex items-center gap-1 cursor-pointer hover:text-amber-600">
+                            <span className="flex items-center gap-1 cursor-pointer hover:text-yellow-600">
                                 <Store className="w-3.5 h-3.5 text-stone-500" />
                                 <span>Salon en ligne</span>
                             </span>
-                            <span className="flex items-center gap-1 cursor-pointer hover:text-amber-600">
+                            <span className="flex items-center gap-1 cursor-pointer hover:text-yellow-600">
                                 <Package className="w-3.5 h-3.5 text-stone-500" />
                                 <span>Hub de sourcing de premier ordre</span>
                             </span>
@@ -231,13 +231,13 @@ export default function Index({
                                                 setSearch(cat.name);
                                                 handleSearchSubmit();
                                             }}
-                                            className="w-full flex items-center justify-between p-2 rounded-xl text-xs text-stone-700 hover:bg-stone-50 hover:text-amber-600 font-normal transition-colors text-left group"
+                                            className="w-full flex items-center justify-between p-2 rounded-xl text-xs text-stone-700 hover:bg-yellow-50 hover:text-yellow-700 font-normal transition-colors text-left group"
                                         >
                                             <div className="flex items-center gap-2.5">
-                                                <IconComponent className="w-4 h-4 text-stone-500 group-hover:text-amber-600" />
+                                                <IconComponent className="w-4 h-4 text-stone-500 group-hover:text-yellow-600" />
                                                 <span>{cat.name}</span>
                                             </div>
-                                            <ChevronRight className="w-3.5 h-3.5 text-stone-400 group-hover:text-amber-600" />
+                                            <ChevronRight className="w-3.5 h-3.5 text-stone-400 group-hover:text-yellow-600" />
                                         </button>
                                     );
                                 })}
@@ -259,20 +259,20 @@ export default function Index({
                                 </div>
                                 <div className="p-2.5 bg-stone-50 rounded-xl space-y-2 border border-stone-100 hover:bg-white hover:shadow-xs transition-all">
                                     <div className="w-full h-20 bg-stone-200 rounded-lg overflow-hidden flex items-center justify-center">
-                                        <Sparkles className="w-8 h-8 text-amber-500 stroke-[1.5]" />
+                                        <Sparkles className="w-8 h-8 text-yellow-500 stroke-[1.5]" />
                                     </div>
                                     <span className="font-medium text-[11px] block text-stone-800">Nouveautés</span>
                                 </div>
                             </div>
 
                             {/* Q&R en direct */}
-                            <div className="bg-amber-50/70 border border-amber-200 rounded-xl p-3 space-y-2 text-xs">
-                                <div className="flex items-center gap-1.5 text-amber-900 font-bold text-[11px]">
-                                    <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                            <div className="bg-yellow-50/80 border border-yellow-200/80 rounded-xl p-3 space-y-2 text-xs">
+                                <div className="flex items-center gap-1.5 text-yellow-900 font-bold text-[11px]">
+                                    <Flame className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500" />
                                     <span>Q&R en direct</span>
                                 </div>
                                 <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-stone-100">
-                                    <div className="w-10 h-10 bg-amber-500 text-amber-950 rounded-md shrink-0 flex items-center justify-center font-bold text-xs">
+                                    <div className="w-10 h-10 bg-yellow-400 text-yellow-950 rounded-md shrink-0 flex items-center justify-center font-black text-xs border border-yellow-500">
                                         LIVE
                                     </div>
                                     <p className="text-[11px] text-stone-600 font-normal line-clamp-2">
@@ -288,7 +288,7 @@ export default function Index({
                                 <h3 className="font-bold text-stone-900 text-xs tracking-tight">
                                     Top classement fournisseurs
                                 </h3>
-                                <Link href={route('public.shops.index')} className="text-[10px] text-amber-600 font-semibold hover:underline">
+                                <Link href={route('public.shops.index')} className="text-[10px] text-yellow-700 font-semibold hover:underline">
                                     Voir tout
                                 </Link>
                             </div>
@@ -302,7 +302,7 @@ export default function Index({
                                 </div>
                                 <div className="p-2.5 bg-stone-50 rounded-xl space-y-2 border border-stone-100 hover:bg-white hover:shadow-xs transition-all">
                                     <div className="w-full h-18 bg-stone-200 rounded-lg overflow-hidden flex items-center justify-center">
-                                        <Award className="w-7 h-7 text-amber-500 stroke-[1.5]" />
+                                        <Award className="w-7 h-7 text-yellow-500 stroke-[1.5]" />
                                     </div>
                                     <span className="font-medium text-[11px] block text-stone-800">Meilleures ventes</span>
                                 </div>
@@ -336,12 +336,12 @@ export default function Index({
 
                                 <div className="grid grid-cols-2 gap-2 pt-1">
                                     <Link href={route('login')}>
-                                        <button className="w-full py-2 bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold text-xs rounded-xl shadow-xs transition-colors">
+                                        <button className="w-full py-2 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-xs transition-colors border border-yellow-500">
                                             Se connecter
                                         </button>
                                     </Link>
                                     <Link href={route('register')}>
-                                        <button className="w-full py-2 border border-amber-500 text-amber-900 hover:bg-amber-50 font-bold text-xs rounded-xl transition-colors">
+                                        <button className="w-full py-2 border border-yellow-500 text-yellow-900 hover:bg-yellow-50 font-bold text-xs rounded-xl transition-colors">
                                             S'inscrire
                                         </button>
                                     </Link>
@@ -380,14 +380,14 @@ export default function Index({
                     <div className="bg-white rounded-2xl p-4 border border-stone-200/80 shadow-2xs space-y-3">
                         <div className="flex items-center justify-between border-b border-stone-100 pb-3 overflow-x-auto">
                             <div className="flex items-center gap-6 text-xs font-semibold text-stone-700 shrink-0">
-                                <button className="text-amber-700 font-bold border-b-2 border-amber-500 pb-1">Toutes les catégories</button>
-                                <button className="hover:text-amber-600">Beauté</button>
-                                <button className="hover:text-amber-600">Véhicules & Transport</button>
-                                <button className="hover:text-amber-600">Maison & Jardin</button>
-                                <button className="hover:text-amber-600">Électronique grand public</button>
-                                <button className="hover:text-amber-600">Sports & Loisirs</button>
-                                <button className="hover:text-amber-600">Chaussures & Accessoires</button>
-                                <button className="hover:text-amber-600">Hygiène...</button>
+                                <button className="text-yellow-700 font-bold border-b-2 border-yellow-400 pb-1">Toutes les catégories</button>
+                                <button className="hover:text-yellow-600">Beauté</button>
+                                <button className="hover:text-yellow-600">Véhicules & Transport</button>
+                                <button className="hover:text-yellow-600">Maison & Jardin</button>
+                                <button className="hover:text-yellow-600">Électronique grand public</button>
+                                <button className="hover:text-yellow-600">Sports & Loisirs</button>
+                                <button className="hover:text-yellow-600">Chaussures & Accessoires</button>
+                                <button className="hover:text-yellow-600">Hygiène...</button>
                             </div>
                             <button className="text-xs text-stone-500 hover:text-stone-800 font-medium shrink-0 flex items-center gap-1">
                                 <span>Voir plus</span>
@@ -439,7 +439,7 @@ export default function Index({
                                     return (
                                         <div 
                                             key={shop.id}
-                                            className="bg-white rounded-2xl border border-stone-200/80 p-5 shadow-2xs hover:border-amber-500 hover:shadow-md transition-all space-y-4"
+                                            className="bg-white rounded-2xl border border-stone-200/80 p-5 shadow-2xs hover:border-yellow-400 hover:shadow-md transition-all space-y-4"
                                         >
                                             {/* Header Row */}
                                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-100 pb-3">
@@ -465,8 +465,8 @@ export default function Index({
 
                                                         {/* Status badges line */}
                                                         <div className="flex flex-wrap items-center gap-2 text-[10px] text-stone-500 font-normal">
-                                                            <span className="text-amber-700 font-bold flex items-center gap-0.5">
-                                                                <CheckCircle2 className="w-3.5 h-3.5 text-amber-500" />
+                                                            <span className="text-yellow-700 font-bold flex items-center gap-0.5">
+                                                                <CheckCircle2 className="w-3.5 h-3.5 text-yellow-500" />
                                                                 Verified
                                                             </span>
                                                             <span>•</span>
@@ -502,9 +502,9 @@ export default function Index({
                                                     <div>
                                                         <span className="text-[10px] text-stone-400 font-bold uppercase tracking-wider block mb-0.5">Note et avis</span>
                                                         <div className="flex items-center gap-1 text-xs">
-                                                            <div className="flex text-amber-400">
+                                                            <div className="flex text-yellow-400">
                                                                 {[...Array(5)].map((_, i) => (
-                                                                    <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                                                                    <Star key={i} className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
                                                                 ))}
                                                             </div>
                                                             <span className="font-bold text-stone-800">4.9/5</span>
@@ -551,7 +551,7 @@ export default function Index({
                                                     {/* Showroom / VR Photo Card */}
                                                     <div className="relative bg-stone-900 rounded-xl overflow-hidden flex items-center justify-center text-white p-2 min-h-[120px] group">
                                                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
-                                                        <span className="absolute top-2 left-2 bg-amber-500 text-amber-950 text-[9px] font-bold px-1.5 py-0.5 rounded z-20 flex items-center gap-0.5">
+                                                        <span className="absolute top-2 left-2 bg-yellow-400 text-yellow-950 text-[9px] font-bold px-1.5 py-0.5 rounded z-20 flex items-center gap-0.5 border border-yellow-500">
                                                             <Eye className="w-3 h-3" />
                                                             <span>VR 360</span>
                                                         </span>
@@ -591,7 +591,7 @@ export default function Index({
                                     <button 
                                         onClick={handleReset}
                                         className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
-                                            !onSale ? 'bg-amber-500 text-amber-950 border-amber-500 font-bold' : 'bg-white text-stone-700 border-stone-200'
+                                            !onSale ? 'bg-yellow-400 text-yellow-950 border-yellow-500 font-bold' : 'bg-white text-stone-700 border-stone-200'
                                         }`}
                                     >
                                         Tous les articles
@@ -599,7 +599,7 @@ export default function Index({
                                     <button 
                                         onClick={() => { setOnSale(true); handleSearchSubmit(); }}
                                         className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
-                                            onSale ? 'bg-amber-500 text-amber-950 border-amber-500 font-bold' : 'bg-white text-stone-700 border-stone-200'
+                                            onSale ? 'bg-yellow-400 text-yellow-950 border-yellow-500 font-bold' : 'bg-white text-stone-700 border-stone-200'
                                         }`}
                                     >
                                         Promotions & Ventes Flash
@@ -613,7 +613,7 @@ export default function Index({
                                     <Package className="w-12 h-12 text-stone-300 mx-auto stroke-[1.5]" />
                                     <h4 className="font-bold text-stone-800 text-sm">Aucun produit trouvé</h4>
                                     <p className="text-xs text-stone-500">Essayez de modifier votre recherche ou réinitialisez les filtres.</p>
-                                    <button onClick={handleReset} className="px-4 py-2 bg-amber-500 text-amber-950 font-bold text-xs rounded-full">
+                                    <button onClick={handleReset} className="px-4 py-2 bg-yellow-400 text-yellow-950 font-bold text-xs rounded-full border border-yellow-500">
                                         Réinitialiser la recherche
                                     </button>
                                 </div>
@@ -627,7 +627,7 @@ export default function Index({
                                         return (
                                             <div 
                                                 key={product.id}
-                                                className="bg-white rounded-xl border border-stone-200/80 overflow-hidden hover:border-amber-500 hover:shadow-md transition-all flex flex-col justify-between group p-3 space-y-2"
+                                                className="bg-white rounded-xl border border-stone-200/80 overflow-hidden hover:border-yellow-400 hover:shadow-md transition-all flex flex-col justify-between group p-3 space-y-2"
                                             >
                                                 <div>
                                                     {/* Card Image Box with Camera hover icon */}
@@ -670,7 +670,7 @@ export default function Index({
 
                                                     {/* Title */}
                                                     <Link href={route('public.products.show', product.slug)} className="block pt-1">
-                                                        <h4 className="font-normal text-stone-900 text-xs line-clamp-2 hover:text-amber-600 transition-colors leading-tight">
+                                                        <h4 className="font-normal text-stone-900 text-xs line-clamp-2 hover:text-yellow-600 transition-colors leading-tight">
                                                             {product.name}
                                                         </h4>
                                                     </Link>
@@ -690,13 +690,13 @@ export default function Index({
 
                                                     {/* Verified Supplier Line */}
                                                     <div className="flex items-center gap-1 text-[10px] text-stone-500 font-medium pt-1">
-                                                        <CheckCircle2 className="w-3 h-3 text-amber-500 shrink-0" />
+                                                        <CheckCircle2 className="w-3 h-3 text-yellow-500 shrink-0" />
                                                         <span className="truncate">Verified • 1 an • 🇨🇲 CM</span>
                                                     </div>
 
                                                     {/* Action Button */}
                                                     <Link href={route('public.products.show', product.slug)} className="block pt-1">
-                                                        <button className="w-full py-1.5 bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold text-[11px] rounded-lg transition-colors shadow-2xs">
+                                                        <button className="w-full py-1.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-[11px] rounded-lg transition-colors shadow-2xs border border-yellow-500">
                                                             Voir la fiche
                                                         </button>
                                                     </Link>
@@ -717,7 +717,7 @@ export default function Index({
                                             dangerouslySetInnerHTML={{ __html: link.label }}
                                             className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
                                                 link.active
-                                                    ? 'bg-amber-500 text-amber-950 border-amber-500 font-bold'
+                                                    ? 'bg-yellow-400 text-yellow-950 border-yellow-500 font-bold'
                                                     : link.url
                                                         ? 'bg-white text-stone-700 border-stone-200 hover:bg-stone-50'
                                                         : 'bg-stone-100 text-stone-300 border-stone-200 cursor-not-allowed'

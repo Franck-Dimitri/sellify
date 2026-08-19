@@ -41,6 +41,17 @@ Route::get('/boutiques', [StoreController::class, 'indexShops'])->name('public.s
 Route::get('/boutique/{slug}', [ShopController::class, 'showPublic'])->name('shop.public');
 Route::post('/boutique/checkout/direct', [ShopController::class, 'directCheckout'])->name('shop.direct_checkout');
 
+// Public Shopping Cart Routes
+Route::get('/cart', [\App\Http\Controllers\Public\CartController::class, 'index'])->name('public.cart.index');
+Route::post('/cart/add', [\App\Http\Controllers\Public\CartController::class, 'add'])->name('public.cart.add');
+Route::post('/cart/update/{id}', [\App\Http\Controllers\Public\CartController::class, 'update'])->name('public.cart.update');
+Route::delete('/cart/remove/{id}', [\App\Http\Controllers\Public\CartController::class, 'remove'])->name('public.cart.remove');
+Route::post('/cart/clear', [\App\Http\Controllers\Public\CartController::class, 'clear'])->name('public.cart.clear');
+
+// Public Checkout Routes
+Route::get('/checkout', [\App\Http\Controllers\Public\CheckoutController::class, 'show'])->name('public.checkout.index');
+Route::post('/checkout/process', [\App\Http\Controllers\Public\CheckoutController::class, 'process'])->name('public.checkout.process');
+
 // Fast Checkout via Smart-Link
 Route::get('/pay/{token}', [SmartLinkCheckoutController::class, 'show'])->name('smartlink.checkout');
 Route::post('/pay/{token}', [SmartLinkCheckoutController::class, 'processPayment'])->name('smartlink.pay');
@@ -214,6 +225,16 @@ Route::middleware(['auth', 'account.active'])->group(function () {
 
         // Chatbot IA Flottant
         Route::post('/ai/chat', [AiChatController::class, 'handle'])->name('ai.chat');
+
+        // ─────────────────────────────────────────────────────────────────────────
+        // Espace Client (Commandes, Suivi OTP, Litiges & Confirmation Escrow)
+        // ─────────────────────────────────────────────────────────────────────────
+        Route::prefix('customer')->name('customer.')->group(function () {
+            Route::get('/orders', [\App\Http\Controllers\Customer\OrderController::class, 'index'])->name('orders.index');
+            Route::get('/orders/{order_number}', [\App\Http\Controllers\Customer\OrderController::class, 'show'])->name('orders.show');
+            Route::post('/orders/{order_number}/confirm', [\App\Http\Controllers\Customer\OrderController::class, 'confirmDelivery'])->name('orders.confirm');
+            Route::post('/orders/{order_number}/dispute', [\App\Http\Controllers\Customer\OrderController::class, 'openDispute'])->name('orders.dispute');
+        });
 
         // ─────────────────────────────────────────────────────────────────────────
         // Espace Livreur (Dashboard & Actions)

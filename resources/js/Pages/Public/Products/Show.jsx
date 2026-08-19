@@ -12,7 +12,8 @@ import {
     ArrowLeft, 
     Plus, 
     Minus, 
-    X, 
+    X,
+    ShoppingCart, 
     Share2,
     Sparkles,
     Check,
@@ -89,17 +90,17 @@ export default function Show({ product, shop, seller, sellerUser, relatedProduct
             <div className="w-full bg-stone-100/70 min-h-screen pb-20 antialiased font-sans text-stone-800">
                 
                 {/* TOP TRADE ASSURANCE BANNER */}
-                <div className="bg-gradient-to-r from-stone-900 via-amber-950 to-stone-900 text-white text-xs py-2 px-4 border-b border-stone-800">
+                <div className="bg-gradient-to-r from-stone-900 via-yellow-950 to-stone-900 text-white text-xs py-2 px-4 border-b border-stone-800">
                     <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 font-normal">
                         <div className="flex items-center gap-2">
-                            <span className="bg-amber-500 text-amber-950 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
+                            <span className="bg-yellow-400 text-yellow-950 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider border border-yellow-500">
                                 Trade Assurance
                             </span>
                             <span className="text-stone-300 text-[11px]">
                                 Produit Vérifié & Commande Protégée par le Séquestre Sellify. Remboursement garanti si non conforme.
                             </span>
                         </div>
-                        <div className="flex items-center gap-4 text-[11px] text-amber-400 font-medium">
+                        <div className="flex items-center gap-4 text-[11px] text-yellow-400 font-medium">
                             <span className="flex items-center gap-1"><Lock className="w-3 h-3" /> Paiement Sécurisé MoMo</span>
                             <span className="flex items-center gap-1"><Truck className="w-3 h-3" /> Expédition Sous 24h-48h</span>
                         </div>
@@ -161,7 +162,7 @@ export default function Show({ product, shop, seller, sellerUser, relatedProduct
                                 )}
 
                                 <span className="absolute bottom-4 left-4 bg-stone-900/85 backdrop-blur-xs text-white text-[10px] font-semibold px-2.5 py-1 rounded-md flex items-center gap-1">
-                                    <BadgeCheck className="w-3.5 h-3.5 text-amber-400" />
+                                    <BadgeCheck className="w-3.5 h-3.5 text-yellow-400" />
                                     <span>Stock Vérifié : {product.stock} unités</span>
                                 </span>
                             </div>
@@ -175,7 +176,7 @@ export default function Show({ product, shop, seller, sellerUser, relatedProduct
                                             onClick={() => setSelectedImage(img)}
                                             className={`w-18 h-18 rounded-xl border-2 overflow-hidden shrink-0 transition-all ${
                                                 selectedImage === img 
-                                                    ? 'border-amber-500 ring-2 ring-amber-500/20' 
+                                                    ? 'border-yellow-400 ring-2 ring-yellow-400/20' 
                                                     : 'border-stone-200 opacity-75 hover:opacity-100'
                                             }`}
                                         >
@@ -186,19 +187,19 @@ export default function Show({ product, shop, seller, sellerUser, relatedProduct
                             )}
 
                             {/* Trade Protection Summary Card */}
-                            <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 space-y-3 text-xs text-amber-950 font-normal shadow-2xs">
-                                <div className="flex items-center gap-2 font-semibold text-amber-900 border-b border-amber-200/60 pb-2">
-                                    <ShieldCheck className="w-4.5 h-4.5 text-amber-600" />
+                            <div className="bg-yellow-50/80 border border-yellow-200/80 rounded-2xl p-4 space-y-3 text-xs text-yellow-950 font-normal shadow-2xs">
+                                <div className="flex items-center gap-2 font-semibold text-yellow-900 border-b border-yellow-200/60 pb-2">
+                                    <ShieldCheck className="w-4.5 h-4.5 text-yellow-600" />
                                     <span>Engagement Acheteur Sellify Escrow</span>
                                 </div>
                                 <p className="text-[11px] text-stone-600 leading-relaxed">
                                     Vos fonds restent sécurisés sur un compte séquestre neutre. Le vendeur ne perçoit son paiement qu'après votre confirmation de réception et conformité sous 48h.
                                 </p>
                                 <div className="grid grid-cols-2 gap-2 text-[11px] text-stone-700 pt-1">
-                                    <span className="flex items-center gap-1"><Truck className="w-3.5 h-3.5 text-amber-600" /> Expédié sous 24h</span>
-                                    <span className="flex items-center gap-1"><CreditCard className="w-3.5 h-3.5 text-amber-600" /> Orange / MTN MoMo</span>
-                                    <span className="flex items-center gap-1"><RefreshCw className="w-3.5 h-3.5 text-amber-600" /> Retour gratuit si défaut</span>
-                                    <span className="flex items-center gap-1"><FileText className="w-3.5 h-3.5 text-amber-600" /> Facture Certifiée</span>
+                                    <span className="flex items-center gap-1"><Truck className="w-3.5 h-3.5 text-yellow-600" /> Expédié sous 24h</span>
+                                    <span className="flex items-center gap-1"><CreditCard className="w-3.5 h-3.5 text-yellow-600" /> Orange / MTN MoMo</span>
+                                    <span className="flex items-center gap-1"><RefreshCw className="w-3.5 h-3.5 text-yellow-600" /> Retour gratuit si défaut</span>
+                                    <span className="flex items-center gap-1"><FileText className="w-3.5 h-3.5 text-yellow-600" /> Facture Certifiée</span>
                                 </div>
                             </div>
                         </div>
@@ -209,7 +210,7 @@ export default function Show({ product, shop, seller, sellerUser, relatedProduct
                             {/* Product Header & SKU */}
                             <div className="space-y-2 border-b border-stone-100 pb-3">
                                 <div className="flex items-center justify-between text-[11px]">
-                                    <span className="bg-amber-100 text-amber-950 font-semibold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider">
+                                    <span className="bg-yellow-100 text-yellow-950 font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider border border-yellow-300">
                                         Fournisseur Certifié
                                     </span>
                                     <span className="text-stone-400 font-mono">SKU : {product.sku || `PROD-${product.id}`}</span>
@@ -218,7 +219,7 @@ export default function Show({ product, shop, seller, sellerUser, relatedProduct
                                 
                                 <div className="flex items-center gap-3 text-xs text-stone-500 pt-1">
                                     <span className="flex items-center gap-1 font-semibold text-stone-900">
-                                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                                        <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
                                         <span>4.9 / 5</span>
                                     </span>
                                     <span>•</span>
@@ -236,15 +237,15 @@ export default function Show({ product, shop, seller, sellerUser, relatedProduct
                                 </span>
                                 
                                 <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                                    <div className={`p-2 rounded-lg border transition-all ${quantity < 5 ? 'bg-amber-50 border-amber-400 font-semibold text-amber-950' : 'bg-white border-stone-200 text-stone-600'}`}>
+                                    <div className={`p-2 rounded-lg border transition-all ${quantity < 5 ? 'bg-yellow-50 border-yellow-400 font-semibold text-yellow-950' : 'bg-white border-stone-200 text-stone-600'}`}>
                                         <span className="block text-[10px] text-stone-400">1 - 4 unités</span>
                                         <span className="font-bold">{Number(baseUnitPrice).toLocaleString()} FCFA</span>
                                     </div>
-                                    <div className={`p-2 rounded-lg border transition-all ${quantity >= 5 && quantity < 10 ? 'bg-amber-50 border-amber-400 font-semibold text-amber-950' : 'bg-white border-stone-200 text-stone-600'}`}>
+                                    <div className={`p-2 rounded-lg border transition-all ${quantity >= 5 && quantity < 10 ? 'bg-yellow-50 border-yellow-400 font-semibold text-yellow-950' : 'bg-white border-stone-200 text-stone-600'}`}>
                                         <span className="block text-[10px] text-stone-400">5 - 9 unités (-5%)</span>
                                         <span className="font-bold">{Number(baseUnitPrice * 0.95).toLocaleString()} FCFA</span>
                                     </div>
-                                    <div className={`p-2 rounded-lg border transition-all ${quantity >= 10 ? 'bg-amber-50 border-amber-400 font-semibold text-amber-950' : 'bg-white border-stone-200 text-stone-600'}`}>
+                                    <div className={`p-2 rounded-lg border transition-all ${quantity >= 10 ? 'bg-yellow-50 border-yellow-400 font-semibold text-yellow-950' : 'bg-white border-stone-200 text-stone-600'}`}>
                                         <span className="block text-[10px] text-stone-400">10+ unités (-10%)</span>
                                         <span className="font-bold">{Number(baseUnitPrice * 0.90).toLocaleString()} FCFA</span>
                                     </div>
@@ -300,18 +301,36 @@ export default function Show({ product, shop, seller, sellerUser, relatedProduct
 
                                 <div className="bg-stone-900 text-white rounded-xl p-3.5 flex justify-between items-center">
                                     <span className="text-xs text-stone-300 font-normal">Montant Total à Régler :</span>
-                                    <span className="text-lg font-bold text-amber-400">{Number(totalPrice).toLocaleString()} FCFA</span>
+                                    <span className="text-lg font-bold text-yellow-400">{Number(totalPrice).toLocaleString()} FCFA</span>
                                 </div>
 
                                 {/* Main Action Buttons */}
                                 <div className="space-y-2">
                                     <button
+                                        onClick={() => {
+                                            router.post(route('public.cart.add'), {
+                                                product_id: product.id,
+                                                quantity: quantity
+                                            }, {
+                                                onSuccess: () => {
+                                                    router.get(route('public.cart.index'));
+                                                }
+                                            });
+                                        }}
+                                        disabled={product.stock <= 0}
+                                        className="w-full py-3.5 bg-yellow-400 hover:bg-yellow-500 disabled:opacity-50 text-yellow-950 font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 border border-yellow-500"
+                                    >
+                                        <ShoppingCart className="w-4.5 h-4.5 text-yellow-950" />
+                                        <span>Ajouter au Panier & Voir le Panier</span>
+                                    </button>
+                                    
+                                    <button
                                         onClick={() => setIsCheckoutOpen(true)}
                                         disabled={product.stock <= 0}
-                                        className="w-full py-3.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-amber-950 font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2"
+                                        className="w-full py-2.5 bg-stone-900 hover:bg-stone-800 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2"
                                     >
-                                        <ShieldCheck className="w-4.5 h-4.5 text-amber-950" />
-                                        <span>Commander Directement via Escrow</span>
+                                        <ShieldCheck className="w-4 h-4 text-yellow-400" />
+                                        <span>Achat Rapide 1-Click via Escrow</span>
                                     </button>
                                     <p className="text-[10px] text-stone-400 text-center font-normal">
                                         Validation instantanée avec Mobile Money (Orange / MTN MoMo).
@@ -325,8 +344,8 @@ export default function Show({ product, shop, seller, sellerUser, relatedProduct
                         <div className="bg-white border border-stone-200/80 rounded-2xl p-5 shadow-xs space-y-4 lg:col-span-3">
                             <div className="border-b border-stone-100 pb-3 flex items-center justify-between">
                                 <h3 className="text-xs font-semibold text-stone-900 uppercase tracking-wider">Profil Fournisseur</h3>
-                                <span className="bg-amber-50 text-amber-900 border border-amber-200 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                                    <Sparkles className="w-3 h-3 text-amber-600" />
+                                <span className="bg-yellow-50 text-yellow-900 border border-yellow-200 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                                    <Sparkles className="w-3 h-3 text-yellow-600" />
                                     <span>Gold Supplier</span>
                                 </span>
                             </div>
@@ -344,18 +363,18 @@ export default function Show({ product, shop, seller, sellerUser, relatedProduct
                                         <div className="truncate">
                                             <div className="flex items-center gap-1">
                                                 <h4 className="font-semibold text-stone-900 text-xs truncate">{shop.name}</h4>
-                                                <BadgeCheck className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                                <BadgeCheck className="w-3.5 h-3.5 text-yellow-600 shrink-0" />
                                             </div>
                                             <p className="text-[11px] text-stone-400 font-normal truncate">{shop.slogan || 'Boutique Certifiée'}</p>
                                         </div>
                                     </div>
 
-                                    {/* Supplier Performance Metrics (Alibaba Style) */}
+                                    {/* Supplier Performance Metrics */}
                                     <div className="bg-stone-50 border border-stone-200/70 rounded-xl p-3 space-y-2 text-xs font-normal">
                                         <div className="flex justify-between items-center">
                                             <span className="text-stone-400 text-[11px]">Note Vendeur :</span>
                                             <span className="font-bold text-stone-900 flex items-center gap-1">
-                                                <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                                                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                                                 <span>4.9 / 5.0</span>
                                             </span>
                                         </div>
@@ -401,7 +420,7 @@ export default function Show({ product, shop, seller, sellerUser, relatedProduct
 
                     </div>
 
-                    {/* DETAILED TABBED INFORMATION SECTIONS (ALIBABA STYLE SPECS & DETAILS) */}
+                    {/* DETAILED TABBED INFORMATION SECTIONS */}
                     <div className="bg-white border border-stone-200/80 rounded-2xl p-6 shadow-xs space-y-5">
                         
                         {/* Tab Headers */}
@@ -419,7 +438,7 @@ export default function Show({ product, shop, seller, sellerUser, relatedProduct
                                         onClick={() => setActiveTab(t.id)}
                                         className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 ${
                                             activeTab === t.id
-                                                ? 'bg-amber-500 text-amber-950 shadow-2xs'
+                                                ? 'bg-yellow-400 text-yellow-950 shadow-2xs border border-yellow-500 font-bold'
                                                 : 'bg-stone-50 text-stone-600 hover:bg-stone-100'
                                         }`}
                                     >
@@ -451,69 +470,52 @@ export default function Show({ product, shop, seller, sellerUser, relatedProduct
                                             <strong className="text-emerald-700 font-semibold">{product.stock} pièces prêtes</strong>
                                         </div>
                                         <div className="flex justify-between p-3 bg-stone-50 rounded-xl border border-stone-200/60">
-                                            <span className="text-stone-400">Commande Minimale (MOQ) :</span>
-                                            <strong className="text-stone-800 font-semibold">1 pièce</strong>
+                                            <span className="text-stone-400">Garantie & Support :</span>
+                                            <strong className="text-stone-800 font-semibold">Garantie Retrait & Remboursement 48h</strong>
                                         </div>
                                     </div>
                                 </div>
                             )}
 
                             {activeTab === 'description' && (
-                                <div className="space-y-3 text-xs text-stone-700 font-normal leading-relaxed whitespace-pre-line">
-                                    <h3 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
-                                        Description & Conseils d'Utilisation
-                                    </h3>
-                                    <p className="p-4 bg-stone-50 rounded-xl border border-stone-200/60">
-                                        {product.description || 'Aucune description détaillée n’a été rédigée pour cet article.'}
+                                <div className="space-y-3 text-xs text-stone-700 leading-relaxed">
+                                    <h3 className="text-xs font-bold text-stone-900 uppercase tracking-wider">Description Détaillée</h3>
+                                    <p className="whitespace-pre-line bg-stone-50 p-4 rounded-xl border border-stone-200/60">
+                                        {product.description || 'Aucune description spécifique fournie par le vendeur pour cet article.'}
                                     </p>
                                 </div>
                             )}
 
-                            {activeTab === 'supplier' && (
-                                <div className="space-y-4 text-xs font-normal">
-                                    <h3 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
-                                        Informations Légales & Certification Vendeur
-                                    </h3>
-                                    {shop && (
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                            <div className="p-4 bg-stone-50 rounded-xl border border-stone-200/60 space-y-1">
-                                                <span className="text-stone-400 text-[11px] block">Raison Sociale :</span>
-                                                <strong className="text-stone-900 font-semibold text-sm">{shop.company_name}</strong>
-                                            </div>
-                                            <div className="p-4 bg-stone-50 rounded-xl border border-stone-200/60 space-y-1">
-                                                <span className="text-stone-400 text-[11px] block">Immatriculation RCCM :</span>
-                                                <strong className="text-stone-900 font-semibold text-sm">{shop.rccm_number || 'Non Renseigné'}</strong>
-                                            </div>
-                                            <div className="p-4 bg-stone-50 rounded-xl border border-stone-200/60 space-y-1">
-                                                <span className="text-stone-400 text-[11px] block">Localisation Siège :</span>
-                                                <strong className="text-stone-900 font-semibold text-sm">{shop.address}, {shop.city}</strong>
-                                            </div>
+                            {activeTab === 'supplier' && shop && (
+                                <div className="space-y-4 text-xs">
+                                    <h3 className="text-xs font-bold text-stone-900 uppercase tracking-wider">Informations d'Immatriculation du Vendeur</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="bg-stone-50 p-4 rounded-xl border border-stone-200/60 space-y-2">
+                                            <span className="font-bold text-stone-900 block text-xs border-b pb-1">Boutique Officielle</span>
+                                            <p className="flex justify-between"><span>Nom :</span> <strong className="text-stone-800">{shop.name}</strong></p>
+                                            <p className="flex justify-between"><span>Slogan :</span> <span className="text-stone-600">{shop.slogan || 'N/A'}</span></p>
+                                            <p className="flex justify-between"><span>Ville :</span> <span className="text-stone-800 font-medium">{shop.city || 'Douala'}</span></p>
                                         </div>
-                                    )}
+                                        <div className="bg-stone-50 p-4 rounded-xl border border-stone-200/60 space-y-2">
+                                            <span className="font-bold text-stone-900 block text-xs border-b pb-1">Conformité Légale</span>
+                                            <p className="flex justify-between"><span>RCCM / Patente :</span> <strong className="text-stone-800 font-mono">{shop.rccm_number || 'En cours de vérification'}</strong></p>
+                                            <p className="flex justify-between"><span>Statut KYC Vendeur :</span> <strong className="text-emerald-700 font-semibold">Vérifié & Validé</strong></p>
+                                        </div>
+                                    </div>
                                 </div>
                             )}
 
                             {activeTab === 'escrow' && (
-                                <div className="space-y-4 text-xs text-stone-700 font-normal">
-                                    <h3 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
-                                        Procédure de Protection Acheteur & Séquestre Escrow
-                                    </h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div className="p-4 bg-amber-50/60 border border-amber-200 rounded-xl space-y-2">
-                                            <span className="w-6 h-6 rounded-full bg-amber-500 text-amber-950 font-bold flex items-center justify-center text-xs">1</span>
-                                            <h4 className="font-semibold text-amber-950">Paiement Sécurisé</h4>
-                                            <p className="text-[11px] text-stone-600">Votre paiement est bloqué sur un compte neutre garanti.</p>
-                                        </div>
-                                        <div className="p-4 bg-amber-50/60 border border-amber-200 rounded-xl space-y-2">
-                                            <span className="w-6 h-6 rounded-full bg-amber-500 text-amber-950 font-bold flex items-center justify-center text-xs">2</span>
-                                            <h4 className="font-semibold text-amber-950">Livraison Express</h4>
-                                            <p className="text-[11px] text-stone-600">Le livreur partenaire vous remet le colis sous 24h-48h.</p>
-                                        </div>
-                                        <div className="p-4 bg-amber-50/60 border border-amber-200 rounded-xl space-y-2">
-                                            <span className="w-6 h-6 rounded-full bg-amber-500 text-amber-950 font-bold flex items-center justify-center text-xs">3</span>
-                                            <h4 className="font-semibold text-amber-950">Libération des Fonds</h4>
-                                            <p className="text-[11px] text-stone-600">Le vendeur est payé seulement après votre validation.</p>
-                                        </div>
+                                <div className="space-y-3 text-xs text-stone-700">
+                                    <h3 className="text-xs font-bold text-stone-900 uppercase tracking-wider">Protection de l'Acheteur par Séquestre</h3>
+                                    <div className="bg-yellow-50/80 border border-yellow-200 rounded-xl p-4 space-y-2">
+                                        <p className="font-medium text-yellow-950">Comment fonctionne la garantie Escrow Sellify ?</p>
+                                        <ul className="list-disc list-inside space-y-1 text-[11px] text-stone-600">
+                                            <li>Votre paiement Mobile Money est consigné sur un compte séquestre de garantie.</li>
+                                            <li>Le vendeur prépare et expédie votre commande sous 24 à 48 heures.</li>
+                                            <li>Une fois le colis livré, vous avez 48 heures pour vérifier sa conformité.</li>
+                                            <li>Les fonds ne sont débloqués vers le vendeur qu'après votre accord final.</li>
+                                        </ul>
                                     </div>
                                 </div>
                             )}
@@ -521,205 +523,84 @@ export default function Show({ product, shop, seller, sellerUser, relatedProduct
 
                     </div>
 
-                    {/* RELATED PRODUCTS FROM THE SAME SUPPLIER */}
-                    {relatedProducts.length > 0 && (
-                        <div className="bg-white border border-stone-200/80 rounded-2xl p-6 shadow-xs space-y-4">
-                            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-                                <h3 className="text-sm font-semibold text-stone-900">
-                                    Autres articles en stock chez {shop?.name}
-                                </h3>
-                                <Link href={route('shop.public', shop?.slug || '#')} className="text-xs text-amber-700 font-medium hover:underline">
-                                    Voir tout le catalogue du vendeur
-                                </Link>
-                            </div>
-                            
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                {relatedProducts.map((rel) => {
-                                    const firstImg = rel.image_paths && rel.image_paths[0] ? `/storage/${rel.image_paths[0]}` : null;
-                                    const relPromo = rel.active_promotion !== null;
-
-                                    return (
-                                        <div key={rel.id} className="border border-stone-200/70 rounded-xl p-3 bg-stone-50/40 hover:bg-white hover:shadow-sm transition-all space-y-2">
-                                            <div className="w-full h-36 bg-stone-100 rounded-lg overflow-hidden flex items-center justify-center">
-                                                {firstImg ? (
-                                                    <img src={firstImg} alt={rel.name} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <Package className="w-6 h-6 text-stone-300 stroke-[1.5]" />
-                                                )}
-                                            </div>
-                                            <h4 className="font-semibold text-stone-900 text-xs truncate">{rel.name}</h4>
-                                            <div className="flex justify-between items-center text-xs">
-                                                <span className="font-bold text-stone-900">
-                                                    {Number(relPromo ? rel.active_promotion.promo_price : rel.price).toLocaleString()} FCFA
-                                                </span>
-                                                <Link href={route('public.products.show', rel.slug)} className="text-[11px] text-amber-700 font-semibold hover:underline">
-                                                    Voir
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    )}
-
                 </div>
 
-                {/* MODAL CHECKOUT DIRECT ESCROW */}
-                {isCheckoutOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-                        <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-5 text-stone-800">
-                            <div className="flex justify-between items-center border-b border-stone-100 pb-3">
-                                <div className="flex items-center gap-2">
-                                    <ShieldCheck className="w-5 h-5 text-amber-600" />
-                                    <h3 className="font-semibold text-stone-900 text-sm">Commande Directe Escrow</h3>
+            </div>
+
+            {/* DIRECT FAST-CHECKOUT MODAL */}
+            {isCheckoutOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs">
+                    <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-stone-200 space-y-4 relative">
+                        <button 
+                            onClick={() => setIsCheckoutOpen(false)}
+                            className="absolute top-4 right-4 text-stone-400 hover:text-stone-800 p-1"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+
+                        <div className="flex items-center gap-2 text-yellow-700 border-b border-stone-100 pb-3">
+                            <ShieldCheck className="w-5 h-5 text-yellow-600" />
+                            <h3 className="font-bold text-stone-900 text-sm">Commande Rapide via Séquestre Escrow</h3>
+                        </div>
+
+                        <form onSubmit={handleCheckoutSubmit} className="space-y-4 text-xs font-normal">
+                            <div className="bg-stone-50 p-3 rounded-xl border border-stone-200 flex justify-between items-center">
+                                <div>
+                                    <strong className="text-stone-900 text-xs block">{product.name}</strong>
+                                    <span className="text-[10px] text-stone-400">{quantity} unité(s) &bull; {Number(unitPrice).toLocaleString()} FCFA / unit</span>
                                 </div>
-                                <button onClick={() => setIsCheckoutOpen(false)} className="text-stone-400 hover:text-stone-600">
-                                    <X className="w-4 h-4" />
-                                </button>
+                                <span className="font-bold text-stone-900 text-sm">{Number(totalPrice).toLocaleString()} FCFA</span>
                             </div>
 
-                            <form onSubmit={handleCheckoutSubmit} className="space-y-4 text-xs font-normal">
-                                
-                                {/* Product Summary & Quantity Selector */}
-                                <div className="bg-stone-50 border border-stone-200/70 rounded-xl p-3.5 flex items-center justify-between">
-                                    <div>
-                                        <h4 className="font-semibold text-stone-900 text-xs">{product.name}</h4>
-                                        <p className="text-[11px] text-stone-500 font-normal">Prix unitaire : {Number(unitPrice).toLocaleString()} FCFA</p>
-                                    </div>
-
-                                    {/* Quantity Counter */}
-                                    <div className="flex items-center gap-2 bg-white border border-stone-200 rounded-lg p-1">
-                                        <button 
-                                            type="button" 
-                                            onClick={() => handleQuantityChange(quantity - 1)}
-                                            className="p-1 hover:bg-stone-100 rounded text-stone-600"
-                                        >
-                                            <Minus className="w-3 h-3" />
-                                        </button>
-                                        <span className="font-semibold text-xs px-1 text-stone-900">{quantity}</span>
-                                        <button 
-                                            type="button" 
-                                            onClick={() => handleQuantityChange(quantity + 1)}
-                                            className="p-1 hover:bg-stone-100 rounded text-stone-600"
-                                        >
-                                            <Plus className="w-3 h-3" />
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Customer info form */}
+                            <div className="space-y-3">
                                 <div>
-                                    <label className="block font-medium text-stone-700 mb-1">Nom Complet du Destinataire *</label>
-                                    <input
-                                        type="text"
+                                    <label className="block text-[11px] font-medium text-stone-700 mb-1">Nom Complet :</label>
+                                    <input 
+                                        type="text" 
+                                        required
+                                        placeholder="Ex: Jean Dupont"
                                         value={data.customer_name}
-                                        onChange={e => setData('customer_name', e.target.value)}
-                                        placeholder="ex: Paul Biya"
-                                        className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
-                                        required
+                                        onChange={(e) => setData('customer_name', e.target.value)}
+                                        className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-yellow-400"
                                     />
-                                    {errors.customer_name && <p className="text-[11px] text-red-600 mt-1">{errors.customer_name}</p>}
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label className="block font-medium text-stone-700 mb-1">Téléphone Livraison *</label>
-                                        <input
-                                            type="text"
-                                            value={data.customer_phone}
-                                            onChange={e => setData('customer_phone', e.target.value)}
-                                            placeholder="ex: 690000000"
-                                            className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
-                                            required
-                                        />
-                                        {errors.customer_phone && <p className="text-[11px] text-red-600 mt-1">{errors.customer_phone}</p>}
-                                    </div>
-
-                                    <div>
-                                        <label className="block font-medium text-stone-700 mb-1">Ville de Livraison *</label>
-                                        <input
-                                            type="text"
-                                            value={data.city}
-                                            onChange={e => setData('city', e.target.value)}
-                                            className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
-                                            required
-                                        />
-                                    </div>
                                 </div>
 
                                 <div>
-                                    <label className="block font-medium text-stone-700 mb-1">Adresse ou Quartier de Livraison *</label>
-                                    <input
-                                        type="text"
+                                    <label className="block text-[11px] font-medium text-stone-700 mb-1">Numéro Mobile Money (Payeur) :</label>
+                                    <input 
+                                        type="tel" 
+                                        required
+                                        placeholder="Ex: 699000000"
+                                        value={data.customer_phone}
+                                        onChange={(e) => setData('customer_phone', e.target.value)}
+                                        className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-yellow-400"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-[11px] font-medium text-stone-700 mb-1">Adresse Précise de Livraison :</label>
+                                    <textarea 
+                                        required
+                                        rows="2"
+                                        placeholder="Ex: Douala, Quartier Akwa, Rue Silo"
                                         value={data.delivery_address}
-                                        onChange={e => setData('delivery_address', e.target.value)}
-                                        placeholder="ex: Akwa, Carrefour Douala"
-                                        className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
-                                        required
-                                    />
+                                        onChange={(e) => setData('delivery_address', e.target.value)}
+                                        className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-yellow-400"
+                                    ></textarea>
                                 </div>
+                            </div>
 
-                                {/* Payment Method Selector */}
-                                <div>
-                                    <label className="block font-medium text-stone-700 mb-1">Mode de Paiement Séquestre *</label>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => setData('payment_method', 'orange_money')}
-                                            className={`p-2.5 border rounded-lg flex items-center justify-center gap-2 font-medium transition-colors ${
-                                                data.payment_method === 'orange_money' 
-                                                    ? 'bg-amber-50 border-amber-500 text-amber-950 font-semibold' 
-                                                    : 'bg-white border-stone-200 text-stone-600'
-                                            }`}
-                                        >
-                                            <span className="w-2.5 h-2.5 rounded-full bg-orange-500" />
-                                            <span>Orange Money</span>
-                                        </button>
-
-                                        <button
-                                            type="button"
-                                            onClick={() => setData('payment_method', 'mtn_momo')}
-                                            className={`p-2.5 border rounded-lg flex items-center justify-center gap-2 font-medium transition-colors ${
-                                                data.payment_method === 'mtn_momo' 
-                                                    ? 'bg-amber-50 border-amber-500 text-amber-950 font-semibold' 
-                                                    : 'bg-white border-stone-200 text-stone-600'
-                                            }`}
-                                        >
-                                            <span className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
-                                            <span>MTN MoMo</span>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Total Summary */}
-                                <div className="bg-stone-900 text-white rounded-xl p-3.5 flex justify-between items-center">
-                                    <span className="text-xs font-normal">Montant Total Escrow :</span>
-                                    <span className="text-base font-semibold text-amber-400">{Number(totalPrice).toLocaleString()} FCFA</span>
-                                </div>
-
-                                <div className="pt-2 flex justify-end gap-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsCheckoutOpen(false)}
-                                        className="px-4 py-2 border border-stone-200 rounded-lg text-stone-600 font-medium hover:bg-stone-50"
-                                    >
-                                        Annuler
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        disabled={processing}
-                                        className="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-amber-950 font-semibold rounded-lg shadow-xs transition-colors"
-                                    >
-                                        {processing ? 'Traitement...' : 'Payer & Valider la Commande'}
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
+                            <button
+                                type="submit"
+                                disabled={processing}
+                                className="w-full py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-xs transition-colors border border-yellow-500"
+                            >
+                                {processing ? 'Validation du paiement...' : `Payer ${Number(totalPrice).toLocaleString()} FCFA via Escrow`}
+                            </button>
+                        </form>
                     </div>
-                )}
-
-            </div>
+                </div>
+            )}
         </PublicLayout>
     );
 }

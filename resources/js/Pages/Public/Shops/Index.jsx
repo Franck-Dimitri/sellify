@@ -35,8 +35,8 @@ export default function Index({ shops, filters = {} }) {
                 {/* HERO BANNER */}
                 <div className="bg-white border-b border-stone-200 py-8 px-4 sm:px-6 lg:px-8 shadow-2xs">
                     <div className="max-w-[1400px] mx-auto space-y-3">
-                        <div className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full text-xs font-bold text-amber-900">
-                            <BadgeCheck className="w-4 h-4 text-amber-600" />
+                        <div className="inline-flex items-center gap-1.5 bg-yellow-50 border border-yellow-200 px-3 py-1 rounded-full text-xs font-bold text-yellow-900">
+                            <BadgeCheck className="w-4 h-4 text-yellow-600" />
                             <span>Boutiques & Fabricants Agréés (Verified Suppliers)</span>
                         </div>
                         <h1 className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight">
@@ -61,12 +61,12 @@ export default function Index({ shops, filters = {} }) {
                                     placeholder="Rechercher une boutique par nom, slogan, ville (ex: Douala, Yaoundé) ou numéro RCCM..."
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-900 focus:ring-2 focus:ring-yellow-400 outline-none font-normal"
                                 />
                             </div>
                             <button
                                 type="submit"
-                                className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-amber-950 text-xs font-bold rounded-xl shadow-xs transition-colors w-full sm:w-auto"
+                                className="px-6 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 text-xs font-bold rounded-xl shadow-xs transition-colors w-full sm:w-auto border border-yellow-500"
                             >
                                 Rechercher Vendeur
                             </button>
@@ -89,7 +89,7 @@ export default function Index({ shops, filters = {} }) {
                                 return (
                                     <div 
                                         key={shop.id} 
-                                        className="bg-white border border-stone-200/80 rounded-2xl overflow-hidden shadow-2xs hover:border-amber-500 hover:shadow-md transition-all flex flex-col justify-between"
+                                        className="bg-white border border-stone-200/80 rounded-2xl overflow-hidden shadow-2xs hover:border-yellow-400 hover:shadow-md transition-all flex flex-col justify-between"
                                     >
                                         <div>
                                             {/* Cover Header */}
@@ -97,13 +97,13 @@ export default function Index({ shops, filters = {} }) {
                                                 {shop.banner_path ? (
                                                     <img src={`/storage/${shop.banner_path}`} alt={shop.name} className="w-full h-full object-cover" />
                                                 ) : (
-                                                    <div className="w-full h-full bg-gradient-to-r from-amber-500/10 to-amber-500/30 flex items-center justify-center">
-                                                        <Building2 className="w-10 h-10 text-amber-600/30 stroke-[1.5]" />
+                                                    <div className="w-full h-full bg-gradient-to-r from-yellow-400/20 to-yellow-500/40 flex items-center justify-center">
+                                                        <Building2 className="w-10 h-10 text-yellow-600/40 stroke-[1.5]" />
                                                     </div>
                                                 )}
 
                                                 <span className="absolute top-2.5 right-2.5 bg-stone-900/90 text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-2xs">
-                                                    <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />
+                                                    <CheckCircle2 className="w-3.5 h-3.5 text-yellow-400" />
                                                     <span>Verified Gold</span>
                                                 </span>
                                             </div>
@@ -121,7 +121,7 @@ export default function Index({ shops, filters = {} }) {
                                                 <div className="space-y-0.5">
                                                     <div className="flex items-center gap-1.5">
                                                         <h3 className="font-bold text-stone-900 text-sm truncate">{shop.name}</h3>
-                                                        <BadgeCheck className="w-4 h-4 text-amber-600 shrink-0" />
+                                                        <BadgeCheck className="w-4 h-4 text-yellow-600 shrink-0" />
                                                     </div>
                                                     <p className="text-xs text-stone-500 font-normal line-clamp-1">
                                                         {shop.slogan || 'Boutique Officielle Certifiée'}
@@ -178,7 +178,7 @@ export default function Index({ shops, filters = {} }) {
 
                                         <div className="p-5 pt-0">
                                             <Link href={route('shop.public', shop.slug)}>
-                                                <button className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-amber-950 text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5">
+                                                <button className="w-full py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 border border-yellow-500">
                                                     <span>Visiter le Store Officiel</span>
                                                     <ArrowRight className="w-3.5 h-3.5" />
                                                 </button>
@@ -200,7 +200,7 @@ export default function Index({ shops, filters = {} }) {
                                     dangerouslySetInnerHTML={{ __html: link.label }}
                                     className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
                                         link.active
-                                            ? 'bg-amber-500 text-amber-950 border-amber-500 font-bold'
+                                            ? 'bg-yellow-400 text-yellow-950 border-yellow-500 font-bold'
                                             : link.url
                                                 ? 'bg-white text-stone-700 border-stone-200 hover:bg-stone-50'
                                                 : 'bg-stone-100 text-stone-300 border-stone-200 cursor-not-allowed'
