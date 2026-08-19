@@ -271,6 +271,7 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/dashboard', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'dashboard'])->name('dashboard');
             Route::get('/orders', [\App\Http\Controllers\Customer\OrderController::class, 'index'])->name('orders.index');
             Route::get('/orders/{order_number}', [\App\Http\Controllers\Customer\OrderController::class, 'show'])->name('orders.show');
+            Route::get('/orders/{order_number}/invoice', [\App\Http\Controllers\Customer\OrderController::class, 'invoice'])->name('orders.invoice');
             Route::post('/orders/{order_number}/confirm', [\App\Http\Controllers\Customer\OrderController::class, 'confirmDelivery'])->name('orders.confirm');
             Route::post('/orders/{order_number}/dispute', [\App\Http\Controllers\Customer\OrderController::class, 'openDispute'])->name('orders.dispute');
             Route::get('/wishlist', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'wishlist'])->name('wishlist');

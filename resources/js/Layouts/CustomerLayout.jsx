@@ -67,9 +67,9 @@ export default function CustomerLayout({ children, title }) {
                 },
                 { 
                     name: 'Mon Panier', 
-                    href: route('cart.index'), 
+                    href: route('public.cart.index'), 
                     icon: ShoppingCart, 
-                    active: route().current('cart.*') 
+                    active: route().current('public.cart.*') 
                 },
             ]
         },
@@ -208,7 +208,7 @@ export default function CustomerLayout({ children, title }) {
                     {/* Right side items */}
                     <div className="flex items-center space-x-3">
                         <Link 
-                            href={route('cart.index')}
+                            href={route('public.cart.index')}
                             className="p-2 text-stone-600 hover:text-yellow-700 rounded-lg hover:bg-stone-50 transition-colors relative"
                             title="Mon Panier"
                         >

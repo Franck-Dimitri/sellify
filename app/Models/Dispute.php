@@ -29,6 +29,11 @@ class Dispute extends Model
         'resolved_at' => 'datetime',
     ];
 
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
+    }
+
     public function seller(): BelongsTo
     {
         return $this->belongsTo(Seller::class);

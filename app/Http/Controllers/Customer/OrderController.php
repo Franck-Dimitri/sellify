@@ -82,6 +82,11 @@ class OrderController extends Controller
                     'description' => "Libération des fonds séquestres (Commande #{$order->order_number} livrée & confirmée)",
                     'status' => 'completed',
                 ]);
+                ActivityLog::create([
+                    'user_id' => auth()->id(),
+                    'action' => 'escrow_released',
+                    'description' => "Le client a confirmé la réception du colis pour la commande #{$order->order_number}. Fonds séquestres débloqués.",
+                ]);
             }
         });
 
@@ -116,6 +121,33 @@ class OrderController extends Controller
 
         $order->update(['delivery_status' => 'cancelled']);
 
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'dispute_opened',
+            'description' => "Ouverture d'une réclamation / litige sur la commande #{$order->order_number}.",
+        ]);
+
         return back()->with('success', 'Votre réclamation a été transmise au service d\'arbitrage Sellify. L\'administrateur va examiner le dossier.');
+    }
+
+    /**
+     * Printable Official Invoice / Receipt for Customer.
+     */
+    public function invoice(string $orderNumber)
+    {
+        $order = Order::where('order_number', $orderNumber)
+            ->where('user_id', auth()->id())
+            ->with(['shop.seller.user', 'items.product', 'driver.user'])
+            ->firstOrFail();
+
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'invoice_viewed',
+            'description' => "Téléchargement / consultation de la facture officielle #{$order->order_number}.",
+        ]);
+
+        return Inertia::render('Customer/Orders/Invoice', [
+            'order' => $order,
+        ]);
     }
 }
