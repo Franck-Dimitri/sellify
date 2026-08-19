@@ -15,7 +15,8 @@ import {
     Key, 
     AlertTriangle,
     X,
-    ExternalLink
+    ExternalLink,
+    FileText
 } from 'lucide-react';
 
 export default function Show({ order }) {
