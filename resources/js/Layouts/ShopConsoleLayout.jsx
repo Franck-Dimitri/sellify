@@ -14,7 +14,7 @@ import {
 export default function ShopConsoleLayout({ children, shop, title }) {
     const { auth, flash } = usePage().props;
     const user = auth.user;
-    const activeThemeColor = shop?.theme_color || '#F59E0B';
+    const activeThemeColor = shop?.theme_color || '#EAB308';
 
     const navigation = [
         { 
@@ -47,14 +47,14 @@ export default function ShopConsoleLayout({ children, shop, title }) {
         <div className="h-screen w-screen flex flex-col bg-stone-50 overflow-hidden antialiased font-sans text-stone-800">
             
             {/* TOP HEADER FOR SHOP CONSOLE */}
-            <header className="h-16 bg-white border-b border-stone-200/70 px-6 flex-shrink-0 z-20">
+            <header className="h-16 bg-white border-b border-stone-200/80 px-6 flex-shrink-0 z-20">
                 <div className="max-w-7xl mx-auto h-full flex items-center justify-between">
                     
                     {/* Shop Brand & Status */}
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center font-semibold text-amber-950 shadow-xs text-sm" style={{ backgroundColor: activeThemeColor }}>
+                        <div className="w-9 h-9 rounded-lg flex items-center justify-center font-medium text-stone-950 shadow-xs text-sm" style={{ backgroundColor: activeThemeColor }}>
                             {shop.logo_path ? (
-                                <img src={`/storage/${shop.logo_path}`} alt={shop.name} className="w-full h-full object-cover rounded-xl" />
+                                <img src={`/storage/${shop.logo_path}`} alt={shop.name} className="w-full h-full object-cover rounded-lg" />
                             ) : (
                                 shop.name[0].toUpperCase()
                             )}
@@ -64,7 +64,7 @@ export default function ShopConsoleLayout({ children, shop, title }) {
                                 <h1 className="font-semibold text-sm tracking-tight text-stone-900 leading-tight">
                                     {shop.name}
                                 </h1>
-                                <span className="text-[10px] bg-amber-50 text-amber-800 font-medium px-2 py-0.5 rounded-full border border-amber-200">
+                                <span className="text-[10px] bg-yellow-50 text-yellow-900 font-medium px-2 py-0.5 rounded-md border border-yellow-200">
                                     Console Boutique
                                 </span>
                             </div>
@@ -72,7 +72,7 @@ export default function ShopConsoleLayout({ children, shop, title }) {
                                 href={route('shop.public', shop.slug)} 
                                 target="_blank" 
                                 rel="noopener noreferrer" 
-                                className="text-[11px] text-amber-700 hover:underline flex items-center gap-1 font-normal"
+                                className="text-[11px] text-yellow-700 hover:underline flex items-center gap-1 font-normal"
                             >
                                 <span>Visiter la vitrine publique</span>
                                 <ExternalLink className="w-3 h-3" />
@@ -94,14 +94,14 @@ export default function ShopConsoleLayout({ children, shop, title }) {
                         <div className="h-5 w-px bg-stone-200"></div>
 
                         {/* Notifications */}
-                        <button className="p-2 text-stone-400 hover:text-stone-600 rounded-xl hover:bg-stone-50 transition-colors relative" title="Notifications">
+                        <button className="p-2 text-stone-400 hover:text-stone-600 rounded-lg hover:bg-stone-50 transition-colors relative" title="Notifications">
                             <Bell className="w-4.5 h-4.5 text-stone-500" />
-                            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-500"></span>
+                            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-yellow-500"></span>
                         </button>
                         
                         {/* User Display */}
                         <div className="flex items-center space-x-2">
-                            <div className="w-7 h-7 rounded-lg bg-amber-500 flex items-center justify-center font-medium text-xs text-amber-950 uppercase shadow-xs">
+                            <div className="w-7 h-7 rounded-lg bg-yellow-500 flex items-center justify-center font-medium text-xs text-stone-950 uppercase shadow-xs">
                                 {user.first_name[0]}
                             </div>
                             <span className="text-xs font-medium text-stone-800 hidden md:inline-block">
@@ -113,7 +113,7 @@ export default function ShopConsoleLayout({ children, shop, title }) {
                             href={route('logout')} 
                             method="post" 
                             as="button" 
-                            className="p-2 text-stone-400 hover:text-red-600 rounded-xl hover:bg-red-50 transition-colors"
+                            className="p-2 text-stone-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors"
                             title="Déconnexion"
                         >
                             <LogOut className="w-4 h-4" />
@@ -123,7 +123,7 @@ export default function ShopConsoleLayout({ children, shop, title }) {
             </header>
 
             {/* HORIZONTAL CENTERED TAB NAVIGATION BAR */}
-            <div className="bg-white border-b border-stone-200/70 px-6 py-2 flex items-center justify-center shrink-0 shadow-2xs">
+            <div className="bg-white border-b border-stone-200/80 px-6 py-2 flex items-center justify-center shrink-0 shadow-2xs">
                 <div className="max-w-7xl mx-auto w-full flex items-center justify-center gap-2 overflow-x-auto no-scrollbar">
                     <span className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider shrink-0 mr-2">
                         Gestion Boutique :
@@ -135,13 +135,13 @@ export default function ShopConsoleLayout({ children, shop, title }) {
                                 <Link
                                     key={item.name}
                                     href={item.href}
-                                    className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-medium transition-all shrink-0 border ${
+                                    className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all shrink-0 border ${
                                         item.active
-                                            ? 'bg-amber-500 text-amber-950 font-semibold border-amber-500 shadow-xs'
-                                            : 'bg-white text-stone-600 hover:bg-stone-50 border-stone-200/70 hover:border-stone-300'
+                                            ? 'bg-yellow-500 text-stone-950 font-medium border-yellow-500 shadow-xs'
+                                            : 'bg-white text-stone-600 hover:bg-stone-50 border-stone-200 hover:border-stone-300'
                                     }`}
                                 >
-                                    <Icon className={`w-3.5 h-3.5 ${item.active ? 'text-amber-950' : 'text-stone-400'}`} />
+                                    <Icon className={`w-3.5 h-3.5 ${item.active ? 'text-stone-950' : 'text-stone-400'}`} />
                                     <span>{item.name}</span>
                                 </Link>
                             );
@@ -155,21 +155,21 @@ export default function ShopConsoleLayout({ children, shop, title }) {
                 {/* Flash messages */}
                 {flash?.success && (
                     <div className="max-w-7xl mx-auto px-6 pt-4">
-                        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-2.5 rounded-xl flex items-center justify-between text-xs font-medium shadow-xs">
+                        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-2 rounded-lg flex items-center justify-between text-xs font-medium shadow-xs">
                             <span>{flash.success}</span>
                         </div>
                     </div>
                 )}
                 {flash?.error && (
                     <div className="max-w-7xl mx-auto px-6 pt-4">
-                        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-2.5 rounded-xl flex items-center justify-between text-xs font-medium shadow-xs">
+                        <div className="bg-rose-50 border border-rose-200 text-rose-800 px-4 py-2 rounded-lg flex items-center justify-between text-xs font-medium shadow-xs">
                             <span>{flash.error}</span>
                         </div>
                     </div>
                 )}
 
-                {/* Page Content Centered with max-w-7xl */}
-                <main className="p-6 max-w-7xl mx-auto w-full">
+                {/* Main page children */}
+                <main className="max-w-7xl mx-auto p-6">
                     {children}
                 </main>
             </div>

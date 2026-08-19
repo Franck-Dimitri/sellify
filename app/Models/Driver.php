@@ -56,4 +56,9 @@ class Driver extends Model
     {
         return $this->status === 'approved' && $this->is_verified;
     }
+
+    public function orders(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
 }

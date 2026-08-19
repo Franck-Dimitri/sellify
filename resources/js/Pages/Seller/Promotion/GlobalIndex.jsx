@@ -39,10 +39,10 @@ export default function GlobalIndex({ promotions = [] }) {
             <div className="w-full space-y-5 text-stone-800 antialiased font-sans pb-16">
                 
                 {/* COMPACT & ELEGANT TOP BANNER */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-amber-50/70 border border-amber-200/60 p-5 rounded-xl">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-yellow-50/70 border border-yellow-200/60 p-5 rounded-xl">
                     <div className="space-y-1">
-                        <div className="flex items-center gap-1.5 text-amber-800 font-medium text-xs uppercase tracking-wide">
-                            <Tag className="w-3.5 h-3.5 text-amber-600" />
+                        <div className="flex items-center gap-1.5 text-yellow-800 font-medium text-xs uppercase tracking-wide">
+                            <Tag className="w-3.5 h-3.5 text-yellow-600" />
                             <span>Ventes Flash & Remises Commerciales</span>
                         </div>
                         <h1 className="text-lg font-semibold text-stone-900">
@@ -54,8 +54,8 @@ export default function GlobalIndex({ promotions = [] }) {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <div className="px-3 py-1.5 bg-amber-500/20 text-amber-950 font-medium rounded-lg text-xs flex items-center gap-1.5">
-                            <Sparkles className="w-3.5 h-3.5 text-amber-700" />
+                        <div className="px-3 py-1.5 bg-yellow-500/20 text-yellow-950 font-medium rounded-lg text-xs flex items-center gap-1.5">
+                            <Sparkles className="w-3.5 h-3.5 text-yellow-700" />
                             <span>Remises Vendeur Active</span>
                         </div>
                     </div>
@@ -66,7 +66,7 @@ export default function GlobalIndex({ promotions = [] }) {
                     <div className="bg-white border border-stone-200/70 p-4 rounded-xl shadow-xs space-y-1">
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-medium text-stone-500">Campagnes Créées</span>
-                            <div className="w-7 h-7 bg-amber-50 rounded-lg flex items-center justify-center text-amber-700">
+                            <div className="w-7 h-7 bg-yellow-50 rounded-lg flex items-center justify-center text-yellow-700">
                                 <Gift className="w-3.5 h-3.5" />
                             </div>
                         </div>
@@ -108,7 +108,7 @@ export default function GlobalIndex({ promotions = [] }) {
                 <div className="bg-white border border-stone-200/70 rounded-xl shadow-xs overflow-hidden">
                     <div className="p-4 border-b border-stone-100 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <Tag className="w-4 h-4 text-amber-600" />
+                            <Tag className="w-4 h-4 text-yellow-600" />
                             <h3 className="font-semibold text-stone-900 text-sm">Offres Promotionnelles Multi-Boutiques</h3>
                         </div>
                     </div>
@@ -142,7 +142,7 @@ export default function GlobalIndex({ promotions = [] }) {
                                             <tr key={promo.id} className="hover:bg-stone-50/70 transition-colors">
                                                 <td className="px-5 py-3">
                                                     <div className="flex items-center gap-1.5 font-medium text-stone-900">
-                                                        <Store className="w-3.5 h-3.5 text-amber-600" />
+                                                        <Store className="w-3.5 h-3.5 text-yellow-600" />
                                                         <span>{promo.shop?.name || 'Boutique'}</span>
                                                     </div>
                                                 </td>
@@ -178,7 +178,7 @@ export default function GlobalIndex({ promotions = [] }) {
                                                     {promo.shop?.slug && (
                                                         <Link 
                                                             href={route('seller.shop.promotions.index', promo.shop.slug)}
-                                                            className="inline-flex items-center gap-1 text-amber-700 hover:underline font-medium text-xs"
+                                                            className="inline-flex items-center gap-1 text-yellow-700 hover:underline font-medium text-xs"
                                                         >
                                                             <span>Gérer</span>
                                                             <ArrowRight className="w-3 h-3" />

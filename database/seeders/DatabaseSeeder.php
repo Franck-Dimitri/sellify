@@ -5,12 +5,19 @@ namespace Database\Seeders;
 use App\Models\User;
 use App\Models\Seller;
 use App\Models\Driver;
+use App\Models\Shop;
+use App\Models\Product;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\PromoCode;
+use App\Models\SmartLink;
 use App\Models\KycDocument;
 use App\Models\KycRequest;
 use App\Models\ActivityLog;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -39,6 +46,7 @@ class DatabaseSeeder extends Seeder
         ActivityLog::log($admin->id, 'system_seed', 'Initialisation de la base de données avec l\'administrateur.');
 
         // 2. Create Clients (Customers)
+        $customers = [];
         for ($i = 1; $i <= 5; $i++) {
             $customer = User::create([
                 'first_name' => 'Client',
@@ -51,10 +59,11 @@ class DatabaseSeeder extends Seeder
                 'kyc_status' => 'none',
                 'status' => 'active',
                 'is_active' => true,
-                'loyalty_points' => rand(10, 500),
+                'loyalty_points' => rand(50, 500),
             ]);
 
-            ActivityLog::log($customer->id, 'registration', 'Inscription en tant que Customer.');
+            $customers[] = $customer;
+            ActivityLog::log($customer->id, 'registration', 'Inscription en tant que Client.');
         }
 
         // Create dummy KYC files
@@ -68,7 +77,7 @@ class DatabaseSeeder extends Seeder
         Storage::put('kyc/test/dummy_vehicule.png', $dummyImageContent);
 
         // 3. Create Sellers
-        // A. Approved Seller
+        // A. Approved Seller (Pro Pack)
         $sellerApprovedUser = User::create([
             'first_name' => 'Jean',
             'last_name' => 'Vendeur',
@@ -78,7 +87,7 @@ class DatabaseSeeder extends Seeder
             'role' => 'seller',
             'email_verified_at' => now(),
             'kyc_status' => 'verified',
-            'kyc_verified_at' => now()->subDays(2),
+            'kyc_verified_at' => now()->subDays(5),
             'status' => 'active',
             'is_active' => true,
         ]);
@@ -87,15 +96,15 @@ class DatabaseSeeder extends Seeder
             'user_id' => $sellerApprovedUser->id,
             'status' => 'approved',
             'is_verified' => true,
-            'verified_at' => now()->subDays(2),
+            'verified_at' => now()->subDays(5),
             'verified_by' => $admin->id,
             'pack' => 'pro',
         ]);
 
         \App\Models\SellerWallet::create([
             'seller_id' => $sellerApproved->id,
-            'balance' => 250000.00,
-            'pending_balance' => 45000.00,
+            'balance' => 385000.00,
+            'pending_balance' => 95000.00,
             'currency' => 'FCFA',
         ]);
 
@@ -162,18 +171,18 @@ class DatabaseSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        Driver::create([
+        $driverApproved = Driver::create([
             'user_id' => $driverApprovedUser->id,
             'vehicle_type' => 'moto',
             'license_number' => 'DL-98218-A',
             'vehicle_plate' => 'LT-129-XX',
-            'coverage_zone' => 'Douala (Akwa, Bonapriso)',
+            'coverage_zone' => 'Douala (Akwa, Bonapriso, Deido, Bonamoussadi)',
             'status' => 'approved',
             'is_verified' => true,
             'verified_at' => now()->subDays(3),
             'verified_by' => $admin->id,
-            'rating' => 4.85,
-            'total_deliveries' => 42,
+            'rating' => 4.90,
+            'total_deliveries' => 48,
         ]);
 
         $this->seedKycDocs($driverApprovedUser, 'driver', 'approved', $admin);
@@ -197,11 +206,292 @@ class DatabaseSeeder extends Seeder
             'vehicle_type' => 'voiture',
             'license_number' => 'DL-44821-B',
             'vehicle_plate' => 'CE-992-YY',
-            'coverage_zone' => 'Yaoundé (Bastos, Omnisports)',
+            'coverage_zone' => 'Yaoundé (Bastos, Omnisports, Tsinga)',
             'status' => 'pending',
         ]);
 
         $this->seedKycDocs($driverPendingUser, 'driver', 'pending');
+
+        // 5. Create Shops for Approved Seller
+        $shopTech = Shop::create([
+            'seller_id' => $sellerApproved->id,
+            'name' => 'Tech & Gadgets Express',
+            'slug' => 'tech-gadgets-express',
+            'slogan' => 'Le meilleur de l\'électronique livrable en 2h chrono',
+            'description' => 'Boutique officielle certifiée spécialisée dans les smartphones, accessoires connectés et matériel informatique neuf.',
+            'company_name' => 'Tech Express Sarl',
+            'registration_number' => 'RC/DLA/2024/B/1892',
+            'address' => 'Boulevard de la Liberté, Akwa, Douala',
+            'phone_contact' => '+237620000001',
+            'email_contact' => 'contact@techexpress.cm',
+            'theme_color' => '#EAB308',
+            'is_active' => true,
+        ]);
+
+        $shopFashion = Shop::create([
+            'seller_id' => $sellerApproved->id,
+            'name' => 'Mode & Élégance Panafricaine',
+            'slug' => 'mode-elegance-panafricaine',
+            'slogan' => 'L\'authenticité du wax et de la haute couture africaine',
+            'description' => 'Créations de prêt-à-porter en pagne tissé, tenues de soirée et accessoires artisanaux haut de gamme.',
+            'company_name' => 'Afrik Style Couture',
+            'registration_number' => 'RC/DLA/2025/A/0411',
+            'address' => 'Rue Joss, Bonanjo, Douala',
+            'phone_contact' => '+237620000001',
+            'email_contact' => 'boutique@afrikstyle.cm',
+            'theme_color' => '#10B981',
+            'is_active' => true,
+        ]);
+
+        // 6. Create Products for Shops
+        $productsTech = [
+            [
+                'name' => 'Smartphone Galaxy A55 5G - 256Go',
+                'slug' => 'smartphone-galaxy-a55-5g-256go',
+                'sku' => 'TECH-SAM-A55',
+                'description' => 'Écran Super AMOLED 120Hz, triple capteur photo 50MP, batterie 5000mAh. Garantie constructeur 12 mois.',
+                'price' => 245000,
+                'stock' => 12,
+                'alert_threshold' => 3,
+                'stock_status' => 'in_stock',
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Écouteurs Sans Fil Pro TWS ANC',
+                'slug' => 'ecouteurs-sans-fil-pro-tws-anc',
+                'sku' => 'TECH-TWS-ANC',
+                'description' => 'Réduction active du bruit, autonomie 32h avec boîtier, son haute définition avec basses profondes.',
+                'price' => 28000,
+                'stock' => 35,
+                'alert_threshold' => 5,
+                'stock_status' => 'in_stock',
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Montre Connectée Smart Watch Ultra 2',
+                'slug' => 'montre-connectee-smart-watch-ultra-2',
+                'sku' => 'TECH-WATCH-U2',
+                'description' => 'Suivi cardiaque, GPS intégré, appels Bluetooth, étanchéité IP68 et batterie longue durée 7 jours.',
+                'price' => 35000,
+                'stock' => 18,
+                'alert_threshold' => 4,
+                'stock_status' => 'in_stock',
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Power Bank 30 000 mAh Charge Rapide 22.5W',
+                'slug' => 'power-bank-30000-mah-charge-rapide',
+                'sku' => 'TECH-PB-30K',
+                'description' => 'Batterie externe haute capacité avec 3 sorties USB et affichage LED du pourcentage.',
+                'price' => 18500,
+                'stock' => 40,
+                'alert_threshold' => 10,
+                'stock_status' => 'in_stock',
+                'is_active' => true,
+            ],
+        ];
+
+        $createdProducts = [];
+        foreach ($productsTech as $p) {
+            $createdProducts[] = Product::create(array_merge($p, ['shop_id' => $shopTech->id]));
+        }
+
+        $productsFashion = [
+            [
+                'name' => 'Robe Longue en Pagne Wax Royal Kente',
+                'slug' => 'robe-longue-pagne-wax-royal-kente',
+                'sku' => 'FASH-ROBE-KNT',
+                'description' => 'Coupe ajustée élégante pour cérémonies et soirées, 100% coton véritable wax hollandais.',
+                'price' => 45000,
+                'stock' => 8,
+                'alert_threshold' => 2,
+                'stock_status' => 'in_stock',
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Chemise Homme Broderie Manuelle Africaine',
+                'slug' => 'chemise-homme-broderie-manuelle',
+                'sku' => 'FASH-CHM-BRD',
+                'description' => 'Chemise en lin pur avec col mao et broderies artistiques dorées sur le buste.',
+                'price' => 32000,
+                'stock' => 15,
+                'alert_threshold' => 3,
+                'stock_status' => 'in_stock',
+                'is_active' => true,
+            ],
+        ];
+
+        foreach ($productsFashion as $p) {
+            $createdProducts[] = Product::create(array_merge($p, ['shop_id' => $shopFashion->id]));
+        }
+
+        // 7. Create Promo Codes
+        PromoCode::create([
+            'shop_id' => $shopTech->id,
+            'code' => 'BIENVENUE10',
+            'type' => 'percentage',
+            'value' => 10,
+            'min_order_amount' => 20000,
+            'usage_limit' => 100,
+            'used_count' => 8,
+            'start_date' => now()->subDays(5),
+            'end_date' => now()->addDays(30),
+            'is_active' => true,
+        ]);
+
+        PromoCode::create([
+            'shop_id' => $shopTech->id,
+            'code' => 'SOLDES2026',
+            'type' => 'fixed',
+            'value' => 5000,
+            'min_order_amount' => 50000,
+            'usage_limit' => 50,
+            'used_count' => 12,
+            'start_date' => now()->subDays(2),
+            'end_date' => now()->addDays(15),
+            'is_active' => true,
+        ]);
+
+        // 8. Create Smart-Links
+        SmartLink::create([
+            'seller_id' => $sellerApproved->id,
+            'product_id' => $createdProducts[0]->id,
+            'title' => 'Pack Promo WhatsApp - Galaxy A55 + Écouteurs TWS',
+            'token' => 'LNK-SMP-' . Str::random(8),
+            'tracking_code' => 'TRK-WA-001',
+            'price_at_time' => 260000,
+            'total_price' => 260000,
+            'status' => 'active',
+            'clicks_count' => 64,
+            'conversions_count' => 5,
+            'expires_at' => now()->addDays(7),
+        ]);
+
+        // 9. Create Rich Sample Orders Across Lifecycle
+        $ordersData = [
+            [
+                'order_number' => 'SLF-2026-9821',
+                'user_id' => $customers[0]->id,
+                'shop_id' => $shopTech->id,
+                'driver_id' => null,
+                'customer_name' => 'Hervé Ngueme',
+                'customer_phone' => '+237699112233',
+                'delivery_address' => 'Face Hôtel Akwa Palace, Rue Mandessi Bell',
+                'city' => 'Douala',
+                'subtotal' => 28000,
+                'shipping_fee' => 1500,
+                'total_amount' => 29500,
+                'payment_method' => 'orange_money',
+                'payment_status' => 'escrow_held',
+                'delivery_status' => 'pending',
+                'delivery_otp' => '482910',
+                'items' => [
+                    ['product_id' => $createdProducts[1]->id, 'name' => 'Écouteurs Sans Fil Pro TWS ANC', 'price' => 28000, 'qty' => 1],
+                ],
+            ],
+            [
+                'order_number' => 'SLF-2026-9819',
+                'user_id' => $customers[1]->id,
+                'shop_id' => $shopTech->id,
+                'driver_id' => null,
+                'customer_name' => 'Clarisse Ngo',
+                'customer_phone' => '+237677445566',
+                'delivery_address' => 'Carrefour Kotto, Bonamoussadi',
+                'city' => 'Douala',
+                'subtotal' => 53500,
+                'shipping_fee' => 2000,
+                'total_amount' => 55500,
+                'payment_method' => 'mtn_momo',
+                'payment_status' => 'escrow_held',
+                'delivery_status' => 'preparing',
+                'delivery_otp' => '719304',
+                'items' => [
+                    ['product_id' => $createdProducts[2]->id, 'name' => 'Montre Connectée Smart Watch Ultra 2', 'price' => 35000, 'qty' => 1],
+                    ['product_id' => $createdProducts[3]->id, 'name' => 'Power Bank 30 000 mAh Charge Rapide', 'price' => 18500, 'qty' => 1],
+                ],
+            ],
+            [
+                'order_number' => 'SLF-2026-9815',
+                'user_id' => $customers[2]->id,
+                'shop_id' => $shopFashion->id,
+                'driver_id' => null,
+                'customer_name' => 'Marc Kamga',
+                'customer_phone' => '+237655889900',
+                'delivery_address' => 'Total Deido, Boulevard de la République',
+                'city' => 'Douala',
+                'subtotal' => 77000,
+                'shipping_fee' => 1500,
+                'total_amount' => 78500,
+                'payment_method' => 'orange_money',
+                'payment_status' => 'escrow_held',
+                'delivery_status' => 'ready_for_pickup',
+                'delivery_otp' => '503819',
+                'items' => [
+                    ['product_id' => $createdProducts[4]->id, 'name' => 'Robe Longue en Pagne Wax Royal Kente', 'price' => 45000, 'qty' => 1],
+                    ['product_id' => $createdProducts[5]->id, 'name' => 'Chemise Homme Broderie Manuelle Africaine', 'price' => 32000, 'qty' => 1],
+                ],
+            ],
+            [
+                'order_number' => 'SLF-2026-9812',
+                'user_id' => $customers[3]->id,
+                'shop_id' => $shopTech->id,
+                'driver_id' => $driverApproved->id,
+                'customer_name' => 'Amina Bello',
+                'customer_phone' => '+237699334455',
+                'delivery_address' => 'Derrière Direction Générale MTN, Bonanjo',
+                'city' => 'Douala',
+                'subtotal' => 245000,
+                'shipping_fee' => 2500,
+                'total_amount' => 247500,
+                'payment_method' => 'mtn_momo',
+                'payment_status' => 'escrow_held',
+                'delivery_status' => 'in_transit',
+                'delivery_otp' => '938201',
+                'items' => [
+                    ['product_id' => $createdProducts[0]->id, 'name' => 'Smartphone Galaxy A55 5G - 256Go', 'price' => 245000, 'qty' => 1],
+                ],
+            ],
+            [
+                'order_number' => 'SLF-2026-9801',
+                'user_id' => $customers[4]->id,
+                'shop_id' => $shopTech->id,
+                'driver_id' => $driverApproved->id,
+                'customer_name' => 'Jean-Paul Koffi',
+                'customer_phone' => '+237677112299',
+                'delivery_address' => 'Résidence Les Palmiers, Bonapriso',
+                'city' => 'Douala',
+                'subtotal' => 63000,
+                'shipping_fee' => 1500,
+                'total_amount' => 64500,
+                'payment_method' => 'orange_money',
+                'payment_status' => 'released',
+                'delivery_status' => 'delivered',
+                'delivery_otp' => '120945',
+                'delivered_at' => now()->subDay(),
+                'items' => [
+                    ['product_id' => $createdProducts[1]->id, 'name' => 'Écouteurs Sans Fil Pro TWS ANC', 'price' => 28000, 'qty' => 1],
+                    ['product_id' => $createdProducts[2]->id, 'name' => 'Montre Connectée Smart Watch Ultra 2', 'price' => 35000, 'qty' => 1],
+                ],
+            ],
+        ];
+
+        foreach ($ordersData as $oData) {
+            $items = $oData['items'];
+            unset($oData['items']);
+
+            $order = Order::create($oData);
+
+            foreach ($items as $item) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item['product_id'],
+                    'product_name' => $item['name'],
+                    'unit_price' => $item['price'],
+                    'quantity' => $item['qty'],
+                    'subtotal' => $item['price'] * $item['qty'],
+                ]);
+            }
+        }
     }
 
     /**
@@ -273,5 +563,3 @@ class DatabaseSeeder extends Seeder
         }
     }
 }
-
-

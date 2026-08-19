@@ -83,7 +83,7 @@ export default function Edit({ shop, product, remainingStock = 30, maxStockLimit
                 <div className="bg-white border border-stone-200/70 rounded-xl p-6 shadow-xs space-y-5">
                     <div className="border-b border-stone-100 pb-3">
                         <h2 className="text-sm font-semibold text-stone-900 flex items-center gap-2">
-                            <Package className="w-4 h-4 text-amber-600" />
+                            <Package className="w-4 h-4 text-yellow-600" />
                             <span>Modifier le Produit : {product.name}</span>
                         </h2>
                         <p className="text-xs text-stone-400 font-normal">Mettez à jour les caractéristiques, les prix ou le niveau de stock.</p>
@@ -97,7 +97,7 @@ export default function Edit({ shop, product, remainingStock = 30, maxStockLimit
                                 value={data.name}
                                 onChange={e => setData('name', e.target.value)}
                                 placeholder="ex: iPhone 15 Pro Max 256GB"
-                                className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
+                                className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none font-normal"
                                 required
                             />
                             {errors.name && <p className="text-[11px] text-red-600 mt-1 font-normal">{errors.name}</p>}
@@ -111,7 +111,7 @@ export default function Edit({ shop, product, remainingStock = 30, maxStockLimit
                                     step="0.01"
                                     value={data.price}
                                     onChange={e => setData('price', e.target.value)}
-                                    className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
+                                    className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none font-normal"
                                     required
                                 />
                                 {errors.price && <p className="text-[11px] text-red-600 mt-1 font-normal">{errors.price}</p>}
@@ -124,7 +124,7 @@ export default function Edit({ shop, product, remainingStock = 30, maxStockLimit
                                     value={data.stock}
                                     onChange={e => setData('stock', e.target.value)}
                                     min="0"
-                                    className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
+                                    className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none font-normal"
                                     required
                                 />
                                 {errors.stock && <p className="text-[11px] text-red-600 mt-1 font-normal">{errors.stock}</p>}
@@ -136,7 +136,7 @@ export default function Edit({ shop, product, remainingStock = 30, maxStockLimit
                             <textarea
                                 value={data.description}
                                 onChange={e => setData('description', e.target.value)}
-                                className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none min-h-[100px] font-normal"
+                                className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none min-h-[100px] font-normal"
                             />
                         </div>
 
@@ -172,7 +172,7 @@ export default function Edit({ shop, product, remainingStock = 30, maxStockLimit
                                     onChange={handleFileChange}
                                     className="absolute inset-0 opacity-0 cursor-pointer z-10"
                                 />
-                                <Upload className="w-6 h-6 text-stone-400 mx-auto mb-1 group-hover:text-amber-600 transition-colors" />
+                                <Upload className="w-6 h-6 text-stone-400 mx-auto mb-1 group-hover:text-yellow-600 transition-colors" />
                                 <span className="text-xs font-medium text-stone-700 block">Téléverser des nouvelles photos</span>
                             </div>
 
@@ -205,7 +205,7 @@ export default function Edit({ shop, product, remainingStock = 30, maxStockLimit
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="px-5 py-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-amber-950 rounded-lg text-xs font-semibold shadow-xs"
+                                className="px-5 py-2 bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50 text-yellow-950 rounded-lg text-xs font-semibold shadow-xs"
                             >
                                 {processing ? 'Mise à jour...' : 'Sauvegarder les modifications'}
                             </button>

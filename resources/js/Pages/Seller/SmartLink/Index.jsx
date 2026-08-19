@@ -16,7 +16,9 @@ import {
     ExternalLink,
     TrendingUp,
     MousePointerClick,
-    CheckCircle2
+    CheckCircle2,
+    MessageCircle,
+    Send
 } from 'lucide-react';
 
 export default function Index({ smartLinks = [], products = [], baseUrl = '' }) {
@@ -85,17 +87,12 @@ export default function Index({ smartLinks = [], products = [], baseUrl = '' }) 
         });
     };
 
-    // Calculate totals for link creator
     const subtotal = selectedProducts.reduce((acc, item) => acc + (item.quantity * item.unit_price), 0);
     const totalPrice = Math.max(0, subtotal - parseFloat(discountAmount || 0) + parseFloat(shippingFee || 0));
 
-    // Calculate overall statistics across all smart links
     const totalLinks = smartLinks.length;
     const totalClicks = smartLinks.reduce((acc, link) => acc + (link.clicks_count || 0), 0);
     const totalConversions = smartLinks.reduce((acc, link) => acc + (link.conversions_count || 0), 0);
-    const totalRevenue = smartLinks
-        .filter(link => link.status === 'paid' || link.conversions_count > 0)
-        .reduce((acc, link) => acc + (parseFloat(link.total_price || link.price_at_time) * (link.conversions_count || 1)), 0);
     const conversionRate = totalClicks > 0 ? ((totalConversions / totalClicks) * 100).toFixed(1) : 0;
 
     const handleCreateLink = (e) => {
@@ -119,208 +116,161 @@ export default function Index({ smartLinks = [], products = [], baseUrl = '' }) 
         };
 
         router.post(route('seller.smart_links.store'), payload, {
-            preserveScroll: true,
-            onSuccess: () => {
+            onFinish: () => {
                 setSubmitting(false);
                 setTitle('');
                 setDiscountAmount(0);
                 setShippingFee(0);
                 setNotes('');
-                if (products[0]) {
-                    setSelectedProducts([{ product_id: products[0].id, quantity: 1, unit_price: products[0].price, name: products[0].name }]);
-                }
-            },
-            onError: () => {
-                setSubmitting(false);
             }
         });
     };
 
     const handleCopy = (token) => {
-        const url = `${baseUrl}${token}`;
-        navigator.clipboard.writeText(url);
+        const fullUrl = `${baseUrl}${token}`;
+        navigator.clipboard.writeText(fullUrl);
         setCopiedToken(token);
         setTimeout(() => setCopiedToken(null), 2500);
     };
 
-    const handleShareWhatsapp = (token, linkTitle) => {
-        const url = `${baseUrl}${token}`;
-        const message = `Bonjour ! Voici votre lien de paiement sécurisé sur Sellify pour "${linkTitle || 'votre commande'}" : ${url}`;
-        window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
-    };
-
     return (
-        <SellerCentralLayout title="Smart-Link Studio (Vente Sociale)">
-            <Head title="Smart-Links Multi-Produits - Sellify" />
+        <SellerCentralLayout title="Smart-Links (Réseaux Sociaux)">
+            <Head title="Smart-Links - Vente Sociale Sellify" />
 
-            <div className="w-full space-y-6 pb-16 text-stone-800">
+            <div className="w-full space-y-5 text-stone-800 antialiased font-sans pb-16">
                 
-                {/* Header Shariow Human Style */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-amber-500/10 border border-amber-500/20 p-6 rounded-2xl">
+                {/* Header Banner */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white border border-stone-200 p-5 rounded-xl">
                     <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-amber-800 font-medium text-xs uppercase tracking-wide">
-                            <Sparkles className="w-4 h-4 text-amber-600" />
-                            <span>Social Commerce & Fast Checkout</span>
+                        <div className="flex items-center gap-1.5 text-yellow-700 font-medium text-xs uppercase tracking-wide">
+                            <Sparkles className="w-3.5 h-3.5 text-yellow-600" />
+                            <span>Vente Directe & Social Commerce</span>
                         </div>
                         <h1 className="text-xl font-semibold text-stone-900">
-                            Générateur de Smart-Links Multi-Produits
+                            Smart-Links de Paiement Escrow
                         </h1>
-                        <p className="text-xs text-stone-600">
-                            Créez un lien de paiement pour vos clients sur WhatsApp & Réseaux Sociaux avec plusieurs articles et réductions.
+                        <p className="text-xs text-stone-500 font-normal">
+                            Créez des liens de paiement instantanés avec séquestre Mobile Money à envoyer directement par WhatsApp, Instagram, TikTok et Facebook.
                         </p>
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <div className="px-3.5 py-1.5 bg-amber-500/20 text-amber-900 font-medium rounded-xl text-xs flex items-center gap-2">
-                            <CheckCircle2 className="w-4 h-4 text-amber-700" />
-                            <span>Compte Séquestre Escrow</span>
+                        <div className="px-3 py-1.5 bg-yellow-50 text-yellow-900 border border-yellow-200 rounded-lg text-xs font-medium flex items-center gap-1.5">
+                            <Link2 className="w-3.5 h-3.5 text-yellow-600" />
+                            <span>{totalLinks} lien(s) actif(s)</span>
                         </div>
                     </div>
                 </div>
 
-                {/* Stat Cards Grid */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-white border border-stone-200/70 p-4 rounded-xl shadow-sm">
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium text-stone-500">Liens Générés</span>
-                            <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center text-amber-700">
-                                <Link2 className="w-4 h-4" />
-                            </div>
-                        </div>
-                        <p className="text-xl font-semibold text-stone-900 mt-2">{totalLinks}</p>
+                {/* Performance Analytics Strip */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+                    <div className="bg-white border border-stone-200 p-4 rounded-xl shadow-xs">
+                        <p className="text-xs font-medium text-stone-500">Total Liens Générés</p>
+                        <p className="text-xl font-semibold text-stone-900 mt-1">{totalLinks}</p>
                     </div>
-
-                    <div className="bg-white border border-stone-200/70 p-4 rounded-xl shadow-sm">
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium text-stone-500">Total Clics</span>
-                            <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600">
-                                <MousePointerClick className="w-4 h-4" />
-                            </div>
-                        </div>
-                        <p className="text-xl font-semibold text-stone-900 mt-2">{totalClicks.toLocaleString()}</p>
+                    <div className="bg-white border border-stone-200 p-4 rounded-xl shadow-xs">
+                        <p className="text-xs font-medium text-stone-500">Clics Reçus</p>
+                        <p className="text-xl font-semibold text-blue-600 mt-1">{totalClicks}</p>
                     </div>
-
-                    <div className="bg-white border border-stone-200/70 p-4 rounded-xl shadow-sm">
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium text-stone-500">Ventes & Taux</span>
-                            <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600">
-                                <CheckCircle2 className="w-4 h-4" />
-                            </div>
-                        </div>
-                        <div className="flex items-baseline gap-2 mt-2">
-                            <span className="text-xl font-semibold text-emerald-600">{totalConversions}</span>
-                            <span className="text-xs font-medium text-stone-500">({conversionRate}%)</span>
-                        </div>
+                    <div className="bg-white border border-stone-200 p-4 rounded-xl shadow-xs">
+                        <p className="text-xs font-medium text-stone-500">Ventes Conclues</p>
+                        <p className="text-xl font-semibold text-emerald-600 mt-1">{totalConversions}</p>
                     </div>
-
-                    <div className="bg-white border border-stone-200/70 p-4 rounded-xl shadow-sm">
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium text-stone-500">Revenu Généré</span>
-                            <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center text-purple-600">
-                                <TrendingUp className="w-4 h-4" />
-                            </div>
-                        </div>
-                        <p className="text-xl font-semibold text-stone-900 mt-2">{totalRevenue.toLocaleString()} FCFA</p>
+                    <div className="bg-white border border-stone-200 p-4 rounded-xl shadow-xs">
+                        <p className="text-xs font-medium text-stone-500">Taux de Conversion</p>
+                        <p className="text-xl font-semibold text-yellow-600 mt-1">{conversionRate}%</p>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                {/* Main 2-column Grid: Form vs Recent Links */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                     
-                    {/* Left Panel: Link Creator Studio */}
-                    <div className="lg:col-span-7 bg-white border border-stone-200/70 rounded-2xl p-6 shadow-sm space-y-6">
-                        <div className="flex items-center justify-between border-b border-stone-100 pb-4">
-                            <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-medium">
-                                    <Link2 className="w-4 h-4" />
-                                </div>
-                                <h2 className="font-semibold text-stone-900 text-sm">Configurer une nouvelle commande</h2>
-                            </div>
+                    {/* Left Column: Creator Form */}
+                    <div className="lg:col-span-7 bg-white border border-stone-200 p-5 rounded-xl shadow-xs space-y-4">
+                        <div className="border-b border-stone-100 pb-3">
+                            <h2 className="text-sm font-semibold text-stone-900 flex items-center gap-2">
+                                <Plus className="w-4 h-4 text-yellow-600" />
+                                <span>Générateur de Smart-Link Personnalisé</span>
+                            </h2>
+                            <p className="text-xs text-stone-500 mt-0.5">
+                                Composez un panier sur-mesure pour votre client WhatsApp.
+                            </p>
                         </div>
 
-                        <form onSubmit={handleCreateLink} className="space-y-5">
-                            
-                            {/* Order Title */}
+                        <form onSubmit={handleCreateLink} className="space-y-4 text-xs">
+                            {/* Title */}
                             <div>
-                                <label className="block text-xs font-medium text-stone-600 mb-1.5">
-                                    Titre ou Référence de la Commande
+                                <label className="block font-medium text-stone-700 mb-1">
+                                    Titre / Référence du lien
                                 </label>
                                 <input
                                     type="text"
-                                    placeholder="ex: Pack Accessoires Client #SL-928"
+                                    placeholder="Ex: Lot 2 Robes Soirée + Sacoche (Client WhatsApp Eric)"
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
-                                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-normal text-stone-900 focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all outline-none"
+                                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-800 focus:border-yellow-500 focus:bg-white outline-none"
                                 />
                             </div>
 
-                            {/* Products Selector List */}
-                            <div className="space-y-3">
+                            {/* Product Rows */}
+                            <div className="space-y-2.5">
                                 <div className="flex items-center justify-between">
-                                    <label className="block text-xs font-medium text-stone-600">
-                                        Produits inclus ({selectedProducts.length})
-                                    </label>
+                                    <label className="font-medium text-stone-700">Articles inclus dans le lien</label>
                                     <button
                                         type="button"
                                         onClick={handleAddProductRow}
-                                        className="text-xs font-medium text-amber-700 hover:text-amber-800 flex items-center gap-1 bg-amber-50 px-2.5 py-1 rounded-lg transition-colors"
+                                        className="text-yellow-700 hover:text-yellow-800 font-medium flex items-center gap-1"
                                     >
-                                        <Plus className="w-3.5 h-3.5" />
-                                        <span>Ajouter un produit</span>
+                                        <Plus className="w-3 h-3" />
+                                        <span>Ajouter un autre article</span>
                                     </button>
                                 </div>
 
                                 {selectedProducts.map((item, idx) => (
-                                    <div key={idx} className="p-3.5 bg-stone-50 border border-stone-200/60 rounded-xl space-y-2.5">
-                                        <div className="flex items-center justify-between text-xs text-stone-500">
-                                            <span>Article #{idx + 1}</span>
+                                    <div key={idx} className="p-3 bg-stone-50 border border-stone-200 rounded-lg space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-[11px] font-medium text-stone-500">Article #{idx + 1}</span>
                                             {selectedProducts.length > 1 && (
                                                 <button
                                                     type="button"
                                                     onClick={() => handleRemoveProductRow(idx)}
-                                                    className="text-stone-400 hover:text-red-600 transition-colors"
+                                                    className="text-stone-400 hover:text-rose-600"
                                                 >
                                                     <Trash2 className="w-3.5 h-3.5" />
                                                 </button>
                                             )}
                                         </div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-12 gap-2.5">
-                                            {/* Select Product */}
-                                            <div className="md:col-span-6">
+                                        <div className="grid grid-cols-1 sm:grid-cols-12 gap-2">
+                                            <div className="sm:col-span-6">
                                                 <select
                                                     value={item.product_id}
                                                     onChange={(e) => handleProductSelectChange(idx, e.target.value)}
-                                                    className="w-full px-3 py-2 bg-white border border-stone-200 rounded-lg text-xs font-normal text-stone-800 focus:ring-2 focus:ring-amber-500 outline-none"
+                                                    className="w-full px-2.5 py-1.5 bg-white border border-stone-200 rounded-md text-stone-800 outline-none focus:border-yellow-500"
                                                 >
                                                     {products.map(p => (
-                                                        <option key={p.id} value={p.id}>
-                                                            {p.name} ({Number(p.price).toLocaleString()} FCFA)
-                                                        </option>
+                                                        <option key={p.id} value={p.id}>{p.name} ({Number(p.price).toLocaleString()} FCFA)</option>
                                                     ))}
                                                 </select>
                                             </div>
-
-                                            {/* Quantity */}
-                                            <div className="md:col-span-3">
+                                            <div className="sm:col-span-3">
                                                 <input
                                                     type="number"
                                                     min="1"
                                                     value={item.quantity}
                                                     onChange={(e) => handleQuantityChange(idx, e.target.value)}
-                                                    className="w-full px-3 py-2 bg-white border border-stone-200 rounded-lg text-xs font-normal text-center text-stone-800 focus:ring-2 focus:ring-amber-500 outline-none"
                                                     placeholder="Qté"
+                                                    className="w-full px-2.5 py-1.5 bg-white border border-stone-200 rounded-md text-stone-800 text-center outline-none focus:border-yellow-500"
                                                 />
                                             </div>
-
-                                            {/* Price */}
-                                            <div className="md:col-span-3">
+                                            <div className="sm:col-span-3">
                                                 <input
                                                     type="number"
                                                     min="0"
                                                     value={item.unit_price}
                                                     onChange={(e) => handleUnitPriceChange(idx, e.target.value)}
-                                                    className="w-full px-3 py-2 bg-white border border-stone-200 rounded-lg text-xs font-normal text-right text-stone-800 focus:ring-2 focus:ring-amber-500 outline-none"
-                                                    placeholder="Prix (FCFA)"
+                                                    placeholder="Prix unit."
+                                                    className="w-full px-2.5 py-1.5 bg-white border border-stone-200 rounded-md text-stone-800 text-right outline-none focus:border-yellow-500"
                                                 />
                                             </div>
                                         </div>
@@ -328,196 +278,118 @@ export default function Index({ smartLinks = [], products = [], baseUrl = '' }) 
                                 ))}
                             </div>
 
-                            {/* Advanced Pricing Config (Discounts & Shipping) */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                            {/* Discount & Shipping */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-xs font-medium text-stone-600 mb-1.5 flex items-center gap-1.5">
-                                        <Tag className="w-3.5 h-3.5 text-amber-600" />
-                                        <span>Réduction Globale (FCFA)</span>
-                                    </label>
+                                    <label className="font-medium text-stone-700 block mb-1">Remise spéciale (FCFA)</label>
                                     <input
                                         type="number"
                                         min="0"
                                         value={discountAmount}
                                         onChange={(e) => setDiscountAmount(e.target.value)}
-                                        className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-normal text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none"
                                         placeholder="0"
+                                        className="w-full px-3 py-1.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-800 outline-none focus:border-yellow-500"
                                     />
                                 </div>
-
                                 <div>
-                                    <label className="block text-xs font-medium text-stone-600 mb-1.5 flex items-center gap-1.5">
-                                        <Truck className="w-3.5 h-3.5 text-amber-600" />
-                                        <span>Frais de Livraison (FCFA)</span>
-                                    </label>
+                                    <label className="font-medium text-stone-700 block mb-1">Frais de livraison (FCFA)</label>
                                     <input
                                         type="number"
                                         min="0"
                                         value={shippingFee}
                                         onChange={(e) => setShippingFee(e.target.value)}
-                                        className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-normal text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none"
                                         placeholder="0"
+                                        className="w-full px-3 py-1.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-800 outline-none focus:border-yellow-500"
                                     />
                                 </div>
                             </div>
 
-                            {/* Validity & Notes */}
-                            <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5">
-                                <div className="md:col-span-5">
-                                    <label className="block text-xs font-medium text-stone-600 mb-1.5 flex items-center gap-1.5">
-                                        <Clock className="w-3.5 h-3.5 text-amber-600" />
-                                        <span>Durée de Validité</span>
-                                    </label>
-                                    <select
-                                        value={validityHours}
-                                        onChange={(e) => setValidityHours(e.target.value)}
-                                        className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-normal text-stone-800 focus:ring-2 focus:ring-amber-500 outline-none"
-                                    >
-                                        <option value={24}>24 Heures</option>
-                                        <option value={48}>48 Heures (Recommandé)</option>
-                                        <option value={72}>72 Heures</option>
-                                        <option value={168}>7 Jours</option>
-                                    </select>
-                                </div>
-
-                                <div className="md:col-span-7">
-                                    <label className="block text-xs font-medium text-stone-600 mb-1.5 flex items-center gap-1.5">
-                                        <FileText className="w-3.5 h-3.5 text-amber-600" />
-                                        <span>Instructions au client (Optionnel)</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        placeholder="ex: Merci de préciser la couleur souhaitée lors de la livraison."
-                                        value={notes}
-                                        onChange={(e) => setNotes(e.target.value)}
-                                        className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-normal text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Summary Card & Generate Button */}
-                            <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4">
+                            {/* Summary & Submit */}
+                            <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-xl flex items-center justify-between gap-4">
                                 <div>
-                                    <span className="text-xs text-stone-600">Montant total du lien</span>
-                                    <div className="flex items-baseline gap-2">
-                                        <span className="text-xl font-semibold text-stone-900">{totalPrice.toLocaleString()} FCFA</span>
-                                        {discountAmount > 0 && (
-                                            <span className="text-xs text-stone-400 line-through">
-                                                {(subtotal + parseFloat(shippingFee || 0)).toLocaleString()} FCFA
-                                            </span>
-                                        )}
-                                    </div>
+                                    <span className="text-stone-500 text-[11px]">Total à payer par le client :</span>
+                                    <p className="text-lg font-semibold text-stone-950">{totalPrice.toLocaleString('fr-FR')} FCFA</p>
                                 </div>
 
                                 <button
                                     type="submit"
                                     disabled={submitting}
-                                    className="w-full md:w-auto px-5 py-2.5 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-amber-950 font-medium text-xs rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                    className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-stone-950 font-medium rounded-lg shadow-xs flex items-center gap-1.5 transition-colors"
                                 >
                                     <Sparkles className="w-4 h-4" />
-                                    <span>{submitting ? 'Génération...' : 'Générer le Smart-Link'}</span>
+                                    <span>{submitting ? 'Génération...' : 'Générer Smart-Link'}</span>
                                 </button>
                             </div>
-
                         </form>
                     </div>
 
-                    {/* Right Panel: Smart-Links List & Share Actions */}
-                    <div className="lg:col-span-5 space-y-4">
-                        <div className="px-1">
-                            <h3 className="font-semibold text-stone-900 text-sm">Vos Smart-Links récents ({smartLinks.length})</h3>
-                        </div>
+                    {/* Right Column: Existing Smart-Links List */}
+                    <div className="lg:col-span-5 space-y-3.5">
+                        <h2 className="text-sm font-semibold text-stone-900">Vos Smart-Links Récents ({smartLinks.length})</h2>
 
-                        {smartLinks.length === 0 ? (
-                            <div className="bg-white border border-stone-200/70 rounded-2xl p-8 text-center text-stone-400 space-y-3">
-                                <Link2 className="w-10 h-10 mx-auto text-stone-300 stroke-[1.5]" />
-                                <p className="font-medium text-stone-600 text-xs">Aucun Smart-Link généré pour l'instant.</p>
-                                <p className="text-xs text-stone-400">Configurez une commande à gauche pour obtenir un lien à partager.</p>
-                            </div>
-                        ) : (
-                            <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
-                                {smartLinks.map(link => {
-                                    const isCopied = copiedToken === link.token;
-                                    const itemsList = link.items || (link.product ? [{ name: link.product.name, quantity: 1, unit_price: link.price_at_time }] : []);
-                                    const displayTitle = link.title || (link.product ? link.product.name : 'Commande');
+                        {smartLinks.length > 0 ? (
+                            <div className="space-y-3 max-h-[620px] overflow-y-auto pr-1">
+                                {smartLinks.map((link) => {
+                                    const shareUrl = `${baseUrl}${link.token}`;
+                                    const displayTitle = link.title || link.product?.name || 'Commande Sellify';
+                                    const shareTextWhatsApp = encodeURIComponent(`Bonjour ! Voici votre lien de commande sécurisé Sellify avec paiement Escrow Mobile Money (${displayTitle}) : ${shareUrl}`);
+                                    const shareUrlWhatsApp = `https://api.whatsapp.com/send?text=${shareTextWhatsApp}`;
+                                    const shareUrlFacebook = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
 
                                     return (
-                                        <div key={link.id} className="bg-white border border-stone-200/70 rounded-xl p-4 shadow-sm space-y-3 hover:border-amber-400 transition-colors">
-                                            <div className="flex items-start justify-between gap-3">
+                                        <div key={link.id} className="bg-white border border-stone-200 p-4 rounded-xl space-y-3 shadow-xs">
+                                            <div className="flex items-start justify-between gap-2">
                                                 <div>
-                                                    <span className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-medium ${
-                                                        link.status === 'active' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                                                        link.status === 'paid' ? 'bg-amber-100 text-amber-900 border border-amber-300' :
-                                                        'bg-stone-100 text-stone-500'
-                                                    }`}>
-                                                        {link.status === 'active' ? 'Actif' : link.status === 'paid' ? 'Payé' : link.status}
-                                                    </span>
-                                                    <h4 className="font-medium text-stone-900 text-xs mt-1">{displayTitle}</h4>
-                                                    <p className="text-[11px] text-stone-400">{itemsList.length} article(s)</p>
+                                                    <p className="font-semibold text-xs text-stone-900">{displayTitle}</p>
+                                                    <p className="text-[11px] text-stone-400 font-mono mt-0.5">{link.tracking_code}</p>
                                                 </div>
-
-                                                <div className="text-right">
-                                                    <span className="text-sm font-semibold text-stone-900">
-                                                        {Number(link.total_price || link.price_at_time).toLocaleString()} FCFA
-                                                    </span>
-                                                    <div className="flex items-center gap-2 text-[11px] text-stone-400 justify-end mt-0.5">
-                                                        <span className="flex items-center gap-1">
-                                                            <MousePointerClick className="w-3 h-3 text-stone-400" />
-                                                            {link.clicks_count}
-                                                        </span>
-                                                        <span className="flex items-center gap-1">
-                                                            <TrendingUp className="w-3 h-3 text-emerald-500" />
-                                                            {link.conversions_count}
-                                                        </span>
-                                                    </div>
-                                                </div>
+                                                <span className="text-xs font-semibold text-stone-900">
+                                                    {Number(link.total_price || link.price_at_time).toLocaleString('fr-FR')} FCFA
+                                                </span>
                                             </div>
 
-                                            {/* Itemized preview */}
-                                            <div className="bg-stone-50 p-2.5 rounded-lg text-xs text-stone-600 space-y-1">
-                                                {itemsList.slice(0, 2).map((it, idx) => (
-                                                    <div key={idx} className="flex justify-between font-normal">
-                                                        <span>• {it.quantity}x {it.name}</span>
-                                                        <span className="font-medium text-stone-800">{Number(it.unit_price * it.quantity).toLocaleString()} FCFA</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-
-                                            {/* Action Buttons */}
-                                            <div className="flex items-center gap-2 pt-1">
+                                            <div className="p-2 bg-stone-50 border border-stone-200 rounded-lg flex items-center justify-between text-[11px] text-stone-600 font-mono truncate">
+                                                <span className="truncate">{shareUrl}</span>
                                                 <button
                                                     onClick={() => handleCopy(link.token)}
-                                                    className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-all ${
-                                                        isCopied 
-                                                            ? 'bg-emerald-600 text-white' 
-                                                            : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
-                                                    }`}
+                                                    className="ml-2 px-2 py-1 bg-white hover:bg-stone-100 text-stone-700 rounded border border-stone-200 font-sans text-xs flex items-center gap-1 shrink-0"
                                                 >
-                                                    {isCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                                                    <span>{isCopied ? 'Copié !' : 'Copier'}</span>
+                                                    {copiedToken === link.token ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                                                    <span>{copiedToken === link.token ? 'Copié !' : 'Copier'}</span>
                                                 </button>
+                                            </div>
 
-                                                <button
-                                                    onClick={() => handleShareWhatsapp(link.token, displayTitle)}
-                                                    className="py-1.5 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-medium flex items-center gap-1 transition-colors border border-emerald-200"
-                                                >
-                                                    <Share2 className="w-3.5 h-3.5" />
-                                                    <span>WhatsApp</span>
-                                                </button>
-
+                                            {/* Social Sharing Quick Buttons */}
+                                            <div className="flex items-center gap-2 pt-1 border-t border-stone-100">
                                                 <a
-                                                    href={`${baseUrl}${link.token}`}
+                                                    href={shareUrlWhatsApp}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="p-1.5 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-lg transition-colors"
-                                                    title="Ouvrir le lien"
+                                                    className="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-center text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
                                                 >
-                                                    <ExternalLink className="w-3.5 h-3.5" />
+                                                    <MessageCircle className="w-3.5 h-3.5" />
+                                                    <span>Partager WhatsApp</span>
+                                                </a>
+
+                                                <a
+                                                    href={shareUrlFacebook}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex-1 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-center text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
+                                                >
+                                                    <Send className="w-3.5 h-3.5" />
+                                                    <span>Partager Facebook</span>
                                                 </a>
                                             </div>
                                         </div>
                                     );
                                 })}
+                            </div>
+                        ) : (
+                            <div className="bg-white border border-stone-200 p-8 rounded-xl text-center text-stone-400 space-y-2">
+                                <Link2 className="w-8 h-8 text-stone-300 mx-auto mb-1" />
+                                <p className="text-xs font-medium text-stone-700">Aucun Smart-Link actif</p>
+                                <p className="text-[11px] text-stone-400">Remplissez le formulaire à gauche pour créer votre premier lien.</p>
                             </div>
                         )}
                     </div>

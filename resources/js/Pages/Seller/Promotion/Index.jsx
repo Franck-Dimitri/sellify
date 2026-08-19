@@ -99,7 +99,7 @@ export default function Index({ shop, promotions = [], products = [] }) {
 
                     <button 
                         onClick={() => setIsModalOpen(true)}
-                        className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-amber-950 text-xs font-semibold rounded-lg shadow-xs flex items-center gap-1.5 transition-colors"
+                        className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-yellow-950 text-xs font-semibold rounded-lg shadow-xs flex items-center gap-1.5 transition-colors"
                     >
                         <Plus className="w-4 h-4" />
                         <span>Nouvelle promotion</span>
@@ -125,7 +125,7 @@ export default function Index({ shop, promotions = [], products = [] }) {
                             <span className="text-lg font-semibold text-stone-900 block mt-0.5">{avgDiscount}%</span>
                             <span className="text-[11px] text-stone-400 font-normal block pt-0.5">Sur prix catalogue</span>
                         </div>
-                        <div className="p-2.5 bg-amber-50 text-amber-700 rounded-lg border border-amber-200/60">
+                        <div className="p-2.5 bg-yellow-50 text-yellow-700 rounded-lg border border-yellow-200/60">
                             <TrendingUp className="w-4 h-4" />
                         </div>
                     </div>
@@ -158,7 +158,7 @@ export default function Index({ shop, promotions = [], products = [] }) {
                                     <p className="text-xs text-stone-500">Aucune promotion active pour l'instant.</p>
                                     <button 
                                         onClick={() => setIsModalOpen(true)}
-                                        className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-amber-950 text-xs font-semibold rounded-lg shadow-xs transition-colors"
+                                        className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-yellow-950 text-xs font-semibold rounded-lg shadow-xs transition-colors"
                                     >
                                         Planifier une promotion
                                     </button>
@@ -237,7 +237,7 @@ export default function Index({ shop, promotions = [], products = [] }) {
                                     <span className="font-semibold text-emerald-600">+24% clics</span>
                                 </div>
                                 <div className="w-full bg-stone-100 h-1.5 rounded-full overflow-hidden">
-                                    <div className="h-full bg-amber-500 rounded-full" style={{ width: '70%' }} />
+                                    <div className="h-full bg-yellow-500 rounded-full" style={{ width: '70%' }} />
                                 </div>
                                 <p className="text-[11px] text-stone-400 leading-relaxed pt-1">
                                     Les produits accompagnés de prix barrés enregistrent une conversion plus élevée sur la vitrine.
@@ -254,7 +254,7 @@ export default function Index({ shop, promotions = [], products = [] }) {
                         <div className="bg-white rounded-xl max-w-md w-full p-5 shadow-xl space-y-4 text-stone-800">
                             <div className="flex justify-between items-center border-b border-stone-100 pb-3">
                                 <div className="flex items-center gap-2">
-                                    <Tag className="w-4 h-4 text-amber-600" />
+                                    <Tag className="w-4 h-4 text-yellow-600" />
                                     <h3 className="font-semibold text-stone-900 text-sm">Planifier une Promotion</h3>
                                 </div>
                                 <button onClick={() => setIsModalOpen(false)} className="text-stone-400 hover:text-stone-600">
@@ -266,7 +266,7 @@ export default function Index({ shop, promotions = [], products = [] }) {
                                 <div>
                                     <label className="block font-medium text-stone-700 mb-1">Sélectionner un produit *</label>
                                     <select
-                                        className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
+                                        className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none font-normal"
                                         value={data.product_id}
                                         onChange={e => setData('product_id', e.target.value)}
                                         required
@@ -289,14 +289,14 @@ export default function Index({ shop, promotions = [], products = [] }) {
                                             value={data.promo_price}
                                             onChange={e => setData('promo_price', e.target.value)}
                                             placeholder="ex: 18000"
-                                            className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
+                                            className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none font-normal"
                                             required
                                             disabled={!data.product_id}
                                         />
                                     </div>
 
                                     <div className="flex flex-col justify-end">
-                                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-2 text-center h-9 flex items-center justify-center">
+                                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2 text-center h-9 flex items-center justify-center">
                                             {discountPercentage > 0 ? (
                                                 <span className="font-semibold text-red-600 text-xs">
                                                     -{discountPercentage}% OFF
@@ -315,7 +315,7 @@ export default function Index({ shop, promotions = [], products = [] }) {
                                             type="date"
                                             value={data.start_date}
                                             onChange={e => setData('start_date', e.target.value)}
-                                            className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
+                                            className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none font-normal"
                                             required
                                         />
                                     </div>
@@ -325,7 +325,7 @@ export default function Index({ shop, promotions = [], products = [] }) {
                                             type="date"
                                             value={data.end_date}
                                             onChange={e => setData('end_date', e.target.value)}
-                                            className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
+                                            className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none font-normal"
                                             required
                                         />
                                     </div>
@@ -342,7 +342,7 @@ export default function Index({ shop, promotions = [], products = [] }) {
                                     <button
                                         type="submit"
                                         disabled={processing || !data.product_id || discountPercentage <= 0}
-                                        className="px-5 py-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-amber-950 font-semibold rounded-lg shadow-xs transition-colors"
+                                        className="px-5 py-2 bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50 text-yellow-950 font-semibold rounded-lg shadow-xs transition-colors"
                                     >
                                         {processing ? 'Lancement...' : 'Lancer l\'Offre'}
                                     </button>

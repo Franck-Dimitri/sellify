@@ -22,6 +22,8 @@ use App\Http\Controllers\Seller\DisputeController;
 use App\Http\Controllers\Public\SmartLinkCheckoutController;
 use App\Http\Controllers\Public\OrderTrackingController;
 use App\Http\Controllers\Public\StoreController;
+use App\Http\Controllers\Seller\OrderController as SellerOrderController;
+use App\Http\Controllers\Seller\PromoCodeController;
 use App\Http\Controllers\AiChatController;
 use Inertia\Inertia;
 
@@ -144,9 +146,31 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             // Dashboard vendeur
             Route::get('/dashboard', function (\Illuminate\Http\Request $request) {
                 $seller = $request->user()->seller;
-                $shops = $seller ? $seller->shops()->with('products.promotions')->get() : [];
-                $totalStock = $seller ? $seller->totalStock() : 0;
+                $shops = $seller ? $seller->shops()->with('products.promotions')->get() : collect();
+                $shopIds = $shops->pluck('id');
                 
+                $totalStock = $seller ? $seller->totalStock() : 0;
+                $totalProducts = $shops->reduce(fn($sum, $s) => $sum + $s->products->where('is_archived', false)->count(), 0);
+                
+                // Real dynamic orders from all seller shops
+                $recentOrders = \App\Models\Order::whereIn('shop_id', $shopIds)
+                    ->with(['shop:id,name,slug', 'items'])
+                    ->latest()
+                    ->take(8)
+                    ->get();
+
+                $totalRevenue = \App\Models\Order::whereIn('shop_id', $shopIds)
+                    ->whereIn('payment_status', ['escrow_held', 'released'])
+                    ->sum('total_amount');
+
+                $pendingOrdersCount = \App\Models\Order::whereIn('shop_id', $shopIds)
+                    ->whereIn('delivery_status', ['pending', 'preparing'])
+                    ->count();
+
+                $deliveredOrdersCount = \App\Models\Order::whereIn('shop_id', $shopIds)
+                    ->where('delivery_status', 'delivered')
+                    ->count();
+
                 $logs = \App\Models\ActivityLog::where('user_id', $request->user()->id)
                     ->latest()
                     ->take(10)
@@ -155,6 +179,11 @@ Route::middleware(['auth', 'account.active'])->group(function () {
                 return Inertia::render('Seller/Dashboard', [
                     'shopsData' => $shops,
                     'totalStock' => $totalStock,
+                    'totalProducts' => $totalProducts,
+                    'totalRevenue' => (float)$totalRevenue,
+                    'pendingOrdersCount' => $pendingOrdersCount,
+                    'deliveredOrdersCount' => $deliveredOrdersCount,
+                    'recentOrders' => $recentOrders,
                     'activityLogs' => $logs,
                 ]);
             })->name('dashboard');
@@ -165,8 +194,17 @@ Route::middleware(['auth', 'account.active'])->group(function () {
                 Route::get('/shops', [ShopController::class, 'index'])->name('shop.index');
                 Route::delete('/shop/{shop:slug}', [ShopController::class, 'destroy'])->name('shop.destroy');
 
-                // Central promotions (consolidated view)
+                // Central Orders Management
+                Route::get('/orders', [SellerOrderController::class, 'index'])->name('orders.index');
+                Route::get('/orders/{order_number}', [SellerOrderController::class, 'show'])->name('orders.show');
+                Route::post('/orders/{order_number}/status', [SellerOrderController::class, 'updateStatus'])->name('orders.status');
+                Route::get('/orders/{order_number}/print', [SellerOrderController::class, 'printSlip'])->name('orders.print');
+
+                // Central promotions (consolidated view) & Promo Codes
                 Route::get('/promotions', [PromotionController::class, 'globalIndex'])->name('promotions.global');
+                Route::get('/promo-codes', [PromoCodeController::class, 'index'])->name('promocodes.index');
+                Route::post('/promo-codes', [PromoCodeController::class, 'store'])->name('promocodes.store');
+                Route::delete('/promo-codes/{promoCode}', [PromoCodeController::class, 'destroy'])->name('promocodes.destroy');
 
                 // Inventaire
                 Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
@@ -230,26 +268,27 @@ Route::middleware(['auth', 'account.active'])->group(function () {
         // Espace Client (Commandes, Suivi OTP, Litiges & Confirmation Escrow)
         // ─────────────────────────────────────────────────────────────────────────
         Route::prefix('customer')->name('customer.')->group(function () {
+            Route::get('/dashboard', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'dashboard'])->name('dashboard');
             Route::get('/orders', [\App\Http\Controllers\Customer\OrderController::class, 'index'])->name('orders.index');
             Route::get('/orders/{order_number}', [\App\Http\Controllers\Customer\OrderController::class, 'show'])->name('orders.show');
             Route::post('/orders/{order_number}/confirm', [\App\Http\Controllers\Customer\OrderController::class, 'confirmDelivery'])->name('orders.confirm');
             Route::post('/orders/{order_number}/dispute', [\App\Http\Controllers\Customer\OrderController::class, 'openDispute'])->name('orders.dispute');
+            Route::get('/wishlist', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'wishlist'])->name('wishlist');
+            Route::get('/disputes', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'disputes'])->name('disputes.index');
+            Route::get('/loyalty', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'loyalty'])->name('loyalty');
+            Route::get('/profile', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'profile'])->name('profile');
+            Route::post('/profile', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'updateProfile'])->name('profile.update');
         });
 
         // ─────────────────────────────────────────────────────────────────────────
         // Espace Livreur (Dashboard & Actions)
         // ─────────────────────────────────────────────────────────────────────────
         Route::middleware('role:driver')->prefix('driver')->name('driver.')->group(function () {
-            // Dashboard livreur
-            Route::get('/dashboard', function () {
-                return Inertia::render('Driver/Dashboard');
-            })->name('dashboard');
+            Route::get('/dashboard', [\App\Http\Controllers\Driver\DriverController::class, 'dashboard'])->name('dashboard');
 
-            // Exemple d'action critique restreinte par le middleware KYC
             Route::middleware('kyc.verified')->group(function () {
-                Route::post('/delivery/accept', function () {
-                    return back()->with('success', 'Livraison acceptée ! (Simulé)');
-                })->name('delivery.accept');
+                Route::post('/delivery/{order_number}/accept', [\App\Http\Controllers\Driver\DriverController::class, 'acceptDelivery'])->name('delivery.accept');
+                Route::post('/delivery/{order_number}/verify-otp', [\App\Http\Controllers\Driver\DriverController::class, 'verifyDeliveryOtp'])->name('delivery.verify_otp');
             });
         });
     });

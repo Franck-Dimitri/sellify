@@ -18,8 +18,12 @@ class EnsureSingleShopLimit
         if ($user && $user->isSeller()) {
             $seller = $user->seller;
             
-            // Starter is limited to 1 shop, Pro is limited to 2 shops
-            $maxShops = $seller && $seller->pack === 'pro' ? 2 : 1;
+            // Starter is limited to 1 shop, Pro is limited to 2 shops, Business is unlimited
+            $maxShops = match ($seller?->pack) {
+                'business' => 999,
+                'pro' => 2,
+                default => 1,
+            };
             
             // Only block creations (POST/PUT/PATCH) if the limit is reached
             if ($seller && $seller->shops()->count() >= $maxShops && !$request->isMethod('GET') && !$request->isMethod('HEAD')) {

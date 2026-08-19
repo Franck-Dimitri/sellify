@@ -3,27 +3,24 @@ import { Link, usePage } from '@inertiajs/react';
 import AIAssistantWidget from '@/Components/AIAssistantWidget';
 import {
     LayoutDashboard,
-    Store,
     ShoppingBag,
-    CreditCard,
+    Heart,
+    Store,
+    Package,
+    ShoppingCart,
+    AlertTriangle,
+    Sparkles,
+    User,
     LogOut,
     Menu,
     X,
     Bell,
     Search,
-    Percent,
-    Tag,
-    Boxes,
-    Link2,
-    DollarSign,
-    Wallet,
-    TrendingUp,
-    AlertTriangle,
     ChevronRight,
-    Sparkles
+    ShieldCheck
 } from 'lucide-react';
 
-export default function SellerCentralLayout({ children, title }) {
+export default function CustomerLayout({ children, title }) {
     const { auth, flash } = usePage().props;
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -31,94 +28,71 @@ export default function SellerCentralLayout({ children, title }) {
 
     const navSections = [
         {
-            title: 'GESTION COMMERCIALE',
+            title: 'ESPACE ACHETEUR',
             items: [
                 { 
                     name: 'Tableau de bord', 
-                    href: route('seller.dashboard'), 
+                    href: route('customer.dashboard'), 
                     icon: LayoutDashboard, 
-                    active: route().current('seller.dashboard') 
+                    active: route().current('customer.dashboard') 
                 },
                 { 
-                    name: 'Commandes', 
-                    href: route('seller.orders.index'), 
+                    name: 'Mes Commandes', 
+                    href: route('customer.orders.index'), 
                     icon: ShoppingBag, 
-                    active: route().current('seller.orders.*') 
+                    active: route().current('customer.orders.*') 
                 },
                 { 
-                    name: 'Mes Boutiques', 
-                    href: route('seller.shop.index'), 
+                    name: 'Mes Favoris', 
+                    href: route('customer.wishlist'), 
+                    icon: Heart, 
+                    active: route().current('customer.wishlist') 
+                },
+            ]
+        },
+        {
+            title: 'EXPLORATION & ACHATS',
+            items: [
+                { 
+                    name: 'Toutes les Boutiques', 
+                    href: route('public.shops.index'), 
                     icon: Store, 
-                    active: route().current('seller.shop.index') 
+                    active: route().current('public.shops.*') 
                 },
                 { 
-                    name: 'Inventaire & Stocks', 
-                    href: route('seller.inventory.index'), 
-                    icon: Boxes, 
-                    active: route().current('seller.inventory.index') 
+                    name: 'Catalogue Produits', 
+                    href: route('public.products.index'), 
+                    icon: Package, 
+                    active: route().current('public.products.*') 
                 },
                 { 
-                    name: 'Smart-Links (Réseaux)', 
-                    href: route('seller.smart_links.index'), 
-                    icon: Link2, 
-                    active: route().current('seller.smart_links.index') 
-                },
-            ]
-        },
-        {
-            title: 'MARKETING & PROMOTIONS',
-            items: [
-                { 
-                    name: 'Promotions Produits', 
-                    href: route('seller.promotions.global'), 
-                    icon: Percent, 
-                    active: route().current('seller.promotions.global') 
-                },
-                { 
-                    name: 'Codes Promo & Coupons', 
-                    href: route('seller.promocodes.index'), 
-                    icon: Tag, 
-                    active: route().current('seller.promocodes.*') 
+                    name: 'Mon Panier', 
+                    href: route('cart.index'), 
+                    icon: ShoppingCart, 
+                    active: route().current('cart.*') 
                 },
             ]
         },
         {
-            title: 'FINANCES & CROISSANCE',
+            title: 'SÉCURITÉ & FIDÉLITÉ',
             items: [
                 { 
-                    name: 'Portefeuille & Retraits', 
-                    href: route('seller.wallet.index'), 
-                    icon: Wallet, 
-                    active: route().current('seller.wallet.index') 
-                },
-                { 
-                    name: 'SellifyPay (Prêts)', 
-                    href: route('seller.loans.index'), 
-                    icon: DollarSign, 
-                    active: route().current('seller.loans.index') 
-                },
-                { 
-                    name: 'Packs Abonnements', 
-                    href: route('seller.subscription.index'), 
-                    icon: CreditCard, 
-                    active: route().current('seller.subscription.index') 
-                },
-            ]
-        },
-        {
-            title: 'ANALYTIQUE & LITIGES',
-            items: [
-                { 
-                    name: 'Rapports IA & Ventes', 
-                    href: route('seller.analytics.index'), 
-                    icon: TrendingUp, 
-                    active: route().current('seller.analytics.index') 
-                },
-                { 
-                    name: 'Gestion des Litiges', 
-                    href: route('seller.disputes.index'), 
+                    name: 'Mes Litiges & Arbitrage', 
+                    href: route('customer.disputes.index'), 
                     icon: AlertTriangle, 
-                    active: route().current('seller.disputes.index') 
+                    active: route().current('customer.disputes.*') 
+                },
+                { 
+                    name: 'Points & Récompenses', 
+                    href: route('customer.loyalty'), 
+                    icon: Sparkles, 
+                    active: route().current('customer.loyalty') 
+                },
+                { 
+                    name: 'Mon Profil & Adresses', 
+                    href: route('customer.profile'), 
+                    icon: User, 
+                    active: route().current('customer.profile') 
                 },
             ]
         }
@@ -140,7 +114,7 @@ export default function SellerCentralLayout({ children, title }) {
                                 Sellify<span className="text-yellow-600">.me</span>
                             </span>
                             <span className="block text-[10px] text-stone-400 font-medium uppercase tracking-wider leading-none mt-0.5">
-                                Espace Vendeur
+                                Espace Client
                             </span>
                         </div>
                     </Link>
@@ -187,8 +161,9 @@ export default function SellerCentralLayout({ children, title }) {
                         </div>
                         <div className="truncate">
                             <p className="text-xs font-medium text-stone-900 truncate">{user.first_name} {user.last_name}</p>
-                            <p className="text-[10px] text-yellow-700 font-medium uppercase tracking-wider">
-                                {user.seller?.pack === 'pro' ? 'Pack Pro' : user.seller?.pack === 'business' ? 'Pack Business' : 'Pack Starter'}
+                            <p className="text-[10px] text-yellow-700 font-medium tracking-wider flex items-center gap-1">
+                                <ShieldCheck className="w-3 h-3 text-yellow-600" />
+                                <span>Acheteur Protégé</span>
                             </p>
                         </div>
                     </div>
@@ -209,7 +184,7 @@ export default function SellerCentralLayout({ children, title }) {
 
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-                {/* Header / Topbar */}
+                {/* Topbar */}
                 <header className="h-16 bg-white border-b border-stone-200/80 flex items-center justify-between px-6 flex-shrink-0 z-20">
                     <div className="flex items-center flex-1 max-w-lg">
                         <button
@@ -224,7 +199,7 @@ export default function SellerCentralLayout({ children, title }) {
                             <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
                             <input
                                 type="text"
-                                placeholder="Rechercher une boutique, une commande..."
+                                placeholder="Rechercher une commande, une boutique ou un produit..."
                                 className="w-full bg-stone-50 text-xs pl-9 pr-12 py-1.5 rounded-lg border border-stone-200 focus:border-yellow-500 focus:bg-white outline-none font-normal text-stone-800 transition-all placeholder-stone-400"
                             />
                         </div>
@@ -232,6 +207,14 @@ export default function SellerCentralLayout({ children, title }) {
 
                     {/* Right side items */}
                     <div className="flex items-center space-x-3">
+                        <Link 
+                            href={route('cart.index')}
+                            className="p-2 text-stone-600 hover:text-yellow-700 rounded-lg hover:bg-stone-50 transition-colors relative"
+                            title="Mon Panier"
+                        >
+                            <ShoppingCart className="w-4.5 h-4.5" />
+                        </Link>
+
                         <button className="p-2 text-stone-400 hover:text-stone-600 rounded-lg hover:bg-stone-50 transition-colors relative" title="Notifications">
                             <Bell className="w-4.5 h-4.5 text-stone-500" />
                             <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-yellow-500"></span>
@@ -269,7 +252,7 @@ export default function SellerCentralLayout({ children, title }) {
                         </div>
                     )}
 
-                    {/* Page Content */}
+                    {/* Main Page Children */}
                     <main className="p-6">
                         {children}
                     </main>

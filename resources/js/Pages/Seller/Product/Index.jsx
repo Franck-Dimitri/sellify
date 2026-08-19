@@ -74,7 +74,7 @@ export default function Index({ shop, products = [], totalStock = 0, maxStockLim
 
                     <Link href={route('seller.shop.products.create', shop.slug)}>
                         <button 
-                            className="px-4 py-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-amber-950 text-xs font-semibold rounded-lg shadow-xs flex items-center gap-1.5 transition-colors"
+                            className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50 text-yellow-950 text-xs font-semibold rounded-lg shadow-xs flex items-center gap-1.5 transition-colors"
                             disabled={remainingStock <= 0}
                         >
                             <Plus className="w-4 h-4" />
@@ -84,12 +84,12 @@ export default function Index({ shop, products = [], totalStock = 0, maxStockLim
                 </div>
 
                 {/* STOCK QUOTA GAUGE BANNER */}
-                <div className="bg-amber-50/60 border border-amber-200/70 rounded-xl p-4 shadow-xs">
+                <div className="bg-yellow-50/60 border border-yellow-200/70 rounded-xl p-4 shadow-xs">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div className="space-y-1 flex-1">
                             <div className="flex items-center gap-2">
-                                <span className="font-semibold text-xs text-amber-900">Quota Stock Vendeur Cumulé</span>
-                                <span className="text-[10px] bg-amber-100 text-amber-800 font-medium px-2 py-0.5 rounded-full border border-amber-200">
+                                <span className="font-semibold text-xs text-yellow-900">Quota Stock Vendeur Cumulé</span>
+                                <span className="text-[10px] bg-yellow-100 text-yellow-800 font-medium px-2 py-0.5 rounded-full border border-yellow-200">
                                     Limite Pack : {maxStockLimit} Unités
                                 </span>
                             </div>
@@ -110,9 +110,9 @@ export default function Index({ shop, products = [], totalStock = 0, maxStockLim
                         <div className="w-full md:w-56 space-y-1.5 shrink-0">
                             <div className="flex justify-between text-xs font-medium">
                                 <span className="text-stone-500 font-normal">Utilisation :</span>
-                                <span className="text-amber-900 font-semibold">{totalStock} / {maxStockLimit} ({Math.round(stockPercent)}%)</span>
+                                <span className="text-yellow-900 font-semibold">{totalStock} / {maxStockLimit} ({Math.round(stockPercent)}%)</span>
                             </div>
-                            <div className="w-full bg-amber-200/50 h-2 rounded-full overflow-hidden">
+                            <div className="w-full bg-yellow-200/50 h-2 rounded-full overflow-hidden">
                                 <div 
                                     className="h-full rounded-full transition-all duration-300"
                                     style={{ 
@@ -134,7 +134,7 @@ export default function Index({ shop, products = [], totalStock = 0, maxStockLim
                             <span className="text-[10px] text-stone-400 font-medium uppercase tracking-wider block">Total Produits</span>
                             <span className="text-lg font-semibold text-stone-900 block mt-0.5">{totalShopProducts}</span>
                         </div>
-                        <div className="p-2.5 bg-amber-50 text-amber-700 rounded-lg border border-amber-200/60">
+                        <div className="p-2.5 bg-yellow-50 text-yellow-700 rounded-lg border border-yellow-200/60">
                             <ShoppingBag className="w-4 h-4" />
                         </div>
                     </div>
@@ -156,7 +156,7 @@ export default function Index({ shop, products = [], totalStock = 0, maxStockLim
                             <span className="text-[10px] text-stone-400 font-medium uppercase tracking-wider block">Stock Critique</span>
                             <span className="text-lg font-semibold text-stone-900 block mt-0.5">{lowStockCount}</span>
                         </div>
-                        <div className="p-2.5 bg-amber-50 text-amber-700 rounded-lg border border-amber-200/60">
+                        <div className="p-2.5 bg-yellow-50 text-yellow-700 rounded-lg border border-yellow-200/60">
                             <AlertTriangle className="w-4 h-4" />
                         </div>
                     </div>
@@ -180,7 +180,7 @@ export default function Index({ shop, products = [], totalStock = 0, maxStockLim
                             <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
                             <input
                                 type="text"
-                                className="w-full pl-9 pr-4 py-2 border border-stone-200 rounded-lg text-xs text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 font-normal bg-stone-50/40"
+                                className="w-full pl-9 pr-4 py-2 border border-stone-200 rounded-lg text-xs text-stone-900 focus:outline-none focus:ring-2 focus:ring-yellow-500 font-normal bg-stone-50/40"
                                 placeholder="Rechercher par nom d'article ou description..."
                                 value={searchQuery}
                                 onChange={e => setSearchQuery(e.target.value)}
@@ -199,7 +199,7 @@ export default function Index({ shop, products = [], totalStock = 0, maxStockLim
                                     onClick={() => setStatusFilter(filter.id)}
                                     className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all shrink-0 ${
                                         statusFilter === filter.id
-                                            ? 'bg-amber-500 text-amber-950 border-amber-500 shadow-xs font-semibold'
+                                            ? 'bg-yellow-500 text-yellow-950 border-yellow-500 shadow-xs font-semibold'
                                             : 'bg-white text-stone-600 border-stone-200 hover:bg-stone-50'
                                     }`}
                                 >
@@ -270,7 +270,7 @@ export default function Index({ shop, products = [], totalStock = 0, maxStockLim
                                                                 product.stock === 0 
                                                                     ? 'bg-red-50 text-red-700 border-red-200' 
                                                                     : product.stock <= 3 
-                                                                        ? 'bg-amber-50 text-amber-800 border-amber-200'
+                                                                        ? 'bg-yellow-50 text-yellow-800 border-yellow-200'
                                                                         : 'bg-emerald-50 text-emerald-800 border-emerald-200'
                                                             }`}>
                                                                 {product.stock} dispo
@@ -327,8 +327,8 @@ export default function Index({ shop, products = [], totalStock = 0, maxStockLim
                         <div className="bg-white border border-stone-200/70 rounded-xl p-5 shadow-xs space-y-3">
                             <div className="flex items-center justify-between border-b border-stone-100 pb-2.5">
                                 <h3 className="text-xs font-semibold text-stone-900 uppercase tracking-wider">Article Vedette</h3>
-                                <span className="bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-full text-[10px] font-medium flex items-center gap-1">
-                                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                                <span className="bg-yellow-50 text-yellow-900 border border-yellow-200 px-2 py-0.5 rounded-full text-[10px] font-medium flex items-center gap-1">
+                                    <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                                     <span>Top Ventes</span>
                                 </span>
                             </div>
@@ -359,7 +359,7 @@ export default function Index({ shop, products = [], totalStock = 0, maxStockLim
                                         <div>
                                             <span className="text-stone-400 text-[10px] block">Note clients</span>
                                             <span className="font-semibold text-stone-900 flex items-center gap-1">
-                                                <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                                                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                                                 <span>4.9 / 5</span>
                                             </span>
                                         </div>
@@ -379,7 +379,7 @@ export default function Index({ shop, products = [], totalStock = 0, maxStockLim
                             <div className="flex items-center gap-4">
                                 <div className="space-y-0.5">
                                     <div className="text-2xl font-semibold text-stone-900">4.8</div>
-                                    <div className="text-amber-500 text-xs flex gap-0.5">★★★★★</div>
+                                    <div className="text-yellow-500 text-xs flex gap-0.5">★★★★★</div>
                                     <span className="text-[10px] text-stone-400 font-normal block">24 avis vérifiés</span>
                                 </div>
 
@@ -399,7 +399,7 @@ export default function Index({ shop, products = [], totalStock = 0, maxStockLim
                                             <span className="font-semibold">8%</span>
                                         </div>
                                         <div className="w-full bg-stone-100 h-1.5 rounded-full overflow-hidden">
-                                            <div className="h-full bg-amber-500 rounded-full" style={{ width: '8%' }} />
+                                            <div className="h-full bg-yellow-500 rounded-full" style={{ width: '8%' }} />
                                         </div>
                                     </div>
                                 </div>
@@ -407,10 +407,10 @@ export default function Index({ shop, products = [], totalStock = 0, maxStockLim
                         </div>
 
                         {/* Inventory Advisory Box */}
-                        <div className="bg-amber-50/70 border border-amber-200/70 rounded-xl p-4 flex gap-3 text-xs text-amber-950 font-normal">
-                            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                        <div className="bg-yellow-50/70 border border-yellow-200/70 rounded-xl p-4 flex gap-3 text-xs text-yellow-950 font-normal">
+                            <AlertTriangle className="w-4 h-4 text-yellow-600 shrink-0 mt-0.5" />
                             <div>
-                                <h4 className="font-semibold text-amber-950">Conseil de Gestion de Stock</h4>
+                                <h4 className="font-semibold text-yellow-950">Conseil de Gestion de Stock</h4>
                                 <p className="text-[11px] text-stone-600 mt-0.5 leading-relaxed font-normal">
                                     Maintenez vos stocks à jour pour garantir l'expédition sous 24h et préserver votre badge de confiance Sellify Escrow.
                                 </p>

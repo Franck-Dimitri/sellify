@@ -72,10 +72,10 @@ export default function WalletIndex({ wallet, shopsBreakdown = [], transactions 
             <div className="w-full space-y-6 pb-16 text-stone-800">
                 
                 {/* Header Banner Shariow Style */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-amber-500/10 border border-amber-500/20 p-6 rounded-2xl">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-yellow-500/10 border border-yellow-500/20 p-6 rounded-2xl">
                     <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-amber-800 font-medium text-xs uppercase tracking-wide">
-                            <Wallet className="w-4 h-4 text-amber-600" />
+                        <div className="flex items-center gap-2 text-yellow-800 font-medium text-xs uppercase tracking-wide">
+                            <Wallet className="w-4 h-4 text-yellow-600" />
                             <span>Gestion Financière Centralisée</span>
                         </div>
                         <h1 className="text-xl font-semibold text-stone-900">
@@ -88,7 +88,7 @@ export default function WalletIndex({ wallet, shopsBreakdown = [], transactions 
 
                     <button
                         onClick={() => setShowWithdrawModal(true)}
-                        className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-amber-950 font-medium text-xs rounded-xl shadow-sm transition-all flex items-center justify-center gap-2"
+                        className="px-5 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-yellow-950 font-medium text-xs rounded-xl shadow-sm transition-all flex items-center justify-center gap-2"
                     >
                         <ArrowUpRight className="w-4 h-4" />
                         <span>Demander un Retrait</span>
@@ -102,7 +102,7 @@ export default function WalletIndex({ wallet, shopsBreakdown = [], transactions 
                     <div className="bg-white border border-stone-200/70 p-5 rounded-2xl shadow-sm space-y-3">
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-medium text-stone-500">Solde Global Disponible</span>
-                            <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center text-amber-700">
+                            <div className="w-8 h-8 bg-yellow-50 rounded-lg flex items-center justify-center text-yellow-700">
                                 <Wallet className="w-4 h-4" />
                             </div>
                         </div>
@@ -120,12 +120,12 @@ export default function WalletIndex({ wallet, shopsBreakdown = [], transactions 
                     <div className="bg-white border border-stone-200/70 p-5 rounded-2xl shadow-sm space-y-3">
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-medium text-stone-500">Fonds Bloqués sur Séquestre (Escrow)</span>
-                            <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center text-amber-800">
+                            <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center text-yellow-800">
                                 <Lock className="w-4 h-4" />
                             </div>
                         </div>
                         <div>
-                            <p className="text-2xl font-semibold text-amber-800">
+                            <p className="text-2xl font-semibold text-yellow-800">
                                 {Number(wallet.pending_balance).toLocaleString()} FCFA
                             </p>
                             <p className="text-[11px] text-stone-400 mt-1">
@@ -135,15 +135,15 @@ export default function WalletIndex({ wallet, shopsBreakdown = [], transactions 
                     </div>
 
                     {/* Escrow Guarantee Callout */}
-                    <div className="bg-amber-50/60 border border-amber-200/70 p-5 rounded-2xl shadow-sm flex flex-col justify-between space-y-2">
-                        <div className="flex items-center gap-2 text-amber-900 font-medium text-xs">
-                            <ShieldCheck className="w-4 h-4 text-amber-700" />
+                    <div className="bg-yellow-50/60 border border-yellow-200/70 p-5 rounded-2xl shadow-sm flex flex-col justify-between space-y-2">
+                        <div className="flex items-center gap-2 text-yellow-900 font-medium text-xs">
+                            <ShieldCheck className="w-4 h-4 text-yellow-700" />
                             <span>Garantie Anti-Fraude Escrow</span>
                         </div>
-                        <p className="text-xs text-amber-800 font-normal">
+                        <p className="text-xs text-yellow-800 font-normal">
                             Toutes vos transactions sont protégées par le système séquestre Sellify pour assurer la confiance entre vos boutiques et vos acheteurs.
                         </p>
-                        <div className="text-[11px] text-amber-700 font-medium pt-1">
+                        <div className="text-[11px] text-yellow-700 font-medium pt-1">
                             {shopsBreakdown.length} boutique(s) rattachée(s)
                         </div>
                     </div>
@@ -154,7 +154,7 @@ export default function WalletIndex({ wallet, shopsBreakdown = [], transactions 
                 <div className="bg-white border border-stone-200/70 rounded-2xl p-6 shadow-sm space-y-4">
                     <div className="flex items-center justify-between border-b border-stone-100 pb-3">
                         <div className="flex items-center gap-2">
-                            <Store className="w-4 h-4 text-amber-600" />
+                            <Store className="w-4 h-4 text-yellow-600" />
                             <h2 className="font-semibold text-stone-900 text-sm">Ventilation Financière par Boutique</h2>
                         </div>
                         <span className="text-xs text-stone-400">Total : {shopsBreakdown.length} boutique(s)</span>
@@ -165,10 +165,10 @@ export default function WalletIndex({ wallet, shopsBreakdown = [], transactions 
                             <p className="text-xs text-stone-400 col-span-full py-4 text-center">Aucune boutique enregistrée pour le moment.</p>
                         ) : (
                             shopsBreakdown.map(shop => (
-                                <div key={shop.id} className="p-4 bg-stone-50 border border-stone-200/60 rounded-xl space-y-3 hover:border-amber-400 transition-colors">
+                                <div key={shop.id} className="p-4 bg-stone-50 border border-stone-200/60 rounded-xl space-y-3 hover:border-yellow-400 transition-colors">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
-                                            <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-900 flex items-center justify-center font-medium text-xs">
+                                            <div className="w-8 h-8 rounded-lg bg-yellow-100 text-yellow-900 flex items-center justify-center font-medium text-xs">
                                                 <Store className="w-4 h-4" />
                                             </div>
                                             <div>
@@ -185,7 +185,7 @@ export default function WalletIndex({ wallet, shopsBreakdown = [], transactions 
                                         </div>
                                         <div>
                                             <span className="text-[10px] text-stone-400 block">En Séquestre</span>
-                                            <span className="font-semibold text-amber-800">{Number(shop.pending_balance).toLocaleString()} FCFA</span>
+                                            <span className="font-semibold text-yellow-800">{Number(shop.pending_balance).toLocaleString()} FCFA</span>
                                         </div>
                                     </div>
                                 </div>
@@ -198,7 +198,7 @@ export default function WalletIndex({ wallet, shopsBreakdown = [], transactions 
                 <div className="bg-white border border-stone-200/70 rounded-2xl shadow-sm overflow-hidden">
                     <div className="p-5 border-b border-stone-100 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <History className="w-4 h-4 text-amber-600" />
+                            <History className="w-4 h-4 text-yellow-600" />
                             <h3 className="font-semibold text-stone-900 text-sm">Demandes de Retrait Effectuées</h3>
                         </div>
                     </div>
@@ -237,7 +237,7 @@ export default function WalletIndex({ wallet, shopsBreakdown = [], transactions 
                                                 <span className={`inline-block px-2.5 py-0.5 rounded-md text-[11px] font-medium ${
                                                     w.status === 'completed'
                                                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                                        : 'bg-amber-100 text-amber-900 border border-amber-300'
+                                                        : 'bg-yellow-100 text-yellow-900 border border-yellow-300'
                                                 }`}>
                                                     {w.status === 'completed' ? '✓ Effectué' : '⏳ En cours'}
                                                 </span>
@@ -257,7 +257,7 @@ export default function WalletIndex({ wallet, shopsBreakdown = [], transactions 
                 <div className="bg-white border border-stone-200/70 rounded-2xl shadow-sm overflow-hidden">
                     <div className="p-5 border-b border-stone-100 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <Coins className="w-4 h-4 text-amber-600" />
+                            <Coins className="w-4 h-4 text-yellow-600" />
                             <h3 className="font-semibold text-stone-900 text-sm">Historique Récent des Transactions</h3>
                         </div>
 
@@ -265,7 +265,7 @@ export default function WalletIndex({ wallet, shopsBreakdown = [], transactions 
                             <button
                                 onClick={() => setActiveTab('all')}
                                 className={`px-3 py-1 text-xs font-medium rounded-lg transition-all ${
-                                    activeTab === 'all' ? 'bg-amber-500 text-amber-950' : 'bg-stone-100 text-stone-600'
+                                    activeTab === 'all' ? 'bg-yellow-500 text-yellow-950' : 'bg-stone-100 text-stone-600'
                                 }`}
                             >
                                 Toutes
@@ -354,7 +354,7 @@ export default function WalletIndex({ wallet, shopsBreakdown = [], transactions 
                                         value={data.amount}
                                         onChange={e => setData('amount', e.target.value)}
                                         placeholder="ex: 50000"
-                                        className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none"
+                                        className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none"
                                         required
                                     />
                                     <span className="text-[10px] text-stone-400 mt-1 block">Solde disponible : {Number(wallet.balance).toLocaleString()} FCFA</span>
@@ -365,7 +365,7 @@ export default function WalletIndex({ wallet, shopsBreakdown = [], transactions 
                                     <select
                                         value={selectedShopId}
                                         onChange={e => setSelectedShopId(e.target.value)}
-                                        className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none"
+                                        className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none"
                                     >
                                         <option value="">Toutes les boutiques (Solde Global)</option>
                                         {shopsBreakdown.map(s => (
@@ -381,7 +381,7 @@ export default function WalletIndex({ wallet, shopsBreakdown = [], transactions 
                                     <select
                                         value={data.payment_method}
                                         onChange={e => setData('payment_method', e.target.value)}
-                                        className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none"
+                                        className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none"
                                     >
                                         <option value="orange_money">Orange Money</option>
                                         <option value="mtn_momo">MTN Mobile Money</option>
@@ -397,7 +397,7 @@ export default function WalletIndex({ wallet, shopsBreakdown = [], transactions 
                                             value={data.phone_number}
                                             onChange={e => setData('phone_number', e.target.value)}
                                             placeholder="ex: 690 12 34 56"
-                                            className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none"
+                                            className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none"
                                             required
                                         />
                                     </div>
@@ -414,7 +414,7 @@ export default function WalletIndex({ wallet, shopsBreakdown = [], transactions 
                                     <button
                                         type="submit"
                                         disabled={submitting}
-                                        className="flex-1 py-2.5 bg-amber-500 text-amber-950 rounded-xl text-xs font-medium hover:bg-amber-600 transition-colors shadow-xs disabled:opacity-50"
+                                        className="flex-1 py-2.5 bg-yellow-500 text-yellow-950 rounded-xl text-xs font-medium hover:bg-yellow-600 transition-colors shadow-xs disabled:opacity-50"
                                     >
                                         {submitting ? 'Traitement...' : 'Confirmer le Retrait'}
                                     </button>

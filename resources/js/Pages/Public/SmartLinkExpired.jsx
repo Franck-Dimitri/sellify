@@ -6,7 +6,7 @@ export default function SmartLinkExpired() {
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6 text-center font-sans">
             <Head title="Lien Expiré - Sellify.me" />
             <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl space-y-4 border border-gray-100">
-                <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-3xl mx-auto">
+                <div className="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center text-3xl mx-auto">
                     ⏰
                 </div>
                 <h1 className="text-2xl font-black text-gray-900">Smart-Link Expiré ou Invalide</h1>

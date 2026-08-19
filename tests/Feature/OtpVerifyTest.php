@@ -91,7 +91,7 @@ class OtpVerifyTest extends TestCase
             'code' => '123456',
         ]);
 
-        $response->assertRedirect(route('welcome'));
+        $response->assertRedirect(route('customer.dashboard'));
         
         $user->refresh();
         $this->assertNotNull($user->email_verified_at);

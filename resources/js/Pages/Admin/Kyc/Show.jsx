@@ -154,7 +154,7 @@ export default function Show({ kycRequest }) {
                                                 onClick={() => setActiveDocTab(doc.id)}
                                                 className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all duration-150
                                                     ${selectedDoc?.id === doc.id
-                                                        ? 'bg-amber-500 border-amber-500 text-white shadow-sm shadow-amber-500/10'
+                                                        ? 'bg-yellow-500 border-yellow-500 text-white shadow-sm shadow-yellow-500/10'
                                                         : 'bg-white border-surface-200 text-surface-600 hover:bg-surface-50'}`}
                                             >
                                                 {doc.type.replace('_', ' ').toUpperCase()}
@@ -247,7 +247,7 @@ export default function Show({ kycRequest }) {
                                         type="button"
                                         onClick={handleOcrFill}
                                         disabled={ocrLoading}
-                                        className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 shadow-sm transition-all duration-150"
+                                        className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-yellow-500 hover:bg-yellow-600 shadow-sm transition-all duration-150"
                                     >
                                         {ocrLoading ? (
                                             <>
@@ -298,7 +298,7 @@ export default function Show({ kycRequest }) {
                                             <select
                                                 value={data.cni_gender}
                                                 onChange={(e) => setData('cni_gender', e.target.value)}
-                                                className="w-full px-3 py-2 text-xs bg-surface-50 border border-surface-200 focus:border-amber-400 rounded-xl outline-none font-semibold text-surface-700 transition-colors"
+                                                className="w-full px-3 py-2 text-xs bg-surface-50 border border-surface-200 focus:border-yellow-400 rounded-xl outline-none font-semibold text-surface-700 transition-colors"
                                             >
                                                 <option value="M">Masculin (M)</option>
                                                 <option value="F">Féminin (F)</option>
@@ -379,8 +379,8 @@ export default function Show({ kycRequest }) {
                                             </div>
                                         ) : (
                                             <div className="space-y-4">
-                                                <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 flex items-start space-x-2 text-xs text-amber-800 font-semibold">
-                                                    <AlertTriangle className="w-4.5 h-4.5 text-amber-600 flex-shrink-0" />
+                                                <div className="bg-yellow-50 border border-yellow-100 rounded-xl p-3 flex items-start space-x-2 text-xs text-yellow-800 font-semibold">
+                                                    <AlertTriangle className="w-4.5 h-4.5 text-yellow-600 flex-shrink-0" />
                                                     <span>Précisez le motif précis du rejet de ce dossier KYC à l'utilisateur.</span>
                                                 </div>
                                                 <Input

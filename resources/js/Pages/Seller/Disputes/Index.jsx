@@ -51,10 +51,10 @@ export default function DisputesIndex({ disputes = [] }) {
             <div className="w-full space-y-6 pb-16 text-stone-800">
                 
                 {/* Header Banner Shariow Style */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-amber-500/10 border border-amber-500/20 p-6 rounded-2xl">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-yellow-500/10 border border-yellow-500/20 p-6 rounded-2xl">
                     <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-amber-800 font-medium text-xs uppercase tracking-wide">
-                            <AlertTriangle className="w-4 h-4 text-amber-600" />
+                        <div className="flex items-center gap-2 text-yellow-800 font-medium text-xs uppercase tracking-wide">
+                            <AlertTriangle className="w-4 h-4 text-yellow-600" />
                             <span>Centre d'Arbitrage & Prévention des Litiges</span>
                         </div>
                         <h1 className="text-xl font-semibold text-stone-900">
@@ -66,8 +66,8 @@ export default function DisputesIndex({ disputes = [] }) {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <div className="px-3.5 py-1.5 bg-amber-500/20 text-amber-900 font-medium rounded-xl text-xs flex items-center gap-2">
-                            <Clock className="w-4 h-4 text-amber-700" />
+                        <div className="px-3.5 py-1.5 bg-yellow-500/20 text-yellow-900 font-medium rounded-xl text-xs flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-yellow-700" />
                             <span>Délai d'Arbitrage : 48h - 72h</span>
                         </div>
                     </div>
@@ -77,7 +77,7 @@ export default function DisputesIndex({ disputes = [] }) {
                 <div className="bg-white border border-stone-200/70 rounded-2xl shadow-sm overflow-hidden">
                     <div className="p-5 border-b border-stone-100 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <Lock className="w-4 h-4 text-amber-600" />
+                            <Lock className="w-4 h-4 text-yellow-600" />
                             <h3 className="font-semibold text-stone-900 text-sm">Dossiers de Contestation ({disputes.length})</h3>
                         </div>
                     </div>
@@ -106,7 +106,7 @@ export default function DisputesIndex({ disputes = [] }) {
                                 ) : (
                                     disputes.map(d => (
                                         <tr key={d.id} className="hover:bg-stone-50/80 transition-colors">
-                                            <td className="px-6 py-3.5 font-mono font-medium text-amber-900">
+                                            <td className="px-6 py-3.5 font-mono font-medium text-yellow-900">
                                                 #LIT-{d.id}
                                             </td>
 
@@ -119,7 +119,7 @@ export default function DisputesIndex({ disputes = [] }) {
                                             </td>
 
                                             <td className="px-6 py-3.5">
-                                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium bg-amber-50 text-amber-900 border border-amber-200">
+                                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium bg-yellow-50 text-yellow-900 border border-yellow-200">
                                                     🔒 Fonds Contestés
                                                 </span>
                                             </td>
@@ -130,8 +130,8 @@ export default function DisputesIndex({ disputes = [] }) {
                                                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Défense transmise
                                                     </span>
                                                 ) : (
-                                                    <span className="text-amber-800 font-medium flex items-center gap-1">
-                                                        <Clock className="w-3.5 h-3.5 text-amber-600" /> Réponse requise (48h)
+                                                    <span className="text-yellow-800 font-medium flex items-center gap-1">
+                                                        <Clock className="w-3.5 h-3.5 text-yellow-600" /> Réponse requise (48h)
                                                     </span>
                                                 )}
                                             </td>
@@ -139,7 +139,7 @@ export default function DisputesIndex({ disputes = [] }) {
                                             <td className="px-6 py-3.5 text-right">
                                                 <button
                                                     onClick={() => handleOpenModal(d)}
-                                                    className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-amber-950 rounded-lg text-xs font-medium transition-all shadow-xs"
+                                                    className="px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-yellow-950 rounded-lg text-xs font-medium transition-all shadow-xs"
                                                 >
                                                     {d.seller_responded_at ? 'Voir le Dossier' : 'Répondre au Litige'}
                                                 </button>
@@ -173,12 +173,12 @@ export default function DisputesIndex({ disputes = [] }) {
                                         value={defenseText}
                                         onChange={e => setDefenseText(e.target.value)}
                                         placeholder="Décrivez précisément l'état de l'article avant expédition, le mode d'emballage et les références de livraison..."
-                                        className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
+                                        className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none font-normal"
                                         required
                                     />
                                 </div>
 
-                                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900">
+                                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-xl text-[11px] text-yellow-900">
                                     <span className="font-medium">Information : </span>
                                     Vos éléments seront transmis directement à l'équipe d'arbitrage Sellify pour débloquer les fonds sous séquestre.
                                 </div>
@@ -194,7 +194,7 @@ export default function DisputesIndex({ disputes = [] }) {
                                     <button
                                         type="submit"
                                         disabled={submitting}
-                                        className="flex-1 py-2.5 bg-amber-500 text-amber-950 rounded-xl font-medium hover:bg-amber-600 transition-colors shadow-xs flex items-center justify-center gap-1.5 disabled:opacity-50"
+                                        className="flex-1 py-2.5 bg-yellow-500 text-yellow-950 rounded-xl font-medium hover:bg-yellow-600 transition-colors shadow-xs flex items-center justify-center gap-1.5 disabled:opacity-50"
                                     >
                                         <Send className="w-3.5 h-3.5" />
                                         <span>{submitting ? 'Transmission...' : 'Soumettre les Preuves'}</span>

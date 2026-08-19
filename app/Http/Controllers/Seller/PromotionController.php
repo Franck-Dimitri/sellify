@@ -63,7 +63,7 @@ class PromotionController extends Controller
 
         if ($validated['promo_price'] >= $product->price) {
             return back()->withErrors([
-                'promo_price' => "Le prix promotionnel doit être inférieur au prix d'origine du produit (" . number_format($product->price, 2) . " €)."
+                'promo_price' => "Le prix promotionnel doit être inférieur au prix d'origine du produit (" . number_format($product->price, 0, ',', ' ') . " FCFA)."
             ])->withInput();
         }
 
@@ -88,7 +88,7 @@ class PromotionController extends Controller
         ActivityLog::log(
             $request->user()->id,
             'promotion_created',
-            "Promotion créée pour le produit \"{$product->name}\" dans \"{$shop->name}\" : -{$discountPercentage}% (prix réduit : {$promotion->promo_price} €)."
+            "Promotion créée pour le produit \"{$product->name}\" dans \"{$shop->name}\" : -{$discountPercentage}% (prix réduit : " . number_format($promotion->promo_price, 0, ',', ' ') . " FCFA)."
         );
 
         return redirect()->route('seller.shop.promotions.index', $shop->slug)

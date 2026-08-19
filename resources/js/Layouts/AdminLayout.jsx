@@ -65,9 +65,9 @@ export default function AdminLayout({ children, title }) {
                 {/* Brand Header */}
                 <div className="h-16 flex items-center justify-between px-6 border-b border-surface-100 bg-white">
                     <Link href="/" className="flex items-center space-x-2.5">
-                        <span className="w-8.5 h-8.5 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-400 flex items-center justify-center font-black text-white shadow-md text-base">S</span>
+                        <span className="w-8.5 h-8.5 rounded-xl bg-gradient-to-tr from-yellow-500 to-yellow-400 flex items-center justify-center font-black text-white shadow-md text-base">S</span>
                         <div>
-                            <span className="font-extrabold text-base tracking-tight text-surface-900">Sellify<span className="text-amber-500">.me</span></span>
+                            <span className="font-extrabold text-base tracking-tight text-surface-900">Sellify<span className="text-yellow-500">.me</span></span>
                             <span className="block text-[10px] text-surface-400 font-bold uppercase tracking-wider leading-none mt-0.5">Administration</span>
                         </div>
                     </Link>
@@ -86,7 +86,7 @@ export default function AdminLayout({ children, title }) {
                                 href={item.href}
                                 className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150
                                     ${item.active
-                                        ? 'bg-amber-500 text-white shadow-md shadow-amber-500/10 font-bold'
+                                        ? 'bg-yellow-500 text-white shadow-md shadow-yellow-500/10 font-bold'
                                         : 'hover:bg-surface-50 text-surface-600 hover:text-surface-900'
                                     }`}
                             >
@@ -125,13 +125,13 @@ export default function AdminLayout({ children, title }) {
                                         href={item.href}
                                         className={`flex items-center justify-between py-2 px-3 rounded-lg text-xs font-semibold transition-all duration-150
                                             ${item.active
-                                                ? 'bg-amber-50 text-amber-900 border-l-2 border-amber-500 font-bold pl-2.5'
+                                                ? 'bg-yellow-50 text-yellow-900 border-l-2 border-yellow-500 font-bold pl-2.5'
                                                 : 'text-surface-500 hover:text-surface-900 hover:bg-surface-50'
                                             }`}
                                     >
                                         <span>{item.name}</span>
                                         <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-mono font-bold
-                                            ${item.active ? 'bg-amber-100 text-amber-800' : 'bg-surface-100 text-surface-500'}`}>
+                                            ${item.active ? 'bg-yellow-100 text-yellow-800' : 'bg-surface-100 text-surface-500'}`}>
                                             {item.count}
                                         </span>
                                     </Link>
@@ -148,7 +148,7 @@ export default function AdminLayout({ children, title }) {
                                 key={item.name}
                                 href={item.href}
                                 className={`flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold hover:bg-surface-50 text-surface-600 hover:text-surface-900 transition-colors
-                                    ${item.active ? 'bg-amber-500 text-white font-semibold' : ''}`}
+                                    ${item.active ? 'bg-yellow-500 text-white font-semibold' : ''}`}
                             >
                                 <item.icon className="w-4.5 h-4.5 flex-shrink-0 text-surface-500" />
                                 <span>{item.name}</span>
@@ -206,7 +206,7 @@ export default function AdminLayout({ children, title }) {
                             <input
                                 type="text"
                                 placeholder="Recherche..."
-                                className="w-full bg-surface-50 text-sm pl-9 pr-12 py-1.5 rounded-xl border border-surface-200 focus:border-amber-400 focus:bg-white outline-none font-medium text-surface-700 transition-all placeholder-surface-400"
+                                className="w-full bg-surface-50 text-sm pl-9 pr-12 py-1.5 rounded-xl border border-surface-200 focus:border-yellow-400 focus:bg-white outline-none font-medium text-surface-700 transition-all placeholder-surface-400"
                             />
                             <div className="absolute right-2.5 top-1/2 transform -translate-y-1/2 bg-white px-1.5 py-0.5 border border-surface-200 rounded-md text-[10px] text-surface-400 font-semibold shadow-xs font-mono">
                                 ⌘K
@@ -222,7 +222,7 @@ export default function AdminLayout({ children, title }) {
                         </button>
                         <div className="h-6 w-px bg-surface-200"></div>
                         <div className="flex items-center space-x-2.5">
-                            <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center font-semibold text-xs border border-amber-250">
+                            <div className="w-8 h-8 rounded-full bg-yellow-100 text-yellow-800 flex items-center justify-center font-semibold text-xs border border-yellow-250">
                                 {auth.user.first_name[0]}
                             </div>
                             <span className="text-sm font-semibold text-surface-800 hidden sm:inline-block">

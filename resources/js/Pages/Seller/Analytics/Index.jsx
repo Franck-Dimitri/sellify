@@ -25,10 +25,10 @@ export default function AnalyticsIndex({ report }) {
             <div className="w-full space-y-6 pb-16 text-stone-800">
                 
                 {/* Header Banner Shariow Style */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-amber-500/10 border border-amber-500/20 p-6 rounded-2xl">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-yellow-500/10 border border-yellow-500/20 p-6 rounded-2xl">
                     <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-amber-800 font-medium text-xs uppercase tracking-wide">
-                            <Sparkles className="w-4 h-4 text-amber-600" />
+                        <div className="flex items-center gap-2 text-yellow-800 font-medium text-xs uppercase tracking-wide">
+                            <Sparkles className="w-4 h-4 text-yellow-600" />
                             <span>Moteur d'Intelligence Artificielle Vendeur</span>
                         </div>
                         <h1 className="text-xl font-semibold text-stone-900">
@@ -40,9 +40,9 @@ export default function AnalyticsIndex({ report }) {
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <div className="px-4 py-2 bg-amber-50 rounded-xl border border-amber-200 text-center">
-                            <span className="text-[10px] text-amber-800 block font-medium">Analyses Effectuées</span>
-                            <span className="text-base font-semibold text-amber-950">{summary.total_analyzed} produit(s)</span>
+                        <div className="px-4 py-2 bg-yellow-50 rounded-xl border border-yellow-200 text-center">
+                            <span className="text-[10px] text-yellow-800 block font-medium">Analyses Effectuées</span>
+                            <span className="text-base font-semibold text-yellow-950">{summary.total_analyzed} produit(s)</span>
                         </div>
                         <div className="px-4 py-2 bg-emerald-50 rounded-xl border border-emerald-200 text-center">
                             <span className="text-[10px] text-emerald-800 block font-medium">Top Performers</span>
@@ -54,14 +54,14 @@ export default function AnalyticsIndex({ report }) {
                 {/* Market Trends & Recommendations Card */}
                 <div className="bg-white border border-stone-200/70 rounded-2xl p-6 shadow-sm space-y-4">
                     <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
-                        <Lightbulb className="w-4 h-4 text-amber-600" />
+                        <Lightbulb className="w-4 h-4 text-yellow-600" />
                         <h2 className="font-semibold text-stone-900 text-sm">Recommandations & Tendances de Marché Locales</h2>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {marketTrends.map((trend, i) => (
-                            <div key={i} className="flex items-start gap-2.5 bg-amber-50/50 border border-amber-200/60 p-3.5 rounded-xl text-xs text-stone-700 font-normal">
-                                <Sparkles className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                            <div key={i} className="flex items-start gap-2.5 bg-yellow-50/50 border border-yellow-200/60 p-3.5 rounded-xl text-xs text-stone-700 font-normal">
+                                <Sparkles className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
                                 <span>{trend}</span>
                             </div>
                         ))}
@@ -72,7 +72,7 @@ export default function AnalyticsIndex({ report }) {
                 <div className="bg-white border border-stone-200/70 rounded-2xl shadow-sm overflow-hidden">
                     <div className="p-5 border-b border-stone-100 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <BarChart2 className="w-4 h-4 text-amber-600" />
+                            <BarChart2 className="w-4 h-4 text-yellow-600" />
                             <h3 className="font-semibold text-stone-900 text-sm">Score de Qualité des Fiches Produits (0 - 100)</h3>
                         </div>
                     </div>
@@ -86,7 +86,7 @@ export default function AnalyticsIndex({ report }) {
                             products.map(item => {
                                 let scoreColor = 'text-emerald-600 bg-emerald-50 border-emerald-200';
                                 if (item.quality_score < 60) scoreColor = 'text-red-600 bg-red-50 border-red-200';
-                                else if (item.quality_score < 80) scoreColor = 'text-amber-700 bg-amber-50 border-amber-200';
+                                else if (item.quality_score < 80) scoreColor = 'text-yellow-700 bg-yellow-50 border-yellow-200';
 
                                 return (
                                     <div key={item.id} className="p-5 hover:bg-stone-50/80 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs">
@@ -101,7 +101,7 @@ export default function AnalyticsIndex({ report }) {
                                             <div className="flex items-center gap-3 text-stone-500 font-normal">
                                                 <span>Prix actuel : <strong className="font-medium text-stone-900">{Number(item.price).toLocaleString()} FCFA</strong></span>
                                                 <span>•</span>
-                                                <span>Prix suggéré IA : <strong className="font-medium text-amber-900">{Number(item.suggested_price || item.price).toLocaleString()} FCFA</strong></span>
+                                                <span>Prix suggéré IA : <strong className="font-medium text-yellow-900">{Number(item.suggested_price || item.price).toLocaleString()} FCFA</strong></span>
                                             </div>
 
                                             {item.optimization_tips && item.optimization_tips.length > 0 && (
@@ -109,7 +109,7 @@ export default function AnalyticsIndex({ report }) {
                                                     <span className="text-[11px] font-medium text-stone-600">Conseils d'optimisation IA :</span>
                                                     <div className="flex flex-wrap gap-1.5">
                                                         {item.optimization_tips.map((tip, idx) => (
-                                                            <span key={idx} className="bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-md text-[11px] font-normal">
+                                                            <span key={idx} className="bg-yellow-50 text-yellow-900 border border-yellow-200 px-2 py-0.5 rounded-md text-[11px] font-normal">
                                                                 • {tip}
                                                             </span>
                                                         ))}

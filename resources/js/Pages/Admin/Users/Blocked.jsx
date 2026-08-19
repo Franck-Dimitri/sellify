@@ -61,12 +61,12 @@ export default function Blocked({ users, filters, stats }) {
                             <Ban className="w-6 h-6" />
                         </div>
                     </div>
-                    <div className="p-5 rounded-3xl border border-amber-100 bg-white flex items-center justify-between shadow-sm transition-all hover:shadow-md">
+                    <div className="p-5 rounded-3xl border border-yellow-100 bg-white flex items-center justify-between shadow-sm transition-all hover:shadow-md">
                         <div className="space-y-1">
                             <span className="text-xs font-bold text-surface-400 uppercase tracking-wider block">Suspendus</span>
-                            <span className="text-3xl font-black text-amber-600 tracking-tight">{stats.suspended}</span>
+                            <span className="text-3xl font-black text-yellow-600 tracking-tight">{stats.suspended}</span>
                         </div>
-                        <div className="p-3 bg-amber-50 border border-amber-100 rounded-2xl text-amber-500">
+                        <div className="p-3 bg-yellow-50 border border-yellow-100 rounded-2xl text-yellow-500">
                             <ShieldAlert className="w-6 h-6 animate-pulse" />
                         </div>
                     </div>

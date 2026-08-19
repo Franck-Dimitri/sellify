@@ -63,10 +63,10 @@ export default function LoansIndex({ creditData, loans = [], pack }) {
             <div className="w-full space-y-6 pb-16 text-stone-800">
                 
                 {/* Header Banner Shariow Style */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-amber-500/10 border border-amber-500/20 p-6 rounded-2xl">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-yellow-500/10 border border-yellow-500/20 p-6 rounded-2xl">
                     <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-amber-800 font-medium text-xs uppercase tracking-wide">
-                            <Zap className="w-4 h-4 text-amber-600" />
+                        <div className="flex items-center gap-2 text-yellow-800 font-medium text-xs uppercase tracking-wide">
+                            <Zap className="w-4 h-4 text-yellow-600" />
                             <span>Micro-Financement Instantané</span>
                         </div>
                         <h1 className="text-xl font-semibold text-stone-900">
@@ -78,8 +78,8 @@ export default function LoansIndex({ creditData, loans = [], pack }) {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <div className="px-3.5 py-1.5 bg-amber-500/20 text-amber-900 font-medium rounded-xl text-xs flex items-center gap-2">
-                            <ShieldCheck className="w-4 h-4 text-amber-700" />
+                        <div className="px-3.5 py-1.5 bg-yellow-500/20 text-yellow-900 font-medium rounded-xl text-xs flex items-center gap-2">
+                            <ShieldCheck className="w-4 h-4 text-yellow-700" />
                             <span>Délivrance Instantanée</span>
                         </div>
                     </div>
@@ -92,7 +92,7 @@ export default function LoansIndex({ creditData, loans = [], pack }) {
                     <div className="md:col-span-6 bg-white border border-stone-200/70 p-5 rounded-2xl shadow-sm flex items-center justify-between gap-4">
                         <div className="space-y-1">
                             <span className="text-xs font-medium text-stone-500 flex items-center gap-1.5">
-                                <Award className="w-4 h-4 text-amber-600" />
+                                <Award className="w-4 h-4 text-yellow-600" />
                                 Score de Crédit IA SellifyPay
                             </span>
                             <div className="flex items-baseline gap-2">
@@ -105,8 +105,8 @@ export default function LoansIndex({ creditData, loans = [], pack }) {
                         </div>
 
                         {/* Progress Gauge */}
-                        <div className="w-16 h-16 rounded-full border-4 border-amber-500/20 flex items-center justify-center relative flex-shrink-0 bg-amber-50/50">
-                            <span className="text-sm font-semibold text-amber-900">{score}</span>
+                        <div className="w-16 h-16 rounded-full border-4 border-yellow-500/20 flex items-center justify-center relative flex-shrink-0 bg-yellow-50/50">
+                            <span className="text-sm font-semibold text-yellow-900">{score}</span>
                         </div>
                     </div>
 
@@ -138,7 +138,7 @@ export default function LoansIndex({ creditData, loans = [], pack }) {
                     {/* Simulator Studio (Left) */}
                     <div className="lg:col-span-7 bg-white border border-stone-200/70 rounded-2xl p-6 shadow-sm space-y-6">
                         <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
-                            <Calculator className="w-4 h-4 text-amber-600" />
+                            <Calculator className="w-4 h-4 text-yellow-600" />
                             <h2 className="font-semibold text-stone-900 text-sm">Simulateur de Prêt Interactif</h2>
                         </div>
 
@@ -146,7 +146,7 @@ export default function LoansIndex({ creditData, loans = [], pack }) {
                         <div className="space-y-3">
                             <div className="flex justify-between items-center text-xs font-medium">
                                 <span className="text-stone-600">Montant souhaité</span>
-                                <span className="text-base font-semibold text-amber-950">
+                                <span className="text-base font-semibold text-yellow-950">
                                     {Number(amount).toLocaleString()} FCFA
                                 </span>
                             </div>
@@ -157,7 +157,7 @@ export default function LoansIndex({ creditData, loans = [], pack }) {
                                 step="10000"
                                 value={amount}
                                 onChange={e => setAmount(Number(e.target.value))}
-                                className="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                                className="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-yellow-500"
                             />
                             <div className="flex justify-between text-[11px] text-stone-400">
                                 <span>50 000 FCFA</span>
@@ -176,7 +176,7 @@ export default function LoansIndex({ creditData, loans = [], pack }) {
                                         onClick={() => setDuration(m)}
                                         className={`py-2 rounded-xl text-xs font-medium transition-all ${
                                             duration === m
-                                                ? 'bg-amber-500 text-amber-950 shadow-sm'
+                                                ? 'bg-yellow-500 text-yellow-950 shadow-sm'
                                                 : 'bg-stone-50 text-stone-700 border border-stone-200 hover:bg-stone-100'
                                         }`}
                                     >
@@ -202,7 +202,7 @@ export default function LoansIndex({ creditData, loans = [], pack }) {
                             </div>
                             <div className="pt-2 border-t border-stone-200 flex justify-between text-xs font-semibold text-stone-900">
                                 <span>Mensualité estimée</span>
-                                <span className="text-amber-950 text-sm">{Number(monthlyPayment).toLocaleString()} FCFA / mois</span>
+                                <span className="text-yellow-950 text-sm">{Number(monthlyPayment).toLocaleString()} FCFA / mois</span>
                             </div>
                         </div>
 
@@ -210,7 +210,7 @@ export default function LoansIndex({ creditData, loans = [], pack }) {
                         <button
                             onClick={handleApply}
                             disabled={!isEligible || submitting}
-                            className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-amber-950 font-medium text-xs rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                            className="w-full py-3 bg-yellow-500 hover:bg-yellow-600 text-yellow-950 font-medium text-xs rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                         >
                             <Zap className="w-4 h-4" />
                             <span>
@@ -227,7 +227,7 @@ export default function LoansIndex({ creditData, loans = [], pack }) {
                     {/* Prerequisites & Auto-repayment checklist (Right) */}
                     <div className="lg:col-span-5 bg-white border border-stone-200/70 rounded-2xl p-6 shadow-sm space-y-4">
                         <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
-                            <ShieldCheck className="w-4 h-4 text-amber-600" />
+                            <ShieldCheck className="w-4 h-4 text-yellow-600" />
                             <h2 className="font-semibold text-stone-900 text-sm">Critères d'Éligibilité</h2>
                         </div>
 
@@ -260,7 +260,7 @@ export default function LoansIndex({ creditData, loans = [], pack }) {
 
                             <li className="flex items-center justify-between py-1 border-b border-stone-100">
                                 <span className="text-stone-600">Score IA ≥ 60 / 100</span>
-                                <span className={`font-medium ${requirements.min_score_met ? 'text-emerald-600' : 'text-amber-700'}`}>
+                                <span className={`font-medium ${requirements.min_score_met ? 'text-emerald-600' : 'text-yellow-700'}`}>
                                     {score} / 100
                                 </span>
                             </li>
@@ -272,19 +272,19 @@ export default function LoansIndex({ creditData, loans = [], pack }) {
                                         <CheckCircle2 className="w-3.5 h-3.5" /> Disponible
                                     </span>
                                 ) : (
-                                    <span className="flex items-center gap-1 text-amber-700 font-medium">
+                                    <span className="flex items-center gap-1 text-yellow-700 font-medium">
                                         <AlertCircle className="w-3.5 h-3.5" /> Prêt Actif
                                     </span>
                                 )}
                             </li>
                         </ul>
 
-                        <div className="p-3.5 bg-amber-50/60 border border-amber-200/70 rounded-xl text-xs text-amber-900 space-y-1">
+                        <div className="p-3.5 bg-yellow-50/60 border border-yellow-200/70 rounded-xl text-xs text-yellow-900 space-y-1">
                             <div className="flex items-center gap-1.5 font-medium">
-                                <Lock className="w-3.5 h-3.5 text-amber-700" />
+                                <Lock className="w-3.5 h-3.5 text-yellow-700" />
                                 <span>Remboursement sur Escrow</span>
                             </div>
-                            <p className="text-[11px] text-amber-800">
+                            <p className="text-[11px] text-yellow-800">
                                 Les remboursements sont prélevés automatiquement (30% max) lors de la libération des fonds de chaque vente Escrow.
                             </p>
                         </div>
@@ -296,7 +296,7 @@ export default function LoansIndex({ creditData, loans = [], pack }) {
                 <div className="bg-white border border-stone-200/70 rounded-2xl shadow-sm overflow-hidden">
                     <div className="p-5 border-b border-stone-100 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <History className="w-4 h-4 text-amber-600" />
+                            <History className="w-4 h-4 text-yellow-600" />
                             <h3 className="font-semibold text-stone-900 text-sm">Historique de vos Prêts SellifyPay</h3>
                         </div>
                     </div>
@@ -353,7 +353,7 @@ export default function LoansIndex({ creditData, loans = [], pack }) {
                                                         loan.status === 'active' || loan.status === 'approved'
                                                             ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                                             : loan.status === 'completed'
-                                                            ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                                                            ? 'bg-yellow-100 text-yellow-900 border border-yellow-300'
                                                             : 'bg-stone-100 text-stone-500'
                                                     }`}>
                                                         {loan.status === 'approved' ? 'Approuvé' : loan.status === 'active' ? 'Actif' : loan.status}

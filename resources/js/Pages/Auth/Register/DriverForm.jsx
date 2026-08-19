@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
 import { useForm } from '@inertiajs/react';
-import Button from '../../../Components/ui/Button';
-import Input from '../../../Components/ui/Input';
-import { Card } from '../../../Components/ui/Card';
-import { ShieldCheck, Upload, ArrowRight, ArrowLeft } from 'lucide-react';
+import { ShieldCheck, Truck, ArrowRight, ArrowLeft } from 'lucide-react';
 
 export default function DriverForm() {
     const [step, setStep] = useState(1);
@@ -32,296 +29,296 @@ export default function DriverForm() {
         setData(field, e.target.files[0]);
     };
 
-    const nextStep = () => {
-        setStep(step + 1);
-    };
-
-    const prevStep = () => {
-        setStep(step - 1);
-    };
-
     const handleSubmit = (e) => {
         e.preventDefault();
         post(route('register'));
     };
 
     return (
-        <Card className="bg-white p-8 border border-surface-200 rounded-3xl shadow-sm space-y-6">
+        <div className="bg-white p-6 sm:p-8 border border-stone-200 rounded-xl shadow-xs space-y-5">
             {/* Step Indicators */}
-            <div className="flex justify-between items-center pb-4 border-b border-surface-100">
-                <span className={`text-xs font-bold uppercase tracking-wider ${step === 1 ? 'text-secondary-600' : 'text-surface-400'}`}>
-                    Étape 1: Profil
+            <div className="flex justify-between items-center pb-3 border-b border-stone-100 text-xs">
+                <span className={`font-medium ${step === 1 ? 'text-yellow-700' : 'text-stone-400'}`}>
+                    1. Identité
                 </span>
-                <div className="h-1 flex-1 mx-3 bg-surface-100 rounded-full overflow-hidden">
-                    <div className={`h-full bg-secondary-500 transition-all duration-300 ${step === 1 ? 'w-1/3' : step === 2 ? 'w-2/3' : 'w-full'}`}></div>
+                <div className="h-1 flex-1 mx-2 bg-stone-100 rounded-full overflow-hidden">
+                    <div className={`h-full bg-yellow-500 transition-all duration-300 ${step === 1 ? 'w-1/3' : step === 2 ? 'w-2/3' : 'w-full'}`}></div>
                 </div>
-                <span className={`text-xs font-bold uppercase tracking-wider ${step === 2 ? 'text-secondary-600' : 'text-surface-400'}`}>
-                    Étape 2: Véhicule
+                <span className={`font-medium ${step === 2 ? 'text-yellow-700' : 'text-stone-400'}`}>
+                    2. Véhicule
                 </span>
-                <div className="h-1 flex-1 mx-3 bg-surface-100 rounded-full overflow-hidden"></div>
-                <span className={`text-xs font-bold uppercase tracking-wider ${step === 3 ? 'text-secondary-600' : 'text-surface-400'}`}>
-                    Étape 3: KYC
+                <div className="h-1 flex-1 mx-2 bg-stone-100 rounded-full overflow-hidden"></div>
+                <span className={`font-medium ${step === 3 ? 'text-yellow-700' : 'text-stone-400'}`}>
+                    3. Documents KYC
                 </span>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 text-xs">
                 {/* Step 1: Personal Info */}
                 {step === 1 && (
-                    <div className="space-y-4 animate-scale-in">
-                        <div className="grid grid-cols-2 gap-4">
-                            <Input
-                                label="Prénom"
-                                name="first_name"
-                                value={data.first_name}
-                                onChange={(e) => setData('first_name', e.target.value)}
-                                error={errors.first_name}
-                                placeholder="Ex: John"
-                                required
-                            />
-                            <Input
-                                label="Nom"
-                                name="last_name"
-                                value={data.last_name}
-                                onChange={(e) => setData('last_name', e.target.value)}
-                                error={errors.last_name}
-                                placeholder="Ex: Doe"
-                                required
-                            />
+                    <div className="space-y-3.5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label className="font-medium text-stone-700 block mb-1">Prénom</label>
+                                <input
+                                    type="text"
+                                    value={data.first_name}
+                                    onChange={(e) => setData('first_name', e.target.value)}
+                                    placeholder="Ex: Pierre"
+                                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none focus:border-yellow-500 focus:bg-white text-stone-800"
+                                    required
+                                />
+                                {errors.first_name && <p className="text-rose-600 text-[11px] mt-0.5">{errors.first_name}</p>}
+                            </div>
+
+                            <div>
+                                <label className="font-medium text-stone-700 block mb-1">Nom</label>
+                                <input
+                                    type="text"
+                                    value={data.last_name}
+                                    onChange={(e) => setData('last_name', e.target.value)}
+                                    placeholder="Ex: Mbarga"
+                                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none focus:border-yellow-500 focus:bg-white text-stone-800"
+                                    required
+                                />
+                                {errors.last_name && <p className="text-rose-600 text-[11px] mt-0.5">{errors.last_name}</p>}
+                            </div>
                         </div>
 
-                        <Input
-                            label="Adresse Email"
-                            name="email"
-                            type="email"
-                            value={data.email}
-                            onChange={(e) => setData('email', e.target.value)}
-                            error={errors.email}
-                            placeholder="john.doe@exemple.com"
-                            required
-                        />
+                        <div>
+                            <label className="font-medium text-stone-700 block mb-1">Adresse Email</label>
+                            <input
+                                type="email"
+                                value={data.email}
+                                onChange={(e) => setData('email', e.target.value)}
+                                placeholder="livreur@exemple.com"
+                                className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none focus:border-yellow-500 focus:bg-white text-stone-800"
+                                required
+                            />
+                            {errors.email && <p className="text-rose-600 text-[11px] mt-0.5">{errors.email}</p>}
+                        </div>
 
-                        <Input
-                            label="Téléphone"
-                            name="phone"
-                            type="tel"
-                            value={data.phone}
-                            onChange={(e) => setData('phone', e.target.value)}
-                            error={errors.phone}
-                            placeholder="Ex: +237699999999"
-                            required
-                        />
+                        <div>
+                            <label className="font-medium text-stone-700 block mb-1">Téléphone (Mobile Money)</label>
+                            <input
+                                type="tel"
+                                value={data.phone}
+                                onChange={(e) => setData('phone', e.target.value)}
+                                placeholder="+237 6XX XX XX XX"
+                                className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none focus:border-yellow-500 focus:bg-white text-stone-800"
+                                required
+                            />
+                            {errors.phone && <p className="text-rose-600 text-[11px] mt-0.5">{errors.phone}</p>}
+                        </div>
 
-                        <Input
-                            label="Mot de passe"
-                            name="password"
-                            type="password"
-                            value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
-                            error={errors.password}
-                            placeholder="••••••••"
-                            required
-                        />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label className="font-medium text-stone-700 block mb-1">Mot de passe</label>
+                                <input
+                                    type="password"
+                                    value={data.password}
+                                    onChange={(e) => setData('password', e.target.value)}
+                                    placeholder="••••••••"
+                                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none focus:border-yellow-500 focus:bg-white text-stone-800"
+                                    required
+                                />
+                                {errors.password && <p className="text-rose-600 text-[11px] mt-0.5">{errors.password}</p>}
+                            </div>
 
-                        <Input
-                            label="Confirmer le mot de passe"
-                            name="password_confirmation"
-                            type="password"
-                            value={data.password_confirmation}
-                            onChange={(e) => setData('password_confirmation', e.target.value)}
-                            error={errors.password_confirmation}
-                            placeholder="••••••••"
-                            required
-                        />
+                            <div>
+                                <label className="font-medium text-stone-700 block mb-1">Confirmer mot de passe</label>
+                                <input
+                                    type="password"
+                                    value={data.password_confirmation}
+                                    onChange={(e) => setData('password_confirmation', e.target.value)}
+                                    placeholder="••••••••"
+                                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none focus:border-yellow-500 focus:bg-white text-stone-800"
+                                    required
+                                />
+                            </div>
+                        </div>
 
-                        <div className="pt-4">
-                            <Button
+                        <div className="pt-2">
+                            <button
                                 type="button"
-                                variant="primary"
-                                className="w-full shadow-md space-x-2"
-                                onClick={nextStep}
+                                onClick={() => setStep(2)}
+                                className="w-full py-2.5 bg-yellow-500 hover:bg-yellow-600 text-stone-950 font-medium rounded-lg shadow-xs flex items-center justify-center gap-1.5 transition-colors"
                             >
-                                <span>Continuer vers le véhicule</span>
-                                <ArrowRight className="w-4 h-4" />
-                            </Button>
+                                <span>Suivant : Informations Véhicule</span>
+                                <ArrowRight className="w-3.5 h-3.5" />
+                            </button>
                         </div>
                     </div>
                 )}
 
-                {/* Step 2: Vehicle & Zone Info */}
+                {/* Step 2: Vehicle & Zone */}
                 {step === 2 && (
-                    <div className="space-y-4 animate-scale-in">
-                        <div className="flex flex-col space-y-1.5 w-full">
-                            <label className="text-sm font-semibold text-surface-700">Type de véhicule</label>
+                    <div className="space-y-3.5">
+                        <div>
+                            <label className="font-medium text-stone-700 block mb-1">Type de Véhicule</label>
                             <select
-                                name="vehicle_type"
                                 value={data.vehicle_type}
                                 onChange={(e) => setData('vehicle_type', e.target.value)}
-                                className="w-full px-3.5 py-2.5 text-surface-900 bg-white border border-surface-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 rounded-lg transition-all outline-none text-sm md:text-base font-medium"
+                                className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none focus:border-yellow-500 text-stone-800"
                             >
-                                <option value="moto">Moto</option>
-                                <option value="voiture">Voiture</option>
-                                <option value="velo">Vélo / Trottinette</option>
-                                <option value="camionnette">Camionnette / Van</option>
+                                <option value="moto">Moto / Scooter (Recommandé en ville)</option>
+                                <option value="voiture">Voiture / Berline</option>
+                                <option value="camionnette">Camionnette / Utilitaire</option>
+                                <option value="velo">Vélo / Vélo Électrique</option>
                             </select>
-                            {errors.vehicle_type && <p className="text-xs text-accent-500 font-medium">{errors.vehicle_type}</p>}
                         </div>
 
-                        <Input
-                            label="Numéro de Permis de conduire"
-                            name="license_number"
-                            value={data.license_number}
-                            onChange={(e) => setData('license_number', e.target.value)}
-                            error={errors.license_number}
-                            placeholder="Ex: PE-980182-B"
-                            required
-                        />
+                        <div>
+                            <label className="font-medium text-stone-700 block mb-1">Numéro de Permis de Conduire</label>
+                            <input
+                                type="text"
+                                value={data.license_number}
+                                onChange={(e) => setData('license_number', e.target.value)}
+                                placeholder="Ex: DL-89218-A"
+                                className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none focus:border-yellow-500 focus:bg-white text-stone-800"
+                                required
+                            />
+                            {errors.license_number && <p className="text-rose-600 text-[11px] mt-0.5">{errors.license_number}</p>}
+                        </div>
 
-                        <Input
-                            label="Plaque d'immatriculation"
-                            name="vehicle_plate"
-                            value={data.vehicle_plate}
-                            onChange={(e) => setData('vehicle_plate', e.target.value)}
-                            error={errors.vehicle_plate}
-                            placeholder="Ex: LT-281-AA"
-                            required
-                        />
+                        <div>
+                            <label className="font-medium text-stone-700 block mb-1">Immatriculation du Véhicule</label>
+                            <input
+                                type="text"
+                                value={data.vehicle_plate}
+                                onChange={(e) => setData('vehicle_plate', e.target.value)}
+                                placeholder="Ex: LT-129-XX"
+                                className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none focus:border-yellow-500 focus:bg-white text-stone-800 font-mono"
+                                required
+                            />
+                            {errors.vehicle_plate && <p className="text-rose-600 text-[11px] mt-0.5">{errors.vehicle_plate}</p>}
+                        </div>
 
-                        <Input
-                            label="Zone de couverture (Villes, Quartiers)"
-                            name="coverage_zone"
-                            value={data.coverage_zone}
-                            onChange={(e) => setData('coverage_zone', e.target.value)}
-                            error={errors.coverage_zone}
-                            placeholder="Ex: Douala (Akwa, Bonapriso, Deido)"
-                            required
-                        />
+                        <div>
+                            <label className="font-medium text-stone-700 block mb-1">Zone de Couverture Principale</label>
+                            <input
+                                type="text"
+                                value={data.coverage_zone}
+                                onChange={(e) => setData('coverage_zone', e.target.value)}
+                                placeholder="Ex: Douala (Akwa, Bonanjo, Deido)"
+                                className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none focus:border-yellow-500 focus:bg-white text-stone-800"
+                                required
+                            />
+                            {errors.coverage_zone && <p className="text-rose-600 text-[11px] mt-0.5">{errors.coverage_zone}</p>}
+                        </div>
 
-                        <div className="flex space-x-4 pt-4">
-                            <Button
+                        <div className="pt-2 flex gap-2">
+                            <button
                                 type="button"
-                                variant="outline"
-                                className="w-1/3 flex items-center justify-center space-x-2"
-                                onClick={prevStep}
+                                onClick={() => setStep(1)}
+                                className="px-4 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-medium rounded-lg flex items-center gap-1.5 transition-colors"
                             >
-                                <ArrowLeft className="w-4 h-4" />
+                                <ArrowLeft className="w-3.5 h-3.5" />
                                 <span>Retour</span>
-                            </Button>
-                            <Button
+                            </button>
+                            <button
                                 type="button"
-                                variant="primary"
-                                className="flex-1 shadow-md space-x-2"
-                                onClick={nextStep}
+                                onClick={() => setStep(3)}
+                                className="flex-1 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-stone-950 font-medium rounded-lg shadow-xs flex items-center justify-center gap-1.5 transition-colors"
                             >
-                                <span>Continuer vers le KYC</span>
-                                <ArrowRight className="w-4 h-4" />
-                            </Button>
+                                <span>Suivant : Documents KYC</span>
+                                <ArrowRight className="w-3.5 h-3.5" />
+                            </button>
                         </div>
                     </div>
                 )}
 
-                {/* Step 3: KYC Document Uploads */}
+                {/* Step 3: KYC Documents */}
                 {step === 3 && (
-                    <div className="space-y-5 animate-scale-in">
-                        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-start space-x-3 text-xs text-blue-800">
-                            <ShieldCheck className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                            <p className="leading-relaxed font-medium">
-                                Pour intégrer la flotte de livraison Sellify, veuillez soumettre les documents d'identification de votre profil et de votre véhicule.
+                    <div className="space-y-3.5">
+                        <div className="bg-yellow-50/70 border border-yellow-200/80 rounded-lg p-3.5 flex items-start gap-2.5 text-xs text-yellow-950">
+                            <ShieldCheck className="w-4 h-4 text-yellow-700 shrink-0 mt-0.5" />
+                            <p className="leading-relaxed">
+                                Les livreurs Sellify.me sont vérifiés et certifiés. Vos documents sont vérifiés sous 24-48h par notre équipe d'administration.
                             </p>
                         </div>
 
-                        <div className="space-y-4">
-                            {/* CNI */}
-                            <div className="flex flex-col space-y-1">
-                                <label className="text-sm font-semibold text-surface-700">CNI ou Passeport</label>
-                                <div className="border border-dashed border-surface-200 hover:border-secondary-500 rounded-xl p-3 flex items-center justify-between cursor-pointer bg-surface-50">
-                                    <input type="file" accept="image/*" onChange={(e) => handleFileChange('doc_cni', e)} className="hidden" id="doc_cni" required />
-                                    <label htmlFor="doc_cni" className="flex items-center space-x-3 cursor-pointer w-full">
-                                        <Upload className="w-5 h-5 text-surface-400" />
-                                        <span className="text-xs font-semibold text-surface-600 truncate">{data.doc_cni ? data.doc_cni.name : 'Photo de la pièce d\'identité'}</span>
-                                    </label>
-                                </div>
-                                {errors.doc_cni && <p className="text-xs text-accent-500 font-medium">{errors.doc_cni}</p>}
-                            </div>
-
-                            {/* Permis */}
-                            <div className="flex flex-col space-y-1">
-                                <label className="text-sm font-semibold text-surface-700">Permis de conduire</label>
-                                <div className="border border-dashed border-surface-200 hover:border-secondary-500 rounded-xl p-3 flex items-center justify-between cursor-pointer bg-surface-50">
-                                    <input type="file" accept="image/*" onChange={(e) => handleFileChange('doc_permis', e)} className="hidden" id="doc_permis" required />
-                                    <label htmlFor="doc_permis" className="flex items-center space-x-3 cursor-pointer w-full">
-                                        <Upload className="w-5 h-5 text-surface-400" />
-                                        <span className="text-xs font-semibold text-surface-600 truncate">{data.doc_permis ? data.doc_permis.name : 'Photo du permis de conduire'}</span>
-                                    </label>
-                                </div>
-                                {errors.doc_permis && <p className="text-xs text-accent-500 font-medium">{errors.doc_permis}</p>}
-                            </div>
-
-                            {/* Carte Grise */}
-                            <div className="flex flex-col space-y-1">
-                                <label className="text-sm font-semibold text-surface-700">Carte Grise du véhicule</label>
-                                <div className="border border-dashed border-surface-200 hover:border-secondary-500 rounded-xl p-3 flex items-center justify-between cursor-pointer bg-surface-50">
-                                    <input type="file" accept="image/*" onChange={(e) => handleFileChange('doc_carte_grise', e)} className="hidden" id="doc_carte_grise" required />
-                                    <label htmlFor="doc_carte_grise" className="flex items-center space-x-3 cursor-pointer w-full">
-                                        <Upload className="w-5 h-5 text-surface-400" />
-                                        <span className="text-xs font-semibold text-surface-600 truncate">{data.doc_carte_grise ? data.doc_carte_grise.name : 'Photo de la carte grise'}</span>
-                                    </label>
-                                </div>
-                                {errors.doc_carte_grise && <p className="text-xs text-accent-500 font-medium">{errors.doc_carte_grise}</p>}
-                            </div>
-
-                            {/* Photo Véhicule */}
-                            <div className="flex flex-col space-y-1">
-                                <label className="text-sm font-semibold text-surface-700">Photo du Véhicule</label>
-                                <div className="border border-dashed border-surface-200 hover:border-secondary-500 rounded-xl p-3 flex items-center justify-between cursor-pointer bg-surface-50">
-                                    <input type="file" accept="image/*" onChange={(e) => handleFileChange('doc_vehicule', e)} className="hidden" id="doc_vehicule" required />
-                                    <label htmlFor="doc_vehicule" className="flex items-center space-x-3 cursor-pointer w-full">
-                                        <Upload className="w-5 h-5 text-surface-400" />
-                                        <span className="text-xs font-semibold text-surface-600 truncate">{data.doc_vehicule ? data.doc_vehicule.name : 'Photo entière du véhicule'}</span>
-                                    </label>
-                                </div>
-                                {errors.doc_vehicule && <p className="text-xs text-accent-500 font-medium">{errors.doc_vehicule}</p>}
-                            </div>
-
-                            {/* Selfie */}
-                            <div className="flex flex-col space-y-1">
-                                <label className="text-sm font-semibold text-surface-700">Photo Selfie de vérification</label>
-                                <div className="border border-dashed border-surface-200 hover:border-secondary-500 rounded-xl p-3 flex items-center justify-between cursor-pointer bg-surface-50">
-                                    <input type="file" accept="image/*" onChange={(e) => handleFileChange('doc_selfie', e)} className="hidden" id="doc_selfie" required />
-                                    <label htmlFor="doc_selfie" className="flex items-center space-x-3 cursor-pointer w-full">
-                                        <Upload className="w-5 h-5 text-surface-400" />
-                                        <span className="text-xs font-semibold text-surface-600 truncate">{data.doc_selfie ? data.doc_selfie.name : 'Uploader une photo selfie'}</span>
-                                    </label>
-                                </div>
-                                {errors.doc_selfie && <p className="text-xs text-accent-500 font-medium">{errors.doc_selfie}</p>}
-                            </div>
+                        <div>
+                            <label className="font-medium text-stone-700 block mb-1">CNI ou Passeport</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleFileChange('doc_cni', e)}
+                                className="w-full px-3 py-1.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-700 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-medium file:bg-stone-200 file:text-stone-800"
+                                required
+                            />
+                            {errors.doc_cni && <p className="text-rose-600 text-[11px] mt-0.5">{errors.doc_cni}</p>}
                         </div>
 
-                        {errors.error && (
-                            <p className="text-sm text-accent-500 font-bold text-center bg-accent-50 border border-accent-100 rounded-xl py-2">{errors.error}</p>
-                        )}
+                        <div>
+                            <label className="font-medium text-stone-700 block mb-1">Permis de Conduire</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleFileChange('doc_permis', e)}
+                                className="w-full px-3 py-1.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-700 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-medium file:bg-stone-200 file:text-stone-800"
+                                required
+                            />
+                            {errors.doc_permis && <p className="text-rose-600 text-[11px] mt-0.5">{errors.doc_permis}</p>}
+                        </div>
 
-                        <div className="flex space-x-4 pt-4">
-                            <Button
+                        <div>
+                            <label className="font-medium text-stone-700 block mb-1">Carte Grise</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleFileChange('doc_carte_grise', e)}
+                                className="w-full px-3 py-1.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-700 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-medium file:bg-stone-200 file:text-stone-800"
+                                required
+                            />
+                            {errors.doc_carte_grise && <p className="text-rose-600 text-[11px] mt-0.5">{errors.doc_carte_grise}</p>}
+                        </div>
+
+                        <div>
+                            <label className="font-medium text-stone-700 block mb-1">Photo du Véhicule</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleFileChange('doc_vehicule', e)}
+                                className="w-full px-3 py-1.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-700 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-medium file:bg-stone-200 file:text-stone-800"
+                                required
+                            />
+                            {errors.doc_vehicule && <p className="text-rose-600 text-[11px] mt-0.5">{errors.doc_vehicule}</p>}
+                        </div>
+
+                        <div>
+                            <label className="font-medium text-stone-700 block mb-1">Photo Selfie (Contrôle d'identité)</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleFileChange('doc_selfie', e)}
+                                className="w-full px-3 py-1.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-700 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-medium file:bg-stone-200 file:text-stone-800"
+                                required
+                            />
+                            {errors.doc_selfie && <p className="text-rose-600 text-[11px] mt-0.5">{errors.doc_selfie}</p>}
+                        </div>
+
+                        <div className="pt-3 flex gap-2">
+                            <button
                                 type="button"
-                                variant="outline"
-                                className="w-1/3 flex items-center justify-center space-x-2"
-                                onClick={prevStep}
+                                onClick={() => setStep(2)}
+                                className="px-4 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-medium rounded-lg flex items-center gap-1.5 transition-colors"
                             >
-                                <ArrowLeft className="w-4 h-4" />
+                                <ArrowLeft className="w-3.5 h-3.5" />
                                 <span>Retour</span>
-                            </Button>
-                            <Button
+                            </button>
+                            <button
                                 type="submit"
-                                variant="success"
-                                className="flex-1 shadow-md"
                                 disabled={processing}
+                                className="flex-1 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-stone-950 font-medium rounded-lg shadow-xs flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
                             >
-                                Soumettre mon dossier KYC
-                            </Button>
+                                <span>Finaliser l'inscription Livreur</span>
+                                <ArrowRight className="w-3.5 h-3.5" />
+                            </button>
                         </div>
                     </div>
                 )}
             </form>
-        </Card>
+        </div>
     );
 }

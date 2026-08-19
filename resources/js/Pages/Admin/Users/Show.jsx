@@ -146,7 +146,7 @@ export default function Show({ targetUser }) {
                         <Card className="bg-white border border-surface-200 rounded-3xl p-5 shadow-xs">
                             <div className="border-b border-surface-100 pb-3 mb-4">
                                 <h4 className="text-sm font-bold flex items-center space-x-2 text-surface-900">
-                                    <ShieldCheck className="w-4.5 h-4.5 text-amber-500" />
+                                    <ShieldCheck className="w-4.5 h-4.5 text-yellow-500" />
                                     <span>Actions de Conformité</span>
                                 </h4>
                             </div>
@@ -161,7 +161,7 @@ export default function Show({ targetUser }) {
                                 )}
                                 {targetUser.status === 'active' && (
                                     <form onSubmit={handleSuspend}>
-                                        <Button type="submit" variant="outline" className="w-full space-x-2 rounded-xl text-xs py-2.5 font-semibold border-amber-300 text-amber-700 hover:bg-amber-50" disabled={suspendForm.processing}>
+                                        <Button type="submit" variant="outline" className="w-full space-x-2 rounded-xl text-xs py-2.5 font-semibold border-yellow-300 text-yellow-700 hover:bg-yellow-50" disabled={suspendForm.processing}>
                                             <Ban className="w-4 h-4" />
                                             <span>Suspendre le compte</span>
                                         </Button>
@@ -186,7 +186,7 @@ export default function Show({ targetUser }) {
                             <Card className="bg-white border border-surface-200 rounded-3xl p-5 shadow-xs">
                                 <div className="border-b border-surface-100 pb-3 mb-4">
                                     <h4 className="text-sm font-bold flex items-center space-x-2 text-surface-900">
-                                        <Store className="w-4.5 h-4.5 text-amber-500" />
+                                        <Store className="w-4.5 h-4.5 text-yellow-500" />
                                         <span>Détails de l'Activité Vendeur</span>
                                     </h4>
                                 </div>
@@ -205,8 +205,8 @@ export default function Show({ targetUser }) {
                                     </div>
                                     <div className="bg-surface-50 p-3 rounded-2xl border border-surface-100">
                                         <span className="text-[10px] text-surface-400 font-bold uppercase tracking-wider block">Note Boutique</span>
-                                        <span className="text-sm font-bold text-amber-600 mt-0.5 flex items-center">
-                                            <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500 mr-1" />
+                                        <span className="text-sm font-bold text-yellow-600 mt-0.5 flex items-center">
+                                            <Star className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500 mr-1" />
                                             <span>4.8 / 5</span>
                                         </span>
                                     </div>
@@ -286,18 +286,18 @@ export default function Show({ targetUser }) {
                             return (
                                 <Card className="bg-gradient-to-tr from-surface-900 to-surface-950 text-white relative overflow-hidden border-none shadow-md rounded-3xl min-h-[220px]">
                                     <div className="absolute -right-12 -bottom-12 w-48 h-48 rounded-full bg-white/5 pointer-events-none"></div>
-                                    <div className="absolute right-12 top-6 w-16 h-16 rounded-full bg-amber-500/10 pointer-events-none"></div>
+                                    <div className="absolute right-12 top-6 w-16 h-16 rounded-full bg-yellow-500/10 pointer-events-none"></div>
 
                                     <CardHeader className="border-b border-white/10 pb-4 mb-4 relative z-10">
                                         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                                             <div className="flex items-center space-x-2">
-                                                <span className="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center font-bold text-white text-xs shadow-md">ID</span>
+                                                <span className="w-8 h-8 rounded-xl bg-yellow-500 flex items-center justify-center font-bold text-white text-xs shadow-md">ID</span>
                                                 <div>
                                                     <CardTitle className="text-xs font-bold text-white font-sans">Carte Nationale d'Identité</CardTitle>
                                                     <span className="block text-[8px] text-white/50 uppercase tracking-widest leading-none mt-0.5">Dossier Validé</span>
                                                 </div>
                                             </div>
-                                            <span className="text-[9px] text-amber-400 font-mono font-bold uppercase tracking-wider px-2 py-0.5 bg-white/5 rounded-md border border-white/10 self-start sm:self-auto">
+                                            <span className="text-[9px] text-yellow-400 font-mono font-bold uppercase tracking-wider px-2 py-0.5 bg-white/5 rounded-md border border-white/10 self-start sm:self-auto">
                                                 RÉPUBLIQUE DU CAMEROUN
                                             </span>
                                         </div>
@@ -323,7 +323,7 @@ export default function Show({ targetUser }) {
                                         <div className="md:col-span-2 grid grid-cols-2 gap-x-4 gap-y-3 font-semibold text-white/80">
                                             <div className="col-span-2">
                                                 <span className="text-[9px] text-white/45 font-semibold uppercase tracking-wider block">Numéro Identifiant (CNI)</span>
-                                                <span className="text-sm font-mono font-bold text-amber-400">{approvedKyc.cni_number}</span>
+                                                <span className="text-sm font-mono font-bold text-yellow-400">{approvedKyc.cni_number}</span>
                                             </div>
                                             <div>
                                                 <span className="text-[9px] text-white/45 font-semibold uppercase tracking-wider block">Nom</span>
@@ -382,7 +382,7 @@ export default function Show({ targetUser }) {
                                                 <Badge variant={doc.status === 'approved' ? 'success' : doc.status === 'rejected' ? 'danger' : 'warning'}>
                                                     {doc.status === 'approved' ? 'Validé' : doc.status === 'rejected' ? 'Rejeté' : 'En attente'}
                                                 </Badge>
-                                                <a href={getDocSrc(doc)} target="_blank" rel="noreferrer" className="text-xs font-semibold text-amber-600 hover:underline">
+                                                <a href={getDocSrc(doc)} target="_blank" rel="noreferrer" className="text-xs font-semibold text-yellow-600 hover:underline">
                                                     Agrandir &rarr;
                                                 </a>
                                             </div>

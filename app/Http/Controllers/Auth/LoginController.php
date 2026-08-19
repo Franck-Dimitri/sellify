@@ -85,7 +85,7 @@ class LoginController extends Controller
             }
 
             // Default route (for customer)
-            return redirect()->intended(route('welcome'))->with('success', 'Ravi de vous revoir !');
+            return redirect()->intended(route('customer.dashboard'))->with('success', 'Ravi de vous revoir !');
         }
 
         return back()->withErrors([

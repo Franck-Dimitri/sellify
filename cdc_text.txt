@@ -1,0 +1,4278 @@
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+CAHIER DES CHARGES
+FONCTIONNEL
+PLATEFORME E-COMMERCE
+
+SELLIFY.ME
+La Plateforme de Confiance pour le Commerce Africain
+
+● Marketplace Multi-Acteurs ● Escrow Mobile Money ● Intelligence Artificielle ● SellifyPay
+Fintech ● Smart-Link Social
+
+Propriété
+
+Valeur
+
+Projet
+
+Sellify.me — Plateforme E-Commerce Africaine
+
+Type de document
+
+Cahier des Charges Fonctionnel (CdCF)
+
+Version
+
+1.0 — Document Initial
+
+Date
+
+Juin 2025
+
+Statut
+
+DOCUMENT DE RÉFÉRENCE — En vigueur
+
+Stack technique
+
+Laravel · Inertia.js · React.js · Tailwind CSS · PostgreSQL · MongoDB ·
+Moteur IA interne
+
+Périmètre
+
+Cameroun — Phase 1 (Douala/Yaoundé) · Expansion Panafricaine
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+TABLE DES MATIÈRES
+Ce document couvre l'intégralité des spécifications fonctionnelles de la plateforme Sellify.me. Il est
+structuré en deux parties principales : la Partie Principale (exigences fonctionnelles et non
+fonctionnelles) et les Annexes Techniques.
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+PARTIE I — PRÉSENTATION GÉNÉRALE
+1.1 Contexte et Objectifs Stratégiques
+Sellify.me est une plateforme e-commerce africaine tout-en-un (web et mobile) conçue pour
+résoudre les trois problèmes fondamentaux du commerce en ligne en Afrique : le manque de
+confiance, la fragmentation des paiements et l'inefficacité logistique.
+Le marché camerounais représente un terrain d'expérimentation idéal : plus de 80 % des
+transactions numériques sont effectuées via Mobile Money (Orange Money, MTN MoMo), et le
+Social Commerce (vente informelle via Facebook, WhatsApp, Instagram) génère des milliards de
+FCFA sans aucune garantie transactionnelle.
+
+1.1.1 Problèmes adressés
+
+
+
+
+Côté Vendeurs : Absence d'outils professionnels, risque d'impayés, difficulté à prouver sa
+crédibilité en ligne
+Côté Clients : Méfiance profonde envers l'achat en ligne, arnaques récurrentes, absence
+de recours
+Côté Livreurs : Revenus sporadiques, itinéraires inefficaces, absence de statut
+professionnel
+
+1.1.2 Solution Sellify.me
+Sellify.me répond par un écosystème technologique intégré reposant sur trois piliers innovants :
+
+
+
+
+
+Pilier 1 — Confiance : Système de Compte Séquestre (Escrow) intégré au Mobile Money.
+Les fonds sont bloqués à la commande et libérés uniquement après validation du client à la
+livraison.
+Pilier 2 — Efficacité Logistique : Optimisation des itinéraires par Intelligence Artificielle,
+réseau de livreurs indépendants vérifiés, suivi GPS temps réel.
+Pilier 3 — Croissance Vendeur : Suite SaaS complète (gestion boutique, inventaire,
+analytics), Smart-Link pour vente sociale, SellifyPay pour micro-financement.
+Pilier 4 — Intelligence Artificielle Centrale : l'IA n'est pas un module annexe mais le pilote
+de la plateforme. Elle oriente les décisions logistiques, génère les recommandations et
+analyses de ventes, agit comme copilote business pour vendeurs et livreurs, surveille en
+continu le trafic et les transactions via une passerelle anti-fraude, et sert d'agent
+conversationnel unique à tous les acteurs, capable d'exécuter des actions réelles sur la
+plateforme à leur demande.
+
+1.2 Périmètre Fonctionnel
+Le présent cahier des charges couvre les modules suivants, tous développés en version 1 (MVP +
+V1) :
+Module
+
+Description
+
+Phase
+
+Module Client
+
+Catalogue, Panier, Paiement Escrow, Suivi, Fidélité
+
+MVP
+
+Module Vendeur
+
+Boutique, Inventaire, Dashboard, Smart-Link, SellifyPay
+
+MVP + V1
+
+Module Livreur
+
+App Mobile, Routage IA, GPS, Portefeuille
+
+MVP + V1
+
+Module
+Admin/SuperAdmin
+
+Supervision KPI, KYC, Litiges, Fintech, Rapports
+
+MVP + V1
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+Module
+
+Description
+
+Phase
+
+Module SellifyPay
+(Fintech)
+
+Scoring IA, Prêts, Remboursement automatique
+
+V1
+
+Module Smart-Link
+
+Génération liens, Fast Checkout, Social Commerce
+
+V1
+
+Module IA Central
+
+Pilotage plateforme, routage logistique, scoring,
+recommandations, analyse de ventes, agents métiers
+(vendeur/livreur), passerelle anti-fraude, chat universel
+avec exécution d'actions
+
+V1
+
+Module Notifications
+
+WhatsApp Business, SMS, Email, Push
+
+MVP + V1
+
+1.3 Acteurs de la Plateforme
+1.3.1 Client (Acheteur)
+Consommateur urbain (25–45 ans), bancarisé ou non, utilisant principalement le Mobile Money. Il
+bénéficie d'une expérience d'achat sécurisée, d'un suivi géolocalisé et d'un système de fidélité.
+
+1.3.2 Vendeur (PME/Micro-entrepreneur)
+PME, entrepreneur local ou commerçant souhaitant digitaliser ses opérations. Accède à une
+boutique en ligne professionnelle, des outils SaaS, le Smart-Link et, selon son pack, à SellifyPay.
+
+1.3.3 Livreur (Micro-logisticien)
+Travailleur indépendant vérifié (permis, véhicule). Utilise l'application mobile dédiée pour recevoir
+des commandes, optimiser ses trajets et recevoir ses paiements via portefeuille sécurisé.
+
+1.3.4 Admin / SuperAdmin
+Équipe opérationnelle Sellify.me. Supervise l'ensemble de la plateforme : validation KYC, gestion
+des litiges, monitoring IA, rapports financiers et conformité AML.
+
+1.4 Contraintes Générales du Projet
+Contrainte
+
+Description
+
+Connectivité
+
+Optimisation pour réseau 3G, chargement < 2 secondes en
+conditions dégradées
+
+Langue
+
+Interface en Français (principal) et Anglais (option régionale)
+
+Paiement
+
+Integration obligatoire Mobile Money (Orange, MTN) et Carte
+bancaire (VISA/MC)
+
+Conformité
+
+KYC/AML conforme aux réglementations CEMAC et BEAC
+
+Disponibilité
+
+SLA 99,5% — RTO < 4h, RPO < 1h pour les données Escrow
+critiques
+
+Sécurité
+
+Chiffrement AES-256 des données sensibles, HTTPS/TLS 1.3, audit
+logs complets
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+1.5 Intelligence Artificielle — Cœur du Système
+Contrairement à une approche où l'IA se limiterait à l'optimisation logistique, Sellify.me est
+architecturé autour d'un Moteur IA Central qui pilote transversalement l'ensemble de la plateforme.
+Ce moteur interne (services Laravel dédiés, invoqués en interne — aucune API IA n'est exposée
+publiquement, conformément à l'architecture monolithique Laravel + Inertia.js + React) alimente six
+grandes fonctions détaillées ci-dessous.
+
+1.5.1 Pilotage Central de la Plateforme
+Rôle Transversal : Le Moteur IA Central agit comme un orchestrateur qui reçoit les événements clés
+de la plateforme (nouvelle commande, nouveau produit, comportement suspect, message utilisateur)
+et déclenche les actions ou recommandations appropriées à travers tous les modules.
+
+
+
+
+
+
+Pilotage logistique : Attribution des livreurs, calcul des ETA et routage — voir section
+2.3.4
+Pilotage fintech (SellifyPay) : Score de risque, plafonds et taux appliqués en temps réel
+— voir section 2.5
+Pilotage commercial : Diffusion des signaux commerciaux (produits gagnants, alertes)
+aux vendeurs — voir section 1.5.2
+Vue consolidée : Le moteur consolide ces signaux dans un tableau de bord IA unique côté
+Admin (voir section 2.6.6 Monitoring IA Central)
+
+1.5.2 Recommandations Intelligentes et Analyse de Ventes
+
+
+
+
+
+Recommandations produits personnalisées pour chaque client (filtrage collaboratif — détail
+en section 2.1.12)
+Analyse continue des ventes de chaque vendeur : tendances, saisonnalité, produits
+gagnants, prix optimaux (détail en section 2.2.10)
+Génération de rapports d'analyse de ventes hebdomadaires et mensuels, envoyés
+automatiquement au vendeur (WhatsApp/Email) avec explication en langage naturel
+Détection des ruptures de tendance (baisse de conversion, hausse des retours) avec alerte
+proactive au vendeur
+
+1.5.3 Agents IA Métiers — Copilotes Vendeur et Livreur
+Concept : Au-delà des rapports passifs, chaque vendeur et chaque livreur dispose d'un agent IA
+personnel capable de répondre à des questions sur son activité et d'exécuter des actions de gestion
+en son nom, sur simple instruction en langage naturel. Détail complet en sections 2.2.12 (Agent IA
+Vendeur) et 2.3.11 (Agent IA Livreur).
+
+
+
+
+Exemples d'usage vendeur : « Quels sont mes 3 produits les plus rentables ce mois-ci ? »,
+« Mets en promotion tous les produits en stock depuis plus de 60 jours », « Génère un
+Smart-Link pour mon dernier produit ajouté »
+Exemples d'usage livreur : « Combien ai-je gagné cette semaine ? », « Quelle est la
+meilleure zone pour me positionner maintenant ? »
+
+1.5.4 Passerelle Anti-Fraude
+Criticité : La passerelle anti-fraude analyse en continu les données et le trafic de la plateforme
+(comportements de connexion, patterns de commande, signaux de paiement, vélocité des actions)
+pour détecter et limiter les tentatives de fraude avant qu'elles n'affectent les transactions Escrow.
+Détail complet en section 2.6.5.
+
+
+
+Analyse du trafic en temps réel : détection de comportements anormaux (multi-comptes,
+vélocité de commandes suspecte, patterns de connexion à risque)
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+
+
+
+
+Scoring de risque appliqué à chaque commande, chaque nouvelle inscription et chaque
+demande de retrait
+Blocage préventif ou mise en quarantaine automatique des transactions à haut risque, avec
+revue Admin obligatoire avant tout déblocage Escrow
+Alimentation continue du modèle par les décisions de litiges et les retours Admin (boucle
+d'amélioration)
+
+1.5.5 Assistant Conversationnel Universel et Exécution d'Actions
+Principe Clé : Un seul agent IA conversationnel dessert les quatre profils de la plateforme (client,
+vendeur, livreur, admin), avec un périmètre de connaissances et d'actions adapté au rôle connecté.
+L'agent ne se contente pas de répondre : il peut exécuter des actions réelles sur la plateforme à la
+demande de l'utilisateur, dans les limites de ses permissions. Détail complet en section 2.6.7.
+
+
+
+
+
+
+
+Recherche et action pour le client : Exemple côté client : un client demande à l'agent de
+rechercher un produit selon des critères (catégorie, budget, localisation vendeur) — l'agent
+effectue la recherche dans le catalogue et retourne les résultats directement dans la
+conversation, avec possibilité d'ajouter au panier depuis le chat
+Actions de gestion pour le vendeur : Exemple côté vendeur : le vendeur demande la
+création d'un code promo ou la génération d'un Smart-Link — l'agent exécute l'action et
+confirme
+Assistance opérationnelle pour le livreur : Exemple côté livreur : le livreur demande son
+itinéraire optimisé du jour — l'agent l'affiche directement
+Chaque action exécutée par l'agent est journalisée (auteur = agent IA pour le compte de
+l'utilisateur, action, horodatage) au même titre qu'une action manuelle, pour traçabilité
+complète
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+PARTIE II — EXIGENCES FONCTIONNELLES PAR
+MODULE
+2.1 Module Client (Acheteur)
+Le module Client couvre l'intégralité du parcours d'achat : de l'inscription à la validation de la
+livraison, en passant par la navigation catalogue, le paiement sécurisé par Escrow et le suivi
+géolocalisé.
+
+2.1.1 Inscription et Connexion
+Règle Métier : L'inscription est accessible sans vérification KYC stricte pour les clients. Une adresse
+email ou un numéro de téléphone suffit pour démarrer. La vérification du numéro Mobile Money
+intervient lors du premier paiement.
+
+
+
+
+
+
+
+
+Inscription par email + mot de passe (validation email obligatoire)
+Inscription par numéro de téléphone mobile (OTP SMS)
+Connexion via OAuth 2.0 : Google, Facebook, Apple ID
+Récupération de mot de passe par email ou SMS
+Déconnexion sécurisée avec invalidation du token Sanctum
+Gestion des sessions multi-appareils (tableau de bord sécurité)
+
+2.1.2 Profil Utilisateur
+
+
+
+
+
+
+
+Gestion des informations personnelles (nom, prénom, photo de profil)
+Gestion de plusieurs adresses de livraison (adresse principale, secondaires)
+Système de géolocalisation pour adresses imprécises : description textuelle + photo du
+point de repère
+Préférences de notification (WhatsApp, SMS, Email, Push)
+Historique de connexion et gestion des appareils actifs
+Gestion des moyens de paiement enregistrés (numéros Mobile Money)
+
+2.1.3 Catalogue et Recherche Avancée
+
+
+
+
+
+
+
+
+Moteur de recherche full-text par mots-clés (PostgreSQL Full-Text Search + Elasticsearch
+optionnel)
+Filtres multicritères : catégorie, sous-catégorie, fourchette de prix, localisation vendeur,
+note vendeur, disponibilité stock
+Tri : pertinence, prix croissant/décroissant, nouveautés, meilleures ventes, mieux notés
+Navigation par catégories arborescentes (ex: Tech > Smartphones > iPhone)
+Suggestions de recherche autocomplete (IA — historique et tendances locales)
+Affichage des produits "Vendeur Pro Vérifié" en priorité (badge KYC)
+Pagination et chargement progressif (infinite scroll optimisé mobile)
+
+2.1.4 Fiche Produit Détaillée
+
+
+
+
+
+
+
+
+Galerie photos HD avec zoom (jusqu'à 5 photos par produit)
+Description complète, caractéristiques techniques, dimensions/poids
+Prix avec affichage clair de la commission et des frais de livraison estimés
+Badge "Vendeur Pro Vérifié" avec lien vers la boutique
+Note moyenne du vendeur et nombre d'avis (avis vérifiés uniquement — achat confirmé)
+Estimation du délai de livraison (IA — ETA précise selon zone et trafic)
+Indicateur de stock disponible (alerte "Plus que X unités")
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+
+
+
+Produits similaires recommandés (moteur IA — collaborative filtering)
+Bouton "Acheter via Smart-Link" si disponible
+
+2.1.5 Panier d'Achat
+
+
+
+
+
+
+
+
+Ajout/suppression de produits, modification des quantités
+Sauvegarde automatique du panier (persistance en base de données — non perdu à la
+déconnexion)
+Calcul en temps réel : sous-total produits + frais de livraison estimés + commission affichée
+Validation de la disponibilité du stock à chaque modification
+Application de codes de réduction et promotions vendeur
+Panier multi-vendeurs avec regroupement par boutique
+Alerte si un produit du panier est en rupture de stock
+
+2.1.6 Paiement Sécurisé avec Escrow — Flux Complet
+Innovation Centrale Sellify.me : Le paiement par Escrow garantit que les fonds du client ne sont
+jamais directement transmis au vendeur. Ils sont bloqués sur le compte séquestre Sellify.me et libérés
+uniquement après confirmation physique de la réception par le client.
+
+1. Étape 1 — Initiation : Le client valide son panier et choisit son adresse de livraison.
+2. Étape 2 — Sélection du Mode de Paiement : Mobile Money (Orange Money ou MTN
+MoMo) ou Carte bancaire (VISA/Mastercard via gateway agréé).
+3. Étape 3 — Saisie des Informations : Numéro Mobile Money ou données carte bancaire.
+Confirmation OTP envoyée par l'opérateur.
+4. Étape 4 — Autorisation Opérateur : L'API Mobile Money (ou la gateway carte) autorise le
+débit du montant total (produit + livraison).
+5. Étape 5 — Blocage Escrow : Laravel EscrowService bloque les fonds dans le compte
+séquestre. Un identifiant de transaction unique est généré. Vendeur et client reçoivent une
+notification de confirmation.
+6. Étape 6 — Préparation Commande : Le vendeur est notifié de la commande confirmée et
+prépare le colis.
+7. Étape 7 — Enlèvement Livreur : Le livreur assigné par l'IA enlève le colis et confirme via
+son application.
+8. Étape 8 — Livraison et Vérification : Le livreur remet le colis. Le client vérifie physiquement
+la conformité (ouvre l'emballage en présence du livreur si nécessaire).
+9. Étape 9 — Validation Client : Le client valide la transaction sur l'application (bouton "Produit
+conforme — Valider") ou signale un problème dans les 24h.
+10. Étape 10 — Déblocage Automatique : Laravel EscrowService déclenche le virement :
+montant produit (moins commission) → vendeur, frais livraison (moins marge Sellify) →
+livreur. Délai : 24h ouvrables.
+
+2.1.7 Suivi de Commande Géolocalisé
+
+
+
+
+
+
+Statuts de suivi : Commande confirmée → Escrow bloqué → En préparation → Livreur
+assigné → Enlèvement confirmé → En livraison → Livré → Validé
+Carte interactive (Leaflet.js ou Google Maps) avec position GPS du livreur en temps réel
+Notifications push/SMS à chaque changement de statut
+ETA dynamique calculée par l'IA logistique (mise à jour toutes les 5 minutes)
+Historique complet de la timeline de la commande avec timestamps
+
+2.1.8 Historique des Commandes
+
+
+
+Liste paginée de toutes les commandes passées avec statut, montant, vendeur
+Détail de chaque commande : produits, livreur, dates, preuve de paiement Escrow
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+
+
+
+
+Possibilité de répasser une commande identique en un clic
+Téléchargement de la facture PDF pour chaque transaction
+Filtres par date, statut, vendeur, montant
+
+2.1.9 Système d'Avis et de Notation
+
+
+
+
+
+
+Avis possibles uniquement après confirmation de réception (anti-fraude)
+Note vendeur (1-5 étoiles) + note livreur (1-5 étoiles) + commentaire libre
+Photos joignables à l'avis (preuve qualité produit)
+Système de signalement d'avis abusifs (modération admin)
+Affichage agrégé : moyenne, distribution des notes, réponses du vendeur
+
+2.1.10 Programme de Fidélité — Points de Confiance
+
+
+
+
+
+
+
+Attribution automatique de points à chaque achat validé (1 FCFA dépensé = 1 point)
+Niveaux de fidélité : Bronze (0-999 pts) → Argent (1000-4999 pts) → Or (5000+ pts)
+Avantages par niveau : réductions sur frais de livraison, accès anticipé aux ventes flash,
+support prioritaire
+Tableau de bord des points et historique des transactions fidélité
+Programme de parrainage : 500 points pour chaque filleul ayant effectué son premier achat
+Expiration des points après 12 mois d'inactivité
+
+2.1.11 Assistant IA Conversationnel — Support et Actions Client
+Technologie : Interface conversationnelle du Moteur IA Central (voir section 1.5.5), intégrée en widget
+flottant sur toutes les pages. Ce même agent dessert aussi les vendeurs (section 2.2.12) et les
+livreurs (section 2.3.11), avec un périmètre adapté au rôle. Escalade automatique vers agent humain
+si non-résolu.
+
+
+
+
+
+
+
+
+
+
+Réponses automatiques aux questions fréquentes : statut commande, fonctionnement
+Escrow, délais de livraison, politique de retour
+Consultation directe du statut de commande par numéro de commande
+Escalade automatique vers support humain (ticketing) si confiance < 70%
+Exécution d'actions à la demande : recherche de produits selon des critères exprimés en
+langage naturel (catégorie, budget, localisation vendeur, note), affichage des résultats dans
+la conversation, ajout au panier directement depuis le chat
+Consultation et actions sur une commande existante (relance suivi, initiation d'un litige)
+directement depuis le chat
+Historique des conversations sauvegardé par utilisateur
+Disponibilité 24/7, réponse < 3 secondes
+Support multilingue : Français et Anglais
+
+2.1.12 Recommandations IA Personnalisées
+
+
+
+
+
+
+Algorithme de recommandation collaborative (basé sur le comportement d'utilisateurs
+similaires)
+Recommandations contextuelles : "Les clients ayant acheté X ont aussi acheté..."
+Carrousel "Pour vous" sur la page d'accueil (mis à jour quotidiennement)
+Recommandations dans le panier et sur la fiche produit
+Prise en compte de l'historique de navigation (même sans achat)
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+2.2 Module Vendeur (PME/Micro-entrepreneur)
+Le module Vendeur est le cœur de la proposition de valeur SaaS de Sellify.me. Il fournit à chaque
+vendeur une boutique professionnelle, des outils de gestion avancés, et l'accès progressif aux
+services IA et Fintech selon son pack d'abonnement.
+
+2.2.1 Inscription et KYC Strict
+Règle Métier KYC : Aucun vendeur ne peut publier des produits sans avoir complété le processus
+KYC. Le badge "Vendeur Pro Vérifié" n'est accordé qu'après validation manuelle ou automatisée par
+l'Admin. Le KYC est un prérequis absolu à toute transaction commerciale.
+
+
+
+
+
+
+
+
+
+Formulaire d'inscription multi-étapes : informations personnelles → informations
+commerciales → documents KYC
+Documents KYC requis : CNI ou Passeport, Preuve de domicile (facture utilitaire < 3 mois),
+Registre de commerce ou patente (si entreprise enregistrée)
+Upload sécurisé des documents (chiffrement AES-256 au repos)
+Vérification automatisée par IA (OCR + vérification de cohérence) puis validation manuelle
+Admin
+Notification du résultat KYC (approuvé/rejeté/informations complémentaires requises) sous
+48h
+Attribution du badge "Vendeur Pro Vérifié" après validation complète
+Refus automatique si tentative de doublon (même document CNI/RCCM)
+
+2.2.2 Gestion de la Boutique
+
+
+
+
+
+
+
+Paramétrage complet : nom de boutique, logo, bannière, description, catégories principales
+Politique de retour personnalisée (délai en jours, conditions, procédure)
+Page boutique publique avec URL dédiée (ex: sellify.me/boutique/nom-boutique)
+Gestion des horaires d'ouverture (influençant la disponibilité pour répondre aux
+commandes)
+Paramétrage des zones de livraison couvertes et des délais de préparation
+Activation/désactivation de la boutique (mode vacances)
+
+2.2.3 Gestion des Produits et Inventaire
+
+
+
+
+
+
+
+
+
+Création de fiches produit : titre, description, photos (jusqu'à 5), catégorie, prix, stock,
+poids/dimensions
+Gestion des variantes : taille, couleur, référence (SKU)
+Alertes de rupture de stock configurables (seuil d'alerte paramétrable par produit)
+Import/export de catalogue par lot : formats CSV et Excel avec template téléchargeable
+Duplication de fiches produit pour création rapide de variantes
+Archivage des produits sans suppression (préservation historique des commandes)
+Gestion des produits en rupture : désactivation automatique ou affichage "Bientôt
+disponible"
+Gestion multi-entrepôt (préparation expansion logistique)
+
+2.2.4 Dashboard de Performance
+Technologie : Tableau de bord React.js avec graphiques Recharts. Données récupérées via React
+Query (cache 5 minutes). Rafraîchissement temps réel des KPI critiques via WebSocket.
+
+
+
+KPI principaux : GMV (Gross Merchandise Value) — journalier/hebdo/mensuel, Nombre de
+commandes, Taux de conversion (vues → commandes), Note moyenne de satisfaction
+client
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+
+
+
+
+
+Graphiques : évolution du GMV dans le temps, répartition des ventes par produit/catégorie,
+funnel de conversion
+Tableau des dernières commandes avec statuts en temps réel
+Alertes dashboard : stock critique, litige en cours, paiement Escrow en attente
+Export des rapports en PDF et CSV
+
+2.2.5 Outils de Promotion
+
+
+
+
+
+
+Création de codes de réduction : pourcentage ou montant fixe, date d'expiration, limite
+d'utilisation, produits éligibles
+Gestion des soldes et promotions saisonnières avec dates de début/fin
+Offres "Pack" (bundle) : vente de plusieurs produits groupés à prix réduit
+Ventes flash avec compte à rebours visible sur la fiche produit
+Boost produit (placement prioritaire dans le catalogue) — selon pack d'abonnement
+
+2.2.6 Smart-Link — Vente via Réseaux Sociaux
+Concept : Le Smart-Link transforme une discussion informelle sur WhatsApp, Facebook ou Instagram
+en une transaction sécurisée protégée par l'Escrow Sellify.me, sans que le client ait besoin de créer
+un compte préalable.
+
+
+
+
+
+
+
+
+
+
+
+
+Génération en 1 clic depuis le dashboard : sélectionner un produit → "Générer Smart-Link"
+URL professionnelle et mémorisable : https://sellify.me/pay/{token_unique}
+Token généré avec UUID court (hashid), non devinable, unique par transaction
+Paramètres du lien : produit, prix au moment de génération (fixé — anti-fraude), durée de
+validité (24h ou 48h)
+Partage direct depuis le dashboard : boutons copier/partager vers WhatsApp, Facebook
+Messenger, Instagram DM, TikTok bio
+Page Fast Checkout mobile-first : chargement < 2s en 3G, sans inscription obligatoire,
+résumé produit + badge sécurité + saisie Mobile Money + bouton "Payer et Sécuriser"
+À la confirmation de paiement : création automatique d'une commande, blocage Escrow,
+notification vendeur et client, déclenchement du flux logistique
+Tableau de bord des Smart-Links générés : statuts (actif/payé/expiré/annulé), historique,
+conversions
+Expiration automatique des liens non utilisés (évite les blocages de stock)
+Calcul automatique commission Sellify + frais livraison avant affichage prix final au client
+
+2.2.7 SellifyPay — Accès Micro-Prêts
+Règle Métier Critique : L'accès à SellifyPay est strictement réservé aux vendeurs disposant d'un pack
+d'abonnement "Pro" ou "Business" en cours de validité. Les vendeurs "Starter" n'ont pas accès à cette
+fonctionnalité.
+
+Le détail complet du module SellifyPay est couvert en section 2.5. Du côté vendeur, l'interface
+propose :
+
+
+
+
+
+
+
+Dashboard SellifyPay : éligibilité, score IA, montant maximum disponible, prêts en cours
+Simulateur de remboursement interactif (choix durée 3/6/12 mois → affichage mensualités
+et coût total)
+Formulaire de demande de prêt (montant dans la limite du plafond IA, durée choisie,
+objectif du financement)
+Signature numérique du contrat de prêt (validité juridique — Loi OHADA)
+Suivi du prêt actif : montant restant dû, prochaine échéance, historique des prélèvements
+automatiques
+Notifications de prélèvement avant chaque transaction (transparence totale)
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+2.2.8 Gestion des Abonnements SaaS
+Pack
+
+Prix Mensuel
+
+Commission
+GMV
+
+Fonctionnalités Clés
+
+Starter
+
+Gratuit (0 FCFA)
+
+12% – 15%
+
+Marketplace, Escrow, 50 produits max,
+Dashboard standard
+
+Pro
+
+15 000 FCFA/mois
+
+8% – 11%
+
+Produits illimités, Stock avancé,
+Analytics, Smart-Link, SellifyPay,
+Support prioritaire
+
+Business
+
+40 000 FCFA/mois
+
+5% – 7%
+
+Tout Pro + Boost illimité, Account
+Manager dédié, SellifyPay taux
+préférentiel (5%), B2B
+
+
+
+
+
+
+Changement de pack en cours de mois : calcul prorata automatique
+Rappels d'expiration (J-7, J-3, J-1) via WhatsApp et email
+Suspension automatique des fonctionnalités premium si abonnement expiré (sans
+suppression des données)
+Facturation automatique : renouvellement par débit sur le portefeuille vendeur ou Mobile
+Money
+
+2.2.9 Commissions, Paiements et Retraits
+
+
+
+
+
+
+Historique complet des transactions Escrow : montant, commission prélevée, net reçu, date
+Solde en temps réel du portefeuille vendeur (fonds débloqués disponibles)
+Demande de retrait vers compte Mobile Money ou bancaire (montant minimum
+paramétrable)
+Délai de retrait : 24h ouvrables après demande
+Relevé mensuel téléchargeable (PDF) pour comptabilité
+
+2.2.10 Rapport IA Vendeur — Produits Gagnants et Optimisation
+Module IA : Analyse des tendances locales (météo, événements, comportements clients similaires)
+pour identifier les opportunités de stock et d'assortiment.
+
+
+
+
+
+
+Analyse des Produits Gagnants : liste des produits à fort potentiel selon les tendances
+locales, les événements calendaires (fêtes, rentrée scolaire) et les comportements des
+clients
+Optimisation des Fiches Produits : score de qualité de chaque fiche (0-100) +
+recommandations concrètes : améliorer le titre, ajouter des mots-clés, compléter la
+description, améliorer les photos
+Conseil Tarifaire Dynamique : suggestion de prix optimaux en temps réel selon la
+demande, le niveau de stock et les prix pratiqués par les vendeurs concurrents dans la
+même catégorie
+Détection de Fraude et Risque Commande : score de risque automatique pour chaque
+commande entrante (localisation suspecte, comportement client inhabituel, historique de
+litiges) — alertes proactives au vendeur
+
+2.2.11 Gestion des Litiges (Côté Vendeur)
+
+
+
+
+Notification immédiate en cas d'ouverture de litige par un client
+Interface pour soumettre les preuves de défense (photos produit avant expédition, preuve
+d'emballage, bon de commande)
+Délai de réponse imparti : 48h pour soumettre les preuves
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+
+
+Suivi du statut du litige et notification de la décision admin
+
+2.2.12 Agent IA Vendeur — Copilote Business
+Concept : Interface conversationnelle du Moteur IA Central (voir section 1.5.3 et 1.5.5), accessible
+depuis le dashboard vendeur. L'agent répond aux questions sur l'activité de la boutique et exécute
+des actions de gestion sur instruction en langage naturel, dans la limite des permissions du vendeur.
+
+
+
+
+
+
+
+Questions sur les performances : ventes du jour/semaine/mois, produits les plus rentables,
+taux de conversion, comparaison à la période précédente
+Actions de gestion exécutables : création/modification de codes promo, activation d'une
+vente flash, génération d'un Smart-Link, mise à jour de stock, archivage d'un produit
+Suggestions proactives basées sur le Rapport IA Vendeur (section 2.2.10) : propositions
+d'actions concrètes directement actionnables depuis le chat (« Veux-tu que je mette ce
+produit en promotion de 10% ? »)
+Confirmation systématique avant toute action ayant un impact financier ou visible
+publiquement (promotion, prix, publication produit)
+Journalisation de chaque action exécutée par l'agent au nom du vendeur (traçabilité
+identique à une action manuelle)
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+2.3 Module Livreur (Micro-logisticien)
+Le module Livreur est conçu comme une PWA installable (Inertia.js) — le même socle applicatif
+que les autres rôles, sans application native séparée — optimisée pour des conditions d'utilisation
+terrain : connectivité variable, manipulation tactile en déplacement, et besoin d'informations claires
+et rapides.
+
+2.3.1 Inscription et Vérification
+Règle Métier : Tout livreur doit passer par un processus de vérification avant de recevoir des
+commandes. Aucun accès aux livraisons sans validation complète des documents par l'Admin.
+
+
+
+
+
+
+
+Inscription via application mobile : informations personnelles, zone de couverture, type de
+véhicule
+Documents requis : CNI/Passeport, Permis de conduire valide, Carte grise du véhicule,
+Photo du véhicule, Photo selfie pour vérification biométrique
+Upload sécurisé des documents avec vérification OCR automatique
+Validation Admin dans les 48h — notification du résultat
+Attribution d'un identifiant unique livreur et accès à l'application
+
+2.3.2 Application Mobile Dédiée
+
+
+
+
+
+
+Tableau de bord livreur : commandes disponibles dans sa zone, commandes en cours,
+historique, gains du jour/semaine/mois
+Mode "En service / Hors service" (activation et désactivation de la disponibilité)
+Carte interactive avec commandes disponibles à proximité géolocalisées
+Notifications push pour chaque nouvelle commande dans la zone
+Mode hors-ligne basique : consultation des commandes en cours et des adresses sans
+connexion
+
+2.3.3 Réception et Acceptation des Commandes
+
+
+
+
+
+Notification d'attribution automatique (algorithme IA) ou offre manuelle à accepter
+Détails de la commande : adresse d'enlèvement (vendeur), adresse de livraison (client),
+type de colis, montant Escrow bloqué (information pour le livreur), frais de livraison alloués
+Acceptation ou refus de la commande (avec justification pour refus — données IA)
+Attribution de backup automatique si refus ou non-réponse dans les 5 minutes
+
+2.3.4 Optimisation d'Itinéraire IA — Routage Dynamique Multi-Points
+Module IA Logistique : Algorithme de routage basé sur TSP (Traveling Salesman Problem) optimisé
+avec contraintes locales (état des routes, trafic en temps réel, historique des zones non
+standardisées). Appel au Moteur IA interne (service Python invoqué en interne par Laravel, non
+exposé publiquement).
+
+
+
+
+
+
+
+
+Calcul de l'itinéraire optimal pour les livraisons multiples groupées dans la même session
+Prise en compte du trafic en temps réel (API Google Maps / OpenStreetMap avec données
+trafic)
+Réoptimisation dynamique si ajout d'une nouvelle commande en cours de session
+Affichage de l'itinéraire sur carte avec instructions de navigation turn-by-turn
+Estimation temps de trajet et kilométrage pour chaque étape
+Gestion des adresses non standardisées : l'IA interprète les descriptions textuelles
+("Derrière le marché central, maison bleue") et les photos de points de repère uploadées
+par les clients
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+2.3.5 Suivi GPS Géolocalisé Temps Réel
+
+
+
+
+
+
+Partage de position GPS automatique toutes les 30 secondes lors d'une livraison active
+Transmission via WebSocket/Socket.io vers le backend — visible en temps réel par le
+client et le vendeur
+Activation automatique du partage à l'acceptation de la commande
+Arrêt du partage GPS après confirmation de livraison (respect de la vie privée)
+Logs GPS conservés 30 jours pour litiges éventuels
+
+2.3.6 Confirmation d'Enlèvement et de Livraison
+
+
+
+
+
+
+Confirmation d'enlèvement chez le vendeur : scan QR code du colis ou saisie code de
+confirmation → photo de l'enlèvement
+Confirmation de livraison : signature électronique du client ou code OTP envoyé au client
+Upload photo du colis livré en situation (preuve de livraison)
+Déclenchement automatique du processus de validation Escrow côté client après
+confirmation livreur
+Délai maximum de livraison selon la zone défini : alerte si dépassé
+
+2.3.7 Validation Client et Déblocage Escrow
+
+
+
+
+
+Le livreur est informé en temps réel de la validation (ou refus) du client
+En cas de refus client (produit non conforme) : instruction de ramener le colis au vendeur
+— procédure litige déclenchée
+Confirmation de retour du colis avec photo (preuve de bon retour)
+Le livreur reçoit sa commission dans les 2 cas (livraison réussie + retour) selon barème
+défini
+
+2.3.8 Portefeuille Sécurisé Livreur
+
+
+
+
+
+
+Crédit automatique du portefeuille après chaque livraison confirmée (frais livraison moins
+marge Sellify.me)
+Consultation du solde en temps réel
+Retrait vers Mobile Money (Orange Money, MTN) — traitement sous 24h
+Historique complet des gains avec détail par course
+Relevé hebdomadaire/mensuel téléchargeable
+
+2.3.9 Système de Notation et Badges
+Badge
+
+Condition
+
+Avantage
+
+Nouveau
+
+Inscription validée
+
+Accès basique commandes
+
+Fiable
+
+Note ≥ 4.0 sur 50+ livraisons
+
+Priorité sur commandes de valeur
+moyenne
+
+Pro
+
+Note ≥ 4.5 sur 200+ livraisons
+
+Accès pack Pro livreur, commandes
+prioritaires
+
+Expert
+
+Note ≥ 4.8 sur 500+ livraisons
+
+Commandes B2B, éligibilité microprêts véhicule
+
+
+
+
+
+Notation client après chaque livraison : 1-5 étoiles + commentaire
+Notation vendeur (ponctualité à l'enlèvement, conditionnement du colis)
+Calcul de la moyenne mobile sur les 30 dernières livraisons
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+
+
+Système d'alertes : avertissement si note < 3.5 → suspension si < 3.0 sur 20 livraisons
+consécutives
+
+2.3.10 Prédiction de la Demande IA — Zones Chaudes
+Module IA : Modèle de prédiction temporelle basé sur l'historique des commandes (jour/heure/zone),
+les données météo, le calendrier local (jours de marché, événements) et les tendances saisonnières.
+
+
+
+
+
+
+Carte thermique des zones à forte demande prévue (mise à jour toutes les 2 heures)
+Alertes push : "Forte demande prévue dans votre zone dans 30 minutes — positionnezvous !"
+Bonus de commission pour les livreurs se positionnant dans les zones prédites avant le pic
+Rapport hebdomadaire personnalisé : meilleures heures et zones pour maximiser les
+revenus
+
+2.3.11 Agent IA Livreur — Assistant Business
+Concept : Interface conversationnelle du Moteur IA Central (voir section 1.5.3 et 1.5.5), accessible
+depuis l'application mobile livreur. L'agent répond aux questions sur l'activité du livreur et l'assiste
+dans l'optimisation de ses revenus.
+
+
+
+
+
+
+Questions sur l'activité : gains du jour/semaine/mois, nombre de livraisons, note moyenne,
+progression vers le badge supérieur
+Assistance opérationnelle : affichage de l'itinéraire optimisé en cours, rappel des zones
+chaudes prédites (section 2.3.10), estimation du temps restant
+Conseils personnalisés pour maximiser les revenus : meilleurs créneaux horaires et zones
+selon l'historique du livreur
+Accès rapide au portefeuille et à la demande de retrait directement depuis la conversation
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+2.4 Module Admin / SuperAdmin
+Le module Admin est le système nerveux central de Sellify.me. Il offre à l'équipe opérationnelle
+une visibilité complète sur l'ensemble de l'écosystème, les outils de supervision, d'arbitrage et de
+configuration de la plateforme.
+
+2.4.1 Dashboard de Supervision — KPI Temps Réel
+
+
+
+
+
+Vue synthétique : GMV total (jour/semaine/mois/cumul), nombre de commandes actives,
+transactions Escrow en cours (montants bloqués), litiges ouverts, livreurs actifs en ce
+moment
+Graphiques temps réel : carte de chaleur des commandes par zone géographique, courbes
+GMV, taux de conversion global
+Alertes critiques : tentative de fraude détectée, transaction Escrow anomalie, livreur
+injoignable, webhook Mobile Money en erreur
+Accès rapide aux actions urgentes : suspension d'un utilisateur, déblocage manuel d'un
+Escrow, assignation manuelle d'un livreur
+
+2.4.2 Gestion des Vendeurs
+
+
+
+
+
+
+
+File de validation KYC : liste des dossiers en attente avec priorité, visualisation des
+documents uploadés, validation/rejet en 1 clic avec motif
+Gestion des badges : attribution manuelle, retrait (en cas de fraude), downgrade de badge
+Suspension temporaire ou permanente d'un vendeur (avec notification et gel des fonds
+Escrow)
+Historique complet d'activité : commandes, litiges, plaintes, évolution du score
+Outil de communication directe vendeur (email, notification in-app)
+Gestion des abonnements : forcer un changement de pack, accorder une extension
+gratuite
+
+2.4.3 Gestion des Livreurs
+
+
+
+
+
+
+
+Validation des dossiers livreurs : vérification documents, approbation/refus
+Supervision des livreurs actifs en temps réel (carte GPS)
+Gestion des badges et niveaux de notation
+Suspension/désactivation en cas d'incidents (retards répétés, plaintes multiples)
+Attribution manuelle de livraisons urgentes
+Rapports de performance individuels
+
+2.4.4 Supervision des Transactions Escrow
+Criticité Maximale : Toute action manuelle sur un Escrow est journalisée avec l'identifiant Admin,
+l'horodatage et le motif. Ces logs sont immuables et constituent la piste d'audit réglementaire.
+
+
+
+
+
+
+
+
+Vue liste de tous les Escrow actifs : montant bloqué, vendeur, client, date de blocage,
+échéance de déblocage
+Filtres : par statut (bloqué/en litige/en attente de validation/expiré), par montant, par date
+Déblocage manuel d'Escrow (avec double confirmation et motif obligatoire)
+Remboursement manuel vers le client (en cas de litige résolu en faveur client)
+Monitoring des webhooks Mobile Money : statut des callbacks, erreurs, retry
+Rapport quotidien des flux financiers Escrow (entrées, sorties, solde)
+
+2.4.5 Gestion des Litiges et Arbitrage
+
+
+File de litiges en attente : priorité par montant, ancienneté, statut
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+
+
+
+
+
+
+
+Interface d'arbitrage : vue côte à côte des preuves client et vendeur (photos, vidéos,
+historique commande)
+Décision d'arbitrage : remboursement client / paiement vendeur / solution mixte
+Notification automatique des deux parties à la décision
+Déblocage/remboursement Escrow automatique suite à la décision
+SLA litige : résolution dans les 72h ouvrables
+Rapport statistique des litiges : taux, motifs fréquents, vendeurs/livreurs impliqués
+
+2.4.6 Configuration Commissions et Abonnements
+
+
+
+
+
+
+Interface de configuration des taux de commission par pack vendeur et par catégorie
+produit
+Gestion des tarifs d'abonnement (prix, avantages inclus)
+Configuration des marges logistiques par pack livreur
+Gestion des promotions plateforme (réduction de commission temporaire, offres
+d'onboarding)
+Paramétrage des règles SellifyPay : plafond de prêt (% du GMV), taux d'intérêt par pack,
+durées disponibles
+
+2.4.7 Monitoring IA
+
+
+
+
+
+Tableau de bord des modèles IA en production : précision du routage, taux d'acceptation
+des recommandations, performances du scoring SellifyPay
+Alertes de dégradation des performances IA (seuils configurables)
+Logs des prédictions et des décisions IA (pour audit et amélioration continue)
+Interface de feedback pour corriger les faux positifs/négatifs (détection fraude, anomalies
+Escrow)
+
+2.4.8 Rapports Financiers et Conformité AML
+
+
+
+
+
+
+Rapport mensuel complet : revenus par source (commissions, abonnements, logistique,
+SellifyPay), charges, marge brute
+Rapport de conformité AML : transactions dépassant les seuils réglementaires BEAC,
+signalement automatique des opérations suspectes
+Audit trail complet de toutes les transactions Escrow (immuable, exportable pour
+régulateurs)
+Rapports TVA et taxes applicables
+Export des données financières aux formats PDF, CSV, Excel
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+2.5 Module SellifyPay — Fintech (Micro-Prêts Vendeurs)
+Prérequis Absolus : (1) Pack d'abonnement "Pro" ou "Business" actif. (2) KYC vendeur validé. (3)
+Ancienneté minimale de 3 mois sur la plateforme. (4) Aucun litige non résolu en cours. (5) Aucun prêt
+actif en défaut.
+
+2.5.1 Scoring IA — Éligibilité Vendeur
+Moteur IA interne : Le scoring est calculé automatiquement par un modèle de Machine Learning
+(Gradient Boosting) entraîné sur l'historique des vendeurs Sellify.me. Aucun document physique
+requis — la performance sur la plateforme est la seule garantie.
+
+
+
+
+
+
+
+Variables du modèle de scoring : GMV moyen mensuel (3 derniers mois), Taux de
+satisfaction client (avis), Taux de litiges (inverse), Ancienneté sur la plateforme, Régularité
+des ventes (coefficient de variation), Taux de retours, Historique de remboursement
+SellifyPay (si prêt précédent)
+Score de 0 à 100 — seuil d'éligibilité minimum : 60/100
+Mise à jour du score en temps réel à chaque transaction complétée
+Affichage du score vendeur dans son dashboard SellifyPay avec indicateurs d'amélioration
+
+2.5.2 Calcul Automatique du Montant du Prêt
+Paramètre
+
+Valeur
+
+Description
+
+Plafond initial
+
+50% du GMV moyen
+
+50% du GMV moyen sur les 3 derniers
+mois
+
+Taux d'intérêt Pack Pro
+
+8% annuel
+
+Taux dégressif selon durée et
+performance
+
+Taux d'intérêt Pack Business
+
+5% annuel
+
+Taux préférentiel pour les meilleurs
+vendeurs
+
+Durées disponibles
+
+3, 6 ou 12 mois
+
+Choix du vendeur lors de la demande
+
+Prélèvement
+
+Max 30% par
+transaction
+
+Prélevé automatiquement sur chaque
+vente Escrow débloquée
+
+Délai de décaissement
+
+48h après approbation
+
+Virement vers portefeuille vendeur
+
+Renouvellement
+
+Après remboursement
+complet
+
+Possibilité de contracter un nouveau
+prêt
+
+2.5.3 Simulateur de Remboursement
+
+
+
+
+
+Interface interactive React : curseur montant (dans la limite du plafond IA) + sélection
+durée (3/6/12 mois)
+Calcul en temps réel : montant des mensualités, coût total du crédit (intérêts), TAEG (Taux
+Annuel Effectif Global)
+Simulation de l'impact sur les ventes : "Pour rembourser ce prêt en X mois, il vous faudra
+maintenir un GMV mensuel de Y FCFA"
+Validation du simulateur sans engagement (pas de création de demande implicite)
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+2.5.4 Contrat Numérique et Signature
+
+
+
+
+
+Génération automatique du contrat de prêt PDF avec : identité vendeur, montant, taux,
+durée, échéancier complet, conditions de prélèvement
+Lecture obligatoire du contrat (tracking scroll — validation impossible sans avoir scrollé
+jusqu'en bas)
+Signature électronique : OTP envoyé par SMS/WhatsApp → saisie de l'OTP = signature
+légalement opposable
+Archivage du contrat signé (PDF) accessible depuis le dashboard vendeur
+
+2.5.5 Décaissement en 48h
+
+
+
+
+
+Après signature du contrat : déclenchement automatique du Job Laravel "DisburseLoan"
+Virement du montant approuvé vers le portefeuille vendeur Sellify.me
+Notification de confirmation : WhatsApp + Email avec récapitulatif du prêt
+Démarrage du prélèvement à la prochaine transaction Escrow débloquée
+
+2.5.6 Prélèvement Automatique sur les Ventes
+Mécanisme : À chaque déblocage d'Escrow (validation client), le EscrowService calcule
+automatiquement la part de remboursement (max 30% du montant net vendeur) avant de créditer le
+portefeuille.
+
+
+
+
+
+
+Calcul à chaque transaction : montant net vendeur = prix produit - commission Sellify. Part
+remboursement = min(30% du net, échéance mensuelle restante)
+Si 30% du net < échéance minimale : report partiel de la mensualité (sans pénalité si GMV
+maintenu)
+Notification au vendeur à chaque prélèvement : montant prélevé, restant dû, prochaine
+échéance estimée
+Alerte si rythme de remboursement trop lent (projection de dépassement de la durée
+prévue)
+
+2.5.7 Dashboard de Suivi du Prêt
+
+
+
+
+
+
+Vue synthétique : montant emprunté, montant remboursé, restant dû, taux d'avancement
+(barre de progression), prochaine échéance estimée
+Graphique d'évolution du remboursement dans le temps
+Historique complet des prélèvements (date, montant transaction source, part prélevée)
+Alerte de fin de prêt : notification 2 semaines avant la fin prévue
+Processus de clôture : confirmation de remboursement complet, attestation PDF,
+déblocage d'un nouveau prêt éventuel
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+2.6 Module IA Central — Le Cerveau de la Plateforme
+Cette section consolide, du point de vue technique et fonctionnel, le Moteur IA Central introduit en
+section 1.5. L'IA n'est ici traitée ni comme un simple module de logistique ni comme une
+fonctionnalité isolée : elle est le système nerveux transversal qui pilote la plateforme, alimente
+chaque module métier (Client, Vendeur, Livreur, Admin) et sert d'interface unique de dialogue et
+d'action pour tous les acteurs.
+
+2.6.1 Architecture du Moteur IA Central
+Architecture : Le Moteur IA Central est composé de services internes invoqués par l'application
+Laravel (jobs, services, listeners d'événements). Aucune API IA n'est exposée publiquement —
+cohérent avec l'architecture monolithique Laravel + Inertia.js + React de la plateforme. Les modèles
+lourds (scoring, prédiction de demande, NLP conversationnel) sont hébergés par un service interne
+dédié, accessible uniquement depuis le réseau applicatif interne.
+
+
+
+
+
+
+
+
+Sous-service de routage et prédiction logistique (voir Annexe A.1.2 LogisticsIAService)
+Sous-service de scoring et fintech (voir Annexe A.1.3 FintechEngine)
+Sous-service de recommandations et analyse de ventes (nouveau :
+RecommendationEngine)
+Sous-service anti-fraude (nouveau : AntiFraudService)
+Sous-service agent conversationnel et exécution d'actions (nouveau : AIAgentService)
+Un bus d'événements interne (Laravel Events/Queues) relie ces sous-services entre eux et
+aux modules métiers
+
+2.6.2 Pilotage et Orchestration
+
+
+
+
+Le Moteur IA Central écoute les événements clés de la plateforme (nouvelle commande,
+nouveau compte, connexion, message chat, transaction Escrow) via le système de queues
+Laravel
+Chaque événement est routé vers le(s) sous-service(s) IA concerné(s), qui produisent une
+décision, une recommandation ou une réponse
+Les décisions à fort impact (blocage anti-fraude, refus de prêt) sont toujours
+accompagnées d'une justification explicable, consultable par l'Admin
+
+2.6.3 Recommandations Intelligentes (Détail Technique)
+
+
+
+
+Moteur de filtrage collaboratif pour les recommandations produits client (voir section 2.1.12)
+Modèle d'analyse de tendances pour le Rapport IA Vendeur (voir section 2.2.10)
+Les deux modèles partagent la même base d'événements comportementaux (vues, ajouts
+panier, achats, avis) stockée dans MongoDB
+
+2.6.4 Agents IA Métiers (Détail Technique)
+
+
+
+
+Un seul service AIAgentService gère les trois profils d'agent (client, vendeur, livreur) avec
+un contexte et un catalogue d'actions autorisées propre à chaque rôle
+Le contexte de conversation inclut les données pertinentes du rôle : catalogue et panier
+pour le client, KPI boutique pour le vendeur, itinéraire et gains pour le livreur
+Le catalogue d'actions est défini par une liste explicite de fonctions autorisées (tool calling)
+— l'agent ne peut exécuter que des actions présentes dans cette liste, jamais d'action
+arbitraire
+
+2.6.5 Passerelle Anti-Fraude (Détail Technique)
+Portée : La passerelle anti-fraude analyse le trafic et les données de toute la plateforme — pas
+seulement les transactions Escrow — pour repérer les signaux faibles de fraude au plus tôt :
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+inscriptions, connexions, navigation, commandes, retraits.
+
+
+
+
+
+
+
+Signaux analysés : vélocité des actions (commandes/minute, tentatives de connexion),
+cohérence géographique, réutilisation de moyens de paiement entre comptes distincts,
+patterns de litiges récurrents
+Score de risque calculé en continu et attaché à chaque entité (utilisateur, commande,
+transaction)
+Actions automatiques selon le score : autorisation normale, vérification supplémentaire
+(OTP renforcé), mise en quarantaine pour revue Admin, blocage préventif
+Tableau de bord dédié côté Admin (voir Annexe — extension du Monitoring IA, section
+2.4.7) avec liste des alertes, score par entité et historique des décisions
+Boucle d'amélioration continue : chaque décision Admin (confirmée/infirmée) réalimente le
+modèle
+
+2.6.6 Monitoring IA Central (Extension Admin)
+
+
+
+
+Vue consolidée de tous les sous-services IA : disponibilité, latence, taux de confiance
+moyen, volume de décisions par jour
+Vue dédiée aux actions exécutées par les agents conversationnels : nombre d'actions par
+type, taux de confirmation utilisateur, taux d'échec
+Alertes de dégradation et interface de feedback (complète la section 2.4.7 existante)
+
+2.6.7 Assistant Conversationnel Universel (Détail Technique)
+
+
+
+
+
+Un seul point d'entrée conversationnel (widget flottant) est utilisé par les quatre rôles ; le
+backend adapte automatiquement le contexte et les permissions selon l'utilisateur connecté
+Toute action déclenchée par l'agent est exécutée via les mêmes services métiers que les
+actions manuelles (EscrowService, SmartLinkService, etc.) — aucun chemin de code
+séparé, garantissant la cohérence des règles métier
+Confirmation explicite requise avant toute action irréversible ou à impact financier
+Journal d'audit dédié aux actions de l'agent, consultable par l'Admin et par l'utilisateur
+concerné
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+PARTIE III — EXIGENCES NON FONCTIONNELLES
+3.1 Sécurité
+Domaine
+
+Exigence
+
+Standard
+
+Chiffrement des
+données
+
+AES-256 pour toutes les données sensibles
+au repos (données bancaires, KYC, Escrow)
+
+AES-256-GCM
+
+Transport
+
+HTTPS/TLS 1.3 obligatoire pour toutes les
+communications
+
+TLS 1.3
+
+Authentification API
+
+Tokens Sanctum (Laravel) avec expiration
+24h. Refresh tokens 30 jours.
+
+OAuth 2.0 / JWT
+
+KYC/AML
+
+Vérification d'identité conforme
+CEMAC/BEAC. Signalement automatique
+des transactions suspectes.
+
+FATF / BEAC
+
+Protection XSS/CSRF
+
+CSRF tokens sur toutes les mutations.
+Sanitisation des inputs. Content-SecurityPolicy.
+
+OWASP Top 10
+
+Rate Limiting API
+
+100 req/min par utilisateur, 1000 req/min par
+Admin, protection DDoS CloudFlare
+
+Nginx + CloudFlare
+
+Journalisation
+
+Audit logs immuables pour toutes les actions
+sur les Escrow. Rétention 5 ans.
+
+ISO 27001
+
+Webhooks Mobile
+Money
+
+Vérification de signature HMAC sur chaque
+payload reçu. Replay attack prevention.
+
+HMAC-SHA256
+
+3.2 Performance
+Métrique
+
+Cible
+
+Condition
+
+Temps de réponse API
+
+< 200ms (p95)
+
+Endpoints catalogue, panier, statut
+commande
+
+Chargement page (mobile)
+
+< 2 secondes
+
+Connexion 3G (1 Mbps), Fast Checkout
+Smart-Link
+
+Score Lighthouse
+
+> 90 (Performance,
+Accessibilité)
+
+Pages client critiques (catalogue,
+checkout)
+
+Capacité concurrente
+
+10 000 utilisateurs
+simultanés
+
+Architecture horizontalement scalable
+
+Throughput Escrow
+
+500
+transactions/seconde
+
+Pic d'activité (ventes flash, promotions)
+
+WebSocket latence
+
+< 500ms
+
+Mise à jour position GPS livreur
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+3.3 Disponibilité et Résilience
+
+
+
+
+
+
+
+
+SLA : 99,5% de disponibilité mensuelle (autorise ~3,6h de downtime/mois)
+RTO (Recovery Time Objective) : < 4h pour le module Escrow (critique financier)
+RPO (Recovery Point Objective) : < 1h — sauvegardes PostgreSQL toutes les heures pour
+les données transactionnelles
+Sauvegarde complète quotidienne — rétention 30 jours
+Architecture multi-zone AWS (au minimum 2 zones de disponibilité pour le module Escrow)
+Circuit breaker sur les appels API Mobile Money (Hystrix pattern) — fallback gracieux
+Monitoring proactif : alertes PagerDuty si disponibilité < 99%
+
+3.4 Traçabilité et Audit
+
+
+
+
+
+Logs applicatifs centralisés (CloudWatch ou Papertrail) avec niveau DEBUG en staging,
+INFO en production
+Audit trail Escrow : chaque action (création, blocage, déblocage, remboursement)
+enregistrée avec timestamp, acteur, montant, motif — immuable
+Logs IA : chaque prédiction/décision IA journalisée (input, output, modèle version,
+confiance) — MongoDB
+RGPD-like : droit à l'oubli pour les données clients (hors données Escrow obligatoirement
+conservées 5 ans)
+
+3.5 Scalabilité et Multi-Pays
+
+
+
+
+
+
+Architecture horizontalement scalable : conteneurs Docker orchestrés par Kubernetes
+Séparation des services critiques : Escrow Service, Logistics IA, Fintech Engine =
+microservices indépendants
+Multi-devises : architecture prête pour FCFA CFA, CFA BCEAO (Côte d'Ivoire), NGN
+(Nigéria)
+Multi-opérateurs Mobile Money : couche d'abstraction permettant l'ajout d'un nouvel
+opérateur sans refactoring
+Internationalisation (i18n) : support multilingue via fichiers de traduction (français, anglais,
+potentiellement wolof/haoussa)
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+PARTIE IV — FLUX MÉTIERS DÉTAILLÉS
+4.1 Flux Transaction Complète avec Escrow
+Acteurs : Client, Vendeur, Livreur, Système Sellify.me (Laravel EscrowService), Opérateur Mobile
+Money
+
+PHASE 1 — COMMANDE ET PAIEMENT
+11. Client parcourt le catalogue → Ajoute produit au panier → Sélectionne adresse de livraison
+12. Client choisit mode de paiement : Mobile Money (Orange / MTN) ou Carte bancaire
+13. Client confirme la commande → Laravel génère une référence commande unique
+14. Laravel EscrowService appelle l'API Mobile Money → Demande de débit du montant total
+15. Opérateur Mobile Money envoie OTP au client → Client confirme le paiement
+16. Opérateur Mobile Money envoie le Webhook de confirmation à Laravel
+17. EscrowService : Marque les fonds comme "bloqués" dans escrow_transactions → Statut :
+LOCKED
+18. Notifications envoyées : Client (confirmation paiement) + Vendeur (nouvelle commande
+confirmée)
+
+PHASE 2 — PRÉPARATION ET LOGISTIQUE
+19. Vendeur prépare la commande → Marque "Prêt pour enlèvement" sur son dashboard
+20. Algorithme IA Logistique assigné le livreur optimal (proximité + score + disponibilité)
+21. Livreur reçoit notification push → Accepte la livraison dans l'application mobile
+22. Livreur se rend chez le vendeur → Scan QR code d'enlèvement → Confirmation
+23. Statut commande mis à jour : "En livraison" → Client notifié
+24. Suivi GPS en temps réel activé → ETA calculée par IA
+
+PHASE 3 — LIVRAISON ET VALIDATION
+25. Livreur arrive chez le client → Remise du colis
+26. Client vérifie le produit (conformité, qualité, quantité)
+27. Client valide sur son application → "Produit conforme — Je valide" → Code OTP de
+confirmation
+28. Livreur confirme la livraison via son application → Upload photo preuve
+29. EscrowService reçoit la double confirmation → Statut : RELEASED
+30. EscrowService déclenche les virements : Vendeur (net après commission) + Livreur (frais
+nets)
+31. Notifications finales : "Paiement libéré" au vendeur, "Merci pour votre commande" au client,
+gains crédités au livreur
+
+SCÉNARIO DE LITIGE
+Si le client refuse la livraison (produit non conforme) :
+32. Client sélectionne "Problème avec ce produit" → Saisit le motif → Upload photos du
+problème
+33. Litige créé automatiquement → EscrowService marque les fonds : DISPUTED
+34. Livreur ramène le colis au vendeur → Confirmation photo retour
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+35. Vendeur a 48h pour soumettre ses preuves de défense (photos avant expédition, bon de
+commande)
+36. Admin arbitre dans les 72h → Décision : remboursement client OU paiement vendeur OU
+solution mixte
+37. EscrowService exécute la décision d'arbitrage automatiquement
+
+4.2 Flux Smart-Link
+38. Vendeur sur son dashboard → Sélectionne un produit → Clique "Générer Smart-Link"
+39. Laravel SmartLinkService génère un token UUID court → Crée une entrée dans
+payment_links (statut: active)
+40. Vendeur partage le lien (https://sellify.me/pay/{token}) sur WhatsApp/Facebook/Instagram
+41. Client clique sur le lien → Laravel vérifie validité du token (non expiré, statut active)
+42. Affichage de la page Fast Checkout React : résumé produit + badge sécurité + formulaire
+Mobile Money
+43. Client saisit son numéro Mobile Money → Clique "Payer et Sécuriser mon achat"
+44. Laravel SmartLinkService initie le débit Mobile Money → Webhook de confirmation reçu
+45. Mise à jour payment_links (statut: paid) → Création de la commande et de
+l'escrow_transaction
+46. Notifications : Vendeur (commande confirmée + ordre de préparation) + Client
+(confirmation paiement)
+47. Flux logistique standard déclenché (cf. section 4.1 Phase 2 et 3)
+
+4.3 Flux SellifyPay
+48. Vendeur Pro/Business ouvre le module SellifyPay → Affichage du score IA (0-100) et du
+montant maximum disponible
+49. Vendeur utilise le simulateur : choix du montant + durée → Affichage des mensualités et
+TAEG
+50. Vendeur soumet la demande de prêt → Vérification automatique des prérequis (pack,
+ancienneté, litiges en cours)
+51. Moteur IA recalcule le score en temps réel → Approbation automatique si score ≥ 60 et
+montant ≤ plafond
+52. Génération du contrat PDF → Affichage obligatoire → Signature OTP
+53. Job Laravel "DisburseLoan" déclenché → Virement vers portefeuille vendeur sous 48h
+54. À chaque transaction Escrow débloquée : EscrowService calcule et prélève max 30% du
+net vendeur
+55. Mise à jour du dashboard SellifyPay en temps réel : progression du remboursement
+56. À remboursement complet : notification + attestation PDF + réactivation de l'éligibilité
+
+4.4 Flux Litige
+57. Client déclenche le litige depuis l'application (bouton "Signaler un problème") → Saisie
+motif + photos
+58. EscrowService : Statut escrow → DISPUTED. Notifications Vendeur + Livreur + Admin
+59. Livreur notifié : instruction de ramener le colis au vendeur dans les 24h
+60. Vendeur a 48h pour soumettre ses preuves (photos, bon de commande, preuve
+d'emballage)
+61. Admin reçoit le dossier complet dans la file de litiges avec toutes les preuves
+62. Admin prend une décision d'arbitrage → Saisit la décision avec justification obligatoire
+63. EscrowService exécute automatiquement : remboursement client / paiement vendeur /
+mixte
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+64. Notifications des deux parties. Clôture du litige. Mise à jour des statistiques.
+
+4.5 Flux Logistique IA
+65. Commande confirmée (Escrow bloqué) → Événement "OrderConfirmed" publié sur la
+queue Laravel
+66. Worker LogisticsService consomme l'événement → Appelle le Moteur IA interne (endpoint
+interne /optimize-route)
+67. Le Moteur IA interne interroge les livreurs disponibles dans la zone → Calcule le score
+d'attribution (proximité 40% + note 30% + charge actuelle 30%)
+68. Sélection du livreur optimal → Attribution de la commande → Notification push livreur
+69. Livreur accepte → Activation du suivi GPS → WebSocket activé
+70. Algorithme de routage multi-points (si plusieurs livraisons groupées) : appel TSP optimisé
+Python → Retour itinéraire optimal
+71. ETA calculée et communiquée au client → Mise à jour toutes les 5 minutes
+72. Modèle de prédiction demande mis à jour en continu → Heat map zones chaudes
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+PARTIE V — MODÈLE DE DONNÉES CONCEPTUEL
+Le modèle de données de Sellify.me est réparti sur deux bases : PostgreSQL (données
+transactionnelles critiques) et MongoDB (logs IA, catalogue produits flexible, logs applicatifs).
+
+5.1 PostgreSQL — Entités Transactionnelles
+5.1.1 Table users
+Champ
+
+Type
+
+Description
+
+id
+
+BigInt PK
+
+Identifiant unique
+
+role
+
+Enum(client, vendeur,
+livreur, admin,
+superadmin)
+
+Rôle polymorphique
+
+first_name, last_name
+
+String
+
+Identité civile
+
+email
+
+String unique
+
+Email de connexion
+
+phone
+
+String unique
+
+Numéro Mobile Money principal
+
+password_hash
+
+String
+
+Bcrypt + sel
+
+kyc_status
+
+Enum(pending, verified,
+rejected)
+
+Statut vérification KYC
+
+kyc_verified_at
+
+Timestamp
+
+Date de validation KYC
+
+status
+
+Enum(active,
+suspended, banned)
+
+Statut du compte
+
+loyalty_points
+
+Integer
+
+Points de fidélité accumulés
+
+created_at, updated_at
+
+Timestamp
+
+Timestamps standard Laravel
+
+5.1.2 Table products / categories / inventory
+
+
+
+
+
+products : id, seller_id (FK users), category_id (FK), title, description, price, weight, status
+(active/inactive/archived), created_at
+categories : id, parent_id (auto-référence), name, slug, icon_url, order
+inventory : id, product_id (FK), variant_sku, quantity, alert_threshold, warehouse_id
+product_images : id, product_id (FK), url, alt_text, order, is_primary
+
+5.1.3 Table orders / order_items
+
+
+
+
+orders : id, client_id (FK), seller_id (FK), livreur_id (FK nullable), status (Enum complet),
+total_amount, delivery_amount, created_at
+order_items : id, order_id (FK), product_id (FK), variant_sku, quantity, unit_price,
+snapshot_title (titre au moment de la commande)
+delivery_addresses : id, order_id (FK), latitude, longitude, address_text,
+landmark_description, landmark_photo_url
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+5.1.4 Table escrow_transactions
+Champ
+
+Type
+
+Description
+
+id
+
+UUID PK
+
+Identifiant immuable de la transaction Escrow
+
+order_id
+
+BigInt FK
+
+Référence à la commande
+
+amount
+
+Decimal(15,2)
+
+Montant total bloqué (FCFA)
+
+seller_amount
+
+Decimal(15,2)
+
+Montant dû au vendeur (net commission)
+
+livreur_amount
+
+Decimal(15,2)
+
+Frais de livraison nets
+
+sellify_commission
+
+Decimal(15,2)
+
+Commission Sellify.me
+
+status
+
+Enum(pending, locked,
+released, disputed,
+refunded)
+
+Statut du séquestre
+
+payment_method
+
+Enum(orange_money,
+mtn_momo, card)
+
+Mode de paiement utilisé
+
+operator_ref
+
+String
+
+Référence transaction côté opérateur Mobile
+Money
+
+locked_at
+
+Timestamp
+
+Horodatage du blocage des fonds
+
+released_at
+
+Timestamp nullable
+
+Horodatage du déblocage
+
+5.1.5 Tables Logistique
+
+
+
+
+deliveries : id, order_id (FK), livreur_id (FK), status, pickup_confirmed_at, delivered_at,
+proof_photo_url
+delivery_routes : id, delivery_id (FK), waypoints (JSONB : tableau de {lat, lng, order}),
+total_distance_km, estimated_duration_min, optimized_at
+gps_tracks : id, livreur_id (FK), delivery_id (FK), latitude, longitude, recorded_at —
+partitionné par semaine
+
+5.1.6 Tables SaaS Abonnements
+
+
+
+
+subscription_packs : id, name, type (vendor/livreur), monthly_price, commission_rate_min,
+commission_rate_max, features (JSONB)
+seller_subscriptions : id, seller_id (FK), pack_id (FK), status (active/expired/cancelled),
+started_at, expires_at, next_billing_at
+livreur_subscriptions : id, livreur_id (FK), pack_id (FK), status, started_at, expires_at
+
+5.1.7 Table seller_loans (SellifyPay)
+Champ
+
+Type
+
+Description
+
+id
+
+BigInt PK
+
+Identifiant du prêt
+
+seller_id
+
+BigInt FK
+
+Référence au vendeur
+
+amount
+
+Decimal(15,2)
+
+Montant emprunté
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+Champ
+
+Type
+
+Description
+
+interest_rate
+
+Decimal(5,4)
+
+Taux annuel (ex: 0.0800 pour 8%)
+
+duration_months
+
+Integer (3/6/12)
+
+Durée choisie
+
+ai_score_at_approval
+
+Integer
+
+Score IA au moment de l'approbation
+
+status
+
+Enum(pending,
+approved, active,
+completed, defaulted)
+
+Statut du prêt
+
+disbursed_at
+
+Timestamp nullable
+
+Date de décaissement
+
+amount_repaid
+
+Decimal(15,2)
+
+Montant déjà remboursé
+
+contract_pdf_url
+
+String
+
+URL du contrat signé (stockage sécurisé)
+
+5.1.8 Autres Tables Importantes
+
+
+
+
+
+
+smart_links : id, seller_id (FK), product_id (FK), token (unique), price_at_time, status
+(active/paid/expired/cancelled), expires_at, order_id (FK nullable)
+disputes : id, order_id (FK), escrow_id (FK), opened_by (FK users), status, reason,
+resolution, resolved_by (FK admin), created_at, resolved_at
+dispute_evidences : id, dispute_id (FK), submitted_by (FK), type (Enum: photo/video/text),
+url, description, created_at
+notifications : id, user_id (FK), type, channel (Enum: push/sms/email/whatsapp), title, body,
+data (JSONB), sent_at, read_at
+loyalty_transactions : id, client_id (FK), type (earn/redeem), points, reason, created_at
+
+5.2 MongoDB — Collections Analytiques et IA
+
+
+
+
+
+
+
+
+ai_route_optimizations : { delivery_id, input_waypoints, optimized_route, algorithm_version,
+computation_ms, created_at }
+ai_recommendations : { user_id, context, recommended_products[], algorithm_version,
+click_through, created_at }
+ai_demand_predictions : { zone_id, prediction_time, predicted_demand, actual_demand,
+accuracy, model_version }
+ai_fraud_scores : { order_id, score, risk_factors[], decision, model_version, created_at }
+ai_seller_scoring : { seller_id, score, variables_used, model_version, computed_at }
+product_catalog_logs : { product_id, change_type, old_value, new_value, changed_by,
+created_at }
+webhook_logs : { operator, webhook_type, payload, status, retry_count, processed_at }
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+ANNEXES TECHNIQUES
+ANNEXE A — SPÉCIFICATIONS BACKEND LARAVEL
+API
+A.1 Architecture des Modules Métiers
+A.1.1 EscrowService
+Service central de gestion des fonds séquestrés. Toute action financière passe obligatoirement par
+ce service.
+
+
+
+
+
+
+
+initiateEscrow(orderId, amount, paymentMethod) : Appelle l'API Mobile Money, crée
+l'enregistrement escrow_transactions en statut PENDING
+handleMobileMoneyWebhook(payload) : Vérifie signature HMAC → Confirme le paiement
+→ Passe l'Escrow en LOCKED
+releaseEscrow(escrowId) : Vérifie double confirmation (client + livreur) → Déclenche les
+virements → Passe en RELEASED
+disputeEscrow(escrowId, reason) : Passe en DISPUTED → Notifie Admin
+resolveDispute(escrowId, resolution) : Exécute la décision d'arbitrage → Virements selon
+décision
+refundEscrow(escrowId) : Remboursement complet vers client → Passe en REFUNDED
+
+A.1.2 LogisticsIAService
+
+
+
+
+
+
+assignDelivery(orderId) : Sélectionne le livreur optimal via scoring multi-critères
+optimizeRoute(livreurId, deliveryIds[]) : Appelle le Moteur IA interne /optimize → Retourne
+itinéraire ordonné
+updateLivreurPosition(livreurId, lat, lng) : Mise à jour position → Diffuse via WebSocket au
+client
+predictDemandZones(datetime) : Appelle le modèle de prédiction Python → Retourne heat
+map
+resolveNonStandardAddress(addressText, landmarkPhotoUrl) : Appelle NLP + vision IA →
+Coordonnées GPS
+
+A.1.3 FintechEngine (SellifyPay)
+
+
+
+
+
+calculateSellerScore(sellerId) : Extrait les variables → Appelle le Moteur IA interne /sellerscore → Retourne score + montant max
+applyForLoan(sellerId, amount, durationMonths) : Vérifie prérequis → Appelle scoring →
+Génère contrat PDF
+disburseLoan(loanId) : Virement vers portefeuille vendeur via EscrowService
+processLoanRepayment(escrowId) : Calcule la part de remboursement (max 30%) →
+Prélève → Met à jour seller_loans
+
+A.1.4 SmartLinkService
+
+
+
+
+
+generateSmartLink(sellerId, productId) : Crée payment_links avec token UUID court + prix
+fixé
+validateSmartLink(token) : Vérifie validité → Retourne données produit pour Fast Checkout
+processSmartLinkPayment(token, phoneNumber) : Appelle EscrowService → Crée la
+commande
+expireSmartLinks() : Job quotidien → Expire les liens dépassant leur TTL
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+A.1.5 NotificationService
+
+
+
+
+
+
+sendWhatsApp(userId, templateId, variables) : WhatsApp Business API → Messages
+transactionnels (OTP, confirmations)
+sendSMS(phone, message) : Gateway SMS local (ex: InfoBip, Twilio)
+sendEmail(userId, template, data) : Mailgun ou AWS SES
+sendPush(userId, title, body, data) : Firebase Cloud Messaging (FCM)
+Gestion des préférences utilisateur → Envoi canal préféré uniquement
+
+A.1.6 AIAgentService — Agent Conversationnel Universel
+Service central du Module IA (voir section 2.6.7), invoqué par le widget de chat pour les quatre
+rôles.
+
+
+
+
+
+
+handleMessage(userId, role, message) : Résout l'intention → Retourne une réponse texte
+et/ou déclenche une action outillée (tool calling)
+searchProductsForClient(criteria) : Recherche catalogue selon critères en langage naturel
+→ Retourne résultats formatés pour le chat
+executeSellerAction(sellerId, actionType, params) : Exécute une action de gestion (promo,
+Smart-Link, stock) via les services métiers existants, avec confirmation préalable
+executeLivreurQuery(livreurId, queryType) : Retourne gains, itinéraire ou statistiques du
+livreur
+logAgentAction(userId, action, result) : Journalise chaque action exécutée par l'agent pour
+audit
+
+A.1.7 RecommendationEngine — Recommandations et Analyse de Ventes
+
+
+
+
+
+getPersonalizedRecommendations(clientId, context) : Filtrage collaboratif → Retourne
+produits recommandés
+getWinningProducts(sellerId) : Analyse tendances locales et comportements → Retourne
+produits à fort potentiel
+getPricingSuggestion(productId) : Analyse demande, stock et concurrence → Retourne prix
+optimal suggéré
+generateSalesReport(sellerId, period) : Génère le rapport d'analyse de ventes (résumé en
+langage naturel + données)
+
+A.1.8 AntiFraudService — Passerelle Anti-Fraude
+Service transversal du Module IA (voir section 2.6.5), invoqué de manière asynchrone sur les
+événements sensibles (inscription, connexion, commande, retrait).
+
+
+
+
+
+
+computeRiskScore(entityType, entityId, context) : Calcule un score de risque à partir des
+signaux de trafic et de données
+evaluateOrder(orderId) : Score de risque appliqué à une commande entrante — alimente
+aussi le module vendeur (section 2.2.10)
+evaluateAccount(userId) : Score de risque appliqué à une inscription ou connexion
+inhabituelle
+quarantineEntity(entityType, entityId, reason) : Place une entité en revue Admin obligatoire,
+bloque les actions sensibles associées
+recordAdminFeedback(alertId, decision) : Réinjecte la décision Admin dans la boucle
+d'amélioration du modèle
+
+A.2 Routes Web — Laravel + Inertia.js
+Sellify.me n'expose pas de couche API REST générale de type /api/v1/... consommée par un
+frontend séparé : c'est un monolithe Laravel + Inertia.js + React. Toutes les pages — y compris
+désormais l'expérience Livreur, intégralement migrée en PWA Inertia — sont servies par des
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+routes web classiques (routes/web.php), avec trois types de réponses possibles selon la nature de
+l'action.
+
+
+
+
+
+Page Inertia (navigation) : Route GET qui retourne Inertia::render('Page', $props) — le
+composant React correspondant est monté côté client avec ses données déjà injectées,
+sans appel AJAX supplémentaire
+Action Inertia (formulaire) : Route POST/PUT/DELETE qui exécute une action puis
+répond par redirect()->back() ou redirect()->route(...), avec les données mises à jour
+renvoyées automatiquement via le partage de props Inertia (pas de payload JSON à parser
+côté client)
+JSON (exception ponctuelle) : Un tout petit nombre de routes retournent du JSON brut
+plutôt qu'une réponse Inertia, uniquement pour des interactions ponctuelles qui n'impliquent
+pas de changement de page (chat, position GPS, webhooks entrants). Elles sont
+recensées et justifiées en section A.2.7 — ce sont des exceptions documentées, pas une
+couche API généralisée
+
+Migration complète vers le PWA : L'ensemble de l'application — Client, Vendeur, Livreur et Admin —
+est servi comme une seule PWA installable (manifest + service worker, voir Annexe B.5), et non plus
+seulement le module Livreur comme envisagé initialement. Il n'y a donc plus d'app mobile native
+(React Native) prévue : un seul code frontend React, monté par Inertia, pour tous les rôles et toutes
+les plateformes (web desktop, mobile web, PWA installée).
+
+A.2.1 Routes Authentification
+Mét
+hod
+e
+
+Route
+
+Description
+
+Réponse
+
+Auth
+
+GE
+T
+
+/register
+
+Formulaire d'inscription
+(client/vendeur/livreur)
+
+Page Inertia
+
+Public
+
+PO
+ST
+
+/register
+
+Traitement de l'inscription
+
+Redirect +
+flash
+
+Public
+
+GE
+T
+
+/login
+
+Formulaire de connexion
+
+Page Inertia
+
+Public
+
+PO
+ST
+
+/login
+
+Traitement de la connexion
+(email/mot de passe)
+
+Redirect +
+session
+
+Public
+
+PO
+ST
+
+/otp/send
+
+Envoi d'un code OTP par
+SMS
+
+JSON
+(ponctuel)
+
+Public
+
+PO
+ST
+
+/otp/verify
+
+Vérification du code OTP
+
+Redirect +
+session
+
+Public
+
+GE
+T
+
+/auth/{provider}/redirect
+
+Redirection vers le
+fournisseur OAuth
+
+Redirect
+(externe)
+
+Public
+
+GE
+T
+
+/auth/{provider}/callback
+
+Retour OAuth et connexion
+
+Redirect +
+session
+
+Public
+
+PO
+ST
+
+/logout
+
+Déconnexion (invalidation de
+session)
+
+Redirect
+
+auth (session)
+
+PO
+ST
+
+/password/reset
+
+Réinitialisation du mot de
+passe
+
+Redirect +
+flash
+
+Public
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+Mét
+hod
+e
+
+Route
+
+Description
+
+Réponse
+
+Auth
+
+Authentification par session : Laravel Sanctum est utilisé ici en mode SPA stateful (cookie de session
+signé), pas en mode token Bearer. Il n'y a donc pas de route de rafraîchissement de token
+(/auth/refresh) : la session est gérée nativement par Laravel, comme pour une application web
+classique.
+
+A.2.2 Routes Escrow
+Mét
+hod
+e
+
+Route
+
+Description
+
+Réponse
+
+Auth
+
+PO
+ST
+
+/checkout/escrow/initiate
+
+Initiation du paiement et
+création de l'Escrow
+
+Redirect +
+flash
+
+auth
+
+GE
+T
+
+/orders/{id}/track
+
+Page de suivi de la
+commande et de l'Escrow
+
+Page Inertia
+
+auth
+
+PO
+ST
+
+/orders/{id}/escrow/
+validate
+
+Validation client (déblocage
+des fonds)
+
+Redirect +
+flash
+
+auth,
+role:client
+
+PO
+ST
+
+/orders/{id}/dispute
+
+Ouverture d'un litige
+
+Redirect +
+flash
+
+auth
+
+GE
+T
+
+/admin/escrow/{id}
+
+Détail d'un Escrow (vue
+Admin)
+
+Page Inertia
+
+auth,
+role:admin
+
+PO
+ST
+
+/admin/escrow/{id}/
+resolve
+
+Résolution d'un litige (Admin)
+
+Redirect +
+flash
+
+auth,
+role:admin
+
+PO
+ST
+
+/admin/escrow/{id}/
+release
+
+Déblocage manuel (Admin)
+
+Redirect +
+flash
+
+auth,
+role:admin
+
+Les webhooks Orange Money et MTN MoMo sont traités à part en section A.2.7 : ce sont des
+appels entrants d'opérateurs externes, pas des routes consommées par le frontend.
+
+A.2.3 Routes Vendeur
+Mét
+hod
+e
+
+Route
+
+Description
+
+Réponse
+
+Auth
+
+GE
+T
+
+/seller/dashboard
+
+Dashboard performance
+(GMV, conversion,
+satisfaction)
+
+Page Inertia
+
+auth,
+role:vendor,
+kyc_verified
+
+GE
+T
+
+/seller/shop
+
+Formulaire de gestion de la
+boutique
+
+Page Inertia
+
+auth,
+role:vendor
+
+PO
+ST
+
+/seller/shop
+
+Mise à jour de la boutique
+
+Redirect +
+flash
+
+auth,
+role:vendor
+
+GE
+T
+
+/seller/products
+
+Liste des produits
+
+Page Inertia
+
+auth,
+role:vendor
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+Mét
+hod
+e
+
+Route
+
+Description
+
+Réponse
+
+Auth
+
+PO
+ST
+
+/seller/products
+
+Création d'un produit
+
+Redirect +
+flash
+
+auth,
+role:vendor
+
+PUT
+
+/seller/products/{id}
+
+Modification d'un produit
+
+Redirect +
+flash
+
+auth,
+role:vendor
+
+DEL
+ETE
+
+/seller/products/{id}
+
+Suppression d'un produit
+
+Redirect +
+flash
+
+auth,
+role:vendor
+
+PO
+ST
+
+/seller/products/import
+
+Import CSV/Excel (traitement
+en file)
+
+Redirect +
+flash
+
+auth,
+role:vendor
+
+GE
+T
+
+/seller/inventory
+
+État de l'inventaire
+
+Page Inertia
+
+auth,
+role:vendor
+
+GE
+T
+
+/seller/smart-links
+
+Liste des Smart-Links
+
+Page Inertia
+
+auth,
+role:vendor
+
+PO
+ST
+
+/seller/smart-links
+
+Génération d'un Smart-Link
+
+Redirect +
+flash
+
+auth,
+kyc_verified
+
+GE
+T
+
+/seller/loans
+
+Éligibilité SellifyPay et score
+
+Page Inertia
+
+auth,
+subscription:p
+ro_business
+
+PO
+ST
+
+/seller/loans
+
+Demande de prêt
+
+Redirect +
+flash
+
+auth,
+subscription:p
+ro_business
+
+GE
+T
+
+/seller/loans/{id}
+
+Détail d'un prêt actif
+
+Page Inertia
+
+auth,
+subscription:p
+ro_business
+
+GE
+T
+
+/seller/analytics
+
+Rapports IA (produits
+gagnants, optimisation)
+
+Page Inertia
+
+auth,
+role:vendor
+
+A.2.4 Routes Livreur (PWA Inertia)
+Plus d'API mobile séparée : le module Livreur, désormais une PWA Inertia comme les autres rôles,
+utilise les mêmes routes web que le reste de la plateforme. Seule la mise à jour de position GPS reste
+en JSON pur (appel toutes les 30 secondes, hors navigation de page — voir A.2.7).
+Mét
+hod
+e
+
+Route
+
+Description
+
+Réponse
+
+Auth
+
+GE
+T
+
+/livreur/deliveries
+
+Commandes disponibles et
+en cours dans la zone
+
+Page Inertia
+
+auth,
+role:livreur
+
+PO
+ST
+
+/livreur/deliveries/{id}/
+accept
+
+Accepter une livraison
+
+Redirect +
+flash
+
+auth,
+role:livreur
+
+PO
+
+/livreur/deliveries/{id}/
+
+Confirmer l'enlèvement
+
+Redirect +
+
+auth,
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+ST
+
+pickup
+
+flash
+
+role:livreur
+
+PO
+ST
+
+/livreur/deliveries/{id}/
+deliver
+
+Confirmer la livraison
+
+Redirect +
+flash
+
+auth,
+role:livreur
+
+GE
+T
+
+/livreur/map
+
+Carte et itinéraire optimisé
+par l'IA
+
+Page Inertia
+
+auth,
+role:livreur
+
+GE
+T
+
+/livreur/wallet
+
+Solde du portefeuille
+
+Page Inertia
+
+auth,
+role:livreur
+
+PO
+ST
+
+/livreur/wallet/withdraw
+
+Demande de retrait
+
+Redirect +
+flash
+
+auth,
+role:livreur
+
+GE
+T
+
+/livreur/performance
+
+Zones chaudes IA, notation,
+badges
+
+Page Inertia
+
+auth,
+role:livreur
+
+Description
+
+Réponse
+
+Auth
+
+A.2.5 Routes Client
+Mét
+hod
+e
+
+Route
+
+GE
+T
+
+/catalog
+
+Catalogue produits avec
+filtres
+
+Page Inertia
+
+Public
+
+GE
+T
+
+/product/{id}
+
+Fiche produit détaillée
+
+Page Inertia
+
+Public
+
+GE
+T
+
+/catalog/search
+
+Résultats de recherche
+(query string)
+
+Page Inertia
+
+Public
+
+GE
+T
+
+/cart
+
+Panier
+
+Page Inertia
+
+auth
+
+PO
+ST
+
+/cart
+
+Ajout au panier
+
+Redirect +
+flash
+
+auth
+
+PUT
+
+/cart/{item_id}
+
+Modifier la quantité d'un item
+
+Redirect +
+flash
+
+auth
+
+DEL
+ETE
+
+/cart/{item_id}
+
+Supprimer un item du panier
+
+Redirect +
+flash
+
+auth
+
+PO
+ST
+
+/orders
+
+Créer une commande depuis
+le panier
+
+Redirect +
+flash
+
+auth
+
+PO
+ST
+
+/orders/{id}/review
+
+Laisser un avis vendeur et
+livreur
+
+Redirect +
+flash
+
+auth
+
+GE
+T
+
+/pay/{token}
+
+Page Fast Checkout SmartLink
+
+Page Inertia
+
+Public
+
+PO
+ST
+
+/pay/{token}
+
+Paiement via Smart-Link
+
+Redirect +
+flash
+
+Public
+
+GE
+
+/loyalty
+
+Solde des points de fidélité
+
+Page Inertia
+
+auth
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+Mét
+hod
+e
+
+Route
+
+Description
+
+Réponse
+
+Auth
+
+Description
+
+Réponse
+
+Auth
+
+T
+
+A.2.6 Routes IA Central
+Mét
+hod
+e
+
+Route
+
+GE
+T
+
+/admin/ai/fraud-alerts
+
+Alertes anti-fraude en attente
+de revue
+
+Page Inertia
+
+auth,
+role:admin
+
+PO
+ST
+
+/admin/ai/fraud-alerts/
+{id}/resolve
+
+Résolution manuelle d'une
+alerte
+
+Redirect +
+flash
+
+auth,
+role:admin
+
+Le chat de l'agent conversationnel (envoi de message, historique, confirmation d'action) est un
+widget flottant qui reste ouvert pendant la navigation de page en page : il est donc listé à part en
+section A.2.7, avec les autres exceptions JSON.
+
+A.2.7 Exceptions JSON — Interactions Hors Navigation de Page
+Ces routes ne suivent pas le cycle Inertia (elles ne remplacent pas une page) et retournent
+volontairement du JSON brut, consommé par un composant React qui reste monté pendant que
+l'utilisateur navigue ailleurs, ou par un système externe. C'est le seul endroit du système qui
+ressemble à une API — et il est volontairement réduit au strict nécessaire.
+Mét
+hod
+e
+
+Route
+
+Description
+
+Réponse
+
+Auth
+
+PO
+ST
+
+/ai/chat
+
+Message envoyé à l'agent
+conversationnel (widget
+flottant, tous rôles)
+
+JSON
+
+auth
+
+GE
+T
+
+/ai/chat/history
+
+Historique de la conversation
+en cours
+
+JSON
+
+auth
+
+PO
+ST
+
+/ai/chat/action/confirm
+
+Confirmation d'exécution
+d'une action proposée par
+l'agent
+
+JSON
+
+auth
+
+PO
+ST
+
+/livreur/position
+
+Mise à jour de la position
+GPS (toutes les 30s)
+
+JSON
+
+auth,
+role:livreur
+
+PO
+ST
+
+/webhooks/orangemoney
+
+Webhook entrant Orange
+Money (confirmation de
+paiement)
+
+JSON
+
+signature
+HMAC
+
+PO
+ST
+
+/webhooks/mtn-momo
+
+Webhook entrant MTN
+MoMo (confirmation de
+paiement)
+
+JSON
+
+signature
+HMAC
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+A.3 Middlewares et Politiques
+Middleware
+
+Description
+
+Application
+
+auth:sanctum
+
+Vérification de session authentifiée
+(Sanctum SPA stateful, cookie de session)
+
+Toutes routes privées
+
+role:vendor
+
+Vérification rôle vendeur
+
+Module Vendeur
+
+role:livreur
+
+Vérification rôle livreur
+
+Module Livreur
+
+role:admin
+
+Vérification rôle admin
+
+Module Admin
+
+kyc_verified
+
+Vérification KYC approuvé
+
+Publication produits,
+génération Smart-Link
+
+subscription:pro_busine
+ss
+
+Vérification pack actif Pro ou Business
+
+SellifyPay, outils avancés
+
+throttle:100,1
+
+100 requêtes/minute par utilisateur
+
+Toutes routes web
+publiques/privées
+
+throttle:1000,1
+
+1000 requêtes/minute pour admin
+
+Routes Admin
+
+cors
+
+Configuration CORS restrictive, utile
+uniquement pour les webhooks entrants et
+un éventuel sous-domaine admin
+
+Routes webhook
+uniquement
+
+validate.webhook.hmac
+
+Vérification signature HMAC webhooks
+Mobile Money
+
+Routes webhook
+operateurs
+
+A.4 Queues et Jobs Asynchrones
+Job Laravel
+
+Déclencheur
+
+Action
+
+Queue
+
+ProcessMobileMoneyWeb
+hook
+
+Réception webhook
+opérateur
+
+Confirme Escrow, notifie
+parties
+
+critical
+
+OptimizeDeliveryRoutes
+
+Acceptation
+livraison livreur
+
+Appelle le Moteur IA interne
+(routage)
+
+logistics
+
+CalculateSellerScoring
+
+Demande de prêt
+SellifyPay
+
+Appelle le Moteur IA interne
+(scoring)
+
+fintech
+
+DisburseLoan
+
+Approbation contrat
+signé
+
+Virement portefeuille vendeur
+
+fintech
+
+SendSmartLinkExpiration
+
+Cron toutes les
+heures
+
+Expire les liens > TTL
+
+notifications
+
+ProcessLoanRepayment
+
+Déblocage Escrow
+vendeur
+
+Calcule et prélève part
+remboursement
+
+fintech
+
+SendDemandPredictions
+
+Cron toutes les 2
+heures
+
+Génère heat map zones et
+notifie livreurs
+
+analytics
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+Job Laravel
+
+Déclencheur
+
+Action
+
+Queue
+
+UpdateAIRecommendation
+s
+
+Cron quotidien 2h
+du matin
+
+Recalcule recommandations
+produits
+
+analytics
+
+GenerateSellerReports
+
+Cron mensuel J+1
+
+Génère rapports PDF
+vendeurs
+
+reports
+
+AMLTransactionMonitor
+
+Chaque Escrow >
+seuil BEAC
+
+Signalement automatique
+conformité
+
+compliance
+
+A.5 Gestion des Webhooks Mobile Money
+Schéma Payload Orange Money (exemple)
+{ "transactionId": "OM-20240601-XXXXX", "amount": 25000, "currency": "XAF", "status":
+"SUCCESS", "timestamp": "2024-06-01T14:23:00Z", "customerPhone": "+237XXXXXXXX",
+"externalRef": "SELLIFY-ORD-001", "signature": "hmac_sha256_value" }
+
+
+
+
+
+
+Vérification HMAC : Laravel recalcule la signature avec la clé secrète partagée → Rejet si
+non correspondance
+Idempotence : Table webhook_logs avec operator_ref unique → Si doublon reçu, ignoré
+sans re-traitement
+Retry avec Exponential Backoff : Tentatives : 1min → 5min → 15min → 1h → 4h →
+abandon + alerte admin
+Timeout handling : Si pas de webhook dans les 15 minutes → Job "CheckPendingEscrow"
+vérifie le statut via API pull de l'opérateur
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+ANNEXE B — SPÉCIFICATIONS FRONTEND REACT.JS
+(INERTIA.JS)
+Sellify.me est un monolithe Laravel + Inertia.js + React + Tailwind CSS : il n'existe ni API REST
+séparée ni SPA autonome, pour aucun rôle — y compris le Livreur, désormais entièrement PWA.
+Laravel gère le routage serveur (fichiers routes/web.php) et retourne des pages React via Inertia,
+qui reçoivent leurs données par props côté serveur — sans couche Axios/API intermédiaire pour la
+navigation. Seules quelques routes JSON ponctuelles subsistent (chat, position GPS, webhooks
+externes), documentées en Annexe A.2.7, pour des interactions qui n'impliquent pas de
+changement de page.
+
+B.1 Structure des Pages Inertia.js (Routage Laravel)
+Routes Publiques
+
+
+
+
+
+
+
+
+
+/ — Page d'accueil (catalogue, promotions, hero Escrow)
+/catalog — Catalogue produits avec filtres
+/product/:id — Fiche produit détaillée
+/shop/:slug — Boutique d'un vendeur
+/pay/:token — Fast Checkout Smart-Link (optimisé mobile, < 2s 3G)
+/auth/login — Connexion
+/auth/register — Inscription (multi-rôle)
+/auth/forgot-password — Récupération mot de passe
+
+Routes Client (Protégées — role:client)
+
+
+
+
+
+
+
+
+/client/dashboard — Tableau de bord client
+/client/cart — Panier
+/client/checkout — Processus de paiement Escrow
+/client/orders — Historique des commandes
+/client/orders/:id/track — Suivi GPS en temps réel
+/client/profile — Gestion du profil et adresses
+/client/loyalty — Programme Points de Confiance
+
+Routes Vendeur (Protégées — role:vendor + kyc_verified)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/seller/dashboard — Dashboard performance (GMV, conversion, satisfaction)
+/seller/shop — Gestion de la boutique
+/seller/products — Liste des produits
+/seller/products/new — Création d'un produit
+/seller/products/:id/edit — Modification produit
+/seller/inventory — Gestion des stocks
+/seller/orders — Commandes reçues
+/seller/smart-links — Gestion Smart-Links
+/seller/smart-links/generate — Génération d'un lien
+/seller/promotions — Codes réduction et soldes
+/seller/analytics — Rapports IA (produits gagnants, optimisation)
+/seller/loans — Module SellifyPay
+/seller/subscription — Gestion abonnement SaaS
+/seller/wallet — Portefeuille et retraits
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+Routes Livreur (Protégées — role:livreur)
+
+
+
+
+
+
+
+/livreur/dashboard — Tableau de bord livreur
+/livreur/deliveries — Commandes disponibles et en cours
+/livreur/deliveries/:id — Détail d'une livraison active
+/livreur/map — Carte temps réel (commandes + itinéraire IA)
+/livreur/wallet — Portefeuille et gains
+/livreur/performance — Notation, badges, statistiques
+
+Routes Admin (Protégées — role:admin)
+
+
+
+
+
+
+
+
+
+
+/admin/dashboard — KPI supervision temps réel
+/admin/kyc — File de validation KYC
+/admin/vendors — Gestion vendeurs
+/admin/livreurs — Gestion livreurs
+/admin/escrow — Supervision transactions Escrow
+/admin/disputes — Gestion litiges
+/admin/loans — Supervision SellifyPay
+/admin/config — Configuration commissions et abonnements
+/admin/reports — Rapports financiers et conformité AML
+
+B.2 Composants Réutilisables Clés
+Composant
+
+Description
+
+Utilisé dans
+
+<EscrowBadge
+status={} />
+
+Badge coloré montrant le statut
+Escrow (bloqué/libéré/litige)
+
+Commandes, Admin Escrow
+
+<SmartLinkButton
+productId={} />
+
+Bouton de génération + copie du
+Smart-Link
+
+Dashboard vendeur, fiches
+produit
+
+<ProductCard
+product={} />
+
+Carte produit avec image, prix, badge
+vendeur, note
+
+Catalogue,
+recommandations
+
+<DeliveryTrackerMap
+orderId={} />
+
+Carte Leaflet avec position GPS livreur
+en temps réel (WebSocket)
+
+Suivi commande client
+
+<LoanSimulator
+maxAmount={} />
+
+Simulateur interactif SellifyPay avec
+calcul mensualités
+
+Module SellifyPay vendeur
+
+<KYCUploader />
+
+Upload sécurisé de documents KYC
+avec preview
+
+Inscription vendeur/livreur
+
+<MobileMoneyInput />
+
+Saisie numéro Mobile Money avec
+détection opérateur (Orange/MTN)
+
+Checkout, Fast Checkout
+
+<OrderTimeline
+orderId={} />
+
+Timeline interactive des statuts de
+commande
+
+Suivi commande, détail
+commande
+
+<NotificationBell />
+
+Cloche notifications avec badge
+compteur et dropdown
+
+Header global
+
+<HeatMapZones />
+
+Carte thermique demande prévue
+(composant livreur)
+
+Dashboard livreur
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+Composant
+<AIAssistantWidget />
+
+Description
+Widget agent conversationnel
+universel, adapté au rôle connecté
+(voir section 2.6.7)
+
+Utilisé dans
+Header global (tous rôles)
+
+B.3 Gestion d'État
+Avec Inertia.js, l'essentiel des données de page (produits, commandes, dashboard) est fourni
+directement par les props Laravel côté serveur à chaque visite — il n'y a donc plus besoin d'un
+cache HTTP client de type React Query pour ces données. Redux Toolkit et un cache léger restent
+utiles uniquement pour l'état purement côté client qui doit persister entre les visites de pages
+Inertia ou provenir du temps réel (panier en cours de saisie, notifications, mises à jour
+WebSocket).
+
+Redux Toolkit — State Client (complément aux props Inertia)
+
+
+
+
+
+authSlice : user, token, role, permissions, kyc_status
+cartSlice : items[], total, itemCount, lastSaved
+notificationsSlice : notifications[], unreadCount
+escrowSlice : activeTransactions[], statusUpdates
+
+React Query — Cache pour Données Temps Réel Uniquement
+
+
+
+
+
+Catalogue produits : staleTime 5 minutes, refetchOnWindowFocus false
+Dashboard KPI : staleTime 30 secondes, refetchInterval 60 secondes
+Statut commande : staleTime 0 (toujours frais), refetchInterval 10 secondes
+Score IA SellifyPay : staleTime 5 minutes
+
+Context API
+
+
+
+
+ThemeContext : mode clair/sombre, couleurs de marque
+UserRoleContext : rôle actif, permissions, feature flags
+LocaleContext : langue, devise, formatage des dates
+
+B.4 Communication et Temps Réel
+La navigation entre pages web (catalogue, dashboard, checkout) passe par le routeur Inertia
+(Inertia.router / composant Link), qui effectue les requêtes vers Laravel et remplace le composant
+React affiché — sans rechargement complet ni couche Axios dédiée à la navigation. Axios reste
+utilisé pour les appels ponctuels hors navigation de page (actions AJAX ciblées, agent
+conversationnel, position GPS livreur — voir Annexe A.2.7).
+
+Axios Interceptors (Appels AJAX Ciblés — A.2.7)
+
+
+
+
+
+Request Interceptor : Injection automatique du jeton CSRF (X-XSRF-TOKEN),
+l'authentification étant portée par le cookie de session Sanctum
+Response Interceptor 401 : Session expirée → redirection /login
+Response Interceptor 422 : Extraction et affichage des erreurs de validation Laravel
+Response Interceptor 500 : Logging Sentry + affichage toast d'erreur générique
+
+WebSocket / Socket.io — Temps Réel
+
+
+
+Canal "delivery.{order_id}" : Mises à jour GPS du livreur toutes les 30 secondes
+Canal "order.{order_id}.status" : Changements de statut commande
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+
+
+
+
+Canal "escrow.{escrow_id}" : Événements Escrow (blocage, déblocage, litige)
+Canal "livreur.{livreur_id}.deliveries" : Nouvelles commandes disponibles
+Canal "admin.dashboard" : KPI en temps réel pour l'Admin
+
+B.5 PWA — Progressive Web App
+La configuration PWA ci-dessous s'applique à l'ensemble de la plateforme (Client, Vendeur,
+Livreur, Admin) et non à un module isolé : un seul manifest et un seul Service Worker couvrent
+toutes les routes Inertia de l'application.
+
+
+
+
+
+
+
+manifest.json : name "Sellify.me", theme_color primary, icons 192x192 et 512x512, display
+"standalone"
+Service Worker (Workbox) : Cache statique des assets (CSS, JS, images) — stratégie
+Cache First
+Offline Fallback : Page "Vous êtes hors ligne" avec les dernières commandes consultées
+depuis le cache
+Push Notifications : Abonnement Firebase Cloud Messaging — gestion dans le Service
+Worker
+Add to Home Screen : Banner installable affiché après 2 visites sur mobile
+Background Sync : Les actions en mode offline (ajout au panier) sont synchronisées à la
+reconnexion
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+ANNEXE C — TESTS ET QUALITÉ
+C.1 Tests Backend (PHPUnit)
+Type de Test
+
+Cible
+
+Priorité
+
+Framework
+
+Unit Tests
+
+EscrowService,
+FintechEngine,
+SmartLinkService (méthodes
+isolées)
+
+Critique
+
+PHPUnit + Mockery
+
+Feature Tests
+
+Parcours API complets
+(inscription → KYC → produit
+→ commande → Escrow)
+
+Haute
+
+PHPUnit + Laravel
+HTTP Test
+
+Integration Tests
+
+Webhooks Mobile Money
+(mock), Jobs Queue
+(Database driver)
+
+Haute
+
+PHPUnit
+
+Contract Tests
+
+APIs Mobile Money (Orange,
+MTN) avec contrats OpenAPI
+
+Moyenne
+
+Pact PHP
+
+
+
+
+
+Couverture cible : > 80% pour les modules Escrow, SellifyPay et SmartLink
+Mock des APIs Mobile Money : Classe MobileMoneyMock simulant succès/échec/timeout
+Tests de régression automatiques à chaque Pull Request (GitHub Actions)
+
+C.2 Tests Frontend (Jest + React Testing Library)
+
+
+
+
+
+Tests unitaires composants : EscrowBadge, LoanSimulator, MobileMoneyInput,
+SmartLinkButton
+Tests d'intégration : Flux panier → checkout → confirmation paiement (avec mock Axios)
+Tests Redux : Reducers, actions, selectors (couverture 90%)
+Snapshot tests : Composants statiques de l'interface
+
+C.3 Tests End-to-End (Cypress)
+
+
+
+
+
+
+Parcours critique 1 : Inscription client → Recherche produit → Panier → Paiement Escrow
+Mobile Money → Validation livraison
+Parcours critique 2 : Inscription vendeur → KYC → Création produit → Génération SmartLink → Paiement client
+Parcours critique 3 : Inscription livreur → Acceptation livraison → Routage IA →
+Confirmation → Gains portefeuille
+Parcours critique 4 : Demande prêt SellifyPay → Simulation → Signature → Décaissement
+→ Remboursement
+Scénario litige : Refus livraison → Ouverture litige → Arbitrage Admin → Remboursement
+
+C.4 Tests de Performance
+
+
+
+
+
+Lighthouse CI : Score > 90 pour Performance, Accessibilité, SEO sur les pages catalogue
+et Fast Checkout
+Load Testing (Artillery ou k6) : 1000 requêtes/seconde sur la route /catalog → p95 < 200ms
+Stress Test Escrow : 500 transactions simultanées → Zéro perte de données, ACID
+respecté
+Test 3G simulation : Fast Checkout < 2 secondes sur 1 Mbps (Chrome DevTools throttling)
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+ANNEXE D — DÉPLOIEMENT ET DEVOPS
+D.1 Infrastructure AWS (ou GCP/Azure équivalent)
+Composant
+
+Service
+
+Configuration
+
+API Laravel
+
+EC2 (Auto Scaling
+Group)
+
+t3.medium × 2 min, × 10 max. Load Balancer
+Application.
+
+Base données
+PostgreSQL
+
+RDS PostgreSQL 15
+
+Multi-AZ, automated backup toutes les
+heures, read replica
+
+MongoDB
+
+Atlas M10
+
+Cluster 3 noeuds, automatique failover
+
+Cache Redis
+
+ElastiCache Redis
+
+Cluster mode, mémoire 4GB pour sessions et
+queues
+
+Queue Workers
+
+EC2 dédiés
+
+4 workers pour queues "critical" (Escrow), 2
+pour les autres
+
+Services IA Python
+
+Lambda ou Fargate
+
+Auto-scaling. Cold start < 2s pour routage et
+scoring.
+
+Fichiers statiques
+
+S3 + CloudFront
+
+CDN global, cache 30 jours pour assets
+immutables
+
+WebSocket
+
+EC2 dédié (Socket.io)
+
+Sticky sessions. Scale horizontal avec Redis
+adapter.
+
+D.2 Pipeline CI/CD (GitHub Actions)
+
+
+
+
+
+
+Trigger : Push sur main → Tests → Build → Déploiement staging automatique
+Trigger : Tag v*.*.* → Tests → Build → Déploiement production (approbation manuelle
+requise)
+Étapes : Lint (ESLint, PHP-CS-Fixer) → Tests unitaires → Tests intégration → Build
+Docker → Push ECR → Deploy ECS/EC2
+Rollback automatique si health check échoue après déploiement
+Gestion des variables d'environnement : AWS Secrets Manager (jamais en clair dans le
+code)
+
+D.3 Monitoring et Observabilité
+
+
+
+
+
+
+Sentry : Tracking des erreurs Frontend (React) et Backend (Laravel). Alertes Slack/Email
+immédiates.
+Grafana + Prometheus : Métriques IA (précision routage, temps réponse du Moteur IA
+interne), métriques infra (CPU, RAM, RDS connections)
+CloudWatch : Logs applicatifs centralisés, alertes sur patterns d'erreurs anormaux
+DataDog (optionnel) : APM (traces distribuées entre Laravel et le Moteur IA interne)
+Uptime Robot : Monitoring externe disponibilité toutes les 5 minutes. Alerte si < 99%.
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+D.4 Environnements
+Environnement
+
+URL
+
+Usage
+
+Données
+
+Development
+
+localhost
+
+Développement local
+individuel
+
+Données de test
+locales
+
+Staging
+
+staging.sellify.me
+
+Tests QA, recettes client,
+démos
+
+Données
+anonymisées (copie
+prod)
+
+Production
+
+sellify.me
+
+Utilisateurs réels,
+transactions réelles
+
+Données de
+production
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+ANNEXE E — CALENDRIER PRÉVISIONNEL DE
+DÉVELOPPEMENT (18 MOIS)
+Phase
+
+Période
+
+Livrables Principaux
+
+Jalons
+
+Phase 0 —
+Setup
+
+Mois 1
+
+Architecture infra AWS, CI/CD, base de
+données, conventions de code, onboarding
+équipe
+
+Stack
+opérationnelle
+
+Phase 1 — MVP
+Core
+
+Mois 2–4
+
+Inscription (tous rôles), KYC basique,
+Catalogue produits, Panier, Paiement Escrow
+Mobile Money (Orange + MTN), Confirmation
+livraison basique, Back-office Admin minimal
+
+Première
+transaction
+Escrow réelle
+
+Phase 2 —
+Logistique
+
+Mois 5–6
+
+Application mobile livreur PWA complète,
+Suivi GPS temps réel WebSocket,
+Optimisation routage IA (Moteur IA interne),
+Système notation livreurs, Attribution
+automatique
+
+Livraison
+optimisée par
+IA
+
+Phase 3 —
+Vendeur SaaS
+
+Mois 7–8
+
+Dashboard vendeur complet, Gestion
+inventaire avancée, Abonnements
+Pro/Business, Smart-Link complet, Outils
+promotion, Rapport IA produits gagnants
+
+Smart-Link
+opérationnel
+
+Phase 4 —
+Fintech
+
+Mois 9–11
+
+SellifyPay complet (scoring, prêt, signature,
+décaissement, remboursement), Programme
+fidélité, Chatbot IA support,
+Recommandations personnalisées
+
+Premier prêt
+SellifyPay
+décaissé
+
+Phase 5 —
+Optimisation
+
+Mois 12–14
+
+Détection fraude IA, Tarification dynamique,
+Prédiction demande zones, Gestion adresses
+non standardisées IA, Conformité AML
+complète, Tests charge
+
+KPI conformes
+SLA production
+
+Phase 6 —
+Scale
+
+Mois 15–18
+
+Expansion Yaoundé (logistique locale),
+Intégration carte bancaire complète, API
+publique partenaires, Multi-devises
+(préparation expansion), Levée Série A
+
+Expansion
+nationale
+validée
+
+E.1 Indicateurs de Succès par Phase
+Phase
+
+KPI de Succès
+
+Phase 1 MVP
+
+50 vendeurs vérifiés, 500 clients actifs, 100 transactions Escrow/mois, taux
+succès Escrow > 98%
+
+Phase 2
+Logistique
+
+20 livreurs actifs, délai moyen livraison < 4h (intra-ville), taux satisfaction
+livraison > 90%
+
+Phase 3 Vendeur
+SaaS
+
+10 abonnements Pro, 5 abonnements Business, 50 Smart-Links
+générés/semaine
+
+Phase 4 Fintech
+
+10 premiers prêts SellifyPay décaissés, taux de remboursement > 95%
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+Phase
+
+KPI de Succès
+
+Phase 5
+Optimisation
+
+Score Lighthouse > 90, API p95 < 200ms, taux fraude détectée > 85%
+
+Phase 6 Scale
+
+500 vendeurs actifs, 5 000 clients actifs, GMV mensuel > 100M FCFA
+
+Sellify.me © 2025 — Confidentiel
+
+SELLIFY.ME — Cahier des Charges Fonctionnel v1.0 | Confidentiel
+
+GLOSSAIRE ET RÉFÉRENCES
+Terme
+
+Définition
+
+Escrow (Séquestre)
+
+Mécanisme financier où les fonds sont bloqués par un tiers (Sellify.me)
+jusqu'à la réalisation d'une condition (validation de la réception par le client)
+
+GMV
+
+Gross Merchandise Value — Volume total de marchandises vendues sur la
+plateforme (avant déduction des commissions)
+
+KYC
+
+Know Your Customer — Procédure de vérification d'identité obligatoire pour
+les vendeurs et livreurs
+
+AML
+
+Anti-Money Laundering — Conformité anti-blanchiment d'argent, obligatoire
+pour les activités Fintech/Escrow
+
+PWA
+
+Progressive Web App — Application web installable sur mobile avec
+fonctionnalités natives (push, offline)
+
+SaaS
+
+Software as a Service — Modèle d'abonnement aux outils vendeur
+(Starter/Pro/Business)
+
+ETA
+
+Estimated Time of Arrival — Heure d'arrivée estimée, calculée par IA
+logistique
+
+TAEG
+
+Taux Annuel Effectif Global — Coût total du crédit SellifyPay exprimé
+annuellement
+
+OTP
+
+One-Time Password — Code à usage unique envoyé par SMS/WhatsApp
+pour les confirmations sensibles
+
+HMAC
+
+Hash-based Message Authentication Code — Mécanisme de vérification des
+signatures des webhooks Mobile Money
+
+TSP
+
+Traveling Salesman Problem — Problème mathématique résolu par l'IA pour
+optimiser les itinéraires multi-points
+
+BEAC
+
+Banque des États de l'Afrique Centrale — Banque centrale de la zone
+CEMAC, autorité de régulation financière
+
+CEMAC
+
+Communauté Économique et Monétaire de l'Afrique Centrale — Zone
+monétaire du FCFA CFA
+
+— FIN DU DOCUMENT —
+Cahier des Charges Fonctionnel Sellify.me — Version 1.0 — Juin 2025
+Document Confidentiel — Usage Interne et Investisseurs — Tous droits réservés Sellify.me
+
+Sellify.me © 2025 — Confidentiel
+
+

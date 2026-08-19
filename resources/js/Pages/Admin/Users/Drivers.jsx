@@ -38,13 +38,13 @@ export default function Drivers({ drivers, filters, stats }) {
 
             <div className="space-y-6">
                 {/* 1. Golden/Orange Header Banner Card */}
-                <div className="bg-gradient-to-r from-amber-500 to-amber-400 text-white rounded-3xl p-6 shadow-lg shadow-amber-500/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="bg-gradient-to-r from-yellow-500 to-yellow-400 text-white rounded-3xl p-6 shadow-lg shadow-yellow-500/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="space-y-1">
                         <h2 className="text-xl font-black tracking-tight flex items-center">
                             <Truck className="w-5.5 h-5.5 mr-2" />
                             <span>Espace Livreurs</span>
                         </h2>
-                        <p className="text-xs text-amber-50 font-bold uppercase tracking-wider">Vue d'ensemble de la flotte de livraison</p>
+                        <p className="text-xs text-yellow-50 font-bold uppercase tracking-wider">Vue d'ensemble de la flotte de livraison</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm border border-white/15 px-4.5 py-2 rounded-2xl text-right">
                         <span className="text-sm font-black tracking-tight">{stats.total} Livreurs / {stats.pending} En attente</span>
@@ -58,7 +58,7 @@ export default function Drivers({ drivers, filters, stats }) {
                             <span className="text-xs font-bold text-surface-400 uppercase tracking-wider block">Total Livreurs</span>
                             <span className="text-3xl font-black text-surface-900 tracking-tight">{stats.total}</span>
                         </div>
-                        <div className="p-3 bg-amber-50 border border-amber-100 rounded-2xl text-amber-500">
+                        <div className="p-3 bg-yellow-50 border border-yellow-100 rounded-2xl text-yellow-500">
                             <Truck className="w-6 h-6" />
                         </div>
                     </div>
@@ -71,12 +71,12 @@ export default function Drivers({ drivers, filters, stats }) {
                             <UserCheck className="w-6 h-6" />
                         </div>
                     </div>
-                    <div className="p-5 rounded-3xl border border-amber-105 bg-white flex items-center justify-between shadow-sm transition-all hover:shadow-md">
+                    <div className="p-5 rounded-3xl border border-yellow-105 bg-white flex items-center justify-between shadow-sm transition-all hover:shadow-md">
                         <div className="space-y-1">
                             <span className="text-xs font-bold text-surface-400 uppercase tracking-wider block">En attente</span>
-                            <span className="text-3xl font-black text-amber-600 tracking-tight">{stats.pending}</span>
+                            <span className="text-3xl font-black text-yellow-600 tracking-tight">{stats.pending}</span>
                         </div>
-                        <div className="p-3 bg-amber-50/50 border border-amber-100 rounded-2xl text-amber-500">
+                        <div className="p-3 bg-yellow-50/50 border border-yellow-100 rounded-2xl text-yellow-500">
                             <Clock className="w-6 h-6 animate-pulse" />
                         </div>
                     </div>
@@ -106,12 +106,12 @@ export default function Drivers({ drivers, filters, stats }) {
                                 onClick={() => handleTabChange(tab.filter)}
                                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-2
                                     ${statusFilter === tab.filter
-                                        ? 'bg-amber-500 text-white shadow-md shadow-amber-500/10 font-bold border border-amber-600/10'
+                                        ? 'bg-yellow-500 text-white shadow-md shadow-yellow-500/10 font-bold border border-yellow-600/10'
                                         : 'text-surface-500 hover:text-surface-800'}`}
                             >
                                 <span>{tab.name}</span>
                                 <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-mono font-bold
-                                    ${statusFilter === tab.filter ? 'bg-amber-600 text-white' : 'bg-surface-150 text-surface-600'}`}>
+                                    ${statusFilter === tab.filter ? 'bg-yellow-600 text-white' : 'bg-surface-150 text-surface-600'}`}>
                                     {tab.count}
                                 </span>
                             </button>
@@ -127,10 +127,10 @@ export default function Drivers({ drivers, filters, stats }) {
                                 placeholder="Recherche..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="w-full bg-surface-50 text-sm pl-9 pr-4 py-2 rounded-2xl border border-surface-200 focus:border-amber-400 outline-none font-semibold text-surface-700 transition-colors"
+                                className="w-full bg-surface-50 text-sm pl-9 pr-4 py-2 rounded-2xl border border-surface-200 focus:border-yellow-400 outline-none font-semibold text-surface-700 transition-colors"
                             />
                         </div>
-                        <Button type="submit" variant="primary" className="bg-amber-500 text-white font-bold p-2.5 rounded-2xl shadow-sm">
+                        <Button type="submit" variant="primary" className="bg-yellow-500 text-white font-bold p-2.5 rounded-2xl shadow-sm">
                             <Search className="w-4 h-4" />
                         </Button>
                     </form>
@@ -200,7 +200,7 @@ export default function Drivers({ drivers, filters, stats }) {
                                                     </Button>
                                                 </Link>
                                                 <Link href={route('admin.kyc.show', pendingKyc.id)} className="flex-1">
-                                                    <Button className="w-full justify-center space-x-1.5 rounded-2xl py-2.5 text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-sm flex items-center">
+                                                    <Button className="w-full justify-center space-x-1.5 rounded-2xl py-2.5 text-xs font-bold bg-yellow-500 hover:bg-yellow-600 text-white shadow-sm flex items-center">
                                                         <Check className="w-3.5 h-3.5" />
                                                         <span>Valider</span>
                                                     </Button>
@@ -233,7 +233,7 @@ export default function Drivers({ drivers, filters, stats }) {
                                         href={link.url || '#'}
                                         dangerouslySetInnerHTML={{ __html: link.label }}
                                         className={`px-3 py-1.5 rounded-lg border transition-colors
-                                            ${link.active ? 'bg-amber-500 text-white border-amber-500' : 'bg-white border-surface-200 hover:bg-surface-100 text-surface-600'}
+                                            ${link.active ? 'bg-yellow-500 text-white border-yellow-500' : 'bg-white border-surface-200 hover:bg-surface-100 text-surface-600'}
                                             ${!link.url ? 'opacity-50 cursor-not-allowed' : ''}
                                         `}
                                     />

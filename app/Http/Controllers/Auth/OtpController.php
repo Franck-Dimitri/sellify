@@ -121,6 +121,6 @@ class OtpController extends Controller
         } elseif ($user->isDriver()) {
             return redirect()->intended(route('driver.dashboard'));
         }
-        return redirect()->intended(route('welcome'));
+        return redirect()->intended(route('customer.dashboard'));
     }
 }

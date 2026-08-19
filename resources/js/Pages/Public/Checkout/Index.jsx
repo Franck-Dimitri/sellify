@@ -153,7 +153,7 @@ export default function Index({
                                                 : 'bg-stone-50 border-stone-200 text-stone-700 hover:bg-stone-100'
                                         }`}
                                     >
-                                        <Smartphone className="w-5 h-5 text-amber-600 shrink-0" />
+                                        <Smartphone className="w-5 h-5 text-yellow-600 shrink-0" />
                                         <div>
                                             <span className="block font-bold">Orange Money</span>
                                             <span className="text-[10px] text-stone-400 font-normal">Paiement Mobile Cameroun</span>
@@ -169,7 +169,7 @@ export default function Index({
                                                 : 'bg-stone-50 border-stone-200 text-stone-700 hover:bg-stone-100'
                                         }`}
                                     >
-                                        <Smartphone className="w-5 h-5 text-amber-500 shrink-0" />
+                                        <Smartphone className="w-5 h-5 text-yellow-500 shrink-0" />
                                         <div>
                                             <span className="block font-bold">MTN MoMo</span>
                                             <span className="text-[10px] text-stone-400 font-normal">Mobile Money MTN</span>

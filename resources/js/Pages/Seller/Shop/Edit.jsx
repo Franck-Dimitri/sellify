@@ -157,7 +157,7 @@ export default function Edit({ shop }) {
                                         >
                                             <span className={`w-6 h-6 rounded-md flex items-center justify-center font-medium text-xs transition-all ${
                                                 step === s.id 
-                                                    ? 'bg-amber-500 text-amber-950 shadow-xs font-semibold' 
+                                                    ? 'bg-yellow-500 text-yellow-950 shadow-xs font-semibold' 
                                                     : step > s.id 
                                                         ? 'bg-emerald-500 text-white font-semibold' 
                                                         : 'bg-stone-100 text-stone-500'
@@ -184,7 +184,7 @@ export default function Edit({ shop }) {
                                     <div className="space-y-4">
                                         <div className="border-b border-stone-100 pb-3">
                                             <h2 className="text-sm font-semibold text-stone-900 flex items-center gap-2">
-                                                <Store className="w-4 h-4 text-amber-600" />
+                                                <Store className="w-4 h-4 text-yellow-600" />
                                                 <span>Identité Visuelle & Thème de Marque</span>
                                             </h2>
                                             <p className="text-xs text-stone-400 font-normal">Définissez le nom public, le slogan et les couleurs de votre vitrine.</p>
@@ -197,7 +197,7 @@ export default function Edit({ shop }) {
                                                 value={data.name}
                                                 onChange={e => setData('name', e.target.value)}
                                                 placeholder="ex: Electro World"
-                                                className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
+                                                className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none font-normal"
                                                 required
                                             />
                                             {errors.name && <p className="text-[11px] text-red-600 mt-1 font-normal">{errors.name}</p>}
@@ -210,7 +210,7 @@ export default function Edit({ shop }) {
                                                 value={data.slogan}
                                                 onChange={e => setData('slogan', e.target.value)}
                                                 placeholder="ex: Le meilleur de la technologie certifiée"
-                                                className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
+                                                className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none font-normal"
                                             />
                                             {errors.slogan && <p className="text-[11px] text-red-600 mt-1 font-normal">{errors.slogan}</p>}
                                         </div>
@@ -221,7 +221,7 @@ export default function Edit({ shop }) {
                                                 value={data.description}
                                                 onChange={e => setData('description', e.target.value)}
                                                 placeholder="Présentez votre entreprise, vos garanties et la gamme de vos produits..."
-                                                className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none min-h-[90px] font-normal"
+                                                className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none min-h-[90px] font-normal"
                                             />
                                         </div>
 
@@ -236,7 +236,7 @@ export default function Edit({ shop }) {
                                                         onChange={e => handleFileChange(e, 'logo')}
                                                         className="absolute inset-0 opacity-0 cursor-pointer z-10"
                                                     />
-                                                    <Upload className="w-5 h-5 text-stone-400 mx-auto mb-1 group-hover:text-amber-600 transition-colors" />
+                                                    <Upload className="w-5 h-5 text-stone-400 mx-auto mb-1 group-hover:text-yellow-600 transition-colors" />
                                                     <span className="text-xs font-medium text-stone-700 block">Téléverser Logo</span>
                                                     <span className="text-[10px] text-stone-400 block font-normal">PNG, JPG (Max 2 Mo)</span>
                                                 </div>
@@ -251,7 +251,7 @@ export default function Edit({ shop }) {
                                                         onChange={e => handleFileChange(e, 'banner')}
                                                         className="absolute inset-0 opacity-0 cursor-pointer z-10"
                                                     />
-                                                    <Upload className="w-5 h-5 text-stone-400 mx-auto mb-1 group-hover:text-amber-600 transition-colors" />
+                                                    <Upload className="w-5 h-5 text-stone-400 mx-auto mb-1 group-hover:text-yellow-600 transition-colors" />
                                                     <span className="text-xs font-medium text-stone-700 block">Téléverser Bannière</span>
                                                     <span className="text-[10px] text-stone-400 block font-normal">Format paysage (Max 5 Mo)</span>
                                                 </div>
@@ -269,7 +269,7 @@ export default function Edit({ shop }) {
                                                         onClick={() => setData('theme_color', preset.value)}
                                                         className={`p-2 rounded-xl border text-[11px] font-medium flex flex-col items-center gap-1 transition-all ${
                                                             data.theme_color === preset.value 
-                                                                ? 'border-amber-500 bg-amber-50/50 text-amber-950 shadow-xs' 
+                                                                ? 'border-yellow-500 bg-yellow-50/50 text-yellow-950 shadow-xs' 
                                                                 : 'border-stone-200 bg-white text-stone-600 hover:bg-stone-50'
                                                         }`}
                                                     >
@@ -299,7 +299,7 @@ export default function Edit({ shop }) {
                                                 value={data.company_name}
                                                 onChange={e => setData('company_name', e.target.value)}
                                                 placeholder="ex: Electro World S.A.R.L"
-                                                className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
+                                                className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none font-normal"
                                                 required
                                             />
                                         </div>
@@ -311,7 +311,7 @@ export default function Edit({ shop }) {
                                                 value={data.registration_number}
                                                 onChange={e => setData('registration_number', e.target.value)}
                                                 placeholder="ex: RC/DLA/2026/B/1024"
-                                                className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
+                                                className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none font-normal"
                                             />
                                         </div>
 
@@ -322,7 +322,7 @@ export default function Edit({ shop }) {
                                                 value={data.address}
                                                 onChange={e => setData('address', e.target.value)}
                                                 placeholder="ex: Akwa, Rue Deido, Douala, Cameroun"
-                                                className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
+                                                className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none font-normal"
                                                 required
                                             />
                                         </div>
@@ -333,7 +333,7 @@ export default function Edit({ shop }) {
                                     <div className="space-y-4">
                                         <div className="border-b border-stone-100 pb-3">
                                             <h2 className="text-sm font-semibold text-stone-900 flex items-center gap-2">
-                                                <Clock className="w-4 h-4 text-amber-600" />
+                                                <Clock className="w-4 h-4 text-yellow-600" />
                                                 <span>Horaires d'Ouverture & Coordonnées Support</span>
                                             </h2>
                                             <p className="text-xs text-stone-400 font-normal">Informations d'assistance clientèle pour vos acheteurs.</p>
@@ -347,7 +347,7 @@ export default function Edit({ shop }) {
                                                     value={data.phone_contact}
                                                     onChange={e => setData('phone_contact', e.target.value)}
                                                     placeholder="ex: +237 690 12 34 56"
-                                                    className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
+                                                    className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none font-normal"
                                                     required
                                                 />
                                             </div>
@@ -359,7 +359,7 @@ export default function Edit({ shop }) {
                                                     value={data.email_contact}
                                                     onChange={e => setData('email_contact', e.target.value)}
                                                     placeholder="ex: support@electroworld.com"
-                                                    className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none font-normal"
+                                                    className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none font-normal"
                                                     required
                                                 />
                                             </div>
@@ -377,7 +377,7 @@ export default function Edit({ shop }) {
                                                                 id={`check-${day}`}
                                                                 checked={data.opening_hours[day].active}
                                                                 onChange={e => handleOpeningHoursChange(day, 'active', e.target.checked)}
-                                                                className="w-4 h-4 rounded border-stone-300 text-amber-600 focus:ring-amber-500"
+                                                                className="w-4 h-4 rounded border-stone-300 text-yellow-600 focus:ring-yellow-500"
                                                             />
                                                             <label htmlFor={`check-${day}`} className="font-medium text-stone-700 min-w-[70px]">
                                                                 {daysTranslation[day]}
@@ -390,14 +390,14 @@ export default function Edit({ shop }) {
                                                                     type="time"
                                                                     value={data.opening_hours[day].open}
                                                                     onChange={e => handleOpeningHoursChange(day, 'open', e.target.value)}
-                                                                    className="px-2 py-1 border border-stone-200 rounded-md text-xs font-medium focus:ring-2 focus:ring-amber-500 outline-none"
+                                                                    className="px-2 py-1 border border-stone-200 rounded-md text-xs font-medium focus:ring-2 focus:ring-yellow-500 outline-none"
                                                                 />
                                                                 <span className="text-stone-400 font-normal">à</span>
                                                                 <input
                                                                     type="time"
                                                                     value={data.opening_hours[day].close}
                                                                     onChange={e => handleOpeningHoursChange(day, 'close', e.target.value)}
-                                                                    className="px-2 py-1 border border-stone-200 rounded-md text-xs font-medium focus:ring-2 focus:ring-amber-500 outline-none"
+                                                                    className="px-2 py-1 border border-stone-200 rounded-md text-xs font-medium focus:ring-2 focus:ring-yellow-500 outline-none"
                                                                 />
                                                             </div>
                                                         ) : (
@@ -426,7 +426,7 @@ export default function Edit({ shop }) {
                                         <button
                                             type="button"
                                             onClick={() => setStep(step + 1)}
-                                            className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-amber-950 rounded-lg text-xs font-semibold shadow-xs"
+                                            className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-yellow-950 rounded-lg text-xs font-semibold shadow-xs"
                                         >
                                             Suivant
                                         </button>
@@ -434,7 +434,7 @@ export default function Edit({ shop }) {
                                         <button
                                             type="submit"
                                             disabled={processing}
-                                            className="px-5 py-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-amber-950 rounded-lg text-xs font-semibold shadow-xs"
+                                            className="px-5 py-2 bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50 text-yellow-950 rounded-lg text-xs font-semibold shadow-xs"
                                         >
                                             {processing ? 'Enregistrement...' : 'Sauvegarder les modifications'}
                                         </button>
@@ -449,7 +449,7 @@ export default function Edit({ shop }) {
                     <div className="lg:col-span-5 space-y-3">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xs font-medium text-stone-400 uppercase tracking-wider">Aperçu Vitrine en Temps Réel</h3>
-                            <span className="text-[10px] text-amber-800 font-medium">Style Alibaba Certifié</span>
+                            <span className="text-[10px] text-yellow-800 font-medium">Style Alibaba Certifié</span>
                         </div>
 
                         <div className="bg-white border border-stone-200/70 rounded-2xl overflow-hidden shadow-xs flex flex-col text-stone-800">
@@ -473,8 +473,8 @@ export default function Edit({ shop }) {
                                             <Store className="w-8 h-8 text-stone-400" />
                                         )}
                                     </div>
-                                    <span className="bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-full text-[10px] font-medium flex items-center gap-1">
-                                        <ShieldCheck className="w-3 h-3 text-amber-600" />
+                                    <span className="bg-yellow-50 text-yellow-900 border border-yellow-200 px-2 py-0.5 rounded-full text-[10px] font-medium flex items-center gap-1">
+                                        <ShieldCheck className="w-3 h-3 text-yellow-600" />
                                         <span>Verified Gold Supplier</span>
                                     </span>
                                 </div>

@@ -59,10 +59,10 @@ export default function All({ users, filters, stats, pendingRequests }) {
                     {[
                         { title: 'Total', value: stats.total, icon: Users, color: 'text-surface-700 bg-surface-50 border-surface-200' },
                         { title: 'Actifs', value: stats.active, icon: UserCheck, color: 'text-emerald-700 bg-emerald-50 border-emerald-100' },
-                        { title: 'En attente', value: stats.pending_kyc, icon: ShieldAlert, color: 'text-amber-700 bg-amber-50 border-amber-100' },
+                        { title: 'En attente', value: stats.pending_kyc, icon: ShieldAlert, color: 'text-yellow-700 bg-yellow-50 border-yellow-100' },
                         { title: 'Vendeurs', value: stats.sellers, icon: ShoppingBag, color: 'text-blue-700 bg-blue-50 border-blue-100' },
                         { title: 'Livreurs', value: stats.drivers, icon: Truck, color: 'text-indigo-700 bg-indigo-50 border-indigo-100' },
-                        { title: 'Clients', value: stats.customers, icon: User, color: 'text-amber-700 bg-amber-50/70 border-amber-100/70' }
+                        { title: 'Clients', value: stats.customers, icon: User, color: 'text-yellow-700 bg-yellow-50/70 border-yellow-100/70' }
                     ].map((stat, idx) => (
                         <div key={idx} className={`p-4 rounded-2xl border bg-white flex flex-col justify-between shadow-sm transition-all duration-200 hover:shadow-md`}>
                             <div className="flex justify-between items-center">
@@ -85,7 +85,7 @@ export default function All({ users, filters, stats, pendingRequests }) {
                         <CardHeader className="flex flex-row items-center justify-between border-b border-surface-100 pb-4 mb-4">
                             <div className="space-y-0.5">
                                 <CardTitle className="text-sm font-bold flex items-center space-x-2 text-surface-800">
-                                    <TrendingUp className="w-5 h-5 text-amber-500" />
+                                    <TrendingUp className="w-5 h-5 text-yellow-500" />
                                     <span>Évolution des inscriptions</span>
                                 </CardTitle>
                                 <p className="text-[10px] text-surface-400 font-bold uppercase tracking-wider">Statistiques des 7 derniers jours</p>
@@ -105,7 +105,7 @@ export default function All({ users, filters, stats, pendingRequests }) {
                         </CardHeader>
                         <CardContent className="h-64 flex flex-col justify-end relative">
                             {/* SVG mockup graph */}
-                            <svg className="w-full h-48 text-amber-500" viewBox="0 0 600 200">
+                            <svg className="w-full h-48 text-yellow-500" viewBox="0 0 600 200">
                                 <defs>
                                     <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.25"/>
@@ -143,10 +143,10 @@ export default function All({ users, filters, stats, pendingRequests }) {
                     <Card className="bento-card">
                         <CardHeader className="flex flex-row items-center justify-between border-b border-surface-100 pb-4 mb-4">
                             <CardTitle className="text-sm font-bold flex items-center space-x-2 text-surface-800">
-                                <ShieldAlert className="w-5 h-5 text-amber-500" />
+                                <ShieldAlert className="w-5 h-5 text-yellow-500" />
                                 <span>Demandes en attente</span>
                             </CardTitle>
-                            <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-lg text-xs font-mono font-bold">
+                            <span className="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-lg text-xs font-mono font-bold">
                                 {pendingRequests.length}
                             </span>
                         </CardHeader>
@@ -159,7 +159,7 @@ export default function All({ users, filters, stats, pendingRequests }) {
                                 pendingRequests.map((req) => (
                                     <div key={req.id} className="p-3.5 border border-surface-150 rounded-xl bg-surface-50/50 hover:bg-surface-50 transition-colors space-y-3.5">
                                         <div className="flex items-center space-x-3">
-                                            <div className="w-9 h-9 rounded-full bg-amber-100 text-amber-900 border border-amber-200 flex items-center justify-center font-black text-xs">
+                                            <div className="w-9 h-9 rounded-full bg-yellow-100 text-yellow-900 border border-yellow-200 flex items-center justify-center font-black text-xs">
                                                 {req.user.first_name[0]}{req.user.last_name[0]}
                                             </div>
                                             <div>
@@ -184,7 +184,7 @@ export default function All({ users, filters, stats, pendingRequests }) {
                                         <div className="flex justify-between items-center pt-1 border-t border-surface-100">
                                             <span className="text-[9px] text-surface-400 font-bold uppercase">Soumis le {new Date(req.submitted_at).toLocaleDateString('fr-FR')}</span>
                                             <Link href={route('admin.kyc.show', req.id)}>
-                                                <Button size="xs" variant="primary" className="font-bold text-[10px] px-3 py-1 bg-amber-500 text-white rounded-lg shadow-sm">
+                                                <Button size="xs" variant="primary" className="font-bold text-[10px] px-3 py-1 bg-yellow-500 text-white rounded-lg shadow-sm">
                                                     Traiter
                                                 </Button>
                                             </Link>
@@ -212,7 +212,7 @@ export default function All({ users, filters, stats, pendingRequests }) {
                             <select
                                 value={role}
                                 onChange={(e) => setRole(e.target.value)}
-                                className="w-full px-3 py-2 text-sm bg-surface-50 border border-surface-200 focus:border-amber-400 rounded-xl outline-none font-semibold text-surface-700 transition-colors"
+                                className="w-full px-3 py-2 text-sm bg-surface-50 border border-surface-200 focus:border-yellow-400 rounded-xl outline-none font-semibold text-surface-700 transition-colors"
                             >
                                 <option value="">Tous les rôles</option>
                                 <option value="customer">Client (Customer)</option>
@@ -226,7 +226,7 @@ export default function All({ users, filters, stats, pendingRequests }) {
                             <select
                                 value={status}
                                 onChange={(e) => setStatus(e.target.value)}
-                                className="w-full px-3 py-2 text-sm bg-surface-50 border border-surface-200 focus:border-amber-400 rounded-xl outline-none font-semibold text-surface-700 transition-colors"
+                                className="w-full px-3 py-2 text-sm bg-surface-50 border border-surface-200 focus:border-yellow-400 rounded-xl outline-none font-semibold text-surface-700 transition-colors"
                             >
                                 <option value="">Tous les statuts</option>
                                 <option value="active">Actif</option>
@@ -235,7 +235,7 @@ export default function All({ users, filters, stats, pendingRequests }) {
                             </select>
                         </div>
                         <div className="flex space-x-2 w-full md:w-auto">
-                            <Button type="submit" variant="primary" className="flex-1 md:flex-initial space-x-2 bg-amber-500 text-white font-bold px-4 py-2.5 rounded-xl shadow-sm">
+                            <Button type="submit" variant="primary" className="flex-1 md:flex-initial space-x-2 bg-yellow-500 text-white font-bold px-4 py-2.5 rounded-xl shadow-sm">
                                 <Search className="w-4 h-4" />
                                 <span>Filtrer</span>
                             </Button>
@@ -348,7 +348,7 @@ export default function All({ users, filters, stats, pendingRequests }) {
                                         href={link.url || '#'}
                                         dangerouslySetInnerHTML={{ __html: link.label }}
                                         className={`px-3 py-1.5 rounded-lg border transition-colors
-                                            ${link.active ? 'bg-amber-500 text-white border-amber-500' : 'bg-white border-surface-200 hover:bg-surface-100 text-surface-600'}
+                                            ${link.active ? 'bg-yellow-500 text-white border-yellow-500' : 'bg-white border-surface-200 hover:bg-surface-100 text-surface-600'}
                                             ${!link.url ? 'opacity-50 cursor-not-allowed' : ''}
                                         `}
                                     />

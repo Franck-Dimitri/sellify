@@ -60,7 +60,7 @@ export default function Dashboard({ stats, recentKyc, activities }) {
                                     onClick={() => setTimeframe(tab.id)}
                                     className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all
                                         ${timeframe === tab.id
-                                            ? 'text-amber-600 bg-amber-50'
+                                            ? 'text-yellow-600 bg-yellow-50'
                                             : 'text-surface-500 hover:text-surface-800'}`}
                                 >
                                     {tab.label}
@@ -76,13 +76,13 @@ export default function Dashboard({ stats, recentKyc, activities }) {
                 </div>
 
                 {/* 2. Welcome Banner */}
-                <div className="bg-amber-500 text-white rounded-3xl p-6 shadow-sm flex flex-col justify-center min-h-[100px] relative overflow-hidden">
+                <div className="bg-yellow-500 text-white rounded-3xl p-6 shadow-sm flex flex-col justify-center min-h-[100px] relative overflow-hidden">
                     <div className="absolute right-0 top-0 w-32 h-full opacity-10 bg-gradient-to-l from-white pointer-events-none" />
                     <h3 className="text-lg font-bold text-white flex items-center">
                         <span>Bonjour, Administrateur</span>
                         <span className="ml-1.5">👋</span>
                     </h3>
-                    <p className="text-xs text-amber-50 mt-1">Voici ce qui se passe sur votre plateforme aujourd'hui</p>
+                    <p className="text-xs text-yellow-50 mt-1">Voici ce qui se passe sur votre plateforme aujourd'hui</p>
                 </div>
 
                 {/* 3. Four Stats Cards Row */}
@@ -114,7 +114,7 @@ export default function Dashboard({ stats, recentKyc, activities }) {
                             </div>
                             <span className="text-[10px] text-surface-400 block pt-1">En attente de validation: {stats.pending_sellers || 12}</span>
                         </div>
-                        <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl">
+                        <div className="p-3 bg-yellow-50 text-yellow-600 rounded-2xl">
                             <Store className="w-5 h-5" />
                         </div>
                     </div>
@@ -163,7 +163,7 @@ export default function Dashboard({ stats, recentKyc, activities }) {
                             </div>
                             <div className="flex items-center space-x-4 text-xs font-semibold">
                                 <div className="flex items-center space-x-1.5">
-                                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                                    <span className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
                                     <span className="text-surface-500">Ventes</span>
                                 </div>
                                 <div className="flex items-center space-x-1.5">
@@ -269,7 +269,7 @@ export default function Dashboard({ stats, recentKyc, activities }) {
                         <div className="space-y-2 text-xs font-semibold text-surface-600">
                             {[
                                 { name: 'Électronique', percent: '35%', color: 'bg-blue-500' },
-                                { name: 'Mode', percent: '25%', color: 'bg-amber-500' },
+                                { name: 'Mode', percent: '25%', color: 'bg-yellow-500' },
                                 { name: 'Maison', percent: '20%', color: 'bg-purple-500' },
                                 { name: 'Beauté', percent: '12%', color: 'bg-emerald-500' },
                                 { name: 'Sports', percent: '8%', color: 'bg-rose-500' }
@@ -294,10 +294,10 @@ export default function Dashboard({ stats, recentKyc, activities }) {
                         <div className="bg-white border border-surface-200 rounded-3xl p-5 shadow-xs">
                             <div className="flex justify-between items-center border-b border-surface-100 pb-3 mb-4">
                                 <h4 className="text-sm font-bold text-surface-900 flex items-center space-x-2">
-                                    <Clock className="w-4 h-4 text-amber-500" />
+                                    <Clock className="w-4 h-4 text-yellow-500" />
                                     <span>Demandes KYC Récentes</span>
                                 </h4>
-                                <Link href={route('admin.users.all')} className="text-xs font-semibold text-amber-600 hover:underline">
+                                <Link href={route('admin.users.all')} className="text-xs font-semibold text-yellow-600 hover:underline">
                                     Tout voir &rarr;
                                 </Link>
                             </div>

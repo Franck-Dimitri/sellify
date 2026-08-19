@@ -39,10 +39,10 @@ export default function SubscriptionIndex({ packs = [], currentPack, currentSubs
             <div className="w-full space-y-6 pb-16 text-stone-800">
                 
                 {/* Header Banner Shariow Style */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-amber-500/10 border border-amber-500/20 p-6 rounded-2xl">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-yellow-500/10 border border-yellow-500/20 p-6 rounded-2xl">
                     <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-amber-800 font-medium text-xs uppercase tracking-wide">
-                            <CreditCard className="w-4 h-4 text-amber-600" />
+                        <div className="flex items-center gap-2 text-yellow-800 font-medium text-xs uppercase tracking-wide">
+                            <CreditCard className="w-4 h-4 text-yellow-600" />
                             <span>Formules & Avantages Vendeur</span>
                         </div>
                         <h1 className="text-xl font-semibold text-stone-900">
@@ -54,8 +54,8 @@ export default function SubscriptionIndex({ packs = [], currentPack, currentSubs
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <div className="px-3.5 py-1.5 bg-amber-500/20 text-amber-900 font-medium rounded-xl text-xs flex items-center gap-2">
-                            <Zap className="w-4 h-4 text-amber-700" />
+                        <div className="px-3.5 py-1.5 bg-yellow-500/20 text-yellow-900 font-medium rounded-xl text-xs flex items-center gap-2">
+                            <Zap className="w-4 h-4 text-yellow-700" />
                             <span>Modulable Sans Engagement</span>
                         </div>
                     </div>
@@ -65,11 +65,11 @@ export default function SubscriptionIndex({ packs = [], currentPack, currentSubs
                 <div className="bg-white border border-stone-200/70 rounded-2xl p-6 shadow-sm space-y-6">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-stone-100 pb-4">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center font-medium">
-                                <CreditCard className="w-5 h-5 text-amber-700" />
+                            <div className="w-10 h-10 rounded-xl bg-yellow-100 text-yellow-900 flex items-center justify-center font-medium">
+                                <CreditCard className="w-5 h-5 text-yellow-700" />
                             </div>
                             <div>
-                                <span className="text-[10px] uppercase font-semibold tracking-wider text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                                <span className="text-[10px] uppercase font-semibold tracking-wider text-yellow-800 bg-yellow-50 px-2 py-0.5 rounded-md border border-yellow-200">
                                     Formule Actuelle
                                 </span>
                                 <h2 className="text-base font-semibold text-stone-900 mt-1 capitalize">
@@ -87,7 +87,7 @@ export default function SubscriptionIndex({ packs = [], currentPack, currentSubs
                             )}
                             {cycle?.expires_at && (
                                 <div className="flex items-center gap-1.5">
-                                    <Clock className="w-3.5 h-3.5 text-amber-600" />
+                                    <Clock className="w-3.5 h-3.5 text-yellow-600" />
                                     <span>Renouvellement : <strong className="font-medium text-stone-800">{cycle.expires_at}</strong></span>
                                 </div>
                             )}
@@ -99,16 +99,16 @@ export default function SubscriptionIndex({ packs = [], currentPack, currentSubs
                         <div className="space-y-2 bg-stone-50 p-4 rounded-xl border border-stone-100">
                             <div className="flex justify-between items-center text-xs font-medium">
                                 <span className="text-stone-600 flex items-center gap-1.5">
-                                    <Clock className="w-3.5 h-3.5 text-amber-600" />
+                                    <Clock className="w-3.5 h-3.5 text-yellow-600" />
                                     Progression du Cycle d'Abonnement
                                 </span>
-                                <span className="text-amber-950 font-semibold">
+                                <span className="text-yellow-950 font-semibold">
                                     {daysRemaining} jour(s) restant(s)
                                 </span>
                             </div>
                             <div className="w-full h-2 bg-stone-200 rounded-full overflow-hidden">
                                 <div 
-                                    className="h-full bg-amber-500 rounded-full transition-all duration-300"
+                                    className="h-full bg-yellow-500 rounded-full transition-all duration-300"
                                     style={{ width: `${percentUsed}%` }}
                                 />
                             </div>
@@ -121,7 +121,7 @@ export default function SubscriptionIndex({ packs = [], currentPack, currentSubs
                         <div className="p-4 bg-stone-50 rounded-xl space-y-2 border border-stone-100">
                             <div className="flex items-center justify-between text-stone-600">
                                 <span className="font-medium flex items-center gap-1.5">
-                                    <Store className="w-3.5 h-3.5 text-amber-600" />
+                                    <Store className="w-3.5 h-3.5 text-yellow-600" />
                                     Boutiques Utilisées
                                 </span>
                                 <span className="font-semibold text-stone-900">
@@ -130,7 +130,7 @@ export default function SubscriptionIndex({ packs = [], currentPack, currentSubs
                             </div>
                             <div className="w-full h-1.5 bg-stone-200 rounded-full overflow-hidden">
                                 <div 
-                                    className="h-full bg-amber-500 rounded-full"
+                                    className="h-full bg-yellow-500 rounded-full"
                                     style={{ width: `${Math.min(100, (usage.shops_count / usage.max_shops) * 100)}%` }}
                                 />
                             </div>
@@ -140,7 +140,7 @@ export default function SubscriptionIndex({ packs = [], currentPack, currentSubs
                         <div className="p-4 bg-stone-50 rounded-xl space-y-2 border border-stone-100">
                             <div className="flex items-center justify-between text-stone-600">
                                 <span className="font-medium flex items-center gap-1.5">
-                                    <Boxes className="w-3.5 h-3.5 text-amber-600" />
+                                    <Boxes className="w-3.5 h-3.5 text-yellow-600" />
                                     Produits en Stock
                                 </span>
                                 <span className="font-semibold text-stone-900">
@@ -149,7 +149,7 @@ export default function SubscriptionIndex({ packs = [], currentPack, currentSubs
                             </div>
                             <div className="w-full h-1.5 bg-stone-200 rounded-full overflow-hidden">
                                 <div 
-                                    className="h-full bg-amber-500 rounded-full"
+                                    className="h-full bg-yellow-500 rounded-full"
                                     style={{ width: `${Math.min(100, (usage.products_count / (usage.max_products || 30)) * 100)}%` }}
                                 />
                             </div>
@@ -177,7 +177,7 @@ export default function SubscriptionIndex({ packs = [], currentPack, currentSubs
                     <button
                         onClick={() => setBillingCycle(prev => prev === 'monthly' ? 'annual' : 'monthly')}
                         className={`w-12 h-6 rounded-full p-1 transition-colors ${
-                            billingCycle === 'annual' ? 'bg-amber-500' : 'bg-stone-300'
+                            billingCycle === 'annual' ? 'bg-yellow-500' : 'bg-stone-300'
                         }`}
                     >
                         <div className={`w-4 h-4 bg-white rounded-full transition-transform ${
@@ -207,14 +207,14 @@ export default function SubscriptionIndex({ packs = [], currentPack, currentSubs
                                 key={pack.id}
                                 className={`bg-white rounded-2xl p-6 shadow-sm border flex flex-col justify-between relative transition-all ${
                                     isCurrent 
-                                        ? 'border-amber-500 ring-2 ring-amber-500/20' 
+                                        ? 'border-yellow-500 ring-2 ring-yellow-500/20' 
                                         : isPopular
-                                        ? 'border-amber-400 shadow-md'
+                                        ? 'border-yellow-400 shadow-md'
                                         : 'border-stone-200/70 hover:border-stone-300'
                                 }`}
                             >
                                 {isPopular && !isCurrent && (
-                                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-amber-950 text-[10px] font-semibold uppercase px-3 py-0.5 rounded-full shadow-xs">
+                                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-500 text-yellow-950 text-[10px] font-semibold uppercase px-3 py-0.5 rounded-full shadow-xs">
                                         Recommandé
                                     </span>
                                 )}
@@ -223,7 +223,7 @@ export default function SubscriptionIndex({ packs = [], currentPack, currentSubs
                                     <div className="flex justify-between items-center">
                                         <h3 className="text-base font-semibold text-stone-900">{pack.display_name}</h3>
                                         {isCurrent && (
-                                            <span className="bg-amber-100 text-amber-900 text-[11px] font-medium px-2.5 py-0.5 rounded-full">
+                                            <span className="bg-yellow-100 text-yellow-900 text-[11px] font-medium px-2.5 py-0.5 rounded-full">
                                                 Actif
                                             </span>
                                         )}
@@ -258,7 +258,7 @@ export default function SubscriptionIndex({ packs = [], currentPack, currentSubs
                                         className={`w-full py-2.5 px-4 rounded-xl font-medium text-xs transition-all flex items-center justify-center gap-2 ${
                                             isCurrent
                                                 ? 'bg-stone-100 text-stone-400 cursor-default'
-                                                : 'bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-amber-950 shadow-xs'
+                                                : 'bg-yellow-500 hover:bg-yellow-600 active:bg-yellow-700 text-yellow-950 shadow-xs'
                                         }`}
                                     >
                                         <span>

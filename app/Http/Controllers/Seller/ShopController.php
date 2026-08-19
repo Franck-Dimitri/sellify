@@ -20,7 +20,11 @@ class ShopController extends Controller
     public function create(Request $request): InertiaResponse|RedirectResponse
     {
         $seller = $request->user()->seller;
-        $maxShops = $seller && $seller->pack === 'pro' ? 2 : 1;
+        $maxShops = match ($seller?->pack) {
+            'business' => 999,
+            'pro' => 2,
+            default => 1,
+        };
         $reachedLimit = $seller && $seller->shops()->count() >= $maxShops;
 
         return Inertia::render('Seller/Shop/Create', [
@@ -40,7 +44,11 @@ class ShopController extends Controller
             return redirect()->route('login')->with('error', 'Compte vendeur non trouvé.');
         }
 
-        $maxShops = $seller->pack === 'pro' ? 2 : 1;
+        $maxShops = match ($seller->pack) {
+            'business' => 999,
+            'pro' => 2,
+            default => 1,
+        };
         if ($seller->shops()->count() >= $maxShops) {
             return redirect()->route('seller.dashboard')
                 ->with('error', "Vous possédez déjà {$maxShops} boutique(s). Votre pack actuel ne permet pas d'en créer d'autres.");

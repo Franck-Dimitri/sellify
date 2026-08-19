@@ -46,20 +46,20 @@ export default function FastCheckout({ smartLink, product, shop }) {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-amber-500/10 via-stone-50 to-stone-100 font-sans text-stone-800 pb-16">
+        <div className="min-h-screen bg-gradient-to-b from-yellow-500/10 via-stone-50 to-stone-100 font-sans text-stone-800 pb-16">
             <Head title={`Paiement Sécurisé - ${smartLink.title || shopName}`} />
 
             {/* Header Shariow Style */}
             <header className="bg-white border-b border-stone-200/70 sticky top-0 z-30 shadow-sm">
                 <div className="max-w-3xl mx-auto px-4 py-3.5 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-amber-500 rounded-xl flex items-center justify-center font-bold text-amber-950 text-lg shadow-sm">
+                        <div className="w-9 h-9 bg-yellow-500 rounded-xl flex items-center justify-center font-bold text-yellow-950 text-lg shadow-sm">
                             S
                         </div>
                         <div>
                             <span className="font-semibold text-stone-900 text-sm block">Sellify.me</span>
                             <span className="text-xs text-stone-500 font-normal flex items-center gap-1">
-                                <Store className="w-3 h-3 text-amber-600" />
+                                <Store className="w-3 h-3 text-yellow-600" />
                                 {shopName}
                             </span>
                         </div>
@@ -76,7 +76,7 @@ export default function FastCheckout({ smartLink, product, shop }) {
                 
                 {/* Title Banner */}
                 <div className="bg-white border border-stone-200/70 rounded-2xl p-5 shadow-sm space-y-1.5">
-                    <span className="inline-block px-2.5 py-0.5 bg-amber-100 text-amber-900 rounded-full text-[11px] font-semibold uppercase tracking-wider">
+                    <span className="inline-block px-2.5 py-0.5 bg-yellow-100 text-yellow-900 rounded-full text-[11px] font-semibold uppercase tracking-wider">
                         Commande Express
                     </span>
                     <h1 className="text-xl font-semibold text-stone-900">
@@ -92,7 +92,7 @@ export default function FastCheckout({ smartLink, product, shop }) {
                     {/* Order Items Breakdown */}
                     <div className="bg-white border border-stone-200/70 rounded-2xl p-5 shadow-sm space-y-4">
                         <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
-                            <ShoppingBag className="w-4 h-4 text-amber-600" />
+                            <ShoppingBag className="w-4 h-4 text-yellow-600" />
                             <h2 className="font-semibold text-stone-900 text-sm">Récapitulatif de votre Commande</h2>
                         </div>
 
@@ -100,7 +100,7 @@ export default function FastCheckout({ smartLink, product, shop }) {
                             {items.map((item, idx) => (
                                 <div key={idx} className="py-2.5 flex items-center justify-between gap-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center font-semibold text-amber-900 text-xs">
+                                        <div className="w-8 h-8 rounded-lg bg-yellow-50 border border-yellow-200 flex items-center justify-center font-semibold text-yellow-900 text-xs">
                                             {item.quantity}x
                                         </div>
                                         <div>
@@ -136,12 +136,12 @@ export default function FastCheckout({ smartLink, product, shop }) {
 
                             <div className="border-t border-stone-200 pt-2 flex justify-between text-sm font-semibold text-stone-900">
                                 <span>Total à payer</span>
-                                <span className="text-amber-950 text-base">{Number(totalPrice).toLocaleString()} FCFA</span>
+                                <span className="text-yellow-950 text-base">{Number(totalPrice).toLocaleString()} FCFA</span>
                             </div>
                         </div>
 
                         {smartLink.notes && (
-                            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900">
+                            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-xl text-xs text-yellow-900">
                                 <span className="font-medium">Note du vendeur : </span>
                                 {smartLink.notes}
                             </div>
@@ -151,7 +151,7 @@ export default function FastCheckout({ smartLink, product, shop }) {
                     {/* Delivery Information Form */}
                     <div className="bg-white border border-stone-200/70 rounded-2xl p-5 shadow-sm space-y-4">
                         <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
-                            <Truck className="w-4 h-4 text-amber-600" />
+                            <Truck className="w-4 h-4 text-yellow-600" />
                             <h2 className="font-semibold text-stone-900 text-sm">Adresse & Contact pour la Livraison</h2>
                         </div>
 
@@ -167,7 +167,7 @@ export default function FastCheckout({ smartLink, product, shop }) {
                                     placeholder="ex: Paul Biya"
                                     value={data.customer_name}
                                     onChange={(e) => setData('customer_name', e.target.value)}
-                                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-normal text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none"
+                                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-normal text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none"
                                 />
                                 {errors.customer_name && <p className="text-xs text-red-600 mt-1 font-normal">{errors.customer_name}</p>}
                             </div>
@@ -184,7 +184,7 @@ export default function FastCheckout({ smartLink, product, shop }) {
                                         placeholder="ex: 690 12 34 56"
                                         value={data.phone_number}
                                         onChange={(e) => setData('phone_number', e.target.value)}
-                                        className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-normal text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none"
+                                        className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-normal text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none"
                                     />
                                     {errors.phone_number && <p className="text-xs text-red-600 mt-1 font-normal">{errors.phone_number}</p>}
                                 </div>
@@ -200,7 +200,7 @@ export default function FastCheckout({ smartLink, product, shop }) {
                                         placeholder="ex: Douala, Akwa Nord"
                                         value={data.city_neighborhood}
                                         onChange={(e) => setData('city_neighborhood', e.target.value)}
-                                        className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-normal text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none"
+                                        className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-normal text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none"
                                     />
                                     {errors.city_neighborhood && <p className="text-xs text-red-600 mt-1 font-normal">{errors.city_neighborhood}</p>}
                                 </div>
@@ -216,7 +216,7 @@ export default function FastCheckout({ smartLink, product, shop }) {
                                     placeholder="ex: Rue Deido, Carrefour Camair, Immeuble à côté de la pharmacie"
                                     value={data.delivery_address}
                                     onChange={(e) => setData('delivery_address', e.target.value)}
-                                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-normal text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none"
+                                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-normal text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none"
                                 />
                                 {errors.delivery_address && <p className="text-xs text-red-600 mt-1 font-normal">{errors.delivery_address}</p>}
                             </div>
@@ -231,7 +231,7 @@ export default function FastCheckout({ smartLink, product, shop }) {
                                     placeholder="ex: Appeler 10 minutes avant d'arriver."
                                     value={data.delivery_notes}
                                     onChange={(e) => setData('delivery_notes', e.target.value)}
-                                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-normal text-stone-900 focus:ring-2 focus:ring-amber-500 outline-none"
+                                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-normal text-stone-900 focus:ring-2 focus:ring-yellow-500 outline-none"
                                 />
                             </div>
                         </div>
@@ -240,14 +240,14 @@ export default function FastCheckout({ smartLink, product, shop }) {
                     {/* Payment Mode Selector */}
                     <div className="bg-white border border-stone-200/70 rounded-2xl p-5 shadow-sm space-y-4">
                         <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
-                            <Smartphone className="w-4 h-4 text-amber-600" />
+                            <Smartphone className="w-4 h-4 text-yellow-600" />
                             <h2 className="font-semibold text-stone-900 text-sm">Mode de Paiement Mobile Money</h2>
                         </div>
 
                         <div className="grid grid-cols-2 gap-3.5">
                             <label className={`p-3.5 rounded-xl border cursor-pointer transition-all flex flex-col items-center justify-center space-y-1.5 ${
                                 paymentMethod === 'orange_money' 
-                                    ? 'border-amber-500 bg-amber-50/40 shadow-sm' 
+                                    ? 'border-yellow-500 bg-yellow-50/40 shadow-sm' 
                                     : 'border-stone-200 bg-white hover:bg-stone-50'
                             }`}>
                                 <input
@@ -269,7 +269,7 @@ export default function FastCheckout({ smartLink, product, shop }) {
 
                             <label className={`p-3.5 rounded-xl border cursor-pointer transition-all flex flex-col items-center justify-center space-y-1.5 ${
                                 paymentMethod === 'mtn_momo' 
-                                    ? 'border-amber-500 bg-amber-50/40 shadow-sm' 
+                                    ? 'border-yellow-500 bg-yellow-50/40 shadow-sm' 
                                     : 'border-stone-200 bg-white hover:bg-stone-50'
                             }`}>
                                 <input
@@ -304,7 +304,7 @@ export default function FastCheckout({ smartLink, product, shop }) {
                     <button
                         type="submit"
                         disabled={processing}
-                        className="w-full py-3.5 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-amber-950 font-medium text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                        className="w-full py-3.5 bg-yellow-500 hover:bg-yellow-600 active:bg-yellow-700 text-yellow-950 font-medium text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                         <span>Payer {Number(totalPrice).toLocaleString()} FCFA & Obtenir le Suivi Colis</span>
                         <ArrowRight className="w-4 h-4" />

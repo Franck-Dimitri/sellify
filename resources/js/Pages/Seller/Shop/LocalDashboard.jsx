@@ -60,7 +60,7 @@ export default function LocalDashboard({
                                 <h1 className="text-lg md:text-xl font-semibold tracking-tight">{shop.name}</h1>
                                 <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider border ${
                                     shop.is_holiday_mode 
-                                        ? 'bg-amber-500/20 text-amber-200 border-amber-400/30' 
+                                        ? 'bg-yellow-500/20 text-yellow-200 border-yellow-400/30' 
                                         : 'bg-emerald-500/20 text-emerald-200 border-emerald-400/30'
                                 }`}>
                                     {shop.is_holiday_mode ? 'Mode Vacances' : 'En Ligne • Active'}
@@ -92,7 +92,7 @@ export default function LocalDashboard({
                             href={route('seller.shop.products.create', shop.slug)}
                             className="px-3.5 py-2 bg-white text-stone-900 hover:bg-stone-100 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
                         >
-                            <Plus className="w-3.5 h-3.5 text-amber-600" />
+                            <Plus className="w-3.5 h-3.5 text-yellow-600" />
                             <span>Ajouter un Produit</span>
                         </Link>
                         <Link 
@@ -112,7 +112,7 @@ export default function LocalDashboard({
                     <div className="bg-white border border-stone-200/70 rounded-xl p-4 shadow-xs space-y-1.5">
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-medium text-stone-500">Chiffre d'Affaires Local</span>
-                            <div className="w-7 h-7 bg-amber-50 rounded-lg flex items-center justify-center text-amber-700">
+                            <div className="w-7 h-7 bg-yellow-50 rounded-lg flex items-center justify-center text-yellow-700">
                                 <DollarSign className="w-3.5 h-3.5" />
                             </div>
                         </div>
@@ -145,7 +145,7 @@ export default function LocalDashboard({
                             </div>
                         </div>
                         <p className="text-lg font-semibold text-stone-900">{promotionsCount} offre(s)</p>
-                        <span className="text-[11px] text-amber-800 font-normal">Attractivité catalogue</span>
+                        <span className="text-[11px] text-yellow-800 font-normal">Attractivité catalogue</span>
                     </div>
 
                     {/* Stock Alert Card */}
@@ -176,7 +176,7 @@ export default function LocalDashboard({
                                 <h3 className="font-semibold text-stone-900 text-sm">Ventes Spécifiques de {shop.name}</h3>
                                 <p className="text-xs text-stone-400 font-normal">Évolution du chiffre d'affaires propre à cette boutique</p>
                             </div>
-                            <span className="text-xs font-medium text-amber-900 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+                            <span className="text-xs font-medium text-yellow-900 bg-yellow-50 px-2.5 py-0.5 rounded-full border border-yellow-200">
                                 7 Derniers Jours
                             </span>
                         </div>
@@ -239,10 +239,10 @@ export default function LocalDashboard({
                         <div className="space-y-2 pt-1">
                             <Link 
                                 href={route('seller.shop.products.index', shop.slug)}
-                                className="w-full py-2 px-3.5 bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-200 rounded-lg text-xs font-medium flex items-center justify-between transition-colors"
+                                className="w-full py-2 px-3.5 bg-yellow-50 hover:bg-yellow-100 text-yellow-950 border border-yellow-200 rounded-lg text-xs font-medium flex items-center justify-between transition-colors"
                             >
                                 <span className="flex items-center gap-2">
-                                    <Package className="w-3.5 h-3.5 text-amber-700" />
+                                    <Package className="w-3.5 h-3.5 text-yellow-700" />
                                     <span>Gérer le Catalogue</span>
                                 </span>
                                 <ChevronRight className="w-3.5 h-3.5" />
@@ -281,7 +281,7 @@ export default function LocalDashboard({
                             <h3 className="font-semibold text-stone-900 text-sm">Dernières Commandes de {shop.name}</h3>
                             <p className="text-xs text-stone-400 font-normal">Commandes enregistrées sous séquestre</p>
                         </div>
-                        <Link href={route('seller.shop.products.index', shop.slug)} className="text-xs font-medium text-amber-700 hover:underline">
+                        <Link href={route('seller.shop.products.index', shop.slug)} className="text-xs font-medium text-yellow-700 hover:underline">
                             Voir le catalogue
                         </Link>
                     </div>
@@ -327,7 +327,7 @@ export default function LocalDashboard({
                                                     href={route('public.order_tracking', order.tracking_code || '')}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="text-amber-700 font-medium text-[11px] hover:underline"
+                                                    className="text-yellow-700 font-medium text-[11px] hover:underline"
                                                 >
                                                     Suivre le colis
                                                 </a>
