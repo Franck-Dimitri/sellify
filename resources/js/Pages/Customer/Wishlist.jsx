@@ -1,9 +1,13 @@
 import React from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
-import { Heart, ShoppingBag, Store, ArrowRight, ExternalLink } from 'lucide-react';
+import { Heart, ShoppingBag, Store, ArrowRight, ExternalLink, Trash2 } from 'lucide-react';
 
 export default function Wishlist({ products = { data: [] } }) {
+    const handleRemoveWishlist = (productId) => {
+        router.post(route('customer.wishlist.toggle', productId), {}, { preserveScroll: true });
+    };
+
     return (
         <CustomerLayout title="Mes Favoris & Liste d'Envies">
             <Head title="Mes Favoris - Sellify" />
@@ -44,7 +48,11 @@ export default function Wishlist({ products = { data: [] } }) {
                                         <span className="text-[10px] bg-yellow-50 text-yellow-900 font-medium px-2 py-0.5 rounded-md border border-yellow-200">
                                             {prod.shop?.name || 'Boutique'}
                                         </span>
-                                        <button className="text-rose-500 hover:text-rose-600">
+                                        <button 
+                                            onClick={() => handleRemoveWishlist(prod.id)}
+                                            title="Retirer des favoris"
+                                            className="text-rose-500 hover:text-rose-600 p-1 hover:bg-rose-50 rounded-lg transition-colors"
+                                        >
                                             <Heart className="w-4 h-4 fill-rose-500" />
                                         </button>
                                     </div>

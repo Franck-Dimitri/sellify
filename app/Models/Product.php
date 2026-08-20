@@ -62,6 +62,21 @@ class Product extends Model
             ->where('promotions.end_date', '>=', $today);
     }
 
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(ProductReview::class);
+    }
+
+    public function wishlists(): HasMany
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    public function getAverageRatingAttribute(): float
+    {
+        return (float) round($this->reviews()->avg('rating') ?? 5.0, 1);
+    }
+
     /**
      * Get the active promotion for this product.
      */

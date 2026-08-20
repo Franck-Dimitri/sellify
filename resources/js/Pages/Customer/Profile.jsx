@@ -1,13 +1,15 @@
 import React from 'react';
 import { Head, useForm } from '@inertiajs/react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
-import { User, Phone, Mail, Lock, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { User, Phone, Mail, Lock, ShieldCheck, CheckCircle2, MapPin } from 'lucide-react';
 
 export default function Profile({ user }) {
     const { data, setData, post, processing, errors, recentlySuccessful } = useForm({
         first_name: user.first_name || '',
         last_name: user.last_name || '',
         phone: user.phone || '',
+        default_delivery_address: user.default_delivery_address || '',
+        default_city: user.default_city || 'Douala',
         password: '',
         password_confirmation: '',
     });
@@ -34,7 +36,7 @@ export default function Profile({ user }) {
                             Mon Compte Acheteur
                         </h1>
                         <p className="text-xs text-stone-500 font-normal mt-0.5">
-                            Gérez vos coordonnées de livraison et vos numéros de paiement Mobile Money.
+                            Gérez vos coordonnées de livraison par défaut et vos numéros de paiement Mobile Money.
                         </p>
                     </div>
                 </div>
@@ -97,6 +99,43 @@ export default function Profile({ user }) {
                                     required
                                 />
                                 {errors.phone && <p className="text-rose-600 text-[11px] mt-0.5">{errors.phone}</p>}
+                            </div>
+                        </div>
+
+                        {/* Default Delivery Address Section */}
+                        <div className="pt-3 border-t border-stone-100 space-y-3">
+                            <h3 className="text-xs font-semibold text-stone-900 flex items-center gap-1.5">
+                                <MapPin className="w-3.5 h-3.5 text-yellow-600" />
+                                <span>Adresse de Livraison par Défaut</span>
+                            </h3>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label className="font-medium text-stone-700 block mb-1">Ville par Défaut</label>
+                                    <select
+                                        value={data.default_city}
+                                        onChange={(e) => setData('default_city', e.target.value)}
+                                        className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none focus:border-yellow-500 focus:bg-white text-stone-800"
+                                    >
+                                        <option value="Douala">Douala</option>
+                                        <option value="Yaoundé">Yaoundé</option>
+                                        <option value="Bafoussam">Bafoussam</option>
+                                        <option value="Bamenda">Bamenda</option>
+                                        <option value="Garoua">Garoua</option>
+                                        <option value="Maroua">Maroua</option>
+                                    </select>
+                                </div>
+
+                                <div className="sm:col-span-2">
+                                    <label className="font-medium text-stone-700 block mb-1">Adresse Précise</label>
+                                    <input
+                                        type="text"
+                                        value={data.default_delivery_address}
+                                        onChange={(e) => setData('default_delivery_address', e.target.value)}
+                                        placeholder="Ex: Akwa, Rue Silo, Immeuble à côté de la pharmacie"
+                                        className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none focus:border-yellow-500 focus:bg-white text-stone-800"
+                                    />
+                                </div>
                             </div>
                         </div>
 

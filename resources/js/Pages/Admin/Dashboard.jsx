@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
-import { Head, Link } from '@inertiajs/react';
-import AdminLayout from '../../Layouts/AdminLayout';
-import { Card, CardHeader, CardTitle, CardContent } from '../../Components/ui/Card';
-import Badge from '../../Components/ui/Badge';
-import Button from '../../Components/ui/Button';
+import { Head, Link, useForm } from '@inertiajs/react';
+import AdminLayout from '@/Layouts/AdminLayout';
 import { 
     Users as UsersIcon, 
     Store, 
@@ -15,41 +12,83 @@ import {
     Clock, 
     ShoppingBag, 
     ArrowRight,
-    Award
+    Award,
+    ShieldAlert,
+    ShieldCheck,
+    AlertTriangle,
+    BarChart2,
+    PieChart,
+    CheckCircle2,
+    XCircle,
+    UserCheck,
+    Tag,
+    Key,
+    Activity,
+    FileText,
+    Percent
 } from 'lucide-react';
 
-export default function Dashboard({ stats, recentKyc, activities }) {
-    const [timeframe, setTimeframe] = useState('week');
+export default function Dashboard({ 
+    stats = {}, 
+    monthlyTrend = [], 
+    recentOrders = [], 
+    urgentDisputes = [], 
+    recentKyc = [], 
+    activities = [] 
+}) {
+    const [timeframe, setTimeframe] = useState('month');
+    const { post, processing } = useForm();
 
-    // Recent orders mock data
-    const recentOrders = [
-        { id: '#ORD-1249', customer: 'Amina Bello', amount: '18 500 CFA', status: 'delivered', date: 'Aujourd\'hui, 13:12' },
-        { id: '#ORD-1248', customer: 'Jean-Pierre Etoa', amount: '35 000 CFA', status: 'pending', date: 'Aujourd\'hui, 11:45' },
-        { id: '#ORD-1247', customer: 'Marie Ngo', amount: '8 200 CFA', status: 'delivered', date: 'Hier, 18:30' },
-        { id: '#ORD-1246', customer: 'Ousmanou Ibrahim', amount: '125 000 CFA', status: 'cancelled', date: 'Hier, 15:10' },
-        { id: '#ORD-1245', customer: 'Ferdinand Tchakounte', amount: '22 000 CFA', status: 'delivered', date: '16 Juil, 10:22' }
-    ];
+    const handleResolveDispute = (disputeId, resolution) => {
+        if (confirm(`Confirmez-vous la décision d'arbitrage : ${resolution === 'refund_buyer' ? 'Rembourser le client' : 'Payer le vendeur'} ?`)) {
+            post(route('admin.disputes.resolve', disputeId), {
+                data: { resolution }
+            });
+        }
+    };
 
-    // Top Sellers mock data
-    const topSellers = [
-        { name: 'Électronique Douala', category: 'High-Tech', sales: 142, revenue: '2 840 000 CFA' },
-        { name: 'Boutique de Mode Yaoundé', category: 'Vêtements', sales: 98, revenue: '1 470 000 CFA' },
-        { name: 'Maison & Déco Cameroun', category: 'Maison', sales: 74, revenue: '1 110 000 CFA' }
-    ];
+    const maxVolume = Math.max(...monthlyTrend.map(m => m.volume), 100000);
+
+    const orderStatusBadge = (status) => {
+        const map = {
+            pending: { label: 'En attente', bg: 'bg-yellow-50 text-yellow-900 border-yellow-200' },
+            preparing: { label: 'En préparation', bg: 'bg-blue-50 text-blue-900 border-blue-200' },
+            ready_for_pickup: { label: 'Prêt pour livraison', bg: 'bg-indigo-50 text-indigo-900 border-indigo-200' },
+            in_transit: { label: 'En cours (OTP)', bg: 'bg-purple-50 text-purple-900 border-purple-200' },
+            delivered: { label: 'Livré & libéré', bg: 'bg-emerald-50 text-emerald-900 border-emerald-200' },
+            cancelled: { label: 'Annulé / Remboursé', bg: 'bg-rose-50 text-rose-900 border-rose-200' },
+        };
+        const conf = map[status] || { label: status, bg: 'bg-stone-100 text-stone-700 border-stone-200' };
+        return (
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border ${conf.bg}`}>
+                {conf.label}
+            </span>
+        );
+    };
 
     return (
-        <AdminLayout title="Tableau de bord">
-            <Head title="Tableau de bord - Sellify Admin" />
+        <AdminLayout title="Tableau de bord administration">
+            <Head title="Tableau de bord général - Sellify Admin" />
 
-            <div className="space-y-6 px-1">
+            <div className="w-full space-y-6 text-stone-800 antialiased font-sans pb-16">
+                
                 {/* 1. Header Row */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs">
                     <div>
-                        <h2 className="text-2xl font-bold text-surface-900 tracking-tight">Tableau de bord</h2>
-                        <p className="text-sm text-surface-500 mt-1">Bienvenue sur votre espace d'administration</p>
+                        <div className="flex items-center gap-2 text-xs font-semibold text-yellow-700">
+                            <ShieldCheck className="w-4 h-4 text-yellow-600" />
+                            <span>Supervision globale de la plateforme</span>
+                        </div>
+                        <h1 className="text-xl font-bold text-stone-900 mt-1">
+                            Tableau de bord d'administration
+                        </h1>
+                        <p className="text-xs text-stone-500 font-normal mt-0.5">
+                            Vue synthétique des transactions sous séquestre, modération des litiges, vendeurs KYC et livreurs.
+                        </p>
                     </div>
-                    <div className="flex items-center space-x-3 bg-white border border-surface-200 p-1 rounded-2xl shadow-sm">
-                        <div className="flex space-x-1">
+
+                    <div className="flex items-center gap-3">
+                        <div className="flex bg-stone-100 p-1 rounded-xl border border-stone-200/80">
                             {[
                                 { id: 'week', label: 'Semaine' },
                                 { id: 'month', label: 'Mois' },
@@ -58,394 +97,347 @@ export default function Dashboard({ stats, recentKyc, activities }) {
                                 <button
                                     key={tab.id}
                                     onClick={() => setTimeframe(tab.id)}
-                                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all
-                                        ${timeframe === tab.id
-                                            ? 'text-yellow-600 bg-yellow-50'
-                                            : 'text-surface-500 hover:text-surface-800'}`}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                                        timeframe === tab.id
+                                            ? 'bg-yellow-400 text-yellow-950 shadow-2xs border border-yellow-500'
+                                            : 'text-stone-600 hover:text-stone-900'
+                                    }`}
                                 >
                                     {tab.label}
                                 </button>
                             ))}
                         </div>
-                        <div className="h-4 w-px bg-surface-200" />
-                        <button className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-surface-600 hover:text-surface-900 transition-colors">
-                            <Download className="w-3.5 h-3.5" />
-                            <span>Exporter</span>
-                        </button>
                     </div>
                 </div>
 
-                {/* 2. Welcome Banner */}
-                <div className="bg-yellow-500 text-white rounded-3xl p-6 shadow-sm flex flex-col justify-center min-h-[100px] relative overflow-hidden">
-                    <div className="absolute right-0 top-0 w-32 h-full opacity-10 bg-gradient-to-l from-white pointer-events-none" />
-                    <h3 className="text-lg font-bold text-white flex items-center">
-                        <span>Bonjour, Administrateur</span>
-                        <span className="ml-1.5">👋</span>
-                    </h3>
-                    <p className="text-xs text-yellow-50 mt-1">Voici ce qui se passe sur votre plateforme aujourd'hui</p>
-                </div>
-
-                {/* 3. Four Stats Cards Row */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {/* Card 1: Users */}
-                    <div className="bg-white border border-surface-200 rounded-3xl p-5 shadow-xs flex justify-between items-start">
-                        <div className="space-y-1">
-                            <span className="text-xs text-surface-400 font-semibold block">Utilisateurs</span>
-                            <span className="text-2xl font-bold text-surface-950 block">{stats.total_users || 1248}</span>
-                            <div className="flex items-center space-x-1 pt-1.5">
-                                <ArrowUpRight className="w-3.5 h-3.5 text-emerald-500" />
-                                <span className="text-xs font-semibold text-emerald-500">12.5% ce mois</span>
+                {/* 2. Primary Financial KPIs (4 Cards) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    
+                    {/* Volume Total Escrow */}
+                    <div className="bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-2">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-stone-500">Volume total sous séquestre</span>
+                            <div className="w-8 h-8 bg-yellow-50 rounded-xl flex items-center justify-center text-yellow-700 border border-yellow-200">
+                                <DollarSign className="w-4 h-4" />
                             </div>
-                            <span className="text-[10px] text-surface-400 block pt-1">+156 nouveaux ce mois</span>
                         </div>
-                        <div className="p-3 bg-blue-50 text-blue-500 rounded-2xl">
-                            <UsersIcon className="w-5 h-5" />
+                        <p className="text-2xl font-bold text-stone-900">
+                            {Number(stats.total_escrow_volume || 0).toLocaleString('fr-FR')} <span className="text-xs font-semibold text-stone-500">FCFA</span>
+                        </p>
+                        <div className="flex items-center justify-between text-[11px] text-stone-400">
+                            <span>Bloqué : {Number(stats.escrow_held_amount || 0).toLocaleString('fr-FR')} F</span>
+                            <span className="text-emerald-600 font-semibold">Libéré : {Number(stats.released_amount || 0).toLocaleString('fr-FR')} F</span>
                         </div>
                     </div>
 
-                    {/* Card 2: Sellers */}
-                    <div className="bg-white border border-surface-200 rounded-3xl p-5 shadow-xs flex justify-between items-start">
-                        <div className="space-y-1">
-                            <span className="text-xs text-surface-400 font-semibold block">Vendeurs</span>
-                            <span className="text-2xl font-bold text-surface-950 block">{stats.total_sellers || 234}</span>
-                            <div className="flex items-center space-x-1 pt-1.5">
-                                <ArrowUpRight className="w-3.5 h-3.5 text-emerald-500" />
-                                <span className="text-xs font-semibold text-emerald-500">8.3% ce mois</span>
+                    {/* Commissions Plateforme (3%) */}
+                    <div className="bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-2">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-stone-500">Commissions Sellify (3%)</span>
+                            <div className="w-8 h-8 bg-purple-50 rounded-xl flex items-center justify-center text-purple-700 border border-purple-200">
+                                <Percent className="w-4 h-4" />
                             </div>
-                            <span className="text-[10px] text-surface-400 block pt-1">En attente de validation: {stats.pending_sellers || 12}</span>
                         </div>
-                        <div className="p-3 bg-yellow-50 text-yellow-600 rounded-2xl">
-                            <Store className="w-5 h-5" />
-                        </div>
+                        <p className="text-2xl font-bold text-purple-700">
+                            {Number(stats.platform_commission || 0).toLocaleString('fr-FR')} <span className="text-xs font-semibold text-stone-500">FCFA</span>
+                        </p>
+                        <span className="text-[11px] text-stone-400 font-normal">Revenu net de la plateforme</span>
                     </div>
 
-                    {/* Card 3: Drivers */}
-                    <div className="bg-white border border-surface-200 rounded-3xl p-5 shadow-xs flex justify-between items-start">
-                        <div className="space-y-1">
-                            <span className="text-xs text-surface-400 font-semibold block">Livreurs</span>
-                            <span className="text-2xl font-bold text-surface-950 block">{stats.total_drivers || 89}</span>
-                            <div className="flex items-center space-x-1 pt-1.5">
-                                <ArrowDownRight className="w-3.5 h-3.5 text-rose-500" />
-                                <span className="text-xs font-semibold text-rose-500">2.1% ce mois</span>
+                    {/* Vendeurs & KYC */}
+                    <div className="bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-2">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-stone-500">Boutiques & vendeurs</span>
+                            <div className="w-8 h-8 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 border border-blue-200">
+                                <Store className="w-4 h-4" />
                             </div>
-                            <span className="text-[10px] text-surface-400 block pt-1">En service: {stats.verified_drivers || 67}</span>
                         </div>
-                        <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
-                            <Truck className="w-5 h-5" />
-                        </div>
+                        <p className="text-2xl font-bold text-blue-600">
+                            {stats.verified_sellers || 0} / {stats.total_sellers || 0} <span className="text-xs font-medium text-stone-500">vérifiés</span>
+                        </p>
+                        <span className="text-[11px] text-amber-600 font-semibold">
+                            {stats.pending_kyc_requests || 0} dossier(s) KYC en attente
+                        </span>
                     </div>
 
-                    {/* Card 4: Revenue */}
-                    <div className="bg-white border border-surface-200 rounded-3xl p-5 shadow-xs flex justify-between items-start">
-                        <div className="space-y-1">
-                            <span className="text-xs text-surface-400 font-semibold block">Chiffre d'affaires</span>
-                            <span className="text-2xl font-bold text-surface-950 block">45 280 CFA</span>
-                            <div className="flex items-center space-x-1 pt-1.5">
-                                <ArrowUpRight className="w-3.5 h-3.5 text-emerald-500" />
-                                <span className="text-xs font-semibold text-emerald-500">18.7% ce mois</span>
+                    {/* Litiges & Arbitrage */}
+                    <div className="bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-2">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-stone-500">Réclamations & litiges</span>
+                            <div className="w-8 h-8 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600 border border-rose-200">
+                                <AlertTriangle className="w-4 h-4" />
                             </div>
-                            <span className="text-[10px] text-surface-400 block pt-1">Commissions: 4,528 CFA</span>
                         </div>
-                        <div className="p-3 bg-purple-50 text-purple-600 rounded-2xl">
-                            <DollarSign className="w-5 h-5" />
-                        </div>
+                        <p className="text-2xl font-bold text-rose-600">
+                            {stats.disputed_orders || 0} <span className="text-xs font-medium text-stone-500">litiges</span>
+                        </p>
+                        <span className="text-[11px] text-rose-700 font-semibold">Arbitrage admin requis</span>
                     </div>
                 </div>
 
-                {/* 4. Charts Section */}
+                {/* 3. CHARTS SECTION */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Left: Sales & Orders Combination Chart */}
-                    <div className="lg:col-span-2 bg-white border border-surface-200 rounded-3xl p-5 shadow-xs">
-                        <div className="flex justify-between items-start mb-6">
-                            <div>
-                                <h4 className="text-sm font-bold text-surface-900">Aperçu des ventes</h4>
-                                <span className="text-[11px] text-surface-400 mt-0.5 block">Évolution des ventes et commandes</span>
+                    
+                    {/* Monthly Volume Bar Chart (2 cols) */}
+                    <div className="lg:col-span-2 bg-white border border-stone-200/80 p-6 rounded-2xl shadow-2xs space-y-5">
+                        <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                            <div className="flex items-center gap-2">
+                                <BarChart2 className="w-4 h-4 text-yellow-600" />
+                                <h3 className="font-bold text-sm text-stone-900">Volume des transactions Escrow & commissions (FCFA)</h3>
                             </div>
-                            <div className="flex items-center space-x-4 text-xs font-semibold">
-                                <div className="flex items-center space-x-1.5">
-                                    <span className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
-                                    <span className="text-surface-500">Ventes</span>
-                                </div>
-                                <div className="flex items-center space-x-1.5">
-                                    <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-                                    <span className="text-surface-500">Commandes</span>
-                                </div>
-                            </div>
+                            <span className="text-[11px] text-stone-400 font-medium">6 derniers mois</span>
                         </div>
 
-                        {/* Responsive SVG Chart */}
-                        <div className="relative w-full h-[240px]">
-                            <svg className="w-full h-full" viewBox="0 0 600 240" preserveAspectRatio="none">
-                                {/* Grid lines */}
-                                <line x1="40" y1="40" x2="570" y2="40" stroke="#f1f5f9" strokeWidth="1" />
-                                <line x1="40" y1="90" x2="570" y2="90" stroke="#f1f5f9" strokeWidth="1" />
-                                <line x1="40" y1="140" x2="570" y2="140" stroke="#f1f5f9" strokeWidth="1" />
-                                <line x1="40" y1="190" x2="570" y2="190" stroke="#f1f5f9" strokeWidth="1" />
-
-                                {/* Bar Chart: Commandes */}
-                                {/* Mon */} <rect x="75" y="150" width="30" height="40" rx="4" fill="#3b82f6" fillOpacity="0.8" />
-                                {/* Tue */} <rect x="155" y="110" width="30" height="80" rx="4" fill="#3b82f6" fillOpacity="0.8" />
-                                {/* Wed */} <rect x="235" y="130" width="30" height="60" rx="4" fill="#3b82f6" fillOpacity="0.8" />
-                                {/* Thu */} <rect x="315" y="90" width="30" height="100" rx="4" fill="#3b82f6" fillOpacity="0.8" />
-                                {/* Fri */} <rect x="395" y="50" width="30" height="140" rx="4" fill="#3b82f6" fillOpacity="0.8" />
-                                {/* Sat */} <rect x="475" y="95" width="30" height="95" rx="4" fill="#3b82f6" fillOpacity="0.8" />
-                                {/* Sun */} <rect x="555" y="135" width="30" height="55" rx="4" fill="#3b82f6" fillOpacity="0.8" />
-
-                                {/* Line Chart: Ventes */}
-                                <path
-                                    d="M 90,160 Q 170,130 250,140 T 410,70 T 570,120"
-                                    fill="none"
-                                    stroke="#f59e0b"
-                                    strokeWidth="3.5"
-                                    strokeLinecap="round"
-                                />
-
-                                {/* Dot markers on the line */}
-                                <circle cx="90" cy="160" r="4.5" fill="#f59e0b" stroke="#ffffff" strokeWidth="2" />
-                                <circle cx="170" cy="130" r="4.5" fill="#f59e0b" stroke="#ffffff" strokeWidth="2" />
-                                <circle cx="250" cy="140" r="4.5" fill="#f59e0b" stroke="#ffffff" strokeWidth="2" />
-                                <circle cx="330" cy="115" r="4.5" fill="#f59e0b" stroke="#ffffff" strokeWidth="2" />
-                                <circle cx="410" cy="70" r="4.5" fill="#f59e0b" stroke="#ffffff" strokeWidth="2" />
-                                <circle cx="490" cy="90" r="4.5" fill="#f59e0b" stroke="#ffffff" strokeWidth="2" />
-                                <circle cx="570" cy="120" r="4.5" fill="#f59e0b" stroke="#ffffff" strokeWidth="2" />
-
-                                {/* Left Axis Labels (Ventes) */}
-                                <text x="10" y="44" fill="#94a3b8" fontSize="10" fontWeight="600" fontFamily="sans-serif">8000</text>
-                                <text x="10" y="94" fill="#94a3b8" fontSize="10" fontWeight="600" fontFamily="sans-serif">6000</text>
-                                <text x="10" y="144" fill="#94a3b8" fontSize="10" fontWeight="600" fontFamily="sans-serif">4000</text>
-                                <text x="10" y="194" fill="#94a3b8" fontSize="10" fontWeight="600" fontFamily="sans-serif">2000</text>
-
-                                {/* Right Axis Labels (Commandes) */}
-                                <text x="580" y="44" fill="#94a3b8" fontSize="10" fontWeight="600" fontFamily="sans-serif">100</text>
-                                <text x="580" y="94" fill="#94a3b8" fontSize="10" fontWeight="600" fontFamily="sans-serif">75</text>
-                                <text x="580" y="144" fill="#94a3b8" fontSize="10" fontWeight="600" fontFamily="sans-serif">50</text>
-                                <text x="580" y="194" fill="#94a3b8" fontSize="10" fontWeight="600" fontFamily="sans-serif">25</text>
-
-                                {/* X Axis Line */}
-                                <line x1="40" y1="190" x2="570" y2="190" stroke="#cbd5e1" strokeWidth="1" />
-
-                                {/* X Axis Labels */}
-                                <text x="83" y="210" fill="#94a3b8" fontSize="10" fontWeight="600" fontFamily="sans-serif">Lun</text>
-                                <text x="163" y="210" fill="#94a3b8" fontSize="10" fontWeight="600" fontFamily="sans-serif">Mar</text>
-                                <text x="243" y="210" fill="#94a3b8" fontSize="10" fontWeight="600" fontFamily="sans-serif">Mer</text>
-                                <text x="323" y="210" fill="#94a3b8" fontSize="10" fontWeight="600" fontFamily="sans-serif">Jeu</text>
-                                <text x="403" y="210" fill="#94a3b8" fontSize="10" fontWeight="600" fontFamily="sans-serif">Ven</text>
-                                <text x="483" y="210" fill="#94a3b8" fontSize="10" fontWeight="600" fontFamily="sans-serif">Sam</text>
-                                <text x="561" y="210" fill="#94a3b8" fontSize="10" fontWeight="600" fontFamily="sans-serif">Dim</text>
-                            </svg>
-                        </div>
-                    </div>
-
-                    {/* Right: Pie Category Sales Chart */}
-                    <div className="bg-white border border-surface-200 rounded-3xl p-5 shadow-xs flex flex-col justify-between">
-                        <div>
-                            <h4 className="text-sm font-bold text-surface-900">Ventes par catégorie</h4>
-                            <span className="text-[11px] text-surface-400 mt-0.5 block">Répartition sur le mois en cours</span>
-                        </div>
-
-                        {/* SVG Donut Chart */}
-                        <div className="flex justify-center items-center my-4">
-                            <svg className="w-32 h-32" viewBox="0 0 36 36">
-                                <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#f1f5f9" strokeWidth="4" />
-                                {/* Blue (Electronics) - 35% */}
-                                <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#3b82f6" strokeWidth="4" 
-                                    strokeDasharray="35 65" strokeDashoffset="25" />
-                                {/* Amber (Fashion) - 25% */}
-                                <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#f59e0b" strokeWidth="4" 
-                                    strokeDasharray="25 75" strokeDashoffset="90" />
-                                {/* Purple (Home) - 20% */}
-                                <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#8b5cf6" strokeWidth="4" 
-                                    strokeDasharray="20 80" strokeDashoffset="115" />
-                                {/* Emerald (Beauty) - 12% */}
-                                <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#10b981" strokeWidth="4" 
-                                    strokeDasharray="12 88" strokeDashoffset="135" />
-                                {/* Rose (Sports) - 8% */}
-                                <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#f43f5e" strokeWidth="4" 
-                                    strokeDasharray="8 92" strokeDashoffset="143" />
-                            </svg>
-                        </div>
-
-                        {/* Breakdown List */}
-                        <div className="space-y-2 text-xs font-semibold text-surface-600">
-                            {[
-                                { name: 'Électronique', percent: '35%', color: 'bg-blue-500' },
-                                { name: 'Mode', percent: '25%', color: 'bg-yellow-500' },
-                                { name: 'Maison', percent: '20%', color: 'bg-purple-500' },
-                                { name: 'Beauté', percent: '12%', color: 'bg-emerald-500' },
-                                { name: 'Sports', percent: '8%', color: 'bg-rose-500' }
-                            ].map((cat) => (
-                                <div key={cat.name} className="flex justify-between items-center">
-                                    <div className="flex items-center space-x-2">
-                                        <span className={`w-2.5 h-2.5 rounded-full ${cat.color}`} />
-                                        <span>{cat.name}</span>
-                                    </div>
-                                    <span className="font-mono text-surface-900">{cat.percent}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-                {/* 5. Details Lists (KYC, Orders, Top Sellers) */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Left: Demandes KYC Récentes & Commandes Récentes */}
-                    <div className="lg:col-span-2 space-y-6">
-                        {/* A. Demandes KYC Récentes */}
-                        <div className="bg-white border border-surface-200 rounded-3xl p-5 shadow-xs">
-                            <div className="flex justify-between items-center border-b border-surface-100 pb-3 mb-4">
-                                <h4 className="text-sm font-bold text-surface-900 flex items-center space-x-2">
-                                    <Clock className="w-4 h-4 text-yellow-500" />
-                                    <span>Demandes KYC Récentes</span>
-                                </h4>
-                                <Link href={route('admin.users.all')} className="text-xs font-semibold text-yellow-600 hover:underline">
-                                    Tout voir &rarr;
-                                </Link>
-                            </div>
-                            {recentKyc.length === 0 ? (
-                                <div className="py-6 text-center text-surface-400 text-xs font-semibold">
-                                    Aucun dossier KYC en attente de traitement.
-                                </div>
-                            ) : (
-                                <div className="divide-y divide-surface-50">
-                                    {recentKyc.map((req) => (
-                                        <div key={req.id} className="py-3 flex items-center justify-between">
-                                            <div className="flex items-center space-x-3">
-                                                <div className="w-9 h-9 rounded-xl bg-surface-50 border border-surface-150 flex items-center justify-center font-bold text-xs text-surface-600">
-                                                    {req.user.first_name[0]}{req.user.last_name[0]}
-                                                </div>
-                                                <div>
-                                                    <span className="text-xs font-bold text-surface-900 block">{req.user.first_name} {req.user.last_name}</span>
-                                                    <span className="text-[10px] text-surface-400 block capitalize mt-0.5">
-                                                        {req.type === 'seller' ? 'Vendeur' : 'Livreur'} • Soumis le {new Date(req.submitted_at).toLocaleDateString('fr-FR')}
-                                                    </span>
-                                                </div>
+                        {/* Interactive Bar Chart */}
+                        <div className="pt-4 pb-2">
+                            <div className="grid grid-cols-6 gap-3 items-end h-44 border-b border-stone-200 pb-2 px-2">
+                                {monthlyTrend.map((m, idx) => {
+                                    const heightPercent = maxVolume > 0 ? Math.max(12, Math.round((m.volume / maxVolume) * 100)) : 12;
+                                    return (
+                                        <div key={idx} className="flex flex-col items-center gap-2 group h-full justify-end">
+                                            <div className="text-[10px] font-bold text-stone-700 opacity-0 group-hover:opacity-100 transition-opacity bg-stone-900 text-white px-2 py-0.5 rounded shadow-xs">
+                                                {Number(m.volume).toLocaleString('fr-FR')} F
                                             </div>
-                                            <div className="flex items-center space-x-3">
-                                                <Badge variant={req.status === 'pending' ? 'warning' : 'neutral'}>
-                                                    {req.status === 'pending' ? 'En attente' : req.status}
-                                                </Badge>
-                                                <Link href={route('admin.kyc.show', req.id)}>
-                                                    <Button variant="outline" size="sm" className="p-1.5 border border-surface-200 text-surface-500 hover:bg-surface-50 rounded-xl">
-                                                        <ArrowRight className="w-3.5 h-3.5" />
-                                                    </Button>
-                                                </Link>
-                                            </div>
+                                            <div 
+                                                style={{ height: `${heightPercent}%` }}
+                                                className="w-full bg-gradient-to-t from-yellow-500 to-yellow-400 rounded-t-xl group-hover:from-yellow-600 group-hover:to-yellow-500 transition-all duration-300 shadow-2xs"
+                                            />
+                                            <span className="text-[11px] font-semibold text-stone-600 truncate">{m.month}</span>
                                         </div>
-                                    ))}
-                                </div>
-                            )}
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Operational Metrics Breakdown (1 col) */}
+                    <div className="bg-white border border-stone-200/80 p-6 rounded-2xl shadow-2xs space-y-5">
+                        <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                            <div className="flex items-center gap-2">
+                                <PieChart className="w-4 h-4 text-yellow-600" />
+                                <h3 className="font-bold text-sm text-stone-900">Santé des opérations</h3>
+                            </div>
                         </div>
 
-                        {/* B. Commandes Récentes */}
-                        <div className="bg-white border border-surface-200 rounded-3xl p-5 shadow-xs">
-                            <div className="flex justify-between items-center border-b border-surface-100 pb-3 mb-4">
-                                <h4 className="text-sm font-bold text-surface-900 flex items-center space-x-2">
-                                    <ShoppingBag className="w-4 h-4 text-blue-500" />
-                                    <span>Commandes récentes</span>
-                                </h4>
-                                <span className="text-[10px] text-surface-400 font-mono font-bold">12 nouvelles aujourd'hui</span>
+                        <div className="space-y-4 pt-1 text-xs">
+                            <div className="space-y-1">
+                                <div className="flex justify-between font-semibold">
+                                    <span className="text-stone-600">Commandes en préparation / attente</span>
+                                    <span className="text-stone-900">{stats.pending_orders || 0}</span>
+                                </div>
+                                <div className="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
+                                    <div className="h-full bg-amber-500 rounded-full w-3/4" />
+                                </div>
                             </div>
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left text-xs">
-                                    <thead>
-                                        <tr className="text-surface-400 font-bold uppercase tracking-wider border-b border-surface-100 pb-2">
-                                            <th className="pb-2.5 font-semibold">Commande ID</th>
-                                            <th className="pb-2.5 font-semibold">Client</th>
-                                            <th className="pb-2.5 font-semibold">Date</th>
-                                            <th className="pb-2.5 font-semibold">Montant</th>
-                                            <th className="pb-2.5 font-semibold">Statut</th>
+
+                            <div className="space-y-1">
+                                <div className="flex justify-between font-semibold">
+                                    <span className="text-stone-600">Colis en cours de livraison (OTP)</span>
+                                    <span className="text-purple-700">{stats.in_transit_orders || 0}</span>
+                                </div>
+                                <div className="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
+                                    <div className="h-full bg-purple-500 rounded-full w-1/2" />
+                                </div>
+                            </div>
+
+                            <div className="space-y-1">
+                                <div className="flex justify-between font-semibold">
+                                    <span className="text-stone-600">Livraisons confirmées & réglées</span>
+                                    <span className="text-emerald-700">{stats.delivered_orders || 0}</span>
+                                </div>
+                                <div className="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
+                                    <div className="h-full bg-emerald-500 rounded-full w-full" />
+                                </div>
+                            </div>
+
+                            <div className="space-y-1">
+                                <div className="flex justify-between font-semibold">
+                                    <span className="text-stone-600">Chauffeurs livreurs homologués</span>
+                                    <span className="text-blue-700">{stats.verified_drivers || 0} / {stats.total_drivers || 0}</span>
+                                </div>
+                                <div className="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
+                                    <div className="h-full bg-blue-500 rounded-full w-4/5" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="pt-2 border-t border-stone-100">
+                            <Link 
+                                href={route('admin.users.sellers')}
+                                className="w-full py-2.5 bg-stone-50 hover:bg-yellow-50 text-stone-700 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors border border-stone-200"
+                            >
+                                <span>Gérer les boutiques & vendeurs</span>
+                                <ArrowRight className="w-3.5 h-3.5" />
+                            </Link>
+                        </div>
+                    </div>
+
+                </div>
+
+                {/* 4. URGENT DISPUTES ARBITRATION SECTION */}
+                <div className="bg-white border border-stone-200/80 rounded-2xl p-6 shadow-2xs space-y-4">
+                    <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                        <div className="flex items-center gap-2">
+                            <AlertTriangle className="w-4.5 h-4.5 text-rose-600" />
+                            <div>
+                                <h3 className="font-bold text-sm text-stone-900">Arbitrage des litiges & réclamations urgentes</h3>
+                                <p className="text-xs text-stone-500 font-normal">Examinez le motif du client et la défense du vendeur avant de débloquer ou rembourser les fonds.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {urgentDisputes && urgentDisputes.length > 0 ? (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr className="border-b border-stone-100 text-[11px] font-semibold text-stone-400 uppercase">
+                                        <th className="py-2.5 px-3">Commande</th>
+                                        <th className="py-2.5 px-3">Acheteur</th>
+                                        <th className="py-2.5 px-3">Boutique / Vendeur</th>
+                                        <th className="py-2.5 px-3">Motif réclamation</th>
+                                        <th className="py-2.5 px-3">Montant</th>
+                                        <th className="py-2.5 px-3 text-right">Décision d'arbitrage admin</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-stone-100">
+                                    {urgentDisputes.map((d) => (
+                                        <tr key={d.id} className="hover:bg-stone-50/60 transition-colors">
+                                            <td className="py-3 px-3 font-mono font-bold text-stone-900">
+                                                #{d.order?.order_number}
+                                            </td>
+                                            <td className="py-3 px-3 font-semibold text-stone-800">
+                                                {d.order?.user ? `${d.order.user.first_name} ${d.order.user.last_name}` : 'Client'}
+                                            </td>
+                                            <td className="py-3 px-3 font-semibold text-stone-800">
+                                                {d.order?.shop?.name || 'Boutique'}
+                                            </td>
+                                            <td className="py-3 px-3 text-stone-600 max-w-xs truncate">
+                                                {d.reason}
+                                            </td>
+                                            <td className="py-3 px-3 font-bold text-stone-900">
+                                                {Number(d.order?.total_amount || 0).toLocaleString('fr-FR')} FCFA
+                                            </td>
+                                            <td className="py-3 px-3 text-right space-x-2">
+                                                <button
+                                                    onClick={() => handleResolveDispute(d.id, 'refund_buyer')}
+                                                    disabled={processing}
+                                                    className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 rounded-xl font-bold text-[11px] transition-colors"
+                                                >
+                                                    Rembourser client
+                                                </button>
+                                                <button
+                                                    onClick={() => handleResolveDispute(d.id, 'release_seller')}
+                                                    disabled={processing}
+                                                    className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl font-bold text-[11px] transition-colors"
+                                                >
+                                                    Payer vendeur
+                                                </button>
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-surface-50 text-surface-700 font-semibold">
-                                        {recentOrders.map((ord) => (
-                                            <tr key={ord.id} className="hover:bg-surface-50/50">
-                                                <td className="py-2.5 font-mono text-surface-900">{ord.id}</td>
-                                                <td className="py-2.5">{ord.customer}</td>
-                                                <td className="py-2.5 text-surface-400">{ord.date}</td>
-                                                <td className="py-2.5 font-mono text-surface-900">{ord.amount}</td>
-                                                <td className="py-2.5">
-                                                    <Badge variant={
-                                                        ord.status === 'delivered' ? 'success' :
-                                                        ord.status === 'pending' ? 'warning' : 'danger'
-                                                    }>
-                                                        {ord.status === 'delivered' ? 'Livrée' : ord.status === 'pending' ? 'En cours' : 'Annulée'}
-                                                    </Badge>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <div className="p-6 text-center text-stone-400 bg-stone-50/50 rounded-xl">
+                            <ShieldCheck className="w-8 h-8 text-emerald-500 mx-auto mb-1 opacity-80" />
+                            <p className="text-xs font-semibold text-stone-700">Aucun litige en attente d'arbitrage</p>
+                        </div>
+                    )}
+                </div>
+
+                {/* 5. RECENT ESCROW TRANSACTIONS TABLE */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    {/* Recent Orders (2 cols) */}
+                    <div className="lg:col-span-2 bg-white border border-stone-200/80 rounded-2xl p-6 shadow-2xs space-y-4">
+                        <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                            <h3 className="font-bold text-sm text-stone-900">Dernières commandes & transactions Escrow</h3>
+                            <span className="text-xs text-stone-400 font-normal">Supervision en direct</span>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr className="border-b border-stone-100 text-[11px] font-semibold text-stone-400 uppercase">
+                                        <th className="py-2.5 px-3">N° Commande</th>
+                                        <th className="py-2.5 px-3">Client</th>
+                                        <th className="py-2.5 px-3">Boutique</th>
+                                        <th className="py-2.5 px-3">Montant</th>
+                                        <th className="py-2.5 px-3">Statut</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-stone-100">
+                                    {recentOrders && recentOrders.length > 0 ? (
+                                        recentOrders.map((o) => (
+                                            <tr key={o.id} className="hover:bg-stone-50/60 transition-colors">
+                                                <td className="py-3 px-3 font-mono font-bold text-stone-900">
+                                                    #{o.order_number}
+                                                </td>
+                                                <td className="py-3 px-3 font-semibold text-stone-800">
+                                                    {o.user ? `${o.user.first_name} ${o.user.last_name}` : 'Client'}
+                                                </td>
+                                                <td className="py-3 px-3 text-stone-600">
+                                                    {o.shop?.name || 'Boutique'}
+                                                </td>
+                                                <td className="py-3 px-3 font-bold text-stone-900">
+                                                    {Number(o.total_amount).toLocaleString('fr-FR')} FCFA
+                                                </td>
+                                                <td className="py-3 px-3">
+                                                    {orderStatusBadge(o.delivery_status)}
                                                 </td>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="5" className="py-6 text-center text-stone-400">Aucune commande récente.</td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
-                    {/* Right: Top Sellers List & Recent Operations */}
-                    <div className="space-y-6">
-                        {/* A. Top Vendeurs */}
-                        <div className="bg-white border border-surface-200 rounded-3xl p-5 shadow-xs">
-                            <div className="flex justify-between items-center border-b border-surface-100 pb-3 mb-4">
-                                <h4 className="text-sm font-bold text-surface-900 flex items-center space-x-2">
-                                    <Award className="w-4 h-4 text-purple-500" />
-                                    <span>Top Vendeurs</span>
-                                </h4>
-                                <span className="text-[10px] text-surface-400 font-bold uppercase tracking-wider">Ce mois</span>
-                            </div>
-                            <div className="space-y-3.5 text-xs font-semibold text-surface-600">
-                                {topSellers.map((seller, idx) => (
-                                    <div key={idx} className="flex justify-between items-center">
-                                        <div className="flex items-center space-x-3">
-                                            <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center font-black">
-                                                {seller.name[0]}
-                                            </div>
-                                            <div>
-                                                <span className="text-xs font-bold text-surface-900 block">{seller.name}</span>
-                                                <span className="text-[10px] text-surface-400 block mt-0.5">{seller.category}</span>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <span className="text-xs font-bold text-surface-900 block font-mono">{seller.revenue}</span>
-                                            <span className="text-[10px] text-surface-400 block font-mono mt-0.5">{seller.sales} commandes</span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                    {/* Pending KYC Submissions (1 col) */}
+                    <div className="bg-white border border-stone-200/80 rounded-2xl p-6 shadow-2xs space-y-4">
+                        <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                            <h3 className="font-bold text-sm text-stone-900 flex items-center gap-1.5">
+                                <UserCheck className="w-4 h-4 text-yellow-600" />
+                                <span>KYC en attente</span>
+                            </h3>
+                            <Link href={route('admin.kyc.index')} className="text-xs text-yellow-700 font-semibold hover:underline">
+                                Voir tous
+                            </Link>
                         </div>
 
-                        {/* B. Activités Récentes */}
-                        <div className="bg-white border border-surface-200 rounded-3xl p-5 shadow-xs">
-                            <div className="flex justify-between items-center border-b border-surface-100 pb-3 mb-4">
-                                <h4 className="text-sm font-bold text-surface-900 flex items-center space-x-2">
-                                    <Clock className="w-4 h-4 text-emerald-500" />
-                                    <span>Activités Récentes</span>
-                                </h4>
-                            </div>
-                            {activities.length === 0 ? (
-                                <div className="py-4 text-center text-surface-400 text-xs font-semibold">
-                                    Aucune activité enregistrée.
-                                </div>
-                            ) : (
-                                <div className="space-y-4 relative border-l border-surface-150 pl-3.5 ml-2 py-1">
-                                    {activities.slice(0, 5).map((log) => (
-                                        <div key={log.id} className="relative text-xs">
-                                            <div className="absolute -left-[20.5px] top-1 w-2 h-2 rounded-full bg-emerald-500 ring-4 ring-white" />
-                                            <div className="flex justify-between items-center">
-                                                <span className="font-bold text-surface-900">
-                                                    {log.user ? `${log.user.first_name} ${log.user.last_name}` : 'Système'}
-                                                </span>
-                                                <span className="text-[10px] text-surface-400 font-mono">
-                                                    {new Date(log.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                                                </span>
-                                            </div>
-                                            <p className="text-[11px] text-surface-500 leading-relaxed mt-0.5 font-medium">
-                                                {log.description}
+                        <div className="space-y-3 text-xs">
+                            {recentKyc && recentKyc.length > 0 ? (
+                                recentKyc.map((kyc) => (
+                                    <div key={kyc.id} className="p-3 bg-stone-50 border border-stone-100 rounded-xl flex items-center justify-between">
+                                        <div>
+                                            <p className="font-semibold text-stone-900">
+                                                {kyc.user ? `${kyc.user.first_name} ${kyc.user.last_name}` : 'Utilisateur'}
                                             </p>
+                                            <span className="text-[10px] text-stone-400 block uppercase">
+                                                Role : {kyc.user?.role}
+                                            </span>
                                         </div>
-                                    ))}
-                                </div>
+                                        <Link
+                                            href={route('admin.kyc.show', kyc.id)}
+                                            className="px-2.5 py-1 bg-white border border-stone-200 hover:bg-yellow-400 hover:text-stone-950 text-stone-700 font-bold rounded-lg transition-colors text-[11px]"
+                                        >
+                                            Examiner
+                                        </Link>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-xs text-stone-400 text-center py-4">Aucun dossier KYC en attente.</p>
                             )}
                         </div>
                     </div>
+
                 </div>
+
             </div>
         </AdminLayout>
     );

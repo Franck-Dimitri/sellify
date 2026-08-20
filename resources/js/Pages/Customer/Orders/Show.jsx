@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, router } from '@inertiajs/react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 import { 
     ArrowLeft, 
@@ -16,13 +16,20 @@ import {
     AlertTriangle,
     X,
     ExternalLink,
-    FileText
+    FileText,
+    Star,
+    Ban
 } from 'lucide-react';
 
 export default function Show({ order }) {
     const [isDisputeOpen, setIsDisputeOpen] = useState(false);
+    const [reviewModalItem, setReviewModalItem] = useState(null);
+    const [rating, setRating] = useState(5);
+    const [comment, setComment] = useState('');
 
     const { post: confirmPost, processing: confirmProcessing } = useForm();
+    const { post: cancelPost, processing: cancelProcessing } = useForm();
+    
     const { data: disputeData, setData: setDisputeData, post: disputePost, processing: disputeProcessing } = useForm({
         reason: '',
         evidence: '',
@@ -34,10 +41,33 @@ export default function Show({ order }) {
         }
     };
 
+    const handleCancelOrder = () => {
+        if (confirm('Voulez-vous vraiment annuler cette commande ? Les fonds sous séquestre vous seront totalement remboursés.')) {
+            cancelPost(route('customer.orders.cancel', order.order_number));
+        }
+    };
+
     const handleDisputeSubmit = (e) => {
         e.preventDefault();
         disputePost(route('customer.orders.dispute', order.order_number), {
             onSuccess: () => setIsDisputeOpen(false)
+        });
+    };
+
+    const handleReviewSubmit = (e) => {
+        e.preventDefault();
+        if (!reviewModalItem) return;
+        
+        router.post(route('customer.orders.review', order.order_number), {
+            product_id: reviewModalItem.product_id,
+            rating: rating,
+            comment: comment,
+        }, {
+            onSuccess: () => {
+                setReviewModalItem(null);
+                setComment('');
+                setRating(5);
+            }
         });
     };
 
@@ -48,6 +78,9 @@ export default function Show({ order }) {
         { key: 'transit', label: 'En livraison', done: ['in_transit', 'delivered'].includes(order.delivery_status) },
         { key: 'delivered', label: 'Livré & Validé', done: order.delivery_status === 'delivered' || order.payment_status === 'released' },
     ];
+
+    const canCancel = ['pending', 'preparing'].includes(order.delivery_status) && order.payment_status !== 'refunded';
+    const isDelivered = order.delivery_status === 'delivered' || order.payment_status === 'released';
 
     return (
         <CustomerLayout title={`Commande ${order.order_number}`}>
@@ -67,8 +100,12 @@ export default function Show({ order }) {
                         <div>
                             <div className="flex items-center gap-2">
                                 <h1 className="text-lg font-semibold text-stone-900">{order.order_number}</h1>
-                                <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-yellow-50 text-yellow-900 border border-yellow-200">
-                                    Paiement Escrow Sécurisé
+                                <span className={`px-2 py-0.5 rounded-md text-xs font-medium border ${
+                                    order.delivery_status === 'cancelled'
+                                        ? 'bg-rose-50 text-rose-800 border-rose-200'
+                                        : 'bg-yellow-50 text-yellow-900 border-yellow-200'
+                                }`}>
+                                    {order.delivery_status === 'cancelled' ? 'Commande Annulée' : 'Paiement Escrow Sécurisé'}
                                 </span>
                             </div>
                             <p className="text-xs text-stone-500 mt-0.5">
@@ -77,7 +114,7 @@ export default function Show({ order }) {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                         <a
                             href={route('customer.orders.invoice', order.order_number)}
                             target="_blank"
@@ -88,8 +125,20 @@ export default function Show({ order }) {
                             <span>Facture PDF</span>
                         </a>
 
+                        {/* Order Cancel Button */}
+                        {canCancel && (
+                            <button
+                                onClick={handleCancelOrder}
+                                disabled={cancelProcessing}
+                                className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-medium rounded-lg flex items-center gap-1.5 transition-colors"
+                            >
+                                <Ban className="w-3.5 h-3.5" />
+                                <span>Annuler la commande</span>
+                            </button>
+                        )}
+
                         {/* Direct Escrow Release Button */}
-                        {order.payment_status === 'escrow_held' && (
+                        {order.payment_status === 'escrow_held' && order.delivery_status !== 'cancelled' && (
                             <button
                                 onClick={handleConfirmDelivery}
                                 disabled={confirmProcessing}
@@ -103,41 +152,53 @@ export default function Show({ order }) {
                 </div>
 
                 {/* Timeline Progress */}
-                <div className="bg-white border border-stone-200 p-5 rounded-xl space-y-4">
-                    <h2 className="text-xs font-semibold text-stone-500 uppercase tracking-wider">État d'avancement de votre livraison</h2>
-                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                        {steps.map((s, idx) => (
-                            <div key={idx} className="flex flex-col items-center text-center space-y-1.5">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium border ${
-                                    s.done ? 'bg-yellow-500 text-stone-950 border-yellow-500 font-semibold' : 'bg-stone-100 text-stone-400 border-stone-200'
-                                }`}>
-                                    {s.done ? <CheckCircle2 className="w-4 h-4" /> : idx + 1}
+                {order.delivery_status !== 'cancelled' ? (
+                    <div className="bg-white border border-stone-200 p-5 rounded-xl space-y-4">
+                        <h2 className="text-xs font-semibold text-stone-500 uppercase tracking-wider">État d'avancement de votre livraison</h2>
+                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                            {steps.map((s, idx) => (
+                                <div key={idx} className="flex flex-col items-center text-center space-y-1.5">
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium border ${
+                                        s.done ? 'bg-yellow-500 text-stone-950 border-yellow-500 font-semibold' : 'bg-stone-100 text-stone-400 border-stone-200'
+                                    }`}>
+                                        {s.done ? <CheckCircle2 className="w-4 h-4" /> : idx + 1}
+                                    </div>
+                                    <span className={`text-[11px] ${s.done ? 'font-medium text-stone-900' : 'text-stone-400'}`}>
+                                        {s.label}
+                                    </span>
                                 </div>
-                                <span className={`text-[11px] ${s.done ? 'font-medium text-stone-900' : 'text-stone-400'}`}>
-                                    {s.label}
-                                </span>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
-                </div>
+                ) : (
+                    <div className="bg-rose-50 border border-rose-200 p-4 rounded-xl flex items-center gap-3 text-xs text-rose-800">
+                        <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+                        <div>
+                            <span className="font-bold">Cette commande a été annulée.</span>
+                            <p className="text-rose-700 mt-0.5">Les fonds consignés sous séquestre Escrow ont été intégralement remboursés et le stock a été remis à disposition.</p>
+                        </div>
+                    </div>
+                )}
 
                 {/* OTP Highlight Banner */}
-                <div className="bg-yellow-500 text-stone-950 p-5 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-stone-950 text-yellow-400 flex items-center justify-center shrink-0">
-                            <Key className="w-5 h-5" />
+                {order.delivery_status !== 'cancelled' && (
+                    <div className="bg-yellow-500 text-stone-950 p-5 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-stone-950 text-yellow-400 flex items-center justify-center shrink-0">
+                                <Key className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-sm">Votre Code Secret de Livraison (OTP)</h3>
+                                <p className="text-xs text-stone-900 opacity-90 mt-0.5">
+                                    Communiquez ce code au livreur uniquement après avoir vérifié le contenu de votre colis.
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 className="font-semibold text-sm">Votre Code Secret de Livraison (OTP)</h3>
-                            <p className="text-xs text-stone-900 opacity-90 mt-0.5">
-                                Communiquez ce code au livreur uniquement après avoir vérifié le contenu de votre colis.
-                            </p>
+                        <div className="bg-stone-950 text-yellow-400 font-mono text-2xl font-bold px-4 py-2 rounded-lg tracking-widest">
+                            {order.delivery_otp || '------'}
                         </div>
                     </div>
-                    <div className="bg-stone-950 text-yellow-400 font-mono text-2xl font-bold px-4 py-2 rounded-lg tracking-widest">
-                        {order.delivery_otp || '------'}
-                    </div>
-                </div>
+                )}
 
                 {/* Order Details & Summary */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -148,15 +209,43 @@ export default function Show({ order }) {
                         </h3>
 
                         <div className="divide-y divide-stone-100">
-                            {order.items?.map((item) => (
-                                <div key={item.id} className="py-3 flex justify-between items-center text-xs">
-                                    <div>
-                                        <p className="font-medium text-stone-900">{item.product_name}</p>
-                                        <p className="text-stone-500 text-[11px]">Qté : {item.quantity} × {Number(item.unit_price).toLocaleString('fr-FR')} FCFA</p>
+                            {order.items?.map((item) => {
+                                const existingReview = order.reviews?.find(r => r.product_id === item.product_id);
+                                return (
+                                    <div key={item.id} className="py-3 flex justify-between items-center text-xs gap-3">
+                                        <div className="flex-1">
+                                            <p className="font-medium text-stone-900">{item.product_name}</p>
+                                            <p className="text-stone-500 text-[11px]">Qté : {item.quantity} × {Number(item.unit_price).toLocaleString('fr-FR')} FCFA</p>
+                                            
+                                            {/* Review status or trigger button */}
+                                            {isDelivered && (
+                                                <div className="mt-1.5">
+                                                    {existingReview ? (
+                                                        <div className="flex items-center gap-1 text-emerald-600 text-[11px] font-medium">
+                                                            <Star className="w-3 h-3 fill-emerald-600" />
+                                                            <span>Avis déposé ({existingReview.rating}/5 étoiles)</span>
+                                                        </div>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() => {
+                                                                setReviewModalItem(item);
+                                                                setRating(5);
+                                                                setComment('');
+                                                            }}
+                                                            className="text-yellow-700 hover:text-yellow-800 text-[11px] font-semibold flex items-center gap-1 underline"
+                                                        >
+                                                            <Star className="w-3 h-3 text-yellow-500" />
+                                                            <span>Évaluer ce produit</span>
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <p className="font-semibold text-stone-900 shrink-0">{Number(item.subtotal).toLocaleString('fr-FR')} FCFA</p>
                                     </div>
-                                    <p className="font-semibold text-stone-900">{Number(item.subtotal).toLocaleString('fr-FR')} FCFA</p>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
 
                         <div className="border-t border-stone-200 pt-3 space-y-1 text-xs">
@@ -193,7 +282,7 @@ export default function Show({ order }) {
                         </div>
 
                         {/* Dispute trigger button */}
-                        {!order.dispute && order.payment_status === 'escrow_held' && (
+                        {!order.dispute && order.payment_status === 'escrow_held' && order.delivery_status !== 'cancelled' && (
                             <button
                                 onClick={() => setIsDisputeOpen(true)}
                                 className="w-full py-2.5 bg-stone-100 hover:bg-rose-50 text-stone-600 hover:text-rose-700 border border-stone-200 hover:border-rose-200 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
@@ -216,6 +305,68 @@ export default function Show({ order }) {
                         )}
                     </div>
                 </div>
+
+                {/* Review Modal */}
+                {reviewModalItem && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
+                        <div className="bg-white border border-stone-200 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
+                            <div className="flex justify-between items-center pb-3 border-b border-stone-100">
+                                <h3 className="text-sm font-bold text-stone-900 flex items-center gap-2">
+                                    <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                                    <span>Évaluer : {reviewModalItem.product_name}</span>
+                                </h3>
+                                <button onClick={() => setReviewModalItem(null)} className="text-stone-400 hover:text-stone-700">
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleReviewSubmit} className="space-y-4 text-xs">
+                                <div>
+                                    <label className="font-semibold text-stone-700 block mb-2 text-center">Note globale :</label>
+                                    <div className="flex justify-center gap-2">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <button
+                                                key={star}
+                                                type="button"
+                                                onClick={() => setRating(star)}
+                                                className="p-1 hover:scale-110 transition-transform"
+                                            >
+                                                <Star className={`w-7 h-7 ${star <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-stone-300'}`} />
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="font-semibold text-stone-700 block mb-1">Votre commentaire :</label>
+                                    <textarea
+                                        rows="3"
+                                        value={comment}
+                                        onChange={(e) => setComment(e.target.value)}
+                                        placeholder="Qu'avez-vous pensé de la qualité du produit et des délais ?"
+                                        className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl outline-none focus:ring-2 focus:ring-yellow-400 text-stone-800 text-xs"
+                                    />
+                                </div>
+
+                                <div className="pt-2 flex gap-2 justify-end border-t border-stone-100">
+                                    <button
+                                        type="button"
+                                        onClick={() => setReviewModalItem(null)}
+                                        className="px-3.5 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold rounded-xl"
+                                    >
+                                        Annuler
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold rounded-xl shadow-xs"
+                                    >
+                                        Publier l'Avis
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
 
                 {/* Dispute Modal */}
                 {isDisputeOpen && (

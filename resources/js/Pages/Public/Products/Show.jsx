@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, router } from '@inertiajs/react';
 import PublicLayout from '../../../Layouts/PublicLayout';
 import { 
     Package, 
@@ -31,10 +31,22 @@ import {
     ChevronRight,
     MapPin,
     Phone,
-    Mail
+    Mail,
+    Heart,
+    MessageSquare
 } from 'lucide-react';
 
-export default function Show({ product, shop, seller, sellerUser, relatedProducts = [] }) {
+export default function Show({ 
+    product, 
+    shop, 
+    seller, 
+    sellerUser, 
+    relatedProducts = [], 
+    reviews = [], 
+    averageRating = 5.0, 
+    totalReviews = 0, 
+    isWishlisted = false 
+}) {
     const images = product.image_paths && product.image_paths.length > 0 
         ? product.image_paths.map(p => `/storage/${p}`) 
         : [];
@@ -213,14 +225,26 @@ export default function Show({ product, shop, seller, sellerUser, relatedProduct
                                     <span className="bg-yellow-100 text-yellow-950 font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider border border-yellow-300">
                                         Fournisseur Certifié
                                     </span>
-                                    <span className="text-stone-400 font-mono">SKU : {product.sku || `PROD-${product.id}`}</span>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => router.post(route('customer.wishlist.toggle', product.id), {}, { preserveScroll: true })}
+                                            className={`p-1.5 rounded-lg border transition-colors ${
+                                                isWishlisted ? 'bg-rose-50 border-rose-200 text-rose-600' : 'bg-stone-50 border-stone-200 text-stone-400 hover:text-rose-500'
+                                            }`}
+                                            title={isWishlisted ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                                        >
+                                            <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-rose-500' : ''}`} />
+                                        </button>
+                                        <span className="text-stone-400 font-mono">SKU : {product.sku || `PROD-${product.id}`}</span>
+                                    </div>
                                 </div>
                                 <h1 className="text-xl font-semibold text-stone-900 leading-snug">{product.name}</h1>
                                 
                                 <div className="flex items-center gap-3 text-xs text-stone-500 pt-1">
                                     <span className="flex items-center gap-1 font-semibold text-stone-900">
                                         <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
-                                        <span>4.9 / 5</span>
+                                        <span>{averageRating} / 5 ({totalReviews} avis)</span>
                                     </span>
                                     <span>•</span>
                                     <span className="text-emerald-700 font-medium flex items-center gap-1">
@@ -428,6 +452,7 @@ export default function Show({ product, shop, seller, sellerUser, relatedProduct
                             {[
                                 { id: 'specs', label: 'Spécifications Techniques', icon: Layers },
                                 { id: 'description', label: 'Description & Fiche Complète', icon: FileText },
+                                { id: 'reviews', label: `Avis Clients Vérifiés (${totalReviews})`, icon: MessageSquare },
                                 { id: 'supplier', label: 'Profil Officiel du Fournisseur', icon: Building2 },
                                 { id: 'escrow', label: 'Garanties & Expédition Escrow', icon: ShieldCheck }
                             ].map((t) => {
@@ -483,6 +508,50 @@ export default function Show({ product, shop, seller, sellerUser, relatedProduct
                                     <p className="whitespace-pre-line bg-stone-50 p-4 rounded-xl border border-stone-200/60">
                                         {product.description || 'Aucune description spécifique fournie par le vendeur pour cet article.'}
                                     </p>
+                                </div>
+                            )}
+
+                            {activeTab === 'reviews' && (
+                                <div className="space-y-4 text-xs">
+                                    <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                                        <div>
+                                            <h3 className="text-xs font-bold text-stone-900 uppercase tracking-wider">Avis Client Authentiques & Vérifiés</h3>
+                                            <p className="text-[11px] text-stone-500 mt-0.5">Seuls les acheteurs ayant confirmé la réception de leur commande peuvent publier un avis.</p>
+                                        </div>
+                                        <div className="flex items-center gap-2 bg-yellow-50 border border-yellow-200 px-3 py-1.5 rounded-xl">
+                                            <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                                            <span className="font-bold text-stone-900 text-sm">{averageRating} / 5</span>
+                                            <span className="text-stone-500 text-[11px]">({totalReviews} avis)</span>
+                                        </div>
+                                    </div>
+
+                                    {reviews && reviews.length > 0 ? (
+                                        <div className="space-y-3">
+                                            {reviews.map((rev) => (
+                                                <div key={rev.id} className="p-4 bg-stone-50 rounded-xl border border-stone-200/60 space-y-1.5">
+                                                    <div className="flex justify-between items-center">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-semibold text-stone-900">{rev.user ? `${rev.user.first_name} ${rev.user.last_name}` : 'Acheteur Vérifié'}</span>
+                                                            <span className="bg-emerald-100 text-emerald-800 text-[10px] px-1.5 py-0.5 rounded font-medium">Achat Vérifié</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-0.5">
+                                                            {[1, 2, 3, 4, 5].map((s) => (
+                                                                <Star key={s} className={`w-3.5 h-3.5 ${s <= rev.rating ? 'text-yellow-400 fill-yellow-400' : 'text-stone-300'}`} />
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                    <p className="text-stone-700 text-xs">{rev.comment || 'Aucun commentaire écrit.'}</p>
+                                                    <span className="text-[10px] text-stone-400 block pt-1">{new Date(rev.created_at).toLocaleDateString('fr-FR')}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-8 bg-stone-50 rounded-xl border border-stone-200/60 text-stone-400 space-y-1">
+                                            <MessageSquare className="w-8 h-8 mx-auto text-stone-300" />
+                                            <p className="font-medium text-stone-600">Aucun avis publié pour le moment</p>
+                                            <p className="text-[11px]">Soyez le premier à commander et évaluer ce produit après livraison !</p>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 

@@ -17,6 +17,8 @@ class User extends Authenticatable
         'last_name',
         'email',
         'phone',
+        'default_delivery_address',
+        'default_city',
         'password',
         'role',
         'avatar',
@@ -88,6 +90,16 @@ class User extends Authenticatable
     public function activities(): HasMany
     {
         return $this->hasMany(ActivityLog::class)->orderByDesc('created_at');
+    }
+
+    public function wishlists(): HasMany
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(ProductReview::class);
     }
 
     // ──────────── Helpers ────────────

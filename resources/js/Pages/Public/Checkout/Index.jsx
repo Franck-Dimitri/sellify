@@ -1,5 +1,5 @@
-import React from 'react';
-import { Head, Link, useForm } from '@inertiajs/react';
+import React, { useState } from 'react';
+import { Head, Link, useForm, router } from '@inertiajs/react';
 import PublicLayout from '../../../Layouts/PublicLayout';
 import { 
     ShieldCheck, 
@@ -10,28 +10,51 @@ import {
     Package, 
     CheckCircle2, 
     Store,
-    Smartphone
+    Smartphone,
+    Tag,
+    X,
+    Check
 } from 'lucide-react';
 
 export default function Index({ 
     items = [], 
     subtotal = 0, 
+    discount = 0,
+    appliedPromo = null,
     shippingFee = 1500, 
     grandTotal = 0,
     customerName = '',
-    customerPhone = ''
+    customerPhone = '',
+    defaultDeliveryAddress = '',
+    defaultCity = 'Douala'
 }) {
+    const [promoInput, setPromoInput] = useState('');
+
     const { data, setData, post, processing, errors } = useForm({
         customer_name: customerName || '',
         customer_phone: customerPhone || '',
-        delivery_address: '',
-        city: 'Douala',
+        delivery_address: defaultDeliveryAddress || '',
+        city: defaultCity || 'Douala',
         payment_method: 'orange_money',
+        save_default_address: true,
     });
 
     const handleSubmit = (e) => {
         e.preventDefault();
         post(route('public.checkout.process'));
+    };
+
+    const handleApplyPromo = (e) => {
+        e.preventDefault();
+        if (!promoInput.trim()) return;
+        router.post(route('public.checkout.promo.apply'), { code: promoInput }, {
+            preserveScroll: true,
+            onSuccess: () => setPromoInput(''),
+        });
+    };
+
+    const handleRemovePromo = () => {
+        router.post(route('public.checkout.promo.remove'), {}, { preserveScroll: true });
     };
 
     return (
@@ -133,6 +156,19 @@ export default function Index({
                                         ></textarea>
                                         {errors.delivery_address && <span className="text-red-500 text-[10px]">{errors.delivery_address}</span>}
                                     </div>
+
+                                    <div className="flex items-center gap-2 pt-1">
+                                        <input
+                                            type="checkbox"
+                                            id="save_default_address"
+                                            checked={data.save_default_address}
+                                            onChange={(e) => setData('save_default_address', e.target.checked)}
+                                            className="w-4 h-4 rounded border-stone-300 text-yellow-500 focus:ring-yellow-400"
+                                        />
+                                        <label htmlFor="save_default_address" className="text-[11px] text-stone-600">
+                                            Définir comme adresse de livraison par défaut pour mes prochaines commandes
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
 
@@ -180,7 +216,7 @@ export default function Index({
 
                         </div>
 
-                        {/* RIGHT COLUMN: ORDER SUMMARY & SUBMIT (5 COLS) */}
+                        {/* RIGHT COLUMN: ORDER SUMMARY & PROMO & SUBMIT (5 COLS) */}
                         <div className="lg:col-span-5 space-y-4">
                             <div className="bg-white rounded-2xl border border-stone-200/80 p-5 shadow-2xs space-y-4">
                                 <h3 className="font-bold text-stone-900 text-sm border-b border-stone-100 pb-2">
@@ -199,11 +235,60 @@ export default function Index({
                                     ))}
                                 </div>
 
+                                {/* Promo Code Box */}
+                                <div className="pt-3 border-t border-stone-100">
+                                    <label className="block text-[11px] font-semibold text-stone-700 mb-1.5 flex items-center gap-1.5">
+                                        <Tag className="w-3.5 h-3.5 text-yellow-600" />
+                                        <span>Code Promo Vendeur</span>
+                                    </label>
+                                    
+                                    {appliedPromo ? (
+                                        <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 text-emerald-900 px-3 py-2 rounded-xl text-xs">
+                                            <div className="flex items-center gap-1.5">
+                                                <Check className="w-4 h-4 text-emerald-600" />
+                                                <span className="font-semibold">Code "{appliedPromo.code}" appliqué</span>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={handleRemovePromo}
+                                                className="text-stone-400 hover:text-rose-600 transition-colors"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                placeholder="Ex: SELLIFY10"
+                                                value={promoInput}
+                                                onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
+                                                className="flex-1 px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-yellow-400 uppercase font-mono"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={handleApplyPromo}
+                                                className="px-4 py-2 bg-stone-900 hover:bg-black text-white text-xs font-semibold rounded-xl transition-colors"
+                                            >
+                                                Appliquer
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
                                 <div className="space-y-2 text-xs font-normal text-stone-600 border-t border-stone-100 pt-3">
                                     <div className="flex justify-between">
                                         <span>Sous-total :</span>
                                         <strong className="text-stone-900">{Number(subtotal).toLocaleString()} FCFA</strong>
                                     </div>
+                                    
+                                    {discount > 0 && (
+                                        <div className="flex justify-between text-emerald-600 font-semibold">
+                                            <span>Réduction Promo :</span>
+                                            <span>-{Number(discount).toLocaleString()} FCFA</span>
+                                        </div>
+                                    )}
+
                                     <div className="flex justify-between">
                                         <span>Frais de livraison :</span>
                                         <strong className="text-stone-900">{Number(shippingFee).toLocaleString()} FCFA</strong>

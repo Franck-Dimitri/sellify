@@ -89,7 +89,7 @@ class CustomerCartAndOrderModuleTest extends TestCase
         // Verify Seller Wallet Escrow Pending Balance
         $wallet = SellerWallet::where('seller_id', $seller->id)->first();
         $this->assertNotNull($wallet);
-        $this->assertEquals(475000, $wallet->pending_balance); // 5 * 95000
+        $this->assertEquals(476500, $wallet->pending_balance); // 5 * 95000 + 1500 shipping
 
         // 7. Customer Confirms Delivery Receipt
         $confirmRes = $this->post(route('customer.orders.confirm', $order->order_number));
@@ -100,6 +100,6 @@ class CustomerCartAndOrderModuleTest extends TestCase
         $this->assertEquals('delivered', $order->delivery_status);
         $this->assertEquals('released', $order->payment_status);
         $this->assertEquals(0, $wallet->pending_balance);
-        $this->assertEquals(475000, $wallet->balance);
+        $this->assertEquals(476500, $wallet->balance);
     }
 }

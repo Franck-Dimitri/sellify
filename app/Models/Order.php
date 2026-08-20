@@ -74,4 +74,9 @@ class Order extends Model
     {
         return $this->hasOne(Dispute::class, 'order_id');
     }
+
+    public function reviews()
+    {
+        return $this->hasMany(ProductReview::class);
+    }
 }

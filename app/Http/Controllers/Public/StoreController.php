@@ -96,7 +96,7 @@ class StoreController extends Controller
     {
         $product = Product::where('slug', $slug)
             ->where('is_archived', false)
-            ->with(['shop.seller.user', 'activePromotion'])
+            ->with(['shop.seller.user', 'activePromotion', 'reviews.user'])
             ->firstOrFail();
 
         // Fetch related products from the same shop
@@ -109,12 +109,22 @@ class StoreController extends Controller
             ->take(4)
             ->get();
 
+        $user = auth()->user();
+        $isWishlisted = $user ? \App\Models\Wishlist::where('user_id', $user->id)->where('product_id', $product->id)->exists() : false;
+
+        $averageRating = (float) round($product->reviews->avg('rating') ?? 5.0, 1);
+        $totalReviews = $product->reviews->count();
+
         return Inertia::render('Public/Products/Show', [
             'product' => $product,
             'shop' => $product->shop,
             'seller' => $product->shop->seller,
             'sellerUser' => $product->shop->seller->user,
             'relatedProducts' => $relatedProducts,
+            'reviews' => $product->reviews,
+            'averageRating' => $averageRating,
+            'totalReviews' => $totalReviews,
+            'isWishlisted' => $isWishlisted,
         ]);
     }
 

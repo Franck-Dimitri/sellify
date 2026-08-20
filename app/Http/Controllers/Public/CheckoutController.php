@@ -8,6 +8,7 @@ use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\PromoCode;
 use App\Models\SellerWallet;
 use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
@@ -75,18 +76,93 @@ class CheckoutController extends Controller
 
         $subtotal = $formattedItems->sum('subtotal');
         $shippingFee = 1500; // Fixed shipping per order
-        $grandTotal = $subtotal + $shippingFee;
+        
+        // Calculate applied promo code discount from session if present
+        $appliedPromo = $request->session()->get('applied_promo');
+        $discount = 0;
 
+        if ($appliedPromo) {
+            if ($appliedPromo['type'] === 'percentage') {
+                $discount = round($subtotal * ($appliedPromo['value'] / 100), 2);
+            } else {
+                $discount = min($subtotal, (float)$appliedPromo['value']);
+            }
+        }
+
+        $grandTotal = max(0, $subtotal - $discount + $shippingFee);
         $user = auth()->user();
 
         return Inertia::render('Public/Checkout/Index', [
             'items' => $formattedItems,
             'subtotal' => $subtotal,
+            'discount' => $discount,
+            'appliedPromo' => $appliedPromo,
             'shippingFee' => $shippingFee,
             'grandTotal' => $grandTotal,
             'customerName' => $user ? "{$user->first_name} {$user->last_name}" : '',
             'customerPhone' => $user ? $user->phone : '',
+            'defaultDeliveryAddress' => $user ? ($user->default_delivery_address ?? '') : '',
+            'defaultCity' => $user ? ($user->default_city ?? 'Douala') : 'Douala',
         ]);
+    }
+
+    /**
+     * Apply a Promo Code to the checkout session.
+     */
+    public function applyPromoCode(Request $request)
+    {
+        $request->validate([
+            'code' => 'required|string',
+        ]);
+
+        $code = strtoupper(trim($request->code));
+        $promo = PromoCode::where('code', $code)
+            ->where('is_active', true)
+            ->whereDate('start_date', '<=', now())
+            ->whereDate('end_date', '>=', now())
+            ->first();
+
+        if (!$promo) {
+            return back()->with('error', "Le code promo \"{$code}\" n'est pas valide ou a expiré.");
+        }
+
+        if ($promo->usage_limit && $promo->used_count >= $promo->usage_limit) {
+            return back()->with('error', "Le code promo \"{$code}\" a atteint son nombre maximal d'utilisations.");
+        }
+
+        $cart = $this->getCart($request);
+        $cartSubtotal = 0;
+        if ($cart) {
+            $cartItems = CartItem::where('cart_id', $cart->id)->with('product.activePromotion')->get();
+            foreach ($cartItems as $item) {
+                $basePrice = $item->product->activePromotion ? (float)$item->product->activePromotion->promo_price : (float)$item->product->price;
+                $unitPrice = $item->quantity >= 10 ? $basePrice * 0.90 : ($item->quantity >= 5 ? $basePrice * 0.95 : $basePrice);
+                $cartSubtotal += $unitPrice * $item->quantity;
+            }
+        }
+
+        if ($promo->min_order_amount && $cartSubtotal < $promo->min_order_amount) {
+            return back()->with('error', "Ce code promo nécessite un panier minimum de " . number_format($promo->min_order_amount, 0, ',', ' ') . " FCFA.");
+        }
+
+        $request->session()->put('applied_promo', [
+            'id' => $promo->id,
+            'code' => $promo->code,
+            'type' => $promo->type,
+            'value' => (float)$promo->value,
+            'shop_id' => $promo->shop_id,
+        ]);
+
+        return back()->with('success', "Code promo \"{$code}\" appliqué avec succès !");
+    }
+
+    /**
+     * Remove applied promo code from checkout session.
+     */
+    public function removePromoCode(Request $request)
+    {
+        $request->session()->forget('applied_promo');
+        return back()->with('info', 'Code promo retiré du panier.');
     }
 
     /**
@@ -100,7 +176,18 @@ class CheckoutController extends Controller
             'delivery_address' => 'required|string|max:500',
             'city' => 'required|string|max:100',
             'payment_method' => 'required|in:orange_money,mtn_momo,bank_transfer',
+            'save_default_address' => 'nullable|boolean',
         ]);
+
+        $user = auth()->user();
+
+        // Optionally save as user default address
+        if ($user && $request->save_default_address) {
+            $user->update([
+                'default_delivery_address' => $request->delivery_address,
+                'default_city' => $request->city,
+            ]);
+        }
 
         $cart = $this->getCart($request);
 
@@ -116,12 +203,14 @@ class CheckoutController extends Controller
             return redirect()->route('public.cart.index')->with('error', 'Votre panier est vide.');
         }
 
+        // Applied promo info
+        $appliedPromo = $request->session()->get('applied_promo');
+
         // Group items by shop_id
         $itemsByShop = $cartItems->groupBy(fn($item) => $item->product->shop_id);
-
         $createdOrders = [];
 
-        DB::transaction(function () use ($itemsByShop, $request, &$createdOrders, $cart) {
+        DB::transaction(function () use ($itemsByShop, $request, &$createdOrders, $cart, $appliedPromo) {
             foreach ($itemsByShop as $shopId => $items) {
                 $shop = $items->first()->product->shop;
                 $seller = $shop->seller;
@@ -157,8 +246,21 @@ class CheckoutController extends Controller
                     $product->decrement('stock', $item->quantity);
                 }
 
+                // Apply promo discount if applicable to this shop or overall
+                $orderDiscount = 0;
+                if ($appliedPromo && (empty($appliedPromo['shop_id']) || $appliedPromo['shop_id'] == $shopId)) {
+                    if ($appliedPromo['type'] === 'percentage') {
+                        $orderDiscount = round($orderSubtotal * ($appliedPromo['value'] / 100), 2);
+                    } else {
+                        $orderDiscount = min($orderSubtotal, (float)$appliedPromo['value']);
+                    }
+                    
+                    // Increment promo code used count
+                    PromoCode::where('id', $appliedPromo['id'])->increment('used_count');
+                }
+
                 $shippingFee = 1500;
-                $totalAmount = $orderSubtotal + $shippingFee;
+                $totalAmount = max(0, $orderSubtotal - $orderDiscount + $shippingFee);
 
                 // Create Order
                 $order = Order::create([
@@ -185,12 +287,12 @@ class CheckoutController extends Controller
                 // Credit seller's wallet pending_balance (Escrow Hold)
                 if ($seller) {
                     $wallet = SellerWallet::firstOrCreate(['seller_id' => $seller->id]);
-                    $wallet->increment('pending_balance', $orderSubtotal);
+                    $wallet->increment('pending_balance', $totalAmount);
 
                     WalletTransaction::create([
                         'wallet_id' => $wallet->id,
                         'type' => 'credit_escrow',
-                        'amount' => $orderSubtotal,
+                        'amount' => $totalAmount,
                         'reference' => $order->order_number,
                         'description' => "Vente sous séquestre Escrow (Commande #{$order->order_number})",
                         'status' => 'completed',
@@ -200,8 +302,9 @@ class CheckoutController extends Controller
                 $createdOrders[] = $order;
             }
 
-            // Clear Cart
+            // Clear Cart & Promo session
             CartItem::where('cart_id', $cart->id)->delete();
+            $request->session()->forget('applied_promo');
         });
 
         // Redirect to order success page

@@ -53,6 +53,8 @@ Route::post('/cart/clear', [\App\Http\Controllers\Public\CartController::class, 
 // Public Checkout Routes
 Route::get('/checkout', [\App\Http\Controllers\Public\CheckoutController::class, 'show'])->name('public.checkout.index');
 Route::post('/checkout/process', [\App\Http\Controllers\Public\CheckoutController::class, 'process'])->name('public.checkout.process');
+Route::post('/checkout/promo/apply', [\App\Http\Controllers\Public\CheckoutController::class, 'applyPromoCode'])->name('public.checkout.promo.apply');
+Route::post('/checkout/promo/remove', [\App\Http\Controllers\Public\CheckoutController::class, 'removePromoCode'])->name('public.checkout.promo.remove');
 
 // Fast Checkout via Smart-Link
 Route::get('/pay/{token}', [SmartLinkCheckoutController::class, 'show'])->name('smartlink.checkout');
@@ -137,6 +139,9 @@ Route::middleware(['auth', 'account.active'])->group(function () {
 
             // Fichiers KYC sécurisés
             Route::get('/kyc/document/{id}', [AdminKycDocumentController::class, 'show'])->name('kyc.document.show');
+
+            // Arbitrage des litiges par l'admin
+            Route::post('/disputes/{dispute}/resolve', [\App\Http\Controllers\Admin\DashboardController::class, 'resolveDispute'])->name('disputes.resolve');
         });
 
         // ─────────────────────────────────────────────────────────────────────────
@@ -273,8 +278,16 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/orders/{order_number}', [\App\Http\Controllers\Customer\OrderController::class, 'show'])->name('orders.show');
             Route::get('/orders/{order_number}/invoice', [\App\Http\Controllers\Customer\OrderController::class, 'invoice'])->name('orders.invoice');
             Route::post('/orders/{order_number}/confirm', [\App\Http\Controllers\Customer\OrderController::class, 'confirmDelivery'])->name('orders.confirm');
+            Route::post('/orders/{order_number}/cancel', [\App\Http\Controllers\Customer\OrderController::class, 'cancelOrder'])->name('orders.cancel');
+            Route::post('/orders/{order_number}/review', [\App\Http\Controllers\Customer\OrderController::class, 'submitReview'])->name('orders.review');
             Route::post('/orders/{order_number}/dispute', [\App\Http\Controllers\Customer\OrderController::class, 'openDispute'])->name('orders.dispute');
             Route::get('/wishlist', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'wishlist'])->name('wishlist');
+            Route::post('/wishlist/toggle/{product}', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'toggleWishlist'])->name('wishlist.toggle');
+            Route::get('/notifications', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'notifications'])->name('notifications');
+            Route::post('/notifications/mark-read', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'markNotificationsRead'])->name('notifications.read');
+            Route::get('/referral', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'referral'])->name('referral');
+            Route::get('/settings', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'settings'])->name('settings');
+            Route::post('/settings', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'updateSettings'])->name('settings.update');
             Route::get('/disputes', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'disputes'])->name('disputes.index');
             Route::get('/loyalty', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'loyalty'])->name('loyalty');
             Route::get('/profile', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'profile'])->name('profile');
