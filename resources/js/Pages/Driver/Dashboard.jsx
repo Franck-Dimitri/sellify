@@ -1,359 +1,346 @@
 import React, { useState } from 'react';
-import { usePage, Link, Head, useForm } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
+import DriverLayout from '@/Layouts/DriverLayout';
 import { 
-    ShieldAlert, 
-    ShieldCheck, 
-    LogOut, 
     Truck, 
-    LayoutDashboard, 
-    MapPin, 
-    Phone, 
-    Package, 
     CheckCircle2, 
     Clock, 
+    Wallet, 
+    Star, 
+    MapPin, 
+    Phone, 
     Key, 
-    Store,
-    DollarSign,
-    Star,
-    Navigation
+    ArrowRight, 
+    ShieldCheck, 
+    Navigation,
+    ShoppingBag,
+    TrendingUp,
+    AlertCircle
 } from 'lucide-react';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend,
+    Filler
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
+
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend,
+    Filler
+);
 
 export default function Dashboard({ 
-    driver, 
+    driver = {}, 
     availableDeliveries = [], 
     activeDeliveries = [], 
     completedDeliveries = [], 
     stats = {} 
 }) {
-    const { auth, flash } = usePage().props;
-    const user = auth.user;
-    const isVerified = user.kyc_status === 'verified';
-
-    const [selectedTab, setSelectedTab] = useState('available');
-    const [otpValues, setOtpValues] = useState({});
-
-    const { post: acceptPost, processing: acceptProcessing } = useForm();
-    const { data: otpData, setData: setOtpData, post: otpPost, processing: otpProcessing } = useForm({
-        otp: '',
-    });
+    const { post, processing } = useForm();
+    const [selectedDeliveryForOtp, setSelectedDeliveryForOtp] = useState(null);
+    const [otpInput, setOtpInput] = useState('');
 
     const handleAccept = (orderNumber) => {
-        if (confirm(`Voulez-vous accepter la livraison de la commande ${orderNumber} ?`)) {
-            acceptPost(route('driver.delivery.accept', orderNumber));
+        if (confirm(`Voulez-vous accepter la livraison de la commande #${orderNumber} ?`)) {
+            post(route('driver.delivery.accept', orderNumber));
         }
     };
 
-    const handleOtpSubmit = (e, orderNumber) => {
+    const handleVerifyOtp = (e) => {
         e.preventDefault();
-        const otp = otpValues[orderNumber];
-        if (!otp || otp.length !== 6) {
-            alert('Veuillez renseigner le code OTP à 6 chiffres communiqué par le client.');
+        if (!otpInput || otpInput.length !== 6) {
+            alert("Veuillez saisir le code OTP à 6 chiffres transmis par le client.");
             return;
         }
-        otpPost(route('driver.delivery.verify_otp', { order_number: orderNumber, otp: otp }));
+        post(route('driver.delivery.verify_otp', selectedDeliveryForOtp.order_number), {
+            data: { otp: otpInput },
+            onSuccess: () => {
+                setSelectedDeliveryForOtp(null);
+                setOtpInput('');
+            }
+        });
+    };
+
+    const earningsChartData = {
+        labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+        datasets: [
+            {
+                label: 'Gains quotidiens (FCFA)',
+                data: [4500, 7000, 6000, 9500, 12000, 15500, 11000],
+                borderColor: '#eab308',
+                backgroundColor: 'rgba(234, 179, 8, 0.15)',
+                fill: true,
+                tension: 0.4,
+                borderWidth: 2,
+            }
+        ]
+    };
+
+    const earningsChartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { grid: { display: false } },
+            y: { grid: { color: 'rgba(231, 229, 228, 0.6)' } }
+        }
     };
 
     return (
-        <div className="min-h-screen bg-stone-50 flex flex-col font-sans text-stone-800 antialiased pb-16">
-            <Head title="Tableau de bord Livreur - Sellify" />
+        <DriverLayout title="Tableau de bord livreur">
+            <Head title="Tableau de bord Livreur - Sellify Express" />
 
-            {/* Top Navigation */}
-            <header className="bg-white border-b border-stone-200 h-16 flex items-center justify-between px-6 sticky top-0 z-20 shadow-2xs">
-                <div className="flex items-center space-x-3">
-                    <span className="w-8 h-8 rounded-lg bg-yellow-500 flex items-center justify-center font-bold text-stone-950 text-sm">S</span>
-                    <div>
-                        <span className="font-semibold text-sm tracking-tight text-stone-900">
-                            Sellify<span className="text-yellow-600">.me</span>
-                        </span>
-                        <span className="block text-[10px] text-stone-400 font-medium uppercase">
-                            Console Livreur
-                        </span>
-                    </div>
-                </div>
-
-                <div className="flex items-center space-x-4">
-                    <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-yellow-100 flex items-center justify-center text-xs font-medium text-yellow-900 uppercase">
-                            {user.first_name[0]}
-                        </div>
-                        <span className="text-xs font-medium text-stone-800 hidden sm:inline">
-                            {user.first_name} {user.last_name}
-                        </span>
-                    </div>
-
-                    <Link href={route('logout')} method="post" as="button" className="p-1.5 text-stone-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors">
-                        <LogOut className="w-4 h-4" />
-                    </Link>
-                </div>
-            </header>
-
-            {/* Flash notifications */}
-            {flash?.success && (
-                <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 pt-4">
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-2.5 rounded-xl text-xs font-medium">
-                        {flash.success}
-                    </div>
-                </div>
-            )}
-            {flash?.error && (
-                <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 pt-4">
-                    <div className="bg-rose-50 border border-rose-200 text-rose-800 px-4 py-2.5 rounded-xl text-xs font-medium">
-                        {flash.error}
-                    </div>
-                </div>
-            )}
-
-            <main className="max-w-6xl w-full mx-auto p-4 sm:p-6 space-y-6">
+            <div className="w-full space-y-6 text-stone-800 antialiased font-sans pb-16">
                 
-                {/* KYC Alert if not verified */}
-                {!isVerified && (
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-start gap-3 text-xs text-yellow-950">
-                        <ShieldAlert className="w-5 h-5 text-yellow-700 shrink-0 mt-0.5" />
-                        <div>
-                            <p className="font-semibold text-stone-900">Vérification de votre dossier Livreur en cours</p>
-                            <p className="text-yellow-800 font-normal mt-0.5">
-                                Vos pièces justificatives (permis, carte grise, photo véhicule) sont en cours d'examen. Dès approbation par un administrateur, vous pourrez accepter des colis et démarrer vos tournées.
+                {/* Header Banner */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs">
+                    <div>
+                        <div className="flex items-center gap-2 text-xs font-semibold text-yellow-700">
+                            <Truck className="w-4 h-4 text-yellow-600" />
+                            <span>Flotte de livraison locale & logistique</span>
+                        </div>
+                        <h1 className="text-xl font-bold text-stone-900 mt-1">
+                            Bonjour, {driver.user?.first_name || 'Livreur'} 👋
+                        </h1>
+                        <p className="text-xs text-stone-500 font-normal mt-0.5">
+                            Consultez vos livraisons en cours, acceptez les nouvelles courses et validez les livraisons par OTP.
+                        </p>
+                    </div>
+
+                    <div className="flex items-center gap-3 shrink-0">
+                        <div className="bg-yellow-50 border border-yellow-300 px-4 py-2 rounded-xl text-xs font-bold text-yellow-950">
+                            Véhicule : <span className="capitalize">{driver.vehicle_type || 'Moto'}</span> ({driver.vehicle_plate || 'LT-492-BX'})
+                        </div>
+                    </div>
+                </div>
+
+                {/* 4 Stat Cards Row */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-2">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-stone-500">Gains cumulés</span>
+                            <div className="w-8 h-8 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 border border-emerald-200">
+                                <Wallet className="w-4 h-4" />
+                            </div>
+                        </div>
+                        <p className="text-2xl font-bold text-stone-900">
+                            {Number(stats.total_earned || 0).toLocaleString('fr-FR')} <span className="text-xs text-stone-500 font-normal">FCFA</span>
+                        </p>
+                        <span className="text-[11px] text-stone-400 font-normal">Frais de livraison perçus</span>
+                    </div>
+
+                    <div className="bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-2">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-stone-500">Courses en cours</span>
+                            <div className="w-8 h-8 bg-yellow-50 rounded-xl flex items-center justify-center text-yellow-700 border border-yellow-200">
+                                <Truck className="w-4 h-4" />
+                            </div>
+                        </div>
+                        <p className="text-2xl font-bold text-yellow-700">{stats.active_count || 0}</p>
+                        <span className="text-[11px] text-stone-400 font-normal">Colis en acheminement</span>
+                    </div>
+
+                    <div className="bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-2">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-stone-500">Livraisons effectuées</span>
+                            <div className="w-8 h-8 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 border border-blue-200">
+                                <CheckCircle2 className="w-4 h-4" />
+                            </div>
+                        </div>
+                        <p className="text-2xl font-bold text-blue-600">{stats.delivered_count || 0}</p>
+                        <span className="text-[11px] text-stone-400 font-normal">Commandes livrées avec OTP</span>
+                    </div>
+
+                    <div className="bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-2">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-stone-500">Note de satisfaction</span>
+                            <div className="w-8 h-8 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600 border border-amber-200">
+                                <Star className="w-4 h-4" />
+                            </div>
+                        </div>
+                        <p className="text-2xl font-bold text-amber-600">{stats.rating || 4.90} / 5</p>
+                        <span className="text-[11px] text-stone-400 font-normal">Évaluation des acheteurs</span>
+                    </div>
+                </div>
+
+                {/* ACTIVE DELIVERY WIDGET */}
+                {activeDeliveries && activeDeliveries.length > 0 && (
+                    <div className="bg-stone-900 text-white rounded-2xl p-6 shadow-xs space-y-4 border border-yellow-500">
+                        <div className="flex items-center justify-between border-b border-stone-800 pb-3">
+                            <div className="flex items-center gap-2">
+                                <Navigation className="w-5 h-5 text-yellow-400 animate-bounce" />
+                                <h3 className="font-bold text-base">Course en cours active #{activeDeliveries[0].order_number}</h3>
+                            </div>
+                            <span className="px-3 py-1 bg-yellow-400 text-yellow-950 text-xs font-bold rounded-full">
+                                En acheminement
+                            </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-stone-200">
+                            <div>
+                                <span className="text-yellow-400 block font-semibold">Boutique de retrait :</span>
+                                <strong className="text-white text-sm block">{activeDeliveries[0].shop?.name}</strong>
+                                <span className="text-[11px] text-stone-400">Point A (Récupération)</span>
+                            </div>
+
+                            <div>
+                                <span className="text-yellow-400 block font-semibold">Adresse du client :</span>
+                                <strong className="text-white text-sm block">{activeDeliveries[0].shipping_address || 'Douala, Cameroun'}</strong>
+                                <span className="text-[11px] text-stone-400">Point B (Livraison)</span>
+                            </div>
+
+                            <div>
+                                <span className="text-yellow-400 block font-semibold">Frais de course livreur :</span>
+                                <strong className="text-emerald-400 text-sm block">{Number(activeDeliveries[0].shipping_fee || 1500).toLocaleString('fr-FR')} FCFA</strong>
+                                <span className="text-[11px] text-stone-400">Solde crédité à la validation</span>
+                            </div>
+                        </div>
+
+                        <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
+                            <p className="text-xs text-stone-300">
+                                Saisissez le code secret OTP à 6 chiffres fourni par le client pour clôturer la livraison et libérer le paiement sous séquestre.
                             </p>
+                            <button
+                                onClick={() => setSelectedDeliveryForOtp(activeDeliveries[0])}
+                                className="px-5 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors shrink-0 flex items-center gap-1.5"
+                            >
+                                <Key className="w-4 h-4 text-yellow-950" />
+                                <span>Valider par code OTP</span>
+                            </button>
                         </div>
                     </div>
                 )}
 
-                {/* Driver Stats Strip */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
-                    <div className="bg-white border border-stone-200 p-4 rounded-xl shadow-xs">
-                        <p className="text-xs font-medium text-stone-500">Gains Livraisons</p>
-                        <p className="text-xl font-semibold text-stone-900 mt-1">
-                            {Number(stats.total_earned || 0).toLocaleString('fr-FR')} FCFA
-                        </p>
-                        <span className="text-[10px] text-emerald-600 font-medium">Frais cumulés</span>
-                    </div>
-
-                    <div className="bg-white border border-stone-200 p-4 rounded-xl shadow-xs">
-                        <p className="text-xs font-medium text-stone-500">En Cours</p>
-                        <p className="text-xl font-semibold text-yellow-600 mt-1">{stats.active_count || 0}</p>
-                        <span className="text-[10px] text-stone-400">Courses actives</span>
-                    </div>
-
-                    <div className="bg-white border border-stone-200 p-4 rounded-xl shadow-xs">
-                        <p className="text-xs font-medium text-stone-500">Colis Livrés</p>
-                        <p className="text-xl font-semibold text-emerald-600 mt-1">{stats.delivered_count || 0}</p>
-                        <span className="text-[10px] text-stone-400">Avec validation OTP</span>
-                    </div>
-
-                    <div className="bg-white border border-stone-200 p-4 rounded-xl shadow-xs">
-                        <p className="text-xs font-medium text-stone-500">Note & Avis</p>
-                        <div className="flex items-center gap-1 mt-1">
-                            <p className="text-xl font-semibold text-stone-900">{stats.rating || 4.9}</p>
-                            <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                {/* Gains Trend & Courses disponibles Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    {/* Available Courses Stream (2 cols) */}
+                    <div className="lg:col-span-2 bg-white border border-stone-200/80 rounded-2xl p-6 shadow-2xs space-y-4">
+                        <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                            <div className="flex items-center gap-2">
+                                <ShoppingBag className="w-4 h-4 text-yellow-600" />
+                                <h3 className="font-bold text-sm text-stone-900">Nouvelles courses disponibles à proximité</h3>
+                            </div>
+                            <span className="text-xs text-stone-400 font-normal">{availableDeliveries.length} course(s) prête(s)</span>
                         </div>
-                        <span className="text-[10px] text-stone-400">Score de fiabilité</span>
-                    </div>
-                </div>
 
-                {/* Active Deliveries Section (if any in transit) */}
-                {activeDeliveries.length > 0 && (
-                    <div className="space-y-3">
-                        <h2 className="text-sm font-semibold text-stone-900 flex items-center gap-2">
-                            <Navigation className="w-4 h-4 text-yellow-600" />
-                            <span>Course(s) en cours de livraison ({activeDeliveries.length})</span>
-                        </h2>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {activeDeliveries.map((order) => (
-                                <div key={order.id} className="bg-white border-2 border-yellow-400 rounded-xl p-5 shadow-sm space-y-4">
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <span className="font-mono font-bold text-xs text-stone-900">{order.order_number}</span>
-                                            <p className="text-xs text-stone-500 mt-0.5">Boutique : {order.shop?.name}</p>
-                                        </div>
-                                        <span className="px-2 py-0.5 bg-yellow-100 text-yellow-900 border border-yellow-300 rounded-md text-[11px] font-medium">
-                                            En cours d'acheminement
-                                        </span>
-                                    </div>
-
-                                    {/* Customer & Address details */}
-                                    <div className="space-y-2 text-xs bg-stone-50 p-3 rounded-lg border border-stone-200/80">
+                        <div className="space-y-3">
+                            {availableDeliveries && availableDeliveries.length > 0 ? (
+                                availableDeliveries.map((del) => (
+                                    <div key={del.id} className="p-4 bg-stone-50 border border-stone-200/80 rounded-xl space-y-3 hover:border-yellow-400 transition-colors">
                                         <div className="flex items-center justify-between">
-                                            <span className="font-medium text-stone-900">{order.customer_name}</span>
-                                            <a href={`tel:${order.customer_phone}`} className="text-yellow-700 hover:underline flex items-center gap-1 font-medium">
-                                                <Phone className="w-3 h-3" />
-                                                <span>{order.customer_phone}</span>
-                                            </a>
+                                            <div>
+                                                <span className="font-mono font-bold text-stone-900 text-xs">#{del.order_number}</span>
+                                                <span className="text-[11px] text-stone-400 block">Prêt au retrait chez {del.shop?.name}</span>
+                                            </div>
+                                            <span className="font-bold text-emerald-600 text-sm">
+                                                +{Number(del.shipping_fee || 1500).toLocaleString('fr-FR')} FCFA
+                                            </span>
                                         </div>
-                                        <p className="text-stone-600 flex items-start gap-1">
-                                            <MapPin className="w-3.5 h-3.5 text-stone-400 shrink-0 mt-0.5" />
-                                            <span>{order.delivery_address}, {order.city}</span>
-                                        </p>
-                                        <p className="text-stone-500 text-[11px]">
-                                            Colis : {order.items?.map(i => `${i.quantity}x ${i.product_name}`).join(', ')}
-                                        </p>
-                                    </div>
 
-                                    {/* OTP Validation Input Form */}
-                                    <form onSubmit={(e) => handleOtpSubmit(e, order.order_number)} className="space-y-2 pt-1">
-                                        <label className="text-[11px] font-semibold text-stone-700 block">
-                                            Entrez le code OTP à 6 chiffres du client à la remise du colis :
-                                        </label>
-                                        <div className="flex gap-2">
-                                            <input
-                                                type="text"
-                                                maxLength="6"
-                                                placeholder="Code OTP..."
-                                                value={otpValues[order.order_number] || ''}
-                                                onChange={(e) => setOtpValues({ ...otpValues, [order.order_number]: e.target.value })}
-                                                className="w-32 px-3 py-1.5 bg-stone-50 border border-stone-200 rounded-lg text-center font-mono text-sm tracking-widest outline-none focus:border-yellow-500 font-bold"
-                                                required
-                                            />
+                                        <div className="flex items-center justify-between pt-2 border-t border-stone-200/60 text-xs text-stone-600">
+                                            <div className="flex items-center gap-1">
+                                                <MapPin className="w-3.5 h-3.5 text-stone-400" />
+                                                <span>Livraison : {del.shipping_address || 'Douala'}</span>
+                                            </div>
+
                                             <button
-                                                type="submit"
-                                                disabled={otpProcessing}
-                                                className="flex-1 px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-stone-950 font-medium text-xs rounded-lg flex items-center justify-center gap-1.5 shadow-xs transition-colors"
+                                                onClick={() => handleAccept(del.order_number)}
+                                                disabled={processing}
+                                                className="px-3.5 py-1.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors flex items-center gap-1 border border-yellow-500"
                                             >
-                                                <CheckCircle2 className="w-3.5 h-3.5" />
-                                                <span>Valider & Débloquer</span>
+                                                <span>Accepter la course</span>
+                                                <ArrowRight className="w-3.5 h-3.5" />
                                             </button>
                                         </div>
-                                    </form>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="py-10 text-center text-stone-400 text-xs space-y-1">
+                                    <Clock className="w-8 h-8 mx-auto text-stone-300" />
+                                    <p>Aucune nouvelle course disponible pour le moment.</p>
+                                    <p className="text-[11px]">Restez connecté, les notifications arrivent en temps réel.</p>
                                 </div>
-                            ))}
+                            )}
                         </div>
                     </div>
-                )}
 
-                {/* Available Deliveries vs Past Deliveries Navigation */}
-                <div className="bg-white border border-stone-200 rounded-xl overflow-hidden shadow-xs">
-                    <div className="border-b border-stone-200 p-2 flex gap-2">
-                        <button
-                            onClick={() => setSelectedTab('available')}
-                            className={`px-4 py-2 text-xs font-medium rounded-lg transition-colors ${
-                                selectedTab === 'available'
-                                    ? 'bg-yellow-500 text-stone-950'
-                                    : 'text-stone-600 hover:bg-stone-50'
-                            }`}
-                        >
-                            Colis Disponibles à l'Enlèvement ({availableDeliveries.length})
-                        </button>
-                        <button
-                            onClick={() => setSelectedTab('history')}
-                            className={`px-4 py-2 text-xs font-medium rounded-lg transition-colors ${
-                                selectedTab === 'history'
-                                    ? 'bg-yellow-500 text-stone-950'
-                                    : 'text-stone-600 hover:bg-stone-50'
-                            }`}
-                        >
-                            Historique des Livraisons ({completedDeliveries.length})
-                        </button>
+                    {/* Chart.js Gains Trend (1 col) */}
+                    <div className="bg-white border border-stone-200/80 rounded-2xl p-6 shadow-2xs space-y-4">
+                        <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                            <h3 className="font-bold text-sm text-stone-900">Évolution de vos gains</h3>
+                        </div>
+
+                        <div className="h-56">
+                            <Line data={earningsChartData} options={earningsChartOptions} />
+                        </div>
                     </div>
 
-                    <div className="p-5">
-                        {selectedTab === 'available' && (
-                            <div className="space-y-4">
-                                {availableDeliveries.length > 0 ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {availableDeliveries.map((order) => (
-                                            <div key={order.id} className="border border-stone-200 rounded-xl p-4 space-y-3 hover:border-yellow-400 transition-colors">
-                                                <div className="flex justify-between items-start">
-                                                    <div>
-                                                        <span className="font-mono font-medium text-xs text-stone-900">{order.order_number}</span>
-                                                        <p className="text-[11px] text-stone-400 mt-0.5">
-                                                            {new Date(order.created_at).toLocaleDateString('fr-FR', {
-                                                                day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
-                                                            })}
-                                                        </p>
-                                                    </div>
-                                                    <span className="px-2 py-0.5 bg-yellow-50 text-yellow-900 border border-yellow-200 rounded-md text-[11px] font-semibold">
-                                                        +{Number(order.shipping_fee || 1500).toLocaleString('fr-FR')} FCFA
-                                                    </span>
-                                                </div>
-
-                                                <div className="space-y-1.5 text-xs text-stone-600">
-                                                    <div className="flex items-start gap-1.5">
-                                                        <Store className="w-3.5 h-3.5 text-stone-400 shrink-0 mt-0.5" />
-                                                        <span><span className="font-medium text-stone-800">{order.shop?.name}</span> ({order.shop?.address || 'Douala'})</span>
-                                                    </div>
-                                                    <div className="flex items-start gap-1.5">
-                                                        <MapPin className="w-3.5 h-3.5 text-yellow-600 shrink-0 mt-0.5" />
-                                                        <span>Destination : <span className="font-medium text-stone-800">{order.delivery_address}, {order.city}</span></span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="pt-2 border-t border-stone-100 flex items-center justify-between">
-                                                    <span className="text-[11px] text-stone-500">
-                                                        {order.items?.length || 0} article(s) à récupérer
-                                                    </span>
-                                                    <button
-                                                        onClick={() => handleAccept(order.order_number)}
-                                                        disabled={!isVerified || acceptProcessing}
-                                                        className="px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-stone-950 font-medium text-xs rounded-lg transition-colors disabled:opacity-50"
-                                                    >
-                                                        Prendre en charge
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-10 text-stone-400 space-y-2">
-                                        <Package className="w-8 h-8 text-stone-300 mx-auto" />
-                                        <p className="text-xs font-medium text-stone-700">Aucun colis en attente d'enlèvement</p>
-                                        <p className="text-[11px] text-stone-400">Les nouvelles courses disponibles s'afficheront ici en temps réel.</p>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {selectedTab === 'history' && (
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse text-xs">
-                                    <thead>
-                                        <tr className="border-b border-stone-100 text-[11px] font-medium text-stone-400 uppercase">
-                                            <th className="py-2.5 px-3">Commande</th>
-                                            <th className="py-2.5 px-3">Boutique</th>
-                                            <th className="py-2.5 px-3">Client</th>
-                                            <th className="py-2.5 px-3">Gain Course</th>
-                                            <th className="py-2.5 px-3">Date de Livraison</th>
-                                            <th className="py-2.5 px-3 text-right">Statut</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-stone-100">
-                                        {completedDeliveries.length > 0 ? (
-                                            completedDeliveries.map((order) => (
-                                                <tr key={order.id} className="hover:bg-stone-50/60">
-                                                    <td className="py-2.5 px-3 font-mono font-medium text-stone-900">{order.order_number}</td>
-                                                    <td className="py-2.5 px-3 text-stone-700">{order.shop?.name}</td>
-                                                    <td className="py-2.5 px-3 text-stone-800">{order.customer_name} ({order.city})</td>
-                                                    <td className="py-2.5 px-3 font-semibold text-emerald-700">
-                                                        +{Number(order.shipping_fee || 1500).toLocaleString('fr-FR')} FCFA
-                                                    </td>
-                                                    <td className="py-2.5 px-3 text-stone-500 text-[11px]">
-                                                        {order.delivered_at ? new Date(order.delivered_at).toLocaleDateString('fr-FR', {
-                                                            day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
-                                                        }) : '-'}
-                                                    </td>
-                                                    <td className="py-2.5 px-3 text-right">
-                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
-                                                            <CheckCircle2 className="w-3 h-3" />
-                                                            <span>Livré</span>
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        ) : (
-                                            <tr>
-                                                <td colSpan="6" className="py-8 text-center text-stone-400">
-                                                    <Truck className="w-8 h-8 text-stone-300 mx-auto mb-1" />
-                                                    <p className="text-xs">Aucune livraison archivée pour le moment.</p>
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </div>
                 </div>
 
-            </main>
-        </div>
+            </div>
+
+            {/* OTP VERIFICATION MODAL */}
+            {selectedDeliveryForOtp && (
+                <div className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+                    <form onSubmit={handleVerifyOtp} className="bg-white border border-stone-200/90 rounded-2xl max-w-md w-full p-6 shadow-xl space-y-5">
+                        <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                            <div className="flex items-center gap-2">
+                                <Key className="w-5 h-5 text-yellow-600" />
+                                <h3 className="font-bold text-base text-stone-900">Validation OTP #{selectedDeliveryForOtp.order_number}</h3>
+                            </div>
+                            <button type="button" onClick={() => setSelectedDeliveryForOtp(null)} className="p-1 text-stone-400 hover:text-stone-700">
+                                ✕
+                            </button>
+                        </div>
+
+                        <div className="space-y-3 text-xs text-stone-600 font-normal">
+                            <p>Demandez au client le code secret à 6 chiffres affiché sur son reçu de commande.</p>
+                            <div>
+                                <label className="block text-xs font-semibold text-stone-800 mb-1">Code OTP à 6 chiffres :</label>
+                                <input
+                                    type="text"
+                                    maxLength="6"
+                                    value={otpInput}
+                                    onChange={(e) => setOtpInput(e.target.value)}
+                                    placeholder="Ex: 890124"
+                                    className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-center text-lg font-mono font-bold tracking-widest text-stone-900 focus:ring-2 focus:ring-yellow-400 outline-none"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="pt-2 flex gap-2">
+                            <button
+                                type="submit"
+                                disabled={processing}
+                                className="flex-1 py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors border border-yellow-500"
+                            >
+                                Valider et encaisser la livraison
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setSelectedDeliveryForOtp(null)}
+                                className="px-4 py-3 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs rounded-xl"
+                            >
+                                Annuler
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
+
+        </DriverLayout>
     );
 }

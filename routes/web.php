@@ -310,10 +310,19 @@ Route::middleware(['auth', 'account.active'])->group(function () {
         });
 
         // ─────────────────────────────────────────────────────────────────────────
-        // Espace Livreur (Dashboard & Actions)
+        // Espace Livreur (Dashboard, Tracking, Gains, OTP & 7 Onglets)
         // ─────────────────────────────────────────────────────────────────────────
         Route::middleware('role:driver')->prefix('driver')->name('driver.')->group(function () {
             Route::get('/dashboard', [\App\Http\Controllers\Driver\DriverController::class, 'dashboard'])->name('dashboard');
+            Route::get('/deliveries', [\App\Http\Controllers\Driver\DriverController::class, 'deliveries'])->name('deliveries');
+            Route::get('/map', [\App\Http\Controllers\Driver\DriverController::class, 'map'])->name('map');
+            Route::get('/earnings', [\App\Http\Controllers\Driver\DriverController::class, 'earnings'])->name('earnings');
+            Route::get('/notifications', [\App\Http\Controllers\Driver\DriverController::class, 'notifications'])->name('notifications');
+            Route::get('/reviews', [\App\Http\Controllers\Driver\DriverController::class, 'reviews'])->name('reviews');
+            Route::get('/settings', [\App\Http\Controllers\Driver\DriverController::class, 'settings'])->name('settings');
+
+            Route::post('/availability', [\App\Http\Controllers\Driver\DriverController::class, 'toggleAvailability'])->name('availability');
+            Route::post('/withdraw', [\App\Http\Controllers\Driver\DriverController::class, 'requestPayout'])->name('withdraw');
 
             Route::middleware('kyc.verified')->group(function () {
                 Route::post('/delivery/{order_number}/accept', [\App\Http\Controllers\Driver\DriverController::class, 'acceptDelivery'])->name('delivery.accept');
