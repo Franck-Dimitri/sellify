@@ -12,11 +12,7 @@ import {
     Store,
     Key,
     ShoppingBag,
-    FileText,
-    X,
-    User,
-    MapPin,
-    ShieldCheck
+    FileText
 } from 'lucide-react';
 import {
     Chart as ChartJS,
@@ -43,7 +39,6 @@ ChartJS.register(
 export default function Index({ orders = { data: [] }, filters = {}, stats = {} }) {
     const [search, setSearch] = useState(filters.search || '');
     const [status, setStatus] = useState(filters.status || 'all');
-    const [selectedOrder, setSelectedOrder] = useState(null);
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -279,13 +274,13 @@ export default function Index({ orders = { data: [] }, filters = {}, stats = {} 
                                                 {statusBadge(o.delivery_status)}
                                             </td>
                                             <td className="py-3.5 px-4 text-right">
-                                                <button
-                                                    onClick={() => setSelectedOrder(o)}
+                                                <Link
+                                                    href={route('admin.orders.show', o.order_number)}
                                                     className="px-3 py-1.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 rounded-xl font-bold text-[11px] transition-colors inline-flex items-center gap-1 border border-yellow-500"
                                                 >
                                                     <Eye className="w-3.5 h-3.5" />
                                                     <span>Inspecter</span>
-                                                </button>
+                                                </Link>
                                             </td>
                                         </tr>
                                     ))
@@ -302,64 +297,6 @@ export default function Index({ orders = { data: [] }, filters = {}, stats = {} 
                 </div>
 
             </div>
-
-            {/* ORDER INSPECTION MODAL */}
-            {selectedOrder && (
-                <div className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-                    <div className="bg-white border border-stone-200/90 rounded-2xl max-w-xl w-full p-6 shadow-xl space-y-5 animate-in fade-in zoom-in duration-150">
-                        
-                        <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-                            <div className="flex items-center gap-2">
-                                <Package className="w-5 h-5 text-yellow-600" />
-                                <h3 className="font-bold text-base text-stone-900">Inspection commande #{selectedOrder.order_number}</h3>
-                            </div>
-                            <button onClick={() => setSelectedOrder(null)} className="p-1 text-stone-400 hover:text-stone-700">
-                                <X className="w-5 h-5" />
-                            </button>
-                        </div>
-
-                        <div className="space-y-3 text-xs text-stone-700">
-                            <div className="grid grid-cols-2 gap-3 p-3 bg-stone-50 rounded-xl">
-                                <div>
-                                    <span className="text-stone-400 block">Acheteur :</span>
-                                    <strong className="text-stone-900">{selectedOrder.user?.first_name} {selectedOrder.user?.last_name}</strong>
-                                </div>
-                                <div>
-                                    <span className="text-stone-400 block">Boutique :</span>
-                                    <strong className="text-stone-900">{selectedOrder.shop?.name}</strong>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3 p-3 bg-stone-50 rounded-xl">
-                                <div>
-                                    <span className="text-stone-400 block">Montant commande :</span>
-                                    <strong className="text-stone-900 text-sm">{Number(selectedOrder.total_amount).toLocaleString('fr-FR')} FCFA</strong>
-                                </div>
-                                <div>
-                                    <span className="text-stone-400 block">Code OTP de sécurité :</span>
-                                    <strong className="text-yellow-700 font-mono text-sm">{selectedOrder.delivery_otp || 'Non généré'}</strong>
-                                </div>
-                            </div>
-
-                            <div className="p-3 bg-stone-50 rounded-xl space-y-1">
-                                <span className="text-stone-400 block">Statut paiement Escrow :</span>
-                                <strong>{selectedOrder.payment_status || 'escrow_held'}</strong>
-                            </div>
-                        </div>
-
-                        <div className="pt-3 border-t border-stone-100 flex justify-end">
-                            <button
-                                onClick={() => setSelectedOrder(null)}
-                                className="py-2 px-4 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs rounded-xl"
-                            >
-                                Fermer l'inspection
-                            </button>
-                        </div>
-
-                    </div>
-                </div>
-            )}
-
         </AdminLayout>
     );
 }

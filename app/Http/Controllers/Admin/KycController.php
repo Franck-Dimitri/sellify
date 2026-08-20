@@ -50,7 +50,7 @@ class KycController extends Controller
      */
     public function show(int $id): InertiaResponse
     {
-        $kycRequest = KycRequest::with(['user.kycDocuments'])->findOrFail($id);
+        $kycRequest = KycRequest::with(['user.kycDocuments', 'user.driver', 'user.seller.shops'])->findOrFail($id);
 
         return Inertia::render('Admin/Kyc/Show', [
             'kycRequest' => $kycRequest,

@@ -8,17 +8,7 @@ import {
     DollarSign, 
     Percent, 
     CheckCircle2, 
-    AlertTriangle, 
-    Eye,
-    X,
-    Lock,
-    Unlock,
-    RotateCcw,
-    MapPin,
-    User,
-    Store,
-    Key,
-    Clock
+    Eye
 } from 'lucide-react';
 import {
     Chart as ChartJS,
@@ -51,8 +41,6 @@ ChartJS.register(
 export default function Index({ orders = { data: [] }, filters = {}, stats = {} }) {
     const [search, setSearch] = useState(filters.search || '');
     const [paymentStatus, setPaymentStatus] = useState(filters.payment_status || 'all');
-    const [selectedOrder, setSelectedOrder] = useState(null); // Inspection Modal state
-    const { post, processing } = useForm();
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -62,30 +50,6 @@ export default function Index({ orders = { data: [] }, filters = {}, stats = {} 
     const handleTabChange = (st) => {
         setPaymentStatus(st);
         router.get(route('admin.escrow.index'), { search, payment_status: st }, { preserveState: true });
-    };
-
-    const handleForceRelease = (orderNumber) => {
-        if (confirm(`Voulez-vous libérer les fonds Escrow de la commande #${orderNumber} au vendeur ?`)) {
-            post(route('admin.escrow.release', orderNumber), {
-                onSuccess: () => setSelectedOrder(null)
-            });
-        }
-    };
-
-    const handleForceRefund = (orderNumber) => {
-        if (confirm(`Voulez-vous forcer le remboursement intégral de la commande #${orderNumber} à l'acheteur ?`)) {
-            post(route('admin.escrow.refund', orderNumber), {
-                onSuccess: () => setSelectedOrder(null)
-            });
-        }
-    };
-
-    const handleLockEscrow = (orderNumber) => {
-        if (confirm(`Voulez-vous geler/bloquer les fonds Escrow de la commande #${orderNumber} pour litige ?`)) {
-            post(route('admin.escrow.lock', orderNumber), {
-                onSuccess: () => setSelectedOrder(null)
-            });
-        }
     };
 
     const paymentStatusBadge = (st) => {
@@ -312,7 +276,7 @@ export default function Index({ orders = { data: [] }, filters = {}, stats = {} 
                                     <th className="py-3 px-4">Boutique destinataire</th>
                                     <th className="py-3 px-4">Montant séquestre</th>
                                     <th className="py-3 px-4">Statut Escrow</th>
-                                    <th className="py-3 px-4 text-right">Inspection & Actions</th>
+                                    <th className="py-3 px-4 text-right">Action</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-stone-100">
@@ -337,14 +301,14 @@ export default function Index({ orders = { data: [] }, filters = {}, stats = {} 
                                             <td className="py-3.5 px-4">
                                                 {paymentStatusBadge(o.payment_status)}
                                             </td>
-                                            <td className="py-3.5 px-4 text-right space-x-2">
-                                                <button
-                                                    onClick={() => setSelectedOrder(o)}
+                                            <td className="py-3.5 px-4 text-right">
+                                                <Link
+                                                    href={route('admin.escrow.show', o.order_number)}
                                                     className="px-3 py-1.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 rounded-xl font-bold text-[11px] transition-colors inline-flex items-center gap-1 border border-yellow-500"
                                                 >
                                                     <Eye className="w-3.5 h-3.5" />
-                                                    <span>Inspecter</span>
-                                                </button>
+                                                    <span>Inspecter séquestre</span>
+                                                </Link>
                                             </td>
                                         </tr>
                                     ))
@@ -361,87 +325,6 @@ export default function Index({ orders = { data: [] }, filters = {}, stats = {} 
                 </div>
 
             </div>
-
-            {/* INSPECTION MODAL DRAWER */}
-            {selectedOrder && (
-                <div className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-                    <div className="bg-white border border-stone-200/90 rounded-2xl max-w-xl w-full p-6 shadow-xl space-y-5 animate-in fade-in zoom-in duration-150">
-                        
-                        <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-                            <div className="flex items-center gap-2">
-                                <ShieldCheck className="w-5 h-5 text-yellow-600" />
-                                <h3 className="font-bold text-base text-stone-900">Inspection consigne #{selectedOrder.order_number}</h3>
-                            </div>
-                            <button onClick={() => setSelectedOrder(null)} className="p-1 text-stone-400 hover:text-stone-700">
-                                <X className="w-5 h-5" />
-                            </button>
-                        </div>
-
-                        <div className="space-y-3 text-xs text-stone-700">
-                            <div className="grid grid-cols-2 gap-3 p-3 bg-stone-50 rounded-xl">
-                                <div>
-                                    <span className="text-stone-400 block">Acheteur :</span>
-                                    <strong className="text-stone-900">{selectedOrder.user?.first_name} {selectedOrder.user?.last_name}</strong>
-                                    <span className="text-[10px] text-stone-400 block">{selectedOrder.user?.email}</span>
-                                </div>
-                                <div>
-                                    <span className="text-stone-400 block">Boutique destinataire :</span>
-                                    <strong className="text-stone-900">{selectedOrder.shop?.name}</strong>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3 p-3 bg-stone-50 rounded-xl">
-                                <div>
-                                    <span className="text-stone-400 block">Montant en séquestre :</span>
-                                    <strong className="text-stone-900 text-sm">{Number(selectedOrder.total_amount).toLocaleString('fr-FR')} FCFA</strong>
-                                </div>
-                                <div>
-                                    <span className="text-stone-400 block">Code OTP de livraison :</span>
-                                    <strong className="text-yellow-700 font-mono text-sm">{selectedOrder.delivery_otp || 'N/A'}</strong>
-                                </div>
-                            </div>
-
-                            <div className="p-3 bg-stone-50 rounded-xl space-y-1">
-                                <span className="text-stone-400 block">Adresse de livraison :</span>
-                                <strong className="text-stone-900">{selectedOrder.shipping_address || 'Non spécifiée'}</strong>
-                            </div>
-                        </div>
-
-                        {/* Admin Action Control Buttons */}
-                        <div className="pt-3 border-t border-stone-100 space-y-2">
-                            <span className="text-xs font-bold text-stone-900 block">Contrôle des fonds par l'Administrateur :</span>
-                            <div className="flex flex-wrap gap-2">
-                                <button
-                                    onClick={() => handleForceRelease(selectedOrder.order_number)}
-                                    disabled={processing}
-                                    className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-2xs transition-colors flex items-center justify-center gap-1.5"
-                                >
-                                    <Unlock className="w-3.5 h-3.5" />
-                                    <span>Débloquer fonds au vendeur</span>
-                                </button>
-                                <button
-                                    onClick={() => handleLockEscrow(selectedOrder.order_number)}
-                                    disabled={processing}
-                                    className="py-2.5 px-3 bg-amber-100 hover:bg-amber-200 text-amber-950 font-bold text-xs rounded-xl transition-colors border border-amber-300 flex items-center gap-1.5"
-                                >
-                                    <Lock className="w-3.5 h-3.5" />
-                                    <span>Geler fonds</span>
-                                </button>
-                                <button
-                                    onClick={() => handleForceRefund(selectedOrder.order_number)}
-                                    disabled={processing}
-                                    className="py-2.5 px-3 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-2xs transition-colors flex items-center gap-1.5"
-                                >
-                                    <RotateCcw className="w-3.5 h-3.5" />
-                                    <span>Rembourser acheteur</span>
-                                </button>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            )}
-
         </AdminLayout>
     );
 }

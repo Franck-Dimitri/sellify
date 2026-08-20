@@ -216,4 +216,32 @@ class OrderController extends Controller
 
         return back()->with('success', "Les fonds sous séquestre de la commande #{$order->order_number} ont été gelés pour investigation.");
     }
+
+    /**
+     * Display single order inspection page.
+     */
+    public function show(string $orderNumber): InertiaResponse
+    {
+        $order = Order::where('order_number', $orderNumber)
+            ->with(['user', 'shop.seller.user', 'driver.user', 'items.product', 'dispute'])
+            ->firstOrFail();
+
+        return Inertia::render('Admin/Orders/Show', [
+            'order' => $order,
+        ]);
+    }
+
+    /**
+     * Display single escrow conscription inspection page.
+     */
+    public function escrowShow(string $orderNumber): InertiaResponse
+    {
+        $order = Order::where('order_number', $orderNumber)
+            ->with(['user', 'shop.seller.user', 'driver.user', 'items.product', 'dispute'])
+            ->firstOrFail();
+
+        return Inertia::render('Admin/Escrow/Show', [
+            'order' => $order,
+        ]);
+    }
 }

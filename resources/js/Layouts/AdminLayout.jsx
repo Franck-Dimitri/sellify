@@ -22,7 +22,8 @@ import {
     PanelLeftOpen,
     ArrowRight,
     Check,
-    Tag
+    Tag,
+    Store
 } from 'lucide-react';
 
 export default function AdminLayout({ children, title }) {
@@ -83,6 +84,12 @@ export default function AdminLayout({ children, title }) {
         {
             title: 'Opérations & litiges',
             items: [
+                { 
+                    name: 'Boutiques', 
+                    href: route('admin.shops.index'), 
+                    icon: Store, 
+                    active: route().current('admin.shops.*') 
+                },
                 { 
                     name: 'Vérifications KYC', 
                     href: route('admin.kyc.index'), 

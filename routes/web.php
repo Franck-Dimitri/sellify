@@ -145,10 +145,18 @@ Route::middleware(['auth', 'account.active'])->group(function () {
 
             // Commandes globales & Séquestre Escrow
             Route::get('/orders', [\App\Http\Controllers\Admin\OrderController::class, 'index'])->name('orders.index');
+            Route::get('/orders/{order_number}', [\App\Http\Controllers\Admin\OrderController::class, 'show'])->name('orders.show');
             Route::get('/escrow', [\App\Http\Controllers\Admin\OrderController::class, 'escrow'])->name('escrow.index');
+            Route::get('/escrow/{order_number}', [\App\Http\Controllers\Admin\OrderController::class, 'escrowShow'])->name('escrow.show');
             Route::post('/escrow/{order_number}/release', [\App\Http\Controllers\Admin\OrderController::class, 'forceReleaseEscrow'])->name('escrow.release');
             Route::post('/escrow/{order_number}/refund', [\App\Http\Controllers\Admin\OrderController::class, 'forceRefundEscrow'])->name('escrow.refund');
             Route::post('/escrow/{order_number}/lock', [\App\Http\Controllers\Admin\OrderController::class, 'lockEscrow'])->name('escrow.lock');
+
+            // Moderation globale des boutiques
+            Route::get('/shops', [\App\Http\Controllers\Admin\ShopController::class, 'index'])->name('shops.index');
+            Route::get('/shops/{shop}', [\App\Http\Controllers\Admin\ShopController::class, 'show'])->name('shops.show');
+            Route::post('/shops/{shop}/activate', [\App\Http\Controllers\Admin\ShopController::class, 'activate'])->name('shops.activate');
+            Route::post('/shops/{shop}/suspend', [\App\Http\Controllers\Admin\ShopController::class, 'suspend'])->name('shops.suspend');
         });
 
         // ─────────────────────────────────────────────────────────────────────────
