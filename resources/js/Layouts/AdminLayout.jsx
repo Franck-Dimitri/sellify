@@ -68,9 +68,9 @@ export default function AdminLayout({ children, title }) {
             items: [
                 { 
                     name: 'Séquestre Escrow', 
-                    href: '#', 
+                    href: route('admin.escrow.index'), 
                     icon: CreditCard, 
-                    active: false 
+                    active: route().current('admin.escrow.*') 
                 },
                 { 
                     name: 'Codes promo', 
@@ -92,9 +92,9 @@ export default function AdminLayout({ children, title }) {
                 },
                 { 
                     name: 'Commandes', 
-                    href: '#', 
+                    href: route('admin.orders.index'), 
                     icon: Package, 
-                    active: false 
+                    active: route().current('admin.orders.*') 
                 },
                 { 
                     name: 'Litiges', 
@@ -112,7 +112,6 @@ export default function AdminLayout({ children, title }) {
         { name: 'Vendeurs', href: route('admin.users.sellers'), count: counts.sellers, active: route().current('admin.users.sellers') },
         { name: 'Livreurs', href: route('admin.users.drivers'), count: counts.drivers, active: route().current('admin.users.drivers') },
         { name: 'Clients', href: route('admin.users.customers'), count: counts.customers, active: route().current('admin.users.customers') },
-        { name: 'Administrateurs', href: route('admin.users.admins'), count: counts.admins, active: route().current('admin.users.admins') },
         { name: 'Comptes bloqués', href: route('admin.users.blocked'), count: counts.blocked, active: route().current('admin.users.blocked') },
     ];
 

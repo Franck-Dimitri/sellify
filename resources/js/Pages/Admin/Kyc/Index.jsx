@@ -11,7 +11,8 @@ import {
     Clock,
     Search,
     BarChart2,
-    PieChart
+    PieChart,
+    TrendingUp
 } from 'lucide-react';
 
 export default function Index({ kycRequests = { data: [] }, filters = {} }) {
@@ -29,6 +30,17 @@ export default function Index({ kycRequests = { data: [] }, filters = {} }) {
     const rejectedCount = kycRequests.data ? kycRequests.data.filter(r => r.status === 'rejected').length : 0;
     const totalCount = kycRequests.data ? kycRequests.data.length : 0;
 
+    // Monthly Submission Trend Mockup Data for Chart
+    const monthlyKycTrend = [
+        { month: 'Mars', count: 12 },
+        { month: 'Avril', count: 18 },
+        { month: 'Mai', count: 25 },
+        { month: 'Juin', count: 32 },
+        { month: 'Juillet', count: 40 },
+        { month: 'Août', count: totalCount || 15 },
+    ];
+    const maxKycCount = Math.max(...monthlyKycTrend.map(m => m.count), 10);
+
     return (
         <AdminLayout title="Modération KYC">
             <Head title="Vérification KYC - Sellify Admin" />
@@ -36,7 +48,7 @@ export default function Index({ kycRequests = { data: [] }, filters = {} }) {
             <div className="w-full space-y-6 text-stone-800 antialiased font-sans pb-16">
                 
                 {/* Header Banner */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-stone-200/80 p-5 rounded-xl shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs">
                     <div>
                         <div className="flex items-center gap-2 text-xs font-semibold text-yellow-700">
                             <UserCheck className="w-4 h-4 text-yellow-600" />
@@ -57,7 +69,7 @@ export default function Index({ kycRequests = { data: [] }, filters = {} }) {
 
                 {/* Exactly 4 Stat Cards Row */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-white border border-stone-200/80 p-5 rounded-xl shadow-xs space-y-1.5">
+                    <div className="bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-2">
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-semibold text-stone-500">Demandes soumises</span>
                             <div className="w-8 h-8 bg-stone-100 rounded-xl flex items-center justify-center text-stone-700">
@@ -68,10 +80,10 @@ export default function Index({ kycRequests = { data: [] }, filters = {} }) {
                         <span className="text-[11px] text-stone-400 font-normal">Total dossiers examinés</span>
                     </div>
 
-                    <div className="bg-white border border-stone-200/80 p-5 rounded-xl shadow-xs space-y-1.5">
+                    <div className="bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-2">
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-semibold text-stone-500">En attente d'examen</span>
-                            <div className="w-8 h-8 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600">
+                            <div className="w-8 h-8 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600 border border-amber-200">
                                 <ShieldAlert className="w-4 h-4" />
                             </div>
                         </div>
@@ -79,10 +91,10 @@ export default function Index({ kycRequests = { data: [] }, filters = {} }) {
                         <span className="text-[11px] text-stone-400 font-normal">Priorité modération haute</span>
                     </div>
 
-                    <div className="bg-white border border-stone-200/80 p-5 rounded-xl shadow-xs space-y-1.5">
+                    <div className="bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-2">
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-semibold text-stone-500">Dossiers approuvés</span>
-                            <div className="w-8 h-8 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
+                            <div className="w-8 h-8 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 border border-emerald-200">
                                 <CheckCircle2 className="w-4 h-4" />
                             </div>
                         </div>
@@ -90,10 +102,10 @@ export default function Index({ kycRequests = { data: [] }, filters = {} }) {
                         <span className="text-[11px] text-stone-400 font-normal">Identités certifiées</span>
                     </div>
 
-                    <div className="bg-white border border-stone-200/80 p-5 rounded-xl shadow-xs space-y-1.5">
+                    <div className="bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-2">
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-semibold text-stone-500">Dossiers rejetés</span>
-                            <div className="w-8 h-8 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600">
+                            <div className="w-8 h-8 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600 border border-rose-200">
                                 <XCircle className="w-4 h-4" />
                             </div>
                         </div>
@@ -102,8 +114,87 @@ export default function Index({ kycRequests = { data: [] }, filters = {} }) {
                     </div>
                 </div>
 
+                {/* CHARTS SECTION IN KYC VIEW */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    {/* Monthly KYC Submission Trend Chart (2 cols) */}
+                    <div className="lg:col-span-2 bg-white border border-stone-200/80 p-6 rounded-2xl shadow-2xs space-y-5">
+                        <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                            <div className="flex items-center gap-2">
+                                <BarChart2 className="w-4 h-4 text-yellow-600" />
+                                <h3 className="font-bold text-sm text-stone-900">Évolution des soumissions KYC par mois</h3>
+                            </div>
+                            <span className="text-[11px] text-stone-400 font-normal">Flux des 6 derniers mois</span>
+                        </div>
+
+                        {/* Interactive Bar Chart */}
+                        <div className="pt-4 pb-2">
+                            <div className="grid grid-cols-6 gap-3 items-end h-40 border-b border-stone-200 pb-2 px-2">
+                                {monthlyKycTrend.map((m, idx) => {
+                                    const heightPercent = maxKycCount > 0 ? Math.max(15, Math.round((m.count / maxKycCount) * 100)) : 15;
+                                    return (
+                                        <div key={idx} className="flex flex-col items-center gap-2 group h-full justify-end">
+                                            <div className="text-[10px] font-bold text-stone-700 opacity-0 group-hover:opacity-100 transition-opacity bg-stone-900 text-white px-2 py-0.5 rounded shadow-xs">
+                                                {m.count} dossiers
+                                            </div>
+                                            <div 
+                                                style={{ height: `${heightPercent}%` }}
+                                                className="w-full bg-gradient-to-t from-yellow-500 to-yellow-400 rounded-t-xl group-hover:from-yellow-600 transition-all duration-300 shadow-2xs"
+                                            />
+                                            <span className="text-[11px] font-semibold text-stone-600 truncate">{m.month}</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Status Breakdown Ring/Progress (1 col) */}
+                    <div className="bg-white border border-stone-200/80 p-6 rounded-2xl shadow-2xs space-y-5">
+                        <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                            <div className="flex items-center gap-2">
+                                <PieChart className="w-4 h-4 text-yellow-600" />
+                                <h3 className="font-bold text-sm text-stone-900">Ratio de validation KYC</h3>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4 pt-1 text-xs">
+                            <div className="space-y-1">
+                                <div className="flex justify-between font-semibold">
+                                    <span className="text-emerald-700">Approuvés</span>
+                                    <span>{approvedCount}</span>
+                                </div>
+                                <div className="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
+                                    <div className="h-full bg-emerald-500 rounded-full w-3/4" />
+                                </div>
+                            </div>
+
+                            <div className="space-y-1">
+                                <div className="flex justify-between font-semibold">
+                                    <span className="text-amber-700">En attente</span>
+                                    <span>{pendingCount}</span>
+                                </div>
+                                <div className="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
+                                    <div className="h-full bg-amber-500 rounded-full w-1/2" />
+                                </div>
+                            </div>
+
+                            <div className="space-y-1">
+                                <div className="flex justify-between font-semibold">
+                                    <span className="text-rose-700">Rejetés</span>
+                                    <span>{rejectedCount}</span>
+                                </div>
+                                <div className="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
+                                    <div className="h-full bg-rose-500 rounded-full w-1/4" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
                 {/* Filter Tabs */}
-                <div className="bg-white border border-stone-200/80 p-4 rounded-xl shadow-xs space-y-3">
+                <div className="bg-white border border-stone-200/80 p-4 rounded-2xl shadow-2xs space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
                         {[
                             { id: 'pending', label: 'En attente de validation', icon: ShieldAlert, color: 'text-amber-700' },
@@ -127,7 +218,7 @@ export default function Index({ kycRequests = { data: [] }, filters = {} }) {
                 </div>
 
                 {/* KYC Table */}
-                <div className="bg-white border border-stone-200/80 rounded-xl shadow-xs overflow-hidden">
+                <div className="bg-white border border-stone-200/80 rounded-2xl shadow-2xs overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse text-xs">
                             <thead>
