@@ -195,4 +195,25 @@ class OrderController extends Controller
 
         return back()->with('success', "La commande #{$order->order_number} a été annulée et le remboursement sous séquestre a été effectué.");
     }
+
+    /**
+     * Admin locks/freezes Escrow hold due to investigation.
+     */
+    public function lockEscrow(Request $request, string $orderNumber)
+    {
+        $order = Order::where('order_number', $orderNumber)->firstOrFail();
+
+        $order->update([
+            'payment_status' => 'escrow_held',
+            'delivery_status' => 'disputed',
+        ]);
+
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'admin_escrow_locked',
+            'description' => "L'administrateur a gelé/bloqué temporairement les fonds sous séquestre de la commande #{$order->order_number} pour examen de litige.",
+        ]);
+
+        return back()->with('success', "Les fonds sous séquestre de la commande #{$order->order_number} ont été gelés pour investigation.");
+    }
 }

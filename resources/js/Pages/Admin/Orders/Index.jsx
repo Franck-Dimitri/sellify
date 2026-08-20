@@ -12,12 +12,38 @@ import {
     Store,
     Key,
     ShoppingBag,
-    FileText
+    FileText,
+    X,
+    User,
+    MapPin,
+    ShieldCheck
 } from 'lucide-react';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+    ArcElement
+} from 'chart.js';
+import { Bar, Doughnut } from 'react-chartjs-2';
+
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+    ArcElement
+);
 
 export default function Index({ orders = { data: [] }, filters = {}, stats = {} }) {
     const [search, setSearch] = useState(filters.search || '');
     const [status, setStatus] = useState(filters.status || 'all');
+    const [selectedOrder, setSelectedOrder] = useState(null);
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -46,6 +72,47 @@ export default function Index({ orders = { data: [] }, filters = {}, stats = {} 
         );
     };
 
+    // Chart.js Configuration
+    const ordersBarData = {
+        labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+        datasets: [
+            {
+                label: 'Commandes traitées',
+                data: [14, 22, 19, 31, 45, 52, 38],
+                backgroundColor: '#f59e0b',
+                borderRadius: 6,
+            }
+        ]
+    };
+
+    const ordersBarOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { grid: { display: false } },
+            y: { grid: { color: 'rgba(231, 229, 228, 0.6)' } }
+        }
+    };
+
+    const ordersDoughnutData = {
+        labels: ['En attente', 'En transit', 'Livrées', 'Annulées'],
+        datasets: [
+            {
+                data: [stats.pending_orders || 15, stats.in_transit_orders || 8, stats.delivered_orders || 42, stats.cancelled_orders || 4],
+                backgroundColor: ['#3b82f6', '#a855f7', '#10b981', '#f43f5e'],
+                borderWidth: 0,
+            }
+        ]
+    };
+
+    const ordersDoughnutOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
+        cutout: '70%'
+    };
+
     return (
         <AdminLayout title="Gestion des commandes">
             <Head title="Commandes globales - Sellify Admin" />
@@ -63,7 +130,7 @@ export default function Index({ orders = { data: [] }, filters = {}, stats = {} 
                             Commandes globales de la plateforme
                         </h1>
                         <p className="text-xs text-stone-500 font-normal mt-0.5">
-                            Suivez l'état d'avancement des commandes, les livraisons en cours et les reçus sous séquestre.
+                            Inspection détaillée des commandes, du statut de livraison et du code OTP de sécurité.
                         </p>
                     </div>
                 </div>
@@ -78,7 +145,7 @@ export default function Index({ orders = { data: [] }, filters = {}, stats = {} 
                             </div>
                         </div>
                         <p className="text-2xl font-bold text-stone-900">{stats.total_orders || 0}</p>
-                        <span className="text-[11px] text-stone-400 font-normal">Commandes passées</span>
+                        <span className="text-[11px] text-stone-400 font-normal">Commandes enregistrées</span>
                     </div>
 
                     <div className="bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-2">
@@ -112,6 +179,28 @@ export default function Index({ orders = { data: [] }, filters = {}, stats = {} 
                         </div>
                         <p className="text-2xl font-bold text-emerald-600">{stats.delivered_orders || 0}</p>
                         <span className="text-[11px] text-stone-400 font-normal">Fonds sous séquestre libérés</span>
+                    </div>
+                </div>
+
+                {/* CHART.JS CHARTS */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2 bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-4">
+                        <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                            <h3 className="font-bold text-sm text-stone-900">Volume quotidien des commandes</h3>
+                            <span className="text-xs text-stone-400">Chart.js Graphique</span>
+                        </div>
+                        <div className="h-52">
+                            <Bar data={ordersBarData} options={ordersBarOptions} />
+                        </div>
+                    </div>
+
+                    <div className="bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-4">
+                        <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                            <h3 className="font-bold text-sm text-stone-900">Répartition par statut</h3>
+                        </div>
+                        <div className="h-52 relative flex items-center justify-center">
+                            <Doughnut data={ordersDoughnutData} options={ordersDoughnutOptions} />
+                        </div>
                     </div>
                 </div>
 
@@ -190,13 +279,13 @@ export default function Index({ orders = { data: [] }, filters = {}, stats = {} 
                                                 {statusBadge(o.delivery_status)}
                                             </td>
                                             <td className="py-3.5 px-4 text-right">
-                                                <Link
-                                                    href={route('customer.orders.show', o.order_number)}
-                                                    className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl font-semibold text-[11px] transition-colors inline-flex items-center gap-1"
+                                                <button
+                                                    onClick={() => setSelectedOrder(o)}
+                                                    className="px-3 py-1.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 rounded-xl font-bold text-[11px] transition-colors inline-flex items-center gap-1 border border-yellow-500"
                                                 >
                                                     <Eye className="w-3.5 h-3.5" />
-                                                    <span>Détails</span>
-                                                </Link>
+                                                    <span>Inspecter</span>
+                                                </button>
                                             </td>
                                         </tr>
                                     ))
@@ -213,6 +302,64 @@ export default function Index({ orders = { data: [] }, filters = {}, stats = {} 
                 </div>
 
             </div>
+
+            {/* ORDER INSPECTION MODAL */}
+            {selectedOrder && (
+                <div className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+                    <div className="bg-white border border-stone-200/90 rounded-2xl max-w-xl w-full p-6 shadow-xl space-y-5 animate-in fade-in zoom-in duration-150">
+                        
+                        <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                            <div className="flex items-center gap-2">
+                                <Package className="w-5 h-5 text-yellow-600" />
+                                <h3 className="font-bold text-base text-stone-900">Inspection commande #{selectedOrder.order_number}</h3>
+                            </div>
+                            <button onClick={() => setSelectedOrder(null)} className="p-1 text-stone-400 hover:text-stone-700">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-3 text-xs text-stone-700">
+                            <div className="grid grid-cols-2 gap-3 p-3 bg-stone-50 rounded-xl">
+                                <div>
+                                    <span className="text-stone-400 block">Acheteur :</span>
+                                    <strong className="text-stone-900">{selectedOrder.user?.first_name} {selectedOrder.user?.last_name}</strong>
+                                </div>
+                                <div>
+                                    <span className="text-stone-400 block">Boutique :</span>
+                                    <strong className="text-stone-900">{selectedOrder.shop?.name}</strong>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3 p-3 bg-stone-50 rounded-xl">
+                                <div>
+                                    <span className="text-stone-400 block">Montant commande :</span>
+                                    <strong className="text-stone-900 text-sm">{Number(selectedOrder.total_amount).toLocaleString('fr-FR')} FCFA</strong>
+                                </div>
+                                <div>
+                                    <span className="text-stone-400 block">Code OTP de sécurité :</span>
+                                    <strong className="text-yellow-700 font-mono text-sm">{selectedOrder.delivery_otp || 'Non généré'}</strong>
+                                </div>
+                            </div>
+
+                            <div className="p-3 bg-stone-50 rounded-xl space-y-1">
+                                <span className="text-stone-400 block">Statut paiement Escrow :</span>
+                                <strong>{selectedOrder.payment_status || 'escrow_held'}</strong>
+                            </div>
+                        </div>
+
+                        <div className="pt-3 border-t border-stone-100 flex justify-end">
+                            <button
+                                onClick={() => setSelectedOrder(null)}
+                                className="py-2 px-4 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs rounded-xl"
+                            >
+                                Fermer l'inspection
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            )}
+
         </AdminLayout>
     );
 }

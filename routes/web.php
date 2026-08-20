@@ -148,6 +148,7 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/escrow', [\App\Http\Controllers\Admin\OrderController::class, 'escrow'])->name('escrow.index');
             Route::post('/escrow/{order_number}/release', [\App\Http\Controllers\Admin\OrderController::class, 'forceReleaseEscrow'])->name('escrow.release');
             Route::post('/escrow/{order_number}/refund', [\App\Http\Controllers\Admin\OrderController::class, 'forceRefundEscrow'])->name('escrow.refund');
+            Route::post('/escrow/{order_number}/lock', [\App\Http\Controllers\Admin\OrderController::class, 'lockEscrow'])->name('escrow.lock');
         });
 
         // ─────────────────────────────────────────────────────────────────────────
