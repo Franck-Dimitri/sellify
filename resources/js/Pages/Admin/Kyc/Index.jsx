@@ -1,12 +1,20 @@
 import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
-import { Card } from '../../../Components/ui/Card';
-import Badge from '../../../Components/ui/Badge';
-import Button from '../../../Components/ui/Button';
-import { Eye, ShieldAlert, CheckCircle, XCircle } from 'lucide-react';
+import AdminLayout from '@/Layouts/AdminLayout';
+import { 
+    Eye, 
+    ShieldAlert, 
+    CheckCircle2, 
+    XCircle, 
+    UserCheck,
+    FileText,
+    Clock,
+    Search,
+    BarChart2,
+    PieChart
+} from 'lucide-react';
 
-export default function Index({ kycRequests, filters }) {
+export default function Index({ kycRequests = { data: [] }, filters = {} }) {
     const [status, setStatus] = useState(filters.status || 'pending');
     const [type, setType] = useState(filters.type || '');
 
@@ -16,130 +24,184 @@ export default function Index({ kycRequests, filters }) {
         router.get(route('admin.kyc.index'), { status: newStatus, type: newType }, { preserveState: true });
     };
 
-    return (
-        <AdminLayout title="File d'attente KYC (Vérification d'Identité)">
-            <Head title="File d'attente KYC" />
+    const pendingCount = kycRequests.data ? kycRequests.data.filter(r => r.status === 'pending').length : 0;
+    const approvedCount = kycRequests.data ? kycRequests.data.filter(r => r.status === 'approved').length : 0;
+    const rejectedCount = kycRequests.data ? kycRequests.data.filter(r => r.status === 'rejected').length : 0;
+    const totalCount = kycRequests.data ? kycRequests.data.length : 0;
 
-            <div className="space-y-6">
-                {/* Custom Bento Tabs */}
-                <div className="flex flex-wrap gap-2">
-                    <Button
-                        variant={status === 'pending' ? 'primary' : 'outline'}
-                        onClick={() => handleFilterChange('pending')}
-                        className="space-x-1.5"
-                    >
-                        <ShieldAlert className="w-4 h-4" />
-                        <span>En attente de validation</span>
-                    </Button>
-                    <Button
-                        variant={status === 'approved' ? 'primary' : 'outline'}
-                        onClick={() => handleFilterChange('approved')}
-                        className="space-x-1.5"
-                    >
-                        <CheckCircle className="w-4 h-4" />
-                        <span>Dossiers Approuvés</span>
-                    </Button>
-                    <Button
-                        variant={status === 'rejected' ? 'primary' : 'outline'}
-                        onClick={() => handleFilterChange('rejected')}
-                        className="space-x-1.5"
-                    >
-                        <XCircle className="w-4 h-4" />
-                        <span>Dossiers Rejetés</span>
-                    </Button>
+    return (
+        <AdminLayout title="Modération KYC">
+            <Head title="Vérification KYC - Sellify Admin" />
+
+            <div className="w-full space-y-6 text-stone-800 antialiased font-sans pb-16">
+                
+                {/* Header Banner */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-stone-200/80 p-5 rounded-xl shadow-xs">
+                    <div>
+                        <div className="flex items-center gap-2 text-xs font-semibold text-yellow-700">
+                            <UserCheck className="w-4 h-4 text-yellow-600" />
+                            <span>Vérification d'identité & pièces justificatives</span>
+                        </div>
+                        <h1 className="text-xl font-bold text-stone-900 mt-1">
+                            File d'examen KYC & conformité
+                        </h1>
+                        <p className="text-xs text-stone-500 font-normal mt-0.5">
+                            Validez l'identité des vendeurs et des livreurs avant l'activation officielle de leurs comptes.
+                        </p>
+                    </div>
+
+                    <div className="bg-yellow-50 border border-yellow-300 px-4 py-2 rounded-xl text-xs font-bold text-yellow-950 shrink-0">
+                        {pendingCount} dossier(s) en attente de modération
+                    </div>
                 </div>
 
-                {/* Table card */}
-                <Card className="bento-card overflow-hidden p-0">
+                {/* Exactly 4 Stat Cards Row */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-white border border-stone-200/80 p-5 rounded-xl shadow-xs space-y-1.5">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-stone-500">Demandes soumises</span>
+                            <div className="w-8 h-8 bg-stone-100 rounded-xl flex items-center justify-center text-stone-700">
+                                <FileText className="w-4 h-4" />
+                            </div>
+                        </div>
+                        <p className="text-2xl font-bold text-stone-900">{totalCount}</p>
+                        <span className="text-[11px] text-stone-400 font-normal">Total dossiers examinés</span>
+                    </div>
+
+                    <div className="bg-white border border-stone-200/80 p-5 rounded-xl shadow-xs space-y-1.5">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-stone-500">En attente d'examen</span>
+                            <div className="w-8 h-8 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600">
+                                <ShieldAlert className="w-4 h-4" />
+                            </div>
+                        </div>
+                        <p className="text-2xl font-bold text-amber-600">{pendingCount}</p>
+                        <span className="text-[11px] text-stone-400 font-normal">Priorité modération haute</span>
+                    </div>
+
+                    <div className="bg-white border border-stone-200/80 p-5 rounded-xl shadow-xs space-y-1.5">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-stone-500">Dossiers approuvés</span>
+                            <div className="w-8 h-8 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
+                                <CheckCircle2 className="w-4 h-4" />
+                            </div>
+                        </div>
+                        <p className="text-2xl font-bold text-emerald-600">{approvedCount}</p>
+                        <span className="text-[11px] text-stone-400 font-normal">Identités certifiées</span>
+                    </div>
+
+                    <div className="bg-white border border-stone-200/80 p-5 rounded-xl shadow-xs space-y-1.5">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-stone-500">Dossiers rejetés</span>
+                            <div className="w-8 h-8 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600">
+                                <XCircle className="w-4 h-4" />
+                            </div>
+                        </div>
+                        <p className="text-2xl font-bold text-rose-600">{rejectedCount}</p>
+                        <span className="text-[11px] text-stone-400 font-normal">Document non conforme</span>
+                    </div>
+                </div>
+
+                {/* Filter Tabs */}
+                <div className="bg-white border border-stone-200/80 p-4 rounded-xl shadow-xs space-y-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                        {[
+                            { id: 'pending', label: 'En attente de validation', icon: ShieldAlert, color: 'text-amber-700' },
+                            { id: 'approved', label: 'Dossiers approuvés', icon: CheckCircle2, color: 'text-emerald-700' },
+                            { id: 'rejected', label: 'Dossiers rejetés', icon: XCircle, color: 'text-rose-700' },
+                        ].map((tab) => (
+                            <button
+                                key={tab.id}
+                                onClick={() => handleFilterChange(tab.id)}
+                                className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
+                                    status === tab.id
+                                        ? 'bg-yellow-400 text-yellow-950 shadow-2xs border border-yellow-500 font-bold'
+                                        : 'bg-stone-50 text-stone-600 hover:bg-stone-100 border border-stone-200'
+                                }`}
+                            >
+                                <tab.icon className={`w-4 h-4 ${tab.color}`} />
+                                <span>{tab.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* KYC Table */}
+                <div className="bg-white border border-stone-200/80 rounded-xl shadow-xs overflow-hidden">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
+                        <table className="w-full text-left border-collapse text-xs">
                             <thead>
-                                <tr className="bg-surface-50 border-b border-surface-200 text-xs font-bold text-surface-400 uppercase tracking-wider">
-                                    <th className="py-4 px-6">Demandeur</th>
-                                    <th className="py-4 px-6">Type</th>
-                                    <th className="py-4 px-6">Documents soumis</th>
-                                    <th className="py-4 px-6">Date de soumission</th>
-                                    <th className="py-4 px-6">Statut KYC</th>
-                                    <th className="py-4 px-6 text-right">Actions</th>
+                                <tr className="border-b border-stone-100 bg-stone-50/70 text-[11px] font-semibold text-stone-400 uppercase">
+                                    <th className="py-3 px-4">Demandeur</th>
+                                    <th className="py-3 px-4">Type de compte</th>
+                                    <th className="py-3 px-4">Pièces fournies</th>
+                                    <th className="py-3 px-4">Date de soumission</th>
+                                    <th className="py-3 px-4">Statut</th>
+                                    <th className="py-3 px-4 text-right">Action</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-surface-100 text-sm font-semibold text-surface-700">
-                                {kycRequests.data.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="6" className="py-12 text-center text-surface-400">
-                                            Aucune demande KYC trouvée dans cette catégorie.
-                                        </td>
-                                    </tr>
-                                ) : (
+                            <tbody className="divide-y divide-stone-100">
+                                {kycRequests.data && kycRequests.data.length > 0 ? (
                                     kycRequests.data.map((req) => (
-                                        <tr key={req.id} className="hover:bg-surface-50/50 transition-colors">
-                                            <td className="py-4 px-6">
-                                                <div className="flex items-center space-x-3">
-                                                    <div className="w-9 h-9 rounded-full bg-surface-100 flex items-center justify-center font-bold text-surface-700 border border-surface-200">
-                                                        {req.user.first_name[0]}{req.user.last_name[0]}
+                                        <tr key={req.id} className="hover:bg-stone-50/60 transition-colors">
+                                            <td className="py-3.5 px-4 font-semibold text-stone-900">
+                                                <div className="flex items-center gap-2.5">
+                                                    <div className="w-8 h-8 rounded-xl bg-yellow-100 flex items-center justify-center font-bold text-yellow-900 text-xs border border-yellow-200">
+                                                        {req.user?.first_name[0]}{req.user?.last_name[0]}
                                                     </div>
                                                     <div>
-                                                        <h4 className="font-bold text-surface-900 leading-none">{req.user.first_name} {req.user.last_name}</h4>
-                                                        <span className="text-xs text-surface-400 font-mono mt-1 block">{req.user.email}</span>
+                                                        <span className="block font-semibold text-stone-900">{req.user?.first_name} {req.user?.last_name}</span>
+                                                        <span className="text-[10px] text-stone-400 font-mono">{req.user?.email}</span>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="py-4 px-6">
-                                                <span className={`capitalize text-xs font-bold px-2.5 py-0.5 rounded-full border
-                                                    ${req.type === 'seller' ? 'bg-secondary-50 text-secondary-800 border-secondary-200' : 'bg-blue-50 text-blue-800 border-blue-200'}
-                                                `}>
-                                                    {req.type === 'seller' ? 'Vendeur' : 'Livreur'}
+                                            <td className="py-3.5 px-4">
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                    req.type === 'seller' ? 'bg-yellow-50 text-yellow-900 border border-yellow-200' : 'bg-purple-50 text-purple-900 border border-purple-200'
+                                                }`}>
+                                                    {req.type === 'seller' ? 'Vendeur / Boutique' : 'Chauffeur livreur'}
                                                 </span>
                                             </td>
-                                            <td className="py-4 px-6 text-surface-500 font-mono">
-                                                {req.documents_count} fichier(s)
+                                            <td className="py-3.5 px-4 font-mono font-medium text-stone-700">
+                                                {req.documents_count || 1} fichier(s) PDF/Image
                                             </td>
-                                            <td className="py-4 px-6 text-surface-500 font-mono">
-                                                {new Date(req.submitted_at).toLocaleDateString('fr-FR')} à {new Date(req.submitted_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                                            <td className="py-3.5 px-4 text-stone-500 font-mono">
+                                                {new Date(req.submitted_at || req.created_at).toLocaleDateString('fr-FR')}
                                             </td>
-                                            <td className="py-4 px-6">
-                                                <Badge variant={
-                                                    req.status === 'approved' ? 'success' :
-                                                    req.status === 'rejected' ? 'danger' : 'warning'
-                                                }>
-                                                    {req.status}
-                                                </Badge>
+                                            <td className="py-3.5 px-4">
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                                                    req.status === 'approved' 
+                                                        ? 'bg-emerald-100 text-emerald-800' 
+                                                        : req.status === 'pending'
+                                                        ? 'bg-amber-100 text-amber-800'
+                                                        : 'bg-rose-100 text-rose-800'
+                                                }`}>
+                                                    {req.status === 'approved' ? 'Approuvé' : req.status === 'pending' ? 'En examen' : 'Rejeté'}
+                                                </span>
                                             </td>
-                                            <td className="py-4 px-6 text-right">
-                                                <Link href={route('admin.kyc.show', req.id)}>
-                                                    <Button variant="outline" size="sm" className="space-x-1.5">
-                                                        <Eye className="w-3.5 h-3.5" />
-                                                        <span>Réviser</span>
-                                                    </Button>
+                                            <td className="py-3.5 px-4 text-right">
+                                                <Link
+                                                    href={route('admin.kyc.show', req.id)}
+                                                    className="px-3 py-1.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 rounded-xl text-[11px] font-bold transition-colors inline-flex items-center gap-1 border border-yellow-500"
+                                                >
+                                                    <Eye className="w-3.5 h-3.5" />
+                                                    <span>Examiner</span>
                                                 </Link>
                                             </td>
                                         </tr>
                                     ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="6" className="py-10 text-center text-stone-400">
+                                            Aucun dossier KYC trouvé.
+                                        </td>
+                                    </tr>
                                 )}
                             </tbody>
                         </table>
                     </div>
+                </div>
 
-                    {/* Pagination */}
-                    {kycRequests.links.length > 3 && (
-                        <div className="bg-surface-50 border-t border-surface-150 px-6 py-4 flex justify-between items-center text-xs font-bold text-surface-500">
-                            <div>Affichage de {kycRequests.from} à {kycRequests.to} sur {kycRequests.total} dossiers</div>
-                            <div className="flex space-x-1">
-                                {kycRequests.links.map((link, idx) => (
-                                    <Link
-                                        key={idx}
-                                        href={link.url || '#'}
-                                        dangerouslySetInnerHTML={{ __html: link.label }}
-                                        className={`px-3 py-1.5 rounded-lg border transition-colors
-                                            ${link.active ? 'bg-primary-500 text-surface-950 border-primary-500' : 'bg-white border-surface-200 hover:bg-surface-100 text-surface-600'}
-                                            ${!link.url ? 'opacity-50 cursor-not-allowed' : ''}
-                                        `}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </Card>
             </div>
         </AdminLayout>
     );

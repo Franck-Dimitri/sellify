@@ -142,6 +142,12 @@ Route::middleware(['auth', 'account.active'])->group(function () {
 
             // Arbitrage des litiges par l'admin
             Route::post('/disputes/{dispute}/resolve', [\App\Http\Controllers\Admin\DashboardController::class, 'resolveDispute'])->name('disputes.resolve');
+
+            // Commandes globales & Séquestre Escrow
+            Route::get('/orders', [\App\Http\Controllers\Admin\OrderController::class, 'index'])->name('orders.index');
+            Route::get('/escrow', [\App\Http\Controllers\Admin\OrderController::class, 'escrow'])->name('escrow.index');
+            Route::post('/escrow/{order_number}/release', [\App\Http\Controllers\Admin\OrderController::class, 'forceReleaseEscrow'])->name('escrow.release');
+            Route::post('/escrow/{order_number}/refund', [\App\Http\Controllers\Admin\OrderController::class, 'forceRefundEscrow'])->name('escrow.refund');
         });
 
         // ─────────────────────────────────────────────────────────────────────────

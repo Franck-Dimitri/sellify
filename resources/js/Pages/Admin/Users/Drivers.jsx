@@ -1,24 +1,17 @@
 import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import AdminLayout from '../../../Layouts/AdminLayout';
-import { Card, CardContent } from '../../../Components/ui/Card';
-import Input from '../../../Components/ui/Input';
-import Button from '../../../Components/ui/Button';
-import Badge from '../../../Components/ui/Badge';
+import AdminLayout from '@/Layouts/AdminLayout';
 import { 
     Search, 
     Eye, 
-    Check,
-    Mail, 
-    Phone, 
-    Calendar,
-    Truck,
-    UserCheck,
-    Clock,
-    UserX
+    Truck, 
+    UserCheck, 
+    Clock, 
+    UserX,
+    ShieldCheck
 } from 'lucide-react';
 
-export default function Drivers({ drivers, filters, stats }) {
+export default function Drivers({ drivers = { data: [] }, filters = {}, stats = {} }) {
     const [search, setSearch] = useState(filters.search || '');
     const [statusFilter, setStatusFilter] = useState(filters.status || '');
 
@@ -33,215 +26,163 @@ export default function Drivers({ drivers, filters, stats }) {
     };
 
     return (
-        <AdminLayout title="Espace Livreurs">
-            <Head title="Flotte de Livraison - Sellify Admin" />
+        <AdminLayout title="Flotte de livreurs">
+            <Head title="Chauffeurs livreurs - Sellify Admin" />
 
-            <div className="space-y-6">
-                {/* 1. Golden/Orange Header Banner Card */}
-                <div className="bg-gradient-to-r from-yellow-500 to-yellow-400 text-white rounded-3xl p-6 shadow-lg shadow-yellow-500/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="space-y-1">
-                        <h2 className="text-xl font-black tracking-tight flex items-center">
-                            <Truck className="w-5.5 h-5.5 mr-2" />
-                            <span>Espace Livreurs</span>
-                        </h2>
-                        <p className="text-xs text-yellow-50 font-bold uppercase tracking-wider">Vue d'ensemble de la flotte de livraison</p>
+            <div className="w-full space-y-6 text-stone-800 antialiased font-sans pb-16">
+                
+                {/* Header Banner */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs">
+                    <div>
+                        <div className="flex items-center gap-2 text-xs font-semibold text-purple-700">
+                            <Truck className="w-4 h-4 text-purple-600" />
+                            <span>Flotte de livraison & chauffeurs</span>
+                        </div>
+                        <h1 className="text-xl font-bold text-stone-900 mt-1">
+                            Gestion des chauffeurs livreurs
+                        </h1>
+                        <p className="text-xs text-stone-500 font-normal mt-0.5">
+                            Supervisez la flotte de livreurs certifiés pour l'acheminement et la validation par code OTP.
+                        </p>
                     </div>
-                    <div className="bg-white/10 backdrop-blur-sm border border-white/15 px-4.5 py-2 rounded-2xl text-right">
-                        <span className="text-sm font-black tracking-tight">{stats.total} Livreurs / {stats.pending} En attente</span>
+
+                    <div className="bg-purple-50 border border-purple-200 px-4 py-2 rounded-xl text-xs font-bold text-purple-950 shrink-0">
+                        {stats.total || 0} livreurs / {stats.approved || 0} homologués
                     </div>
                 </div>
 
-                {/* 2. Four Stats Cards Row */}
+                {/* 4 Stats Cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="p-5 rounded-3xl border border-surface-200 bg-white flex items-center justify-between shadow-sm transition-all hover:shadow-md">
-                        <div className="space-y-1">
-                            <span className="text-xs font-bold text-surface-400 uppercase tracking-wider block">Total Livreurs</span>
-                            <span className="text-3xl font-black text-surface-900 tracking-tight">{stats.total}</span>
-                        </div>
-                        <div className="p-3 bg-yellow-50 border border-yellow-100 rounded-2xl text-yellow-500">
-                            <Truck className="w-6 h-6" />
-                        </div>
+                    <div className="p-4 rounded-2xl border border-stone-200/80 bg-white space-y-1 shadow-2xs">
+                        <span className="text-xs font-semibold text-stone-500 block">Total livreurs</span>
+                        <span className="text-2xl font-bold text-stone-900 block">{stats.total || 0}</span>
                     </div>
-                    <div className="p-5 rounded-3xl border border-emerald-100 bg-white flex items-center justify-between shadow-sm transition-all hover:shadow-md">
-                        <div className="space-y-1">
-                            <span className="text-xs font-bold text-surface-400 uppercase tracking-wider block">Approuvés</span>
-                            <span className="text-3xl font-black text-emerald-600 tracking-tight">{stats.approved}</span>
-                        </div>
-                        <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-2xl text-emerald-500">
-                            <UserCheck className="w-6 h-6" />
-                        </div>
+                    <div className="p-4 rounded-2xl border border-emerald-200/80 bg-white space-y-1 shadow-2xs">
+                        <span className="text-xs font-semibold text-emerald-700 block">Homologués & actifs</span>
+                        <span className="text-2xl font-bold text-emerald-600 block">{stats.approved || 0}</span>
                     </div>
-                    <div className="p-5 rounded-3xl border border-yellow-105 bg-white flex items-center justify-between shadow-sm transition-all hover:shadow-md">
-                        <div className="space-y-1">
-                            <span className="text-xs font-bold text-surface-400 uppercase tracking-wider block">En attente</span>
-                            <span className="text-3xl font-black text-yellow-600 tracking-tight">{stats.pending}</span>
-                        </div>
-                        <div className="p-3 bg-yellow-50/50 border border-yellow-100 rounded-2xl text-yellow-500">
-                            <Clock className="w-6 h-6 animate-pulse" />
-                        </div>
+                    <div className="p-4 rounded-2xl border border-amber-200/80 bg-white space-y-1 shadow-2xs">
+                        <span className="text-xs font-semibold text-amber-700 block">En examen</span>
+                        <span className="text-2xl font-bold text-amber-600 block">{stats.pending || 0}</span>
                     </div>
-                    <div className="p-5 rounded-3xl border border-rose-100 bg-white flex items-center justify-between shadow-sm transition-all hover:shadow-md">
-                        <div className="space-y-1">
-                            <span className="text-xs font-bold text-surface-400 uppercase tracking-wider block">Rejetés</span>
-                            <span className="text-3xl font-black text-rose-600 tracking-tight">{stats.rejected}</span>
-                        </div>
-                        <div className="p-3 bg-rose-50 border border-rose-100 rounded-2xl text-rose-500">
-                            <UserX className="w-6 h-6" />
-                        </div>
+                    <div className="p-4 rounded-2xl border border-rose-200/80 bg-white space-y-1 shadow-2xs">
+                        <span className="text-xs font-semibold text-rose-700 block">Rejetés / Bloqués</span>
+                        <span className="text-2xl font-bold text-rose-600 block">{stats.rejected || 0}</span>
                     </div>
                 </div>
 
-                {/* 3. Filter Tabs & Search Bar */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-3.5 border border-surface-200 rounded-3xl shadow-sm">
-                    {/* Tabs */}
-                    <div className="flex flex-wrap space-x-1 p-1 bg-surface-50 border border-surface-150 rounded-2xl">
-                        {[
-                            { name: 'Tous', filter: '', count: stats.total },
-                            { name: 'Approuvés', filter: 'approved', count: stats.approved },
-                            { name: 'En attente', filter: 'pending', count: stats.pending },
-                            { name: 'Rejetés', filter: 'rejected', count: stats.rejected }
-                        ].map((tab) => (
-                            <button
-                                key={tab.name}
-                                onClick={() => handleTabChange(tab.filter)}
-                                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-2
-                                    ${statusFilter === tab.filter
-                                        ? 'bg-yellow-500 text-white shadow-md shadow-yellow-500/10 font-bold border border-yellow-600/10'
-                                        : 'text-surface-500 hover:text-surface-800'}`}
-                            >
-                                <span>{tab.name}</span>
-                                <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-mono font-bold
-                                    ${statusFilter === tab.filter ? 'bg-yellow-600 text-white' : 'bg-surface-150 text-surface-600'}`}>
-                                    {tab.count}
-                                </span>
-                            </button>
-                        ))}
-                    </div>
+                {/* Filter Tabs & Search Bar */}
+                <div className="bg-white border border-stone-200/80 p-4 rounded-2xl shadow-2xs space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        
+                        <div className="flex flex-wrap gap-1">
+                            {[
+                                { name: 'Tous', filter: '', count: stats.total },
+                                { name: 'Homologués', filter: 'approved', count: stats.approved },
+                                { name: 'En attente', filter: 'pending', count: stats.pending },
+                                { name: 'Rejetés', filter: 'rejected', count: stats.rejected }
+                            ].map((tab) => (
+                                <button
+                                    key={tab.filter}
+                                    onClick={() => handleTabChange(tab.filter)}
+                                    className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                                        statusFilter === tab.filter
+                                            ? 'bg-yellow-400 text-yellow-950 shadow-2xs border border-yellow-500'
+                                            : 'bg-stone-50 text-stone-600 hover:bg-stone-100'
+                                    }`}
+                                >
+                                    {tab.name} ({tab.count || 0})
+                                </button>
+                            ))}
+                        </div>
 
-                    {/* Search Form */}
-                    <form onSubmit={handleSearch} className="flex items-center space-x-2 w-full md:w-80">
-                        <div className="relative w-full">
-                            <Search className="w-4 h-4 text-surface-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                        <form onSubmit={handleSearch} className="relative sm:w-72">
+                            <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
                             <input
                                 type="text"
-                                placeholder="Recherche..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="w-full bg-surface-50 text-sm pl-9 pr-4 py-2 rounded-2xl border border-surface-200 focus:border-yellow-400 outline-none font-semibold text-surface-700 transition-colors"
+                                placeholder="Rechercher par nom ou téléphone..."
+                                className="w-full pl-9 pr-3 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl outline-none focus:ring-2 focus:ring-yellow-400 text-stone-800"
                             />
-                        </div>
-                        <Button type="submit" variant="primary" className="bg-yellow-500 text-white font-bold p-2.5 rounded-2xl shadow-sm">
-                            <Search className="w-4 h-4" />
-                        </Button>
-                    </form>
+                        </form>
+
+                    </div>
                 </div>
 
-                {/* 4. Driver Cards Grid */}
-                {drivers.data.length === 0 ? (
-                    <Card className="bento-card text-center py-24 flex flex-col items-center justify-center space-y-4">
-                        <div className="w-16 h-16 rounded-3xl bg-surface-50 flex items-center justify-center border border-surface-150 text-surface-300">
-                            <Truck className="w-8 h-8" />
-                        </div>
-                        <div className="space-y-1">
-                            <h3 className="text-sm font-bold text-surface-700">Aucun livreur trouvé</h3>
-                            <p className="text-xs text-surface-400 font-semibold">Aucun dossier de livraison ne correspond à ce filtre actuellement.</p>
-                        </div>
-                    </Card>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {drivers.data.map((user) => {
-                            const driverStatus = user.driver?.status || 'pending';
-                            const pendingKyc = user.kyc_requests?.find(r => r.status === 'pending');
-
-                            return (
-                                <div key={user.id} className="bg-white border border-surface-200 rounded-3xl p-5 shadow-sm hover:shadow-md transition-all duration-200 relative flex flex-col justify-between space-y-4">
-                                    {/* Header of Card */}
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex items-center space-x-3.5">
-                                            <div className="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-700 border border-indigo-100 flex items-center justify-center font-black text-sm shadow-sm">
-                                                {user.first_name[0]}{user.last_name[0]}
-                                            </div>
-                                            <div>
-                                                <h4 className="font-extrabold text-surface-900 leading-tight">{user.first_name} {user.last_name}</h4>
-                                                <span className="text-[10px] text-surface-400 font-bold uppercase tracking-wider block mt-1">Livreur</span>
-                                            </div>
-                                        </div>
-                                        <Badge variant={
-                                            driverStatus === 'approved' ? 'success' :
-                                            driverStatus === 'pending' ? 'warning' : 'danger'
-                                        }>
-                                            {driverStatus === 'approved' ? 'Approuvé' : driverStatus === 'pending' ? 'En attente' : 'Rejeté'}
-                                        </Badge>
-                                    </div>
-
-                                    {/* Body Information */}
-                                    <div className="space-y-2 text-xs font-semibold text-surface-600 border-t border-surface-50 pt-3.5">
-                                        <div className="flex items-center space-x-2">
-                                            <Mail className="w-3.5 h-3.5 text-surface-400" />
-                                            <span className="font-mono truncate">{user.email}</span>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <Phone className="w-3.5 h-3.5 text-surface-400" />
-                                            <span className="font-mono">{user.phone || 'Non renseigné'}</span>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <Calendar className="w-3.5 h-3.5 text-surface-400" />
-                                            <span>Inscrit le {new Date(user.created_at).toLocaleDateString('fr-FR')}</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Actions Footer */}
-                                    <div className="pt-2 flex items-center space-x-2">
-                                        {driverStatus === 'pending' && pendingKyc ? (
-                                            <>
-                                                <Link href={route('admin.users.show', user.id)} className="w-1/3">
-                                                    <Button variant="outline" className="w-full justify-center rounded-2xl border border-surface-200 py-2.5 text-xs font-bold bg-surface-50 text-surface-700 hover:bg-surface-100">
-                                                        Détails
-                                                    </Button>
-                                                </Link>
-                                                <Link href={route('admin.kyc.show', pendingKyc.id)} className="flex-1">
-                                                    <Button className="w-full justify-center space-x-1.5 rounded-2xl py-2.5 text-xs font-bold bg-yellow-500 hover:bg-yellow-600 text-white shadow-sm flex items-center">
-                                                        <Check className="w-3.5 h-3.5" />
-                                                        <span>Valider</span>
-                                                    </Button>
-                                                </Link>
-                                            </>
-                                        ) : (
-                                            <Link href={route('admin.users.show', user.id)} className="w-full">
-                                                <Button variant="outline" className="w-full justify-center space-x-1.5 rounded-2xl border border-surface-200 py-2.5 text-xs font-bold bg-surface-50 text-surface-700 hover:bg-surface-100">
+                {/* Drivers Table */}
+                <div className="bg-white border border-stone-200/80 rounded-2xl shadow-2xs overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr className="border-b border-stone-100 bg-stone-50/70 text-[11px] font-semibold text-stone-400 uppercase">
+                                    <th className="py-3 px-4">Livreur</th>
+                                    <th className="py-3 px-4">Contact</th>
+                                    <th className="py-3 px-4">Type de véhicule</th>
+                                    <th className="py-3 px-4">Statut d'homologation</th>
+                                    <th className="py-3 px-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-stone-100">
+                                {drivers.data && drivers.data.length > 0 ? (
+                                    drivers.data.map((d) => (
+                                        <tr key={d.id} className="hover:bg-stone-50/60 transition-colors">
+                                            <td className="py-3.5 px-4 font-semibold text-stone-900">
+                                                <div className="flex items-center gap-2.5">
+                                                    <div className="w-8 h-8 rounded-xl bg-purple-100 flex items-center justify-center font-bold text-purple-900 text-xs border border-purple-200">
+                                                        {d.user?.first_name[0]}{d.user?.last_name[0]}
+                                                    </div>
+                                                    <div>
+                                                        <span className="block font-bold text-stone-900">
+                                                            {d.user ? `${d.user.first_name} ${d.user.last_name}` : 'Livreur'}
+                                                        </span>
+                                                        <span className="text-[10px] text-stone-400 font-mono">Chauffeur ID #{d.id}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="py-3.5 px-4 text-stone-600">
+                                                <div className="space-y-0.5">
+                                                    <span className="block font-medium text-stone-800">{d.user?.email}</span>
+                                                    <span className="text-[11px] text-stone-400">{d.user?.phone || 'Non renseigné'}</span>
+                                                </div>
+                                            </td>
+                                            <td className="py-3.5 px-4 font-semibold text-stone-700">
+                                                {d.vehicle_type || 'Moto / Tricycle'}
+                                            </td>
+                                            <td className="py-3.5 px-4">
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                                                    d.status === 'approved' 
+                                                        ? 'bg-emerald-100 text-emerald-800' 
+                                                        : d.status === 'pending'
+                                                        ? 'bg-amber-100 text-amber-800'
+                                                        : 'bg-rose-100 text-rose-800'
+                                                }`}>
+                                                    {d.status === 'approved' ? 'Homologué' : d.status === 'pending' ? 'En examen' : 'Rejeté'}
+                                                </span>
+                                            </td>
+                                            <td className="py-3.5 px-4 text-right">
+                                                <Link
+                                                    href={route('admin.users.show', d.user_id || d.id)}
+                                                    className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg text-[11px] font-semibold transition-colors inline-flex items-center gap-1"
+                                                >
                                                     <Eye className="w-3.5 h-3.5" />
-                                                    <span>Détails complets</span>
-                                                </Button>
-                                            </Link>
-                                        )}
-                                    </div>
-                                </div>
-                            );
-                        })}
+                                                    <span>Consulter</span>
+                                                </Link>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="5" className="py-10 text-center text-stone-400">
+                                            Aucun livreur ne correspond aux critères.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
                     </div>
-                )}
+                </div>
 
-                {/* Pagination */}
-                {drivers.links.length > 3 && (
-                    <Card className="bento-card overflow-hidden p-0">
-                        <div className="bg-surface-50 px-6 py-4 flex justify-between items-center text-xs font-bold text-surface-500 font-mono">
-                            <div>Affichage de {drivers.from} à {drivers.to} sur {drivers.total} livreurs</div>
-                            <div className="flex space-x-1">
-                                {drivers.links.map((link, idx) => (
-                                    <Link
-                                        key={idx}
-                                        href={link.url || '#'}
-                                        dangerouslySetInnerHTML={{ __html: link.label }}
-                                        className={`px-3 py-1.5 rounded-lg border transition-colors
-                                            ${link.active ? 'bg-yellow-500 text-white border-yellow-500' : 'bg-white border-surface-200 hover:bg-surface-100 text-surface-600'}
-                                            ${!link.url ? 'opacity-50 cursor-not-allowed' : ''}
-                                        `}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    </Card>
-                )}
             </div>
         </AdminLayout>
     );

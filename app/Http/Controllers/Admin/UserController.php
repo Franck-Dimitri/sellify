@@ -26,6 +26,7 @@ class UserController extends Controller
         $status = $request->input('status');
 
         $users = User::query()
+            ->where('role', '!=', 'admin')
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('first_name', 'like', "%{$search}%")
@@ -45,8 +46,8 @@ class UserController extends Controller
             ->withQueryString();
 
         $stats = [
-            'total' => User::count(),
-            'active' => User::where('status', 'active')->count(),
+            'total' => User::where('role', '!=', 'admin')->count(),
+            'active' => User::where('role', '!=', 'admin')->where('status', 'active')->count(),
             'pending_kyc' => KycRequest::where('status', 'pending')->count(),
             'sellers' => User::where('role', 'seller')->count(),
             'drivers' => User::where('role', 'driver')->count(),

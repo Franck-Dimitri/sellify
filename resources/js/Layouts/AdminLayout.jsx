@@ -4,7 +4,6 @@ import AIAssistantWidget from '@/Components/AIAssistantWidget';
 import {
     LayoutDashboard,
     Users,
-    ShieldAlert,
     Settings,
     LogOut,
     Menu,
@@ -14,19 +13,16 @@ import {
     CreditCard,
     Package,
     LifeBuoy,
-    MoreHorizontal,
     ChevronDown,
     Search,
     UserCheck,
-    Globe,
-    Store,
-    Truck,
     AlertTriangle,
     ShieldCheck,
     PanelLeftClose,
     PanelLeftOpen,
     ArrowRight,
-    Check
+    Check,
+    Tag
 } from 'lucide-react';
 
 export default function AdminLayout({ children, title }) {
@@ -44,33 +40,99 @@ export default function AdminLayout({ children, title }) {
         drivers: 0,
         customers: 0,
         admins: 0,
-        blocked: 0
+        blocked: 0,
+        pending_kyc: 0
     };
 
-    const mainNavigation = [
-        { 
-            name: 'Tableau de bord', 
-            href: route('admin.dashboard'), 
-            icon: LayoutDashboard, 
-            active: route().current('admin.dashboard') 
+    const mainSections = [
+        {
+            title: 'Vue d\'ensemble',
+            items: [
+                { 
+                    name: 'Tableau de bord', 
+                    href: route('admin.dashboard'), 
+                    icon: LayoutDashboard, 
+                    active: route().current('admin.dashboard') 
+                },
+                { 
+                    name: 'Statistiques', 
+                    href: '#', 
+                    icon: BarChart3, 
+                    badge: 'Pro',
+                    active: false 
+                },
+            ]
         },
-        { 
-            name: 'Vérifications KYC', 
-            href: route('admin.kyc.index'), 
-            icon: UserCheck, 
-            badge: 'Prioritaire', 
-            active: route().current('admin.kyc.*') 
+        {
+            title: 'Finances & séquestre',
+            items: [
+                { 
+                    name: 'Séquestre Escrow', 
+                    href: '#', 
+                    icon: CreditCard, 
+                    active: false 
+                },
+                { 
+                    name: 'Codes promo', 
+                    href: '#', 
+                    icon: Tag, 
+                    active: false 
+                },
+            ]
         },
+        {
+            title: 'Opérations & litiges',
+            items: [
+                { 
+                    name: 'Vérifications KYC', 
+                    href: route('admin.kyc.index'), 
+                    icon: UserCheck, 
+                    badge: counts.pending_kyc > 0 ? `${counts.pending_kyc}` : 'Urgent', 
+                    active: route().current('admin.kyc.*') 
+                },
+                { 
+                    name: 'Commandes', 
+                    href: '#', 
+                    icon: Package, 
+                    active: false 
+                },
+                { 
+                    name: 'Litiges', 
+                    href: '#', 
+                    icon: AlertTriangle, 
+                    badge: 'Litiges',
+                    active: false 
+                },
+            ]
+        }
     ];
 
     const userSubNavigation = [
-        { name: 'Tous les utilisateurs', href: route('admin.users.all'), count: counts.all, active: route().current('admin.users.all') },
-        { name: 'Boutiques & vendeurs', href: route('admin.users.sellers'), count: counts.sellers, active: route().current('admin.users.sellers') },
-        { name: 'Chauffeurs livreurs', href: route('admin.users.drivers'), count: counts.drivers, active: route().current('admin.users.drivers') },
-        { name: 'Acheteurs clients', href: route('admin.users.customers'), count: counts.customers, active: route().current('admin.users.customers') },
+        { name: 'Tous utilisateurs', href: route('admin.users.all'), count: counts.all, active: route().current('admin.users.all') },
+        { name: 'Vendeurs', href: route('admin.users.sellers'), count: counts.sellers, active: route().current('admin.users.sellers') },
+        { name: 'Livreurs', href: route('admin.users.drivers'), count: counts.drivers, active: route().current('admin.users.drivers') },
+        { name: 'Clients', href: route('admin.users.customers'), count: counts.customers, active: route().current('admin.users.customers') },
         { name: 'Administrateurs', href: route('admin.users.admins'), count: counts.admins, active: route().current('admin.users.admins') },
         { name: 'Comptes bloqués', href: route('admin.users.blocked'), count: counts.blocked, active: route().current('admin.users.blocked') },
     ];
+
+    const systemSection = {
+        title: 'Système',
+        items: [
+            { 
+                name: 'Support', 
+                href: '#', 
+                icon: LifeBuoy, 
+                active: false 
+            },
+            { 
+                name: 'Paramètres', 
+                href: '#', 
+                icon: Settings, 
+                active: false 
+            },
+        ]
+    };
 
     const topNotifications = [
         {
@@ -140,54 +202,59 @@ export default function AdminLayout({ children, title }) {
                 {/* Navigation Links */}
                 <nav className="flex-1 px-2.5 py-4 overflow-y-auto space-y-4">
                     
-                    {/* Main Nav Section */}
-                    <div className="space-y-1">
-                        {!isCollapsed && (
-                            <h3 className="px-3 text-[10px] font-semibold text-stone-400 tracking-wide">
-                                Vue d'ensemble
-                            </h3>
-                        )}
-                        <div className="space-y-0.5">
-                            {mainNavigation.map((item) => (
-                                <Link
-                                    key={item.name}
-                                    href={item.href}
-                                    title={isCollapsed ? item.name : undefined}
-                                    className={`flex items-center rounded-xl text-xs transition-all duration-150 ${
-                                        isCollapsed 
-                                            ? 'justify-center p-2.5' 
-                                            : 'justify-between px-3 py-2'
-                                    } ${
-                                        item.active
-                                            ? 'bg-yellow-50 text-stone-950 font-semibold border-r-2 border-yellow-500 shadow-xs'
-                                            : 'hover:bg-stone-50 text-stone-600 hover:text-stone-900 font-normal'
-                                    }`}
-                                >
-                                    <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2.5'}`}>
-                                        <item.icon className={`w-4 h-4 flex-shrink-0 ${item.active ? 'text-yellow-600' : 'text-stone-400'}`} />
-                                        {!isCollapsed && <span>{item.name}</span>}
-                                    </div>
-                                    {!isCollapsed && item.badge && (
-                                        <span className="text-[10px] bg-yellow-400 text-stone-950 font-bold px-1.5 py-0.2 rounded-md">
-                                            {item.badge}
-                                        </span>
-                                    )}
-                                </Link>
-                            ))}
+                    {/* Section 1, 2, 3 */}
+                    {mainSections.map((section, sIdx) => (
+                        <div key={sIdx} className="space-y-1">
+                            {!isCollapsed && (
+                                <h3 className="px-3 text-[10px] font-semibold text-stone-400 tracking-wide">
+                                    {section.title}
+                                </h3>
+                            )}
+                            <div className="space-y-0.5">
+                                {section.items.map((item) => (
+                                    <Link
+                                        key={item.name}
+                                        href={item.href}
+                                        title={isCollapsed ? item.name : undefined}
+                                        className={`flex items-center rounded-xl text-xs transition-all duration-150 ${
+                                            isCollapsed 
+                                                ? 'justify-center p-2.5' 
+                                                : 'justify-between px-3 py-2'
+                                        } ${
+                                            item.active
+                                                ? 'bg-yellow-50 text-stone-950 font-semibold border-r-2 border-yellow-500 shadow-xs'
+                                                : 'hover:bg-stone-50 text-stone-600 hover:text-stone-900 font-normal'
+                                        }`}
+                                    >
+                                        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2.5'}`}>
+                                            <item.icon className={`w-4 h-4 flex-shrink-0 ${item.active ? 'text-yellow-600' : 'text-stone-400'}`} />
+                                            {!isCollapsed && <span>{item.name}</span>}
+                                        </div>
+                                        {!isCollapsed && item.badge && (
+                                            <span className="text-[10px] bg-yellow-400 text-stone-950 font-bold px-1.5 py-0.2 rounded-md">
+                                                {item.badge}
+                                            </span>
+                                        )}
+                                    </Link>
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    ))}
 
-                    {/* Users Expandable Section */}
+                    {/* Section 4: User Accounts (Placed as 4th section!) */}
                     <div className="space-y-1">
                         {!isCollapsed ? (
                             <>
+                                <h3 className="px-3 text-[10px] font-semibold text-stone-400 tracking-wide">
+                                    Utilisateurs
+                                </h3>
                                 <button
                                     onClick={() => setUsersDropdownOpen(!usersDropdownOpen)}
                                     className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-stone-600 hover:bg-stone-50 hover:text-stone-900 transition-colors"
                                 >
                                     <div className="flex items-center space-x-2.5">
                                         <Users className="w-4 h-4 text-stone-400" />
-                                        <span>Gestion des comptes</span>
+                                        <span>Gestion utilisateurs</span>
                                     </div>
                                     <ChevronDown className={`w-3.5 h-3.5 text-stone-400 transition-transform duration-200 ${usersDropdownOpen ? 'transform rotate-180' : ''}`} />
                                 </button>
@@ -214,16 +281,40 @@ export default function AdminLayout({ children, title }) {
                                 )}
                             </>
                         ) : (
-                            <div className="flex flex-col items-center gap-2 pt-2">
+                            <div className="flex flex-col items-center gap-2 py-2">
                                 <Link 
                                     href={route('admin.users.all')} 
-                                    title="Gestion des comptes"
+                                    title="Gestion utilisateurs"
                                     className="p-2.5 hover:bg-stone-100 rounded-xl text-stone-600"
                                 >
                                     <Users className="w-4 h-4 text-stone-500" />
                                 </Link>
                             </div>
                         )}
+                    </div>
+
+                    {/* Section 5: System */}
+                    <div className="space-y-1">
+                        {!isCollapsed && (
+                            <h3 className="px-3 text-[10px] font-semibold text-stone-400 tracking-wide">
+                                {systemSection.title}
+                            </h3>
+                        )}
+                        <div className="space-y-0.5">
+                            {systemSection.items.map((item) => (
+                                <Link
+                                    key={item.name}
+                                    href={item.href}
+                                    title={isCollapsed ? item.name : undefined}
+                                    className="flex items-center justify-between px-3 py-2 rounded-xl text-xs hover:bg-stone-50 text-stone-600 hover:text-stone-900 font-normal transition-all"
+                                >
+                                    <div className="flex items-center space-x-2.5">
+                                        <item.icon className="w-4 h-4 text-stone-400" />
+                                        {!isCollapsed && <span>{item.name}</span>}
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
                     </div>
 
                 </nav>
@@ -287,7 +378,7 @@ export default function AdminLayout({ children, title }) {
                             <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
                             <input
                                 type="text"
-                                placeholder="Rechercher un utilisateur, un vendeur, une commande ou une boutique..."
+                                placeholder="Rechercher un utilisateur, une boutique ou une commande..."
                                 className="w-full bg-stone-50 text-xs pl-9 pr-12 py-2 rounded-xl border border-stone-200 focus:border-yellow-500 focus:bg-white outline-none font-normal text-stone-800 transition-all placeholder-stone-400"
                             />
                         </div>
@@ -295,6 +386,22 @@ export default function AdminLayout({ children, title }) {
 
                     {/* Right Side Items */}
                     <div className="flex items-center space-x-3 relative">
+                        
+                        {/* Quick Access to KYC Pending */}
+                        <Link 
+                            href={route('admin.kyc.index')}
+                            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-yellow-50 border border-yellow-300 text-yellow-950 font-bold text-xs rounded-xl hover:bg-yellow-100 transition-colors shadow-2xs"
+                            title="Accès rapide aux KYC en attente"
+                        >
+                            <UserCheck className="w-4 h-4 text-yellow-700" />
+                            <span>KYC en attente</span>
+                            {counts.pending_kyc > 0 && (
+                                <span className="bg-yellow-500 text-stone-950 px-1.5 py-0.2 rounded-md font-bold text-[10px]">
+                                    {counts.pending_kyc}
+                                </span>
+                            )}
+                        </Link>
+
                         {/* Notifications Bell */}
                         <div className="relative">
                             <button 
