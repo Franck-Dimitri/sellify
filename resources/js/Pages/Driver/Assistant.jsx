@@ -20,6 +20,7 @@ import {
     Zap,
     MapPin
 } from 'lucide-react';
+import MarkdownText from '@/Components/MarkdownText';
 
 const STORAGE_KEY = 'sellify_ai_driver_chat_history_v1';
 
@@ -36,31 +37,25 @@ function TypewriterMessage({ text, onComplete }) {
 
         const interval = setInterval(() => {
             if (indexRef.current < text.length) {
-                // Advance by chunks of 3-5 chars for smooth, natural reading speed
-                const nextChunk = text.slice(0, indexRef.current + 4);
+                // Advance by chunks of 4-6 chars for smooth, natural reading speed
+                const nextChunk = text.slice(0, indexRef.current + 5);
                 setDisplayedText(nextChunk);
-                indexRef.current += 4;
+                indexRef.current += 5;
             } else {
                 setDisplayedText(text);
                 clearInterval(interval);
                 if (onComplete) onComplete();
             }
-        }, 18);
+        }, 16);
 
         return () => clearInterval(interval);
     }, [text]);
 
     return (
-        <div className="whitespace-pre-line text-xs leading-relaxed">
-            {displayedText.split('\n').map((line, idx) => (
-                <p key={idx} className={line.startsWith('- ') ? 'pl-2 my-0.5' : 'my-0.5'}>
-                    {line}
-                </p>
-            ))}
-            {displayedText.length < text.length && (
-                <span className="inline-block w-1.5 h-3 bg-yellow-500 ml-1 animate-pulse" />
-            )}
-        </div>
+        <MarkdownText 
+            content={displayedText} 
+            isStreaming={displayedText.length < text.length} 
+        />
     );
 }
 
@@ -319,13 +314,7 @@ export default function Assistant({
                                                 }}
                                             />
                                         ) : (
-                                            <div className="whitespace-pre-line text-xs">
-                                                {msg.text.split('\n').map((line, idx) => (
-                                                    <p key={idx} className={line.startsWith('- ') ? 'pl-2 my-0.5' : 'my-0.5'}>
-                                                        {line}
-                                                    </p>
-                                                ))}
-                                            </div>
+                                            <MarkdownText content={msg.text} />
                                         )}
 
                                         {/* Action Button inside AI Message if present */}

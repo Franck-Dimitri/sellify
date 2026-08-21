@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { usePage } from '@inertiajs/react';
+import { Sparkles, X, Send, Bot, User } from 'lucide-react';
+import MarkdownText from '@/Components/MarkdownText';
 
 export default function AIAssistantWidget() {
     const { auth } = usePage().props;
@@ -7,7 +9,7 @@ export default function AIAssistantWidget() {
     const [messages, setMessages] = useState([
         {
             sender: 'ai',
-            text: `Bonjour ${auth?.user?.first_name || ''} ! Je suis votre Copilote IA Sellify. Comment puis-je vous aider aujourd'hui ?`
+            text: `Bonjour ${auth?.user?.first_name || ''} ! Je suis Sellify AI, votre assistant intelligent. Comment puis-je vous aider aujourd'hui ?`
         }
     ]);
     const [input, setInput] = useState('');
@@ -47,72 +49,92 @@ export default function AIAssistantWidget() {
             {!isOpen ? (
                 <button
                     onClick={() => setIsOpen(true)}
-                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-3 rounded-full shadow-xl transition-all transform hover:scale-105"
+                    className="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold px-4 py-3 rounded-full shadow-xl transition-all transform hover:scale-105 border border-yellow-500"
                 >
-                    <span className="text-xl">✨</span>
-                    <span>Copilote IA</span>
+                    <Sparkles className="w-5 h-5 text-yellow-950" />
+                    <span>Sellify AI</span>
                 </button>
             ) : (
-                <div className="w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col h-[500px] overflow-hidden animate-in fade-in slide-in-from-bottom-5">
+                <div className="w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-stone-200 flex flex-col h-[520px] overflow-hidden animate-in fade-in slide-in-from-bottom-5">
                     {/* Header */}
-                    <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white px-4 py-3 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <span className="text-xl">✨</span>
+                    <div className="bg-yellow-400 text-yellow-950 px-4 py-3 flex items-center justify-between border-b border-yellow-500">
+                        <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-lg bg-yellow-500 text-yellow-950 flex items-center justify-center font-bold text-xs shadow-2xs">
+                                <Sparkles className="w-4 h-4" />
+                            </div>
                             <div>
-                                <h3 className="font-semibold text-sm">Copilote IA Sellify</h3>
-                                <p className="text-xs text-indigo-200">En ligne • Assistant personnel</p>
+                                <h3 className="font-bold text-xs sm:text-sm text-stone-900">Sellify AI</h3>
+                                <p className="text-[10px] text-yellow-900 font-medium">Assistant intelligent en direct</p>
                             </div>
                         </div>
                         <button
                             onClick={() => setIsOpen(false)}
-                            className="text-white hover:bg-white/20 rounded-full w-8 h-8 flex items-center justify-center transition"
+                            className="text-yellow-950 hover:bg-yellow-500 rounded-lg w-7 h-7 flex items-center justify-center transition"
                         >
-                            ✕
+                            <X className="w-4 h-4" />
                         </button>
                     </div>
 
                     {/* Messages Body */}
-                    <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-gray-50 text-sm">
+                    <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-stone-50 text-xs">
                         {messages.map((msg, idx) => (
                             <div
                                 key={idx}
-                                className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                                className={`flex items-start gap-2 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                             >
+                                {msg.sender === 'ai' && (
+                                    <div className="w-6 h-6 rounded bg-yellow-400 text-yellow-950 flex items-center justify-center shrink-0 mt-0.5 border border-yellow-500">
+                                        <Bot className="w-3.5 h-3.5" />
+                                    </div>
+                                )}
                                 <div
-                                    className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${
+                                    className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 ${
                                         msg.sender === 'user'
-                                            ? 'bg-indigo-600 text-white rounded-br-none'
-                                            : 'bg-white text-gray-800 border border-gray-200 shadow-sm rounded-bl-none'
+                                            ? 'bg-yellow-400 text-yellow-950 font-semibold rounded-tr-none shadow-2xs border border-yellow-500'
+                                            : 'bg-white text-stone-800 border border-stone-200/80 shadow-2xs rounded-tl-none'
                                     }`}
                                 >
-                                    <p className="whitespace-pre-line leading-relaxed">{msg.text}</p>
+                                    {msg.sender === 'ai' ? (
+                                        <MarkdownText content={msg.text} />
+                                    ) : (
+                                        <p className="whitespace-pre-line leading-relaxed">{msg.text}</p>
+                                    )}
                                 </div>
+                                {msg.sender === 'user' && (
+                                    <div className="w-6 h-6 rounded bg-stone-800 text-white flex items-center justify-center shrink-0 mt-0.5">
+                                        <User className="w-3.5 h-3.5" />
+                                    </div>
+                                )}
                             </div>
                         ))}
                         {loading && (
-                            <div className="flex justify-start">
-                                <div className="bg-white border border-gray-200 shadow-sm rounded-2xl px-4 py-2 text-gray-500 text-xs flex items-center gap-2">
-                                    <span className="animate-spin">⏳</span> Réflexion en cours...
+                            <div className="flex justify-start items-center gap-2">
+                                <div className="w-6 h-6 rounded bg-yellow-400 text-yellow-950 flex items-center justify-center shrink-0 border border-yellow-500">
+                                    <Bot className="w-3.5 h-3.5" />
+                                </div>
+                                <div className="bg-white border border-stone-200/80 shadow-2xs rounded-2xl px-3 py-2 text-stone-500 text-xs flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-ping" />
+                                    <span>Sellify AI réfléchit...</span>
                                 </div>
                             </div>
                         )}
                     </div>
 
                     {/* Input Footer */}
-                    <form onSubmit={handleSend} className="p-3 bg-white border-t border-gray-100 flex gap-2">
+                    <form onSubmit={handleSend} className="p-3 bg-white border-t border-stone-100 flex gap-2">
                         <input
                             type="text"
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
-                            placeholder="Posez une question à l'IA..."
-                            className="flex-1 text-xs sm:text-sm px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            placeholder="Posez votre question à Sellify AI..."
+                            className="flex-1 text-xs px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 text-stone-900 font-medium"
                         />
                         <button
                             type="submit"
                             disabled={loading || !input.trim()}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs px-4 py-2 rounded-xl transition disabled:opacity-50"
+                            className="bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs px-3.5 py-2 rounded-xl transition border border-yellow-500 disabled:opacity-50 flex items-center gap-1 shrink-0"
                         >
-                            Envoyer
+                            <Send className="w-3.5 h-3.5" />
                         </button>
                     </form>
                 </div>
