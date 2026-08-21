@@ -323,6 +323,7 @@ Route::middleware(['auth', 'account.active'])->group(function () {
 
             Route::post('/availability', [\App\Http\Controllers\Driver\DriverController::class, 'toggleAvailability'])->name('availability');
             Route::post('/withdraw', [\App\Http\Controllers\Driver\DriverController::class, 'requestPayout'])->name('withdraw');
+            Route::post('/telemetry/location', [\App\Http\Controllers\Driver\DriverController::class, 'updateLocation'])->name('telemetry.location');
 
             Route::middleware('kyc.verified')->group(function () {
                 Route::post('/delivery/{order_number}/accept', [\App\Http\Controllers\Driver\DriverController::class, 'acceptDelivery'])->name('delivery.accept');

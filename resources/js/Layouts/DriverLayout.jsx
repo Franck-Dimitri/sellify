@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
 import AIAssistantWidget from '@/Components/AIAssistantWidget';
 import RefuseDeliveryModal from '@/Components/RefuseDeliveryModal';
+import { GpsTrackerService } from '@/Services/GpsTrackerService';
 import {
     LayoutDashboard,
     Truck,
@@ -24,7 +25,10 @@ import {
     Download,
     Clock,
     Lock,
-    Package
+    Package,
+    Navigation,
+    AlertTriangle,
+    Zap
 } from 'lucide-react';
 
 export default function DriverLayout({ children, title }) {
@@ -38,12 +42,33 @@ export default function DriverLayout({ children, title }) {
     const [deferredPrompt, setDeferredPrompt] = useState(null);
     const [timerSeconds, setTimerSeconds] = useState(300);
 
+    // GPS Telemetry State (2.3.5 Spec)
+    const [telemetry, setTelemetry] = useState({ lat: 3.8680, lng: 11.5180, speed: 38, isSpeeding: false, isProlongedStop: false });
+
     const user = auth.user || {};
     const driver = user.driver || {};
 
     const [activityStatus, setActivityStatus] = useState(driver.activity_status || 'online');
 
-    // 5-minute Countdown Timer
+    // Start 10-second GPS Telemetry tracking
+    useEffect(() => {
+        GpsTrackerService.startTracking((pos) => {
+            const speed = pos.speed || 38;
+            setTelemetry({
+                lat: pos.lat,
+                lng: pos.lng,
+                speed,
+                isSpeeding: speed > 90, // urban speed limit alert (>90 km/h)
+                isProlongedStop: false
+            });
+        });
+
+        return () => {
+            GpsTrackerService.stopTracking();
+        };
+    }, []);
+
+    // 5-minute Decision Countdown Timer
     useEffect(() => {
         if (!pushAlert) return;
         setTimerSeconds(300);
@@ -284,7 +309,7 @@ export default function DriverLayout({ children, title }) {
                 
                 {/* Topbar */}
                 <header className="h-16 bg-white border-b border-stone-200/80 flex items-center justify-between px-3 sm:px-6 flex-shrink-0 z-20">
-                    <div className="flex items-center flex-1 max-w-xl gap-2 sm:gap-3">
+                    <div className="flex items-center flex-1 max-w-2xl gap-2 sm:gap-3">
                         <button
                             onClick={() => setSidebarOpen(!sidebarOpen)}
                             className="text-stone-500 hover:text-stone-700 focus:outline-none md:hidden p-1.5 bg-stone-100 rounded-lg shrink-0"
@@ -292,8 +317,8 @@ export default function DriverLayout({ children, title }) {
                             <Menu className="w-5 h-5" />
                         </button>
 
-                        {/* Status Toggle Button (Responsive Wrap) */}
-                        <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-xl overflow-x-auto">
+                        {/* Status Toggle Button */}
+                        <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-xl overflow-x-auto shrink-0">
                             <button
                                 onClick={() => handleStatusToggle('online')}
                                 className={`px-2.5 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-semibold flex items-center gap-1 transition-all shrink-0 ${
@@ -326,6 +351,12 @@ export default function DriverLayout({ children, title }) {
                             >
                                 <span>Hors service</span>
                             </button>
+                        </div>
+
+                        {/* GPS Live Telemetry Status Pill (2.3.5 Spec) */}
+                        <div className="hidden xl:flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold shrink-0">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping shrink-0" />
+                            <span>GPS Live (10s) · {telemetry.speed} km/h</span>
                         </div>
                     </div>
 
@@ -382,11 +413,19 @@ export default function DriverLayout({ children, title }) {
                     </div>
                 </header>
 
+                {/* TELEMETRY SPEEDING / ANOMALY ALERT BANNER (2.3.5 Spec) */}
+                {telemetry.isSpeeding && (
+                    <div className="bg-rose-500 text-white px-3 py-1.5 text-xs font-bold flex items-center justify-center gap-2 shadow-inner text-center animate-pulse">
+                        <AlertTriangle className="w-4 h-4 shrink-0 text-yellow-300" />
+                        <span>⚠️ Alerte Télémétrie : Vitesse excessive détectée en zone urbaine ({telemetry.speed} km/h). Veuillez ralentir.</span>
+                    </div>
+                )}
+
                 {/* OFFLINE WARNING BANNER */}
                 {isOffline && (
                     <div className="bg-amber-500 text-white px-3 py-1.5 text-xs font-semibold flex items-center justify-center gap-2 shadow-inner text-center">
                         <WifiOff className="w-4 h-4 shrink-0" />
-                        <span className="leading-tight">⚡ Mode Hors-ligne activé — Les courses en cours restent consultables sans réseau.</span>
+                        <span className="leading-tight">⚡ Mode Hors-ligne activé — Les positions GPS sont enregistrées localement et seront synchronisées à la reconnexion.</span>
                     </div>
                 )}
 
@@ -415,7 +454,7 @@ export default function DriverLayout({ children, title }) {
                         {children}
                     </main>
 
-                    {/* REAL-TIME PUSH DISPATCH POPUP (FLAWLESS RESPONSIVE) */}
+                    {/* REAL-TIME PUSH DISPATCH POPUP */}
                     {pushAlert && (
                         <div className="fixed bottom-4 left-3 right-3 sm:left-auto sm:right-6 z-50 max-w-md w-auto sm:w-full bg-white text-stone-900 rounded-2xl p-4 sm:p-5 shadow-2xl border-2 border-yellow-400 animate-in slide-in-from-bottom-5 duration-200 space-y-3">
                             

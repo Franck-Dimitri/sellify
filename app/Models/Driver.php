@@ -25,6 +25,9 @@ class Driver extends Model
         'verified_by',
         'rating',
         'total_deliveries',
+        'current_latitude',
+        'current_longitude',
+        'last_ping_at',
     ];
 
     protected function casts(): array

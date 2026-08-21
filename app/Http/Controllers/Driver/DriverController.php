@@ -244,6 +244,32 @@ class DriverController extends Controller
     }
 
     /**
+     * Update driver live GPS telemetry location ping.
+     */
+    public function updateLocation(Request $request)
+    {
+        $request->validate([
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'speed' => 'nullable|numeric',
+        ]);
+
+        $driver = $request->user()->driver;
+        if ($driver) {
+            $driver->update([
+                'current_latitude' => $request->latitude,
+                'current_longitude' => $request->longitude,
+                'last_ping_at' => now(),
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'timestamp' => now()->toIso8601String(),
+        ]);
+    }
+
+    /**
      * Accept a delivery assignment.
      */
     public function acceptDelivery(Request $request, string $orderNumber)

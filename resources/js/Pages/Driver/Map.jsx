@@ -20,11 +20,15 @@ import {
     ListFilter,
     Lock,
     Package,
-    MessageSquare
+    MessageSquare,
+    Camera,
+    Sparkles,
+    Eye,
+    Maximize2
 } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { fetchOSRMRoute } from '@/Services/RoutingService';
+import { fetchOSRMRoute, solveMultiStopTSPRoute } from '@/Services/RoutingService';
 
 export default function Map({ driver = {}, availableDeliveries = [], activeDelivery }) {
     const mapRef = useRef(null);
@@ -32,6 +36,9 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
     const [selectedOrder, setSelectedOrder] = useState(activeDelivery || availableDeliveries[0] || null);
     const [selectedDeliveryForOtp, setSelectedDeliveryForOtp] = useState(null);
     const [refuseModalOrderNumber, setRefuseModalOrderNumber] = useState(null);
+    const [landmarkPhotoZoom, setLandmarkPhotoZoom] = useState(null);
+    const [tspModeActive, setTspModeActive] = useState(false);
+    const [tspRouteData, setTspRouteData] = useState(null);
     const [otpInput, setOtpInput] = useState('');
     const [etaInfo, setEtaInfo] = useState({ distance: '3.4 km', duration: '12 min' });
     const { post, processing } = useForm();
@@ -57,10 +64,59 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
             shop: { name: 'Tech & Gadgets Express', phone: '+237 670 11 22 33', lat: 3.8780, lng: 11.5121 },
             user: { first_name: 'Paul', last_name: 'Ondobo', phone: '+237 690 00 00 00' },
             shipping_address: 'Bastos, Rue des Ambassades, Yaoundé',
+            landmark_text: 'Derrière le marché central, portail bleu près de la pharmacie du Soleil',
+            landmark_photo_url: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=600&auto=format&fit=crop',
             lat: 3.8620,
             lng: 11.5220
+        },
+        {
+            id: 'real-2',
+            order_number: 'SLF-2026-X892',
+            vehicle_plate: driver.vehicle_plate || 'LT-492-BX',
+            shipping_fee: 3000,
+            escrow_amount: 220000,
+            package_desc: 'Ordinateur Portable HP · 2.5 kg',
+            delivery_status: 'ready_for_pickup',
+            shop: { name: 'Electro Shop Akwa', phone: '+237 655 44 33 22', lat: 3.8840, lng: 11.5050 },
+            user: { first_name: 'Marc', last_name: 'Kamga', phone: '+237 677 88 99 00' },
+            shipping_address: 'Akwa, Carrefour Ndokoti, Douala',
+            landmark_text: 'Immeuble Rose à côté du dépôt de brasseries, 2ème étage',
+            landmark_photo_url: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=600&auto=format&fit=crop',
+            lat: 3.8550,
+            lng: 11.5310
         }
     ];
+
+    // TSP Multi-Stop Optimization Trigger
+    useEffect(() => {
+        if (!tspModeActive) return;
+
+        const driverPos = { lat: 3.8680, lng: 11.5180 };
+        const stops = [];
+
+        mapOrders.forEach((o) => {
+            stops.push({
+                id: `pickup-${o.order_number}`,
+                order_number: o.order_number,
+                type: 'pickup',
+                name: `Retrait : ${o.shop?.name || 'Boutique'}`,
+                lat: o.shop?.lat || 3.8780,
+                lng: o.shop?.lng || 11.5121
+            });
+            stops.push({
+                id: `dropoff-${o.order_number}`,
+                order_number: o.order_number,
+                type: 'dropoff',
+                name: `Livraison : ${o.user?.first_name || 'Client'} (${o.shipping_address})`,
+                lat: o.lat || 3.8620,
+                lng: o.lng || 11.5220
+            });
+        });
+
+        solveMultiStopTSPRoute(driverPos, stops).then((res) => {
+            setTspRouteData(res);
+        });
+    }, [tspModeActive]);
 
     // Initialize Fullscreen Leaflet Map
     useEffect(() => {
@@ -118,6 +174,7 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
 
             shopMarker.on('click', () => {
                 setSelectedOrder(order);
+                setTspModeActive(false);
             });
 
             // Customer Destination Marker
@@ -135,11 +192,19 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
 
             customerMarker.on('click', () => {
                 setSelectedOrder(order);
+                setTspModeActive(false);
             });
         });
 
-        // 3. IF AN ORDER IS SELECTED, FETCH OSRM ROUTE AND DRAW POLYLINE
-        if (selectedOrder) {
+        // 3. TSP MULTI-STOP POLYLINE vs SINGLE ORDER POLYLINE
+        if (tspModeActive && tspRouteData?.coordinates) {
+            L.polyline(tspRouteData.coordinates, {
+                color: '#eab308',
+                weight: 6,
+                dashArray: '8, 8',
+                opacity: 0.95
+            }).addTo(map);
+        } else if (selectedOrder) {
             const shopLat = selectedOrder.shop?.lat || 3.8780;
             const shopLng = selectedOrder.shop?.lng || 11.5121;
             const custLat = selectedOrder.lat || 3.8620;
@@ -169,7 +234,7 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                 mapInstance.current = null;
             }
         };
-    }, [selectedOrder]);
+    }, [selectedOrder, tspModeActive, tspRouteData]);
 
     const handleAcceptCourse = (orderNumber) => {
         if (confirm(`Accepter la livraison de la commande #${orderNumber} ?`)) {
@@ -198,14 +263,32 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                 {/* REAL LEAFLET MAP */}
                 <div ref={mapRef} className="absolute inset-0 z-0" />
 
-                {/* TOP FLOATING BADGE (RESPONSIVE WRAP) */}
-                <div className="absolute top-3 sm:top-4 left-1/2 -translate-x-1/2 z-10 bg-white/95 backdrop-blur-md border border-stone-200 px-4 sm:px-5 py-2 rounded-full shadow-lg flex items-center gap-2 sm:gap-3 text-[11px] sm:text-xs font-bold text-stone-900 max-w-[calc(100%-2rem)] truncate">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping shrink-0" />
-                    <span className="truncate">Carte & Tracking Live · {mapOrders.length} course(s) géolocalisée(s)</span>
+                {/* TOP FLOATING BADGES (RESPONSIVE WRAP) */}
+                <div className="absolute top-3 sm:top-4 left-1/2 -translate-x-1/2 z-10 flex flex-wrap items-center justify-center gap-2 max-w-[calc(100%-2rem)]">
+                    <div className="bg-white/95 backdrop-blur-md border border-stone-200 px-4 sm:px-5 py-2 rounded-full shadow-lg flex items-center gap-2 sm:gap-3 text-[11px] sm:text-xs font-bold text-stone-900 truncate">
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping shrink-0" />
+                        <span className="truncate">Carte & Tracking Live · {mapOrders.length} course(s) géolocalisée(s)</span>
+                    </div>
+
+                    {/* TSP Multi-Stop Optimization Toggle Button */}
+                    <button
+                        onClick={() => {
+                            setTspModeActive(!tspModeActive);
+                            if (!tspModeActive) setSelectedOrder(null);
+                        }}
+                        className={`px-4 py-2 rounded-full shadow-lg text-[11px] sm:text-xs font-bold transition-all flex items-center gap-1.5 border ${
+                            tspModeActive 
+                                ? 'bg-yellow-400 text-yellow-950 border-yellow-500 shadow-yellow-200 ring-2 ring-yellow-400' 
+                                : 'bg-white/95 text-stone-800 border-stone-200 hover:bg-stone-50'
+                        }`}
+                    >
+                        <Sparkles className="w-3.5 h-3.5 text-yellow-700 shrink-0" />
+                        <span>{tspModeActive ? 'Routage IA Multi-Points Actif' : 'Activer Routage Groupé (TSP IA)'}</span>
+                    </button>
                 </div>
 
                 {/* BOTTOM HORIZONTAL QUICK SELECT PILLS */}
-                {!selectedOrder && (
+                {!selectedOrder && !tspModeActive && (
                     <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-10 bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-2xl p-2.5 sm:p-3 shadow-xl max-w-[calc(100%-2rem)] sm:max-w-lg w-full flex items-center gap-2 overflow-x-auto">
                         <span className="text-[10px] sm:text-[11px] font-bold text-stone-500 shrink-0 pl-1">Sélectionner :</span>
                         {mapOrders.map((ord) => (
@@ -221,8 +304,58 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                     </div>
                 )}
 
-                {/* FLOATING ORDER INSPECTION CARD (FLAWLESS RESPONSIVE ON DESKTOP & MOBILE) */}
-                {selectedOrder && (
+                {/* TSP MULTI-STOP IA DISPATCH PANEL (2.3.4 SPEC) */}
+                {tspModeActive && tspRouteData && (
+                    <div className="absolute sm:top-4 sm:left-4 sm:bottom-4 bottom-3 inset-x-3 sm:inset-x-auto sm:w-96 max-h-[80vh] sm:max-h-none z-20 bg-white/95 backdrop-blur-md border-2 border-yellow-400 rounded-2xl p-4 sm:p-5 shadow-2xl flex flex-col justify-between overflow-y-auto space-y-4 animate-in slide-in-from-left-5 duration-200">
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between border-b border-stone-100 pb-2.5">
+                                <div className="flex items-center gap-2">
+                                    <Sparkles className="w-5 h-5 text-yellow-600 shrink-0 animate-spin" />
+                                    <div>
+                                        <h3 className="font-bold text-xs sm:text-sm text-stone-900">Routage Optimisé IA (TSP)</h3>
+                                        <span className="text-[10px] text-yellow-800 font-bold block">Résolution du problème du voyageur de commerce</span>
+                                    </div>
+                                </div>
+                                <button onClick={() => setTspModeActive(false)} className="p-1 text-stone-400 hover:text-stone-700">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            <div className="p-2.5 bg-yellow-50 border border-yellow-200 rounded-xl flex items-center justify-between text-xs font-bold text-yellow-950">
+                                <span>Distance totale : {tspRouteData.distanceKm} km</span>
+                                <span>Durée estimée : {tspRouteData.durationMin} min</span>
+                            </div>
+
+                            <h4 className="text-xs font-bold text-stone-700 uppercase tracking-wider">Ordre idéal des arrêts optimisé :</h4>
+                            
+                            <div className="space-y-2 text-xs">
+                                {tspRouteData.optimizedStops.map((stop, idx) => (
+                                    <div key={stop.id} className="p-3 bg-stone-50 border border-stone-200/80 rounded-xl space-y-1">
+                                        <div className="flex items-center justify-between">
+                                            <span className={`px-2 py-0.5 rounded font-mono font-bold text-[10px] ${
+                                                stop.type === 'pickup' ? 'bg-yellow-200 text-yellow-950' : 'bg-emerald-200 text-emerald-950'
+                                            }`}>
+                                                Arrêt #{idx + 1} · {stop.type === 'pickup' ? 'RETRAIT' : 'LIVRAISON'}
+                                            </span>
+                                            <span className="font-mono text-stone-500 font-bold text-[11px]">#{stop.order_number}</span>
+                                        </div>
+                                        <p className="font-bold text-stone-900">{stop.name}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => alert("Itinéraire multi-points TSP validé ! Suivez l'ordre des arrêts sur la carte.")}
+                            className="w-full py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors border border-yellow-500"
+                        >
+                            Démarrer la tournée groupée IA
+                        </button>
+                    </div>
+                )}
+
+                {/* FLOATING ORDER INSPECTION CARD (WITH LANDMARK TEXT & LANDMARK PHOTO PREVIEW - 2.3.4 SPEC) */}
+                {selectedOrder && !tspModeActive && (
                     <div className="absolute sm:top-4 sm:left-4 sm:bottom-4 bottom-3 inset-x-3 sm:inset-x-auto sm:w-96 max-h-[80vh] sm:max-h-none z-20 bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-2xl p-4 sm:p-5 shadow-2xl flex flex-col justify-between overflow-y-auto space-y-4 animate-in slide-in-from-left-5 duration-200">
                         
                         <div className="space-y-3 sm:space-y-4">
@@ -284,10 +417,10 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                                 <span className="text-[11px] text-stone-500 block truncate">Tél: {selectedOrder.shop?.phone || '+237 670 11 22 33'}</span>
                             </div>
 
-                            {/* Customer Information & Direct Contact */}
-                            <div className="p-3 bg-stone-50 rounded-xl border border-stone-200/70 space-y-1 text-xs">
+                            {/* Customer Information, Textual Landmark & Photo Preview (2.3.4 Spec) */}
+                            <div className="p-3 bg-stone-50 rounded-xl border border-stone-200/70 space-y-2 text-xs">
                                 <div className="flex items-center justify-between gap-2">
-                                    <span className="text-[10px] text-emerald-700 font-bold uppercase truncate">Point B · Client</span>
+                                    <span className="text-[10px] text-emerald-700 font-bold uppercase truncate">Point B · Client & Repère</span>
                                     <a
                                         href={`tel:${selectedOrder.user?.phone || '+237690000000'}`}
                                         className="text-[10px] bg-stone-200 hover:bg-stone-300 text-stone-800 px-2 py-0.5 rounded font-semibold flex items-center gap-1 shrink-0"
@@ -297,6 +430,40 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                                 </div>
                                 <strong className="text-stone-900 block font-bold text-xs sm:text-sm break-words">{selectedOrder.user ? `${selectedOrder.user.first_name} ${selectedOrder.user.last_name}` : 'Paul Ondobo'}</strong>
                                 <span className="text-[11px] text-stone-500 block leading-snug break-words">{selectedOrder.shipping_address || 'Bastos, Rue des Ambassades, Yaoundé'}</span>
+
+                                {/* NON-STANDARDIZED TEXTUAL LANDMARK INSTRUCTION (2.3.4 Spec) */}
+                                {selectedOrder.landmark_text && (
+                                    <div className="p-2 bg-yellow-50/80 border border-yellow-200 rounded-lg text-[11px] text-yellow-950 font-normal space-y-1">
+                                        <div className="flex items-center gap-1 font-bold text-yellow-800">
+                                            <Compass className="w-3 h-3 text-yellow-600 shrink-0" />
+                                            <span>Indication de repère terrain :</span>
+                                        </div>
+                                        <p className="leading-snug italic font-serif">"{selectedOrder.landmark_text}"</p>
+                                    </div>
+                                )}
+
+                                {/* LANDMARK PHOTO THUMBNAIL WITH ZOOM (2.3.4 Spec) */}
+                                {selectedOrder.landmark_photo_url && (
+                                    <div className="space-y-1">
+                                        <span className="text-[10px] font-bold text-stone-500 flex items-center gap-1">
+                                            <Camera className="w-3 h-3 text-stone-400" /> Photo du point de repère uploadée par le client :
+                                        </span>
+                                        <div 
+                                            onClick={() => setLandmarkPhotoZoom(selectedOrder.landmark_photo_url)}
+                                            className="relative group cursor-pointer overflow-hidden rounded-xl border border-stone-200 h-24 bg-stone-200"
+                                        >
+                                            <img
+                                                src={selectedOrder.landmark_photo_url}
+                                                alt="Point de repère client"
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                            />
+                                            <div className="absolute inset-0 bg-stone-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1">
+                                                <Maximize2 className="w-4 h-4" />
+                                                <span>Agrandir</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -343,6 +510,27 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                 )}
 
             </div>
+
+            {/* FULLSCREEN LANDMARK PHOTO ZOOM MODAL (2.3.4 SPEC) */}
+            {landmarkPhotoZoom && (
+                <div className="fixed inset-0 z-50 bg-stone-900/80 backdrop-blur-md flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl p-4 max-w-xl w-full space-y-3 relative shadow-2xl">
+                        <div className="flex items-center justify-between border-b border-stone-100 pb-2">
+                            <div className="flex items-center gap-2 text-xs font-bold text-stone-900">
+                                <Camera className="w-4 h-4 text-yellow-600" />
+                                <span>Agrandissement du point de repère client</span>
+                            </div>
+                            <button onClick={() => setLandmarkPhotoZoom(null)} className="p-1 text-stone-400 hover:text-stone-700">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="w-full max-h-[70vh] rounded-xl overflow-hidden bg-stone-900 border border-stone-200">
+                            <img src={landmarkPhotoZoom} alt="Repère Terrain Agrandie" className="w-full h-full object-contain" />
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* REFUSAL JUSTIFICATION MODAL */}
             {refuseModalOrderNumber && (
