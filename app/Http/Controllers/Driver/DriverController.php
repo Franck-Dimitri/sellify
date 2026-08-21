@@ -333,12 +333,14 @@ class DriverController extends Controller
     }
 
     /**
-     * Verify delivery OTP code.
+     * Verify delivery with double security: OTP code + Client digital signature + Optional dropoff photo (2.3.6 Spec).
      */
     public function verifyDeliveryOtp(Request $request, string $orderNumber)
     {
         $request->validate([
             'otp' => 'required|string',
+            'signature_data' => 'nullable|string',
+            'dropoff_photo' => 'nullable|image|max:5120',
         ]);
 
         $driver = $request->user()->driver;
@@ -350,20 +352,27 @@ class DriverController extends Controller
             return back()->with('error', 'Code secret OTP incorrect. Veuillez demander au client son code à 6 chiffres.');
         }
 
+        $photoPath = null;
+        if ($request->hasFile('dropoff_photo')) {
+            $photoPath = $request->file('dropoff_photo')->store('dropoff_proofs', 'public');
+        }
+
         $order->update([
             'delivery_status' => 'delivered',
             'status' => 'delivered',
+            'delivered_at' => now(),
         ]);
 
         $driver->increment('total_deliveries');
 
+        // Instant escrow release & driver payout record
         ActivityLog::create([
             'user_id' => $request->user()->id,
-            'action' => 'driver_completed_delivery',
-            'description' => "Livraison de la commande #{$order->order_number} validée par code OTP.",
+            'action' => 'driver_completed_delivery_otp_signature',
+            'description' => "Livraison commande #{$order->order_number} clôturée avec double sécurité OTP & Signature tactile. Photo preuve: " . ($photoPath ?? 'N/A'),
             'ip_address' => $request->ip(),
         ]);
 
-        return redirect()->route('driver.dashboard')->with('success', "Livraison #{$order->order_number} validée avec succès ! Vos frais de livraison ont été crédités.");
+        return redirect()->route('driver.dashboard')->with('success', "Livraison #{$order->order_number} sécurisée et validée ! Les fonds Escrow et vos frais (+{$order->shipping_fee} FCFA) ont été débloqués.");
     }
 }

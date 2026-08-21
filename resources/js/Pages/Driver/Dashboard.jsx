@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Head, useForm } from '@inertiajs/react';
 import DriverLayout from '@/Layouts/DriverLayout';
+import DeliveryOtpVerificationModal from '@/Components/DeliveryOtpVerificationModal';
 import { 
     Truck, 
     CheckCircle2, 
@@ -50,7 +51,6 @@ export default function Dashboard({
 }) {
     const { post, processing } = useForm();
     const [selectedDeliveryForOtp, setSelectedDeliveryForOtp] = useState(null);
-    const [otpInput, setOtpInput] = useState('');
     const [cachedDeliveries, setCachedDeliveries] = useState(activeDeliveries);
 
     // Save active deliveries into IndexedDB/LocalStorage when online for PWA offline resilience
@@ -70,21 +70,6 @@ export default function Dashboard({
         if (confirm(`Voulez-vous accepter la livraison de la commande #${orderNumber} ?`)) {
             post(route('driver.delivery.accept', orderNumber));
         }
-    };
-
-    const handleVerifyOtp = (e) => {
-        e.preventDefault();
-        if (!otpInput || otpInput.length !== 6) {
-            alert("Veuillez saisir le code OTP à 6 chiffres transmis par le client.");
-            return;
-        }
-        post(route('driver.delivery.verify_otp', selectedDeliveryForOtp.order_number), {
-            data: { otp: otpInput },
-            onSuccess: () => {
-                setSelectedDeliveryForOtp(null);
-                setOtpInput('');
-            }
-        });
     };
 
     const earningsChartData = {
@@ -191,7 +176,7 @@ export default function Dashboard({
                     </div>
                 </div>
 
-                {/* ACTIVE DELIVERY CARD (With Offline Cache Support) */}
+                {/* ACTIVE DELIVERY CARD */}
                 {displayActiveDeliveries && displayActiveDeliveries.length > 0 && (
                     <div className="bg-white border-2 border-yellow-400 rounded-2xl p-6 shadow-2xs space-y-4">
                         <div className="flex items-center justify-between border-b border-stone-100 pb-3">
@@ -220,20 +205,20 @@ export default function Dashboard({
                             <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl space-y-0.5">
                                 <span className="text-emerald-800 block font-semibold">Frais de course livreur :</span>
                                 <strong className="text-emerald-700 text-base block font-bold">{Number(displayActiveDeliveries[0].shipping_fee || 1500).toLocaleString('fr-FR')} FCFA</strong>
-                                <span className="text-[11px] text-emerald-600">Crédité à la saisie OTP</span>
+                                <span className="text-[11px] text-emerald-600">Crédité à la validation OTP & Signature</span>
                             </div>
                         </div>
 
                         <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
                             <p className="text-xs text-stone-500 font-normal">
-                                Saisissez le code secret OTP à 6 chiffres transmis par le client pour finaliser la livraison.
+                                Demandez au client son code OTP et faites-le signer sur l'écran tactile pour encaisser vos frais.
                             </p>
                             <button
                                 onClick={() => setSelectedDeliveryForOtp(displayActiveDeliveries[0])}
                                 className="px-5 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors shrink-0 flex items-center gap-1.5 border border-yellow-500"
                             >
                                 <Key className="w-4 h-4 text-yellow-950" />
-                                <span>Saisir le Code OTP</span>
+                                <span>Valider avec OTP & Signature</span>
                             </button>
                         </div>
                     </div>
@@ -307,41 +292,12 @@ export default function Dashboard({
 
             </div>
 
-            {/* OTP VERIFICATION MODAL */}
+            {/* DOUBLE SECURITY OTP & DIGITAL SIGNATURE VERIFICATION MODAL */}
             {selectedDeliveryForOtp && (
-                <div className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-                    <form onSubmit={handleVerifyOtp} className="bg-white border border-stone-200/90 rounded-2xl max-w-md w-full p-6 shadow-xl space-y-5">
-                        <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-                            <div className="flex items-center gap-2">
-                                <Key className="w-5 h-5 text-yellow-600" />
-                                <h3 className="font-bold text-base text-stone-900">Validation OTP #{selectedDeliveryForOtp.order_number}</h3>
-                            </div>
-                            <button type="button" onClick={() => setSelectedDeliveryForOtp(null)} className="p-1 text-stone-400">✕</button>
-                        </div>
-
-                        <div className="space-y-3 text-xs text-stone-600 font-normal">
-                            <p>Saisissez le code secret à 6 chiffres affiché sur le reçu du client.</p>
-                            <input
-                                type="text"
-                                maxLength="6"
-                                value={otpInput}
-                                onChange={(e) => setOtpInput(e.target.value)}
-                                placeholder="Ex: 890124"
-                                className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-center text-lg font-mono font-bold tracking-widest text-stone-900 focus:ring-2 focus:ring-yellow-400 outline-none"
-                            />
-                        </div>
-
-                        <div className="pt-2 flex gap-2">
-                            <button
-                                type="submit"
-                                disabled={processing}
-                                className="flex-1 py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors border border-yellow-500"
-                            >
-                                Valider et encaisser la livraison
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                <DeliveryOtpVerificationModal
+                    order={selectedDeliveryForOtp}
+                    onClose={() => setSelectedDeliveryForOtp(null)}
+                />
             )}
 
         </DriverLayout>

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Head, useForm } from '@inertiajs/react';
 import DriverLayout from '@/Layouts/DriverLayout';
 import RefuseDeliveryModal from '@/Components/RefuseDeliveryModal';
+import DeliveryOtpVerificationModal from '@/Components/DeliveryOtpVerificationModal';
 import { 
     MapPin, 
     Navigation, 
@@ -39,7 +40,6 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
     const [landmarkPhotoZoom, setLandmarkPhotoZoom] = useState(null);
     const [tspModeActive, setTspModeActive] = useState(false);
     const [tspRouteData, setTspRouteData] = useState(null);
-    const [otpInput, setOtpInput] = useState('');
     const [etaInfo, setEtaInfo] = useState({ distance: '3.4 km', duration: '12 min' });
     const { post, processing } = useForm();
 
@@ -242,17 +242,6 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
         }
     };
 
-    const handleVerifyOtp = (e) => {
-        e.preventDefault();
-        post(route('driver.delivery.verify_otp', selectedDeliveryForOtp.order_number), {
-            data: { otp: otpInput },
-            onSuccess: () => {
-                setSelectedDeliveryForOtp(null);
-                setOtpInput('');
-            }
-        });
-    };
-
     return (
         <DriverLayout title="Carte & itinéraire live">
             <Head title="Carte & Mapping Tracking - Sellify Express" />
@@ -304,7 +293,7 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                     </div>
                 )}
 
-                {/* TSP MULTI-STOP IA DISPATCH PANEL (2.3.4 SPEC) */}
+                {/* TSP MULTI-STOP IA DISPATCH PANEL */}
                 {tspModeActive && tspRouteData && (
                     <div className="absolute sm:top-4 sm:left-4 sm:bottom-4 bottom-3 inset-x-3 sm:inset-x-auto sm:w-96 max-h-[80vh] sm:max-h-none z-20 bg-white/95 backdrop-blur-md border-2 border-yellow-400 rounded-2xl p-4 sm:p-5 shadow-2xl flex flex-col justify-between overflow-y-auto space-y-4 animate-in slide-in-from-left-5 duration-200">
                         <div className="space-y-3">
@@ -354,7 +343,7 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                     </div>
                 )}
 
-                {/* FLOATING ORDER INSPECTION CARD (WITH LANDMARK TEXT & LANDMARK PHOTO PREVIEW - 2.3.4 SPEC) */}
+                {/* FLOATING ORDER INSPECTION CARD */}
                 {selectedOrder && !tspModeActive && (
                     <div className="absolute sm:top-4 sm:left-4 sm:bottom-4 bottom-3 inset-x-3 sm:inset-x-auto sm:w-96 max-h-[80vh] sm:max-h-none z-20 bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-2xl p-4 sm:p-5 shadow-2xl flex flex-col justify-between overflow-y-auto space-y-4 animate-in slide-in-from-left-5 duration-200">
                         
@@ -417,10 +406,10 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                                 <span className="text-[11px] text-stone-500 block truncate">Tél: {selectedOrder.shop?.phone || '+237 670 11 22 33'}</span>
                             </div>
 
-                            {/* Customer Information, Textual Landmark & Photo Preview (2.3.4 Spec) */}
+                            {/* Customer Information, Textual Landmark & Photo Preview */}
                             <div className="p-3 bg-stone-50 rounded-xl border border-stone-200/70 space-y-2 text-xs">
                                 <div className="flex items-center justify-between gap-2">
-                                    <span className="text-[10px] text-emerald-700 font-bold uppercase truncate">Point B · Client & Repère</span>
+                                    <span className="text-[10px] text-emerald-700 font-bold uppercase truncate">Point B · Client</span>
                                     <a
                                         href={`tel:${selectedOrder.user?.phone || '+237690000000'}`}
                                         className="text-[10px] bg-stone-200 hover:bg-stone-300 text-stone-800 px-2 py-0.5 rounded font-semibold flex items-center gap-1 shrink-0"
@@ -431,7 +420,7 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                                 <strong className="text-stone-900 block font-bold text-xs sm:text-sm break-words">{selectedOrder.user ? `${selectedOrder.user.first_name} ${selectedOrder.user.last_name}` : 'Paul Ondobo'}</strong>
                                 <span className="text-[11px] text-stone-500 block leading-snug break-words">{selectedOrder.shipping_address || 'Bastos, Rue des Ambassades, Yaoundé'}</span>
 
-                                {/* NON-STANDARDIZED TEXTUAL LANDMARK INSTRUCTION (2.3.4 Spec) */}
+                                {/* NON-STANDARDIZED TEXTUAL LANDMARK INSTRUCTION */}
                                 {selectedOrder.landmark_text && (
                                     <div className="p-2 bg-yellow-50/80 border border-yellow-200 rounded-lg text-[11px] text-yellow-950 font-normal space-y-1">
                                         <div className="flex items-center gap-1 font-bold text-yellow-800">
@@ -442,11 +431,11 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                                     </div>
                                 )}
 
-                                {/* LANDMARK PHOTO THUMBNAIL WITH ZOOM (2.3.4 Spec) */}
+                                {/* LANDMARK PHOTO THUMBNAIL WITH ZOOM */}
                                 {selectedOrder.landmark_photo_url && (
                                     <div className="space-y-1">
                                         <span className="text-[10px] font-bold text-stone-500 flex items-center gap-1">
-                                            <Camera className="w-3 h-3 text-stone-400" /> Photo du point de repère uploadée par le client :
+                                            <Camera className="w-3 h-3 text-stone-400" /> Photo du point de repère client :
                                         </span>
                                         <div 
                                             onClick={() => setLandmarkPhotoZoom(selectedOrder.landmark_photo_url)}
@@ -500,7 +489,7 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                                         className="flex-1 py-2.5 sm:py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors border border-yellow-500 flex items-center justify-center gap-1.5"
                                     >
                                         <Key className="w-4 h-4 shrink-0" />
-                                        <span>Saisir le Code OTP</span>
+                                        <span>Valider avec OTP & Signature</span>
                                     </button>
                                 </div>
                             )}
@@ -511,7 +500,7 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
 
             </div>
 
-            {/* FULLSCREEN LANDMARK PHOTO ZOOM MODAL (2.3.4 SPEC) */}
+            {/* FULLSCREEN LANDMARK PHOTO ZOOM MODAL */}
             {landmarkPhotoZoom && (
                 <div className="fixed inset-0 z-50 bg-stone-900/80 backdrop-blur-md flex items-center justify-center p-4">
                     <div className="bg-white rounded-2xl p-4 max-w-xl w-full space-y-3 relative shadow-2xl">
@@ -540,41 +529,12 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                 />
             )}
 
-            {/* OTP VERIFICATION MODAL */}
+            {/* DOUBLE SECURITY OTP & TACTILE SIGNATURE VERIFICATION MODAL (2.3.6 SPEC) */}
             {selectedDeliveryForOtp && (
-                <div className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-                    <form onSubmit={handleVerifyOtp} className="bg-white border border-stone-200/90 rounded-2xl max-w-md w-full p-6 shadow-xl space-y-5">
-                        <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-                            <div className="flex items-center gap-2">
-                                <Key className="w-5 h-5 text-yellow-600" />
-                                <h3 className="font-bold text-base text-stone-900">Validation OTP #{selectedDeliveryForOtp.order_number}</h3>
-                            </div>
-                            <button type="button" onClick={() => setSelectedDeliveryForOtp(null)} className="p-1 text-stone-400">✕</button>
-                        </div>
-
-                        <div className="space-y-3 text-xs text-stone-600 font-normal">
-                            <p>Saisissez le code secret à 6 chiffres affiché sur le reçu du client.</p>
-                            <input
-                                type="text"
-                                maxLength="6"
-                                value={otpInput}
-                                onChange={(e) => setOtpInput(e.target.value)}
-                                placeholder="Code à 6 chiffres"
-                                className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-center text-lg font-mono font-bold tracking-widest text-stone-900 focus:ring-2 focus:ring-yellow-400 outline-none"
-                            />
-                        </div>
-
-                        <div className="pt-2 flex gap-2">
-                            <button
-                                type="submit"
-                                disabled={processing}
-                                className="flex-1 py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl border border-yellow-500"
-                            >
-                                Valider et encaisser la livraison
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                <DeliveryOtpVerificationModal
+                    order={selectedDeliveryForOtp}
+                    onClose={() => setSelectedDeliveryForOtp(null)}
+                />
             )}
 
         </DriverLayout>
