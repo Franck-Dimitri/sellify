@@ -14,7 +14,7 @@ use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Enums\Lab;
 
 #[Provider(Lab::Gemini)]
-#[Model('gemini-3.5-flash')]
+#[Model('gemini-3.1-flash-lite')]
 #[Temperature(0.7)]
 #[Timeout(30)]
 class SellifyAgent implements Agent, Conversational

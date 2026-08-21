@@ -616,16 +616,23 @@ class DriverController extends Controller
         $msg = trim($request->input('message'));
         $lower = mb_strtolower($msg);
 
-        // 1. Process via Official Laravel AI SDK Agent (with automatic conversation persistence)
+        // 1. Process via Official Laravel AI SDK Agent (with multi-model fallback)
         $reply = "";
-        try {
-            if (!empty(config('ai.providers.gemini.key')) || !empty(env('GEMINI_API_KEY'))) {
-                $agent = new \App\Ai\Agents\SellifyDriverAgent($user);
-                $agentResponse = $agent->forUser($user)->prompt($msg);
-                $reply = (string) $agentResponse;
+        $modelsToTry = ['gemini-3.1-flash-lite', 'gemma-4-31b-it', 'gemini-3.5-flash'];
+        
+        foreach ($modelsToTry as $modelCandidate) {
+            try {
+                if (!empty(config('ai.providers.gemini.key')) || !empty(env('GEMINI_API_KEY'))) {
+                    $agent = new \App\Ai\Agents\SellifyDriverAgent($user);
+                    $agentResponse = $agent->forUser($user)->prompt($msg, model: $modelCandidate);
+                    $reply = (string) $agentResponse;
+                    if (!empty($reply)) {
+                        break;
+                    }
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning("Laravel AI SDK [{$modelCandidate}] fallback: " . $e->getMessage());
             }
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::warning("Laravel AI SDK execution fallback: " . $e->getMessage());
         }
 
         if (empty($reply)) {

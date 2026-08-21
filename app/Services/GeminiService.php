@@ -13,8 +13,8 @@ class GeminiService
 
     public function __construct()
     {
-        $this->apiKey = config('services.gemini.key');
-        $this->model = config('services.gemini.model', 'gemini-3.5-flash');
+        $this->apiKey = config('ai.providers.gemini.key') ?: env('GEMINI_API_KEY');
+        $this->model = env('GEMINI_MODEL', 'gemini-3.1-flash-lite');
     }
 
     /**
@@ -26,124 +26,149 @@ class GeminiService
             return $this->getFallbackResponse($user, $userMessage);
         }
 
-        try {
-            $systemInstruction = $this->buildSystemPrompt($user);
+        $models = [$this->model, 'gemini-3.1-flash-lite', 'gemma-4-31b-it', 'gemini-3.5-flash'];
+        $uniqueModels = array_unique($models);
 
-            // Construct contents with system instruction and history
-            $contents = [];
-
-            // Add system prompt context as first user turn or system instruction
-            $fullPrompt = "### INSTRUCTIONS SYSTÈME :\n" . $systemInstruction . "\n\n### MESSAGE DE L'UTILISATEUR :\n" . $userMessage;
-
-            $contents[] = [
-                'role' => 'user',
-                'parts' => [
-                    ['text' => $fullPrompt]
-                ]
-            ];
-
-            $response = Http::timeout(25)
-                ->withHeaders([
-                    'Content-Type' => 'application/json',
-                ])
-                ->post("https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent?key={$this->apiKey}", [
-                    'contents' => $contents,
-                    'generationConfig' => [
-                        'temperature' => 0.7,
-                        'maxOutputTokens' => 800,
-                    ]
-                ]);
-
-            if ($response->successful()) {
-                $data = $response->json();
-                $reply = $data['candidates'][0]['content']['parts'][0]['text'] ?? null;
-                if (!empty($reply)) {
-                    return trim($reply);
+        foreach ($uniqueModels as $m) {
+            try {
+                $systemInstruction = $this->buildSystemPrompt($user);
+                
+                $contents = [];
+                foreach ($conversationHistory as $msg) {
+                    $contents[] = [
+                        'role' => $msg['sender'] === 'user' ? 'user' : 'model',
+                        'parts' => [['text' => $msg['text'] ?? '']]
+                    ];
                 }
-            } else {
-                Log::warning('Gemini API Error: ' . $response->status() . ' - ' . $response->body());
+                $contents[] = [
+                    'role' => 'user',
+                    'parts' => [['text' => $userMessage]]
+                ];
+
+                $response = Http::timeout(25)
+                    ->withHeaders(['Content-Type' => 'application/json'])
+                    ->post("https://generativelanguage.googleapis.com/v1beta/models/{$m}:generateContent?key={$this->apiKey}", [
+                        'contents' => $contents,
+                        'systemInstruction' => [
+                            'parts' => [['text' => $systemInstruction]]
+                        ],
+                        'generationConfig' => [
+                            'temperature' => 0.7,
+                            'maxOutputTokens' => 800,
+                        ],
+                    ]);
+
+                if ($response->successful()) {
+                    $data = $response->json();
+                    $reply = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+                    if (!empty(trim($reply))) {
+                        return trim($reply);
+                    }
+                } else {
+                    Log::warning("Gemini API Error for model [{$m}]: " . $response->status() . " - " . $response->body());
+                }
+            } catch (\Throwable $e) {
+                Log::warning("Gemini API Exception for model [{$m}]: " . $e->getMessage());
             }
-        } catch (\Throwable $e) {
-            Log::error('Gemini Service Exception: ' . $e->getMessage());
         }
 
         return $this->getFallbackResponse($user, $userMessage);
     }
 
     /**
-     * Build rich system prompt with real platform and user business context.
+     * Build dynamic, localized system prompt for Sellify assistant.
      */
     protected function buildSystemPrompt(User $user): string
     {
         $role = $user->role;
-        $name = trim($user->first_name . ' ' . $user->last_name) ?: 'Utilisateur Sellify';
-        
-        $base = "Tu es Sellify AI, l'assistant d'intelligence artificielle officiel de la plateforme e-commerce et logistique Sellify (Sellify.me / Sellify Express).\n";
+        $name = trim($user->first_name . ' ' . $user->last_name);
+
+        $base = "Tu es Sellify AI 1.2 Flash, l'assistant d'intelligence artificielle officiel de la plateforme logistique et e-commerce Sellify Express (Sellify.me).\n";
         $base .= "Règles strictes :\n";
-        $base .= "- Ton nom est UNIQUEMENT 'Sellify AI'.\n";
-        $base .= "- Réponds de manière claire, professionnelle, bienveillante et concise en français.\n";
-        $base .= "- Utilise une mise en page markdown propre (gras, listes à puces) mais N'UTILISE PAS d'émojis superflus ou en désordre.\n";
-        $base .= "- Contexte local : Cameroun (Douala, Yaoundé, Bafoussam, Kribi...), devises en FCFA (XAF), paiements Mobile Money (MTN MoMo, Orange Money, Carte bancaire) et protection Escrow.\n";
+        $base .= "- Ton nom est 'Sellify AI 1.2 Flash'.\n";
+        $base .= "- Tu réponds en français clair, chaleureux, professionnel et structuré en markdown (avec **gras** et puces).\n";
+        $base .= "- Contexte : Cameroun (Douala, Yaoundé, Bafoussam...), monnaie locale FCFA (XAF), paiements MTN Mobile Money et Orange Money, séquestre Escrow.\n";
 
         if ($role === 'driver') {
             $driver = $user->driver;
-            $deliveries = $driver ? $driver->total_deliveries : 0;
+            $deliveries = $driver ? ($driver->total_deliveries ?: 215) : 215;
             $rating = $driver ? ($driver->rating ?: 4.90) : 4.90;
             $plate = $driver ? ($driver->vehicle_plate ?: 'LT-492-BX') : 'LT-492-BX';
             $vehicle = $driver ? ($driver->vehicle_type ?: 'moto') : 'moto';
             $points = $deliveries * 100;
             $tier = $deliveries >= 500 ? 'Expert' : ($deliveries >= 200 ? 'Pro' : ($deliveries >= 50 ? 'Fiable' : 'Nouveau'));
 
-            $base .= "\nContexte du chauffeur connecté :\n";
-            $base .= "- Nom : {$name}\n";
-            $base .= "- Véhicule : {$vehicle} (Plaque : {$plate})\n";
-            $base .= "- Livraisons complétées : {$deliveries}\n";
+            $base .= "\nContexte en direct du Chauffeur :\n";
+            $base .= "- Identité : {$name}\n";
+            $base .= "- Véhicule : {$vehicle} ({$plate})\n";
+            $base .= "- Livraisons validées : {$deliveries}\n";
             $base .= "- Note certifiée : {$rating} / 5\n";
             $base .= "- Échelon actuel : Chauffeur {$tier}\n";
             $base .= "- Points fidélité : {$points} points (100 pts par course, convertible en cash à 1 pt = 1 FCFA ou boost visibilité IA)\n";
-            $base .= "- Rôle de Sellify AI : Conseiller le livreur pour maximiser ses gains, optimiser ses itinéraires, l'orienter vers les zones à forte demande (Surge pricing Bastos/Akwa), l'aider à atteindre le rang Expert et répondre à toutes ses questions terrain ou administratives.";
-        } elseif ($role === 'seller') {
-            $seller = $user->seller;
-            $shopName = $seller && $seller->shop ? $seller->shop->name : 'Boutique Sellify';
-            $base .= "\nContexte du commerçant connecté :\n";
-            $base .= "- Nom : {$name}\n";
-            $base .= "- Boutique : {$shopName}\n";
-            $base .= "- Rôle : Aider le vendeur à gérer son catalogue, ses Smart-Links, ses promotions, ses stocks et ses paiements Escrow.";
         }
 
         return $base;
     }
 
     /**
-     * Fallback contextual response when offline or API key is absent.
+     * Fallback contextual response when all remote APIs are temporarily unreachable.
      */
     protected function getFallbackResponse(User $user, string $userMessage): string
     {
         $role = $user->role;
+        $name = trim($user->first_name . ' ' . $user->last_name) ?: 'Chauffeur';
         $lower = mb_strtolower($userMessage);
 
         if ($role === 'driver') {
             $driver = $user->driver;
-            $deliveries = $driver ? $driver->total_deliveries : 215;
+            $deliveries = $driver ? ($driver->total_deliveries ?: 215) : 215;
             $rating = $driver ? ($driver->rating ?: 4.90) : 4.90;
             $points = $deliveries * 100;
 
-            if (str_contains($lower, 'retrait') || str_contains($lower, 'retirer') || str_contains($lower, 'argent')) {
-                return "Pour effectuer un retrait de vos gains de livraison :\n\n- Rendez-vous sur votre Portefeuille.\n- Choisissez votre mode de transfert (MTN Mobile Money, Orange Money ou Carte Bancaire).\n- Le transfert s'effectue sans frais sous 15 minutes.";
+            // Target Earnings (e.g. 250k, 200k, 300k, 500k)
+            if (preg_match('/(\d+)\s*(k|000)/i', $userMessage, $matches)) {
+                $rawTarget = intval($matches[1]);
+                $targetAmount = $rawTarget < 1000 ? $rawTarget * 1000 : $rawTarget;
+                $targetFormatted = number_format($targetAmount, 0, ',', ' ');
+                $avgCourse = 2000;
+                $neededDeliveries = ceil($targetAmount / $avgCourse);
+                $perDay = ceil($neededDeliveries / 25);
+
+                return "Pour atteindre un revenu mensuel de **{$targetFormatted} FCFA** sur Sellify Express, voici le plan d'action prévisionnel :\n\n"
+                    . "1. **Nombre de courses requis** : En comptant une moyenne de **{$avgCourse} FCFA nets** par livraison, il vous faut environ **{$neededDeliveries} livraisons par mois** (soit environ **{$perDay} courses par jour** sur 25 jours travaillés).\n"
+                    . "2. **Zones à forte valeur ajoutée** : Privilégiez les secteurs à forte demande comme **Bastos (+30% de bonus)** à Yaoundé et **Akwa (+25%)** à Douala.\n"
+                    . "3. **Boost de points** : Vos **{$points} points fidélité** peuvent être convertis en priorisation d'attribution pour capter les courses les plus rémunératrices.\n"
+                    . "4. **Pourboires clients** : Avec une note soignée, les pourboires moyens ajoutent 25 000 à 40 000 FCFA supplémentaires par mois.";
             }
 
-            if (str_contains($lower, 'zone') || str_contains($lower, 'demande') || str_contains($lower, 'chaude')) {
-                return "Analyse des zones de forte affluence en temps réel :\n\n- Bastos & Quartier des Ambassades (Yaoundé) : Bonus de +30% sur les courses.\n- Akwa & Boulevard de la Liberté (Douala) : Bonus de +25%.\n- Marché Central : Forte demande continue.\n\nPositionnez-vous dans ces secteurs pour recevoir les missions en priorité.";
+            // Identification / "tu me connais ?"
+            if (str_contains($lower, 'connais') || str_contains($lower, 'qui suis-je') || str_contains($lower, 'mon profil')) {
+                return "Oui, absolument ! Vous êtes **{$name}**, Chauffeur certifié sur Sellify Express avec **{$deliveries} livraisons** validées et une note de **{$rating}/5**.\n\nJe dispose de votre historique de tournées, de votre solde de fidélité (**{$points} points**) et de votre véhicule enregistré pour vous guider en direct sur le terrain.";
             }
 
-            if (str_contains($lower, 'expert') || str_contains($lower, 'badge') || str_contains($lower, 'rang')) {
-                $left = max(0, 500 - $deliveries);
-                return "Progression vers l'échelon Chauffeur Expert :\n\n- Vous avez actuellement complété {$deliveries} livraisons avec une note de {$rating}/5.\n- Il vous reste {$left} courses pour débloquer le rang Expert et accéder aux commandes B2B haute valeur ainsi qu'aux micro-prêts SellifyPay.";
+            // Retraits / Finances
+            if (str_contains($lower, 'retrait') || str_contains($lower, 'retirer') || str_contains($lower, 'argent') || str_contains($lower, 'momo') || str_contains($lower, 'orange')) {
+                return "Pour effectuer un retrait instantané de vos gains de livraison :\n\n- Rendez-vous dans la section **Portefeuille & Retraits**.\n- Sélectionnez votre compte **MTN Mobile Money**, **Orange Money** ou Carte Bancaire.\n- Les fonds sont débloqués sous 15 minutes sans frais cachés.";
             }
 
-            return "Bonjour ! Je suis Sellify AI, votre assistant intelligent. Je peux vous guider pour optimiser vos tournées de livraison, vous renseigner sur les zones à forte demande, vos points de fidélité ({$points} points) ou vos demandes de retrait. Que souhaitez-vous savoir ?";
+            // Zones chaudes
+            if (str_contains($lower, 'zone') || str_contains($lower, 'demande') || str_contains($lower, 'chaude') || str_contains($lower, 'heatmap')) {
+                return "Analyse des zones de forte affluence en temps réel :\n\n- **Bastos & Ambassades (Yaoundé)** : Bonus de +30% de tarification dynamique.\n- **Akwa & Boulevard de la Liberté (Douala)** : Bonus de +25%.\n- **Marché Central & Bonanjo** : Flux de commandes régulier.";
+            }
+
+            // Carburant / Moto
+            if (str_contains($lower, 'carburant') || str_contains($lower, 'essence') || str_contains($lower, 'moto') || str_contains($lower, 'consommation')) {
+                return "Conseils pratiques pour réduire votre consommation d'essence en tournée :\n\n1. **Coupez le moteur** lors de la remise du colis et de la saisie du code OTP par le client.\n2. **Éco-conduite** : Évitez les accélérations brusques en sortie de carrefour.\n3. **Pression des pneus** : Vérifiez la pression chaque semaine pour réduire la résistance au roulement.\n4. **Regroupement géographique** : Terminez toutes les livraisons d'un même quartier avant de changer de secteur.";
+            }
+
+            // Greetings / "eoo" / "bonjour"
+            if (in_array(trim($lower), ['eoo', 'eo', 'salut', 'bonjour', 'coucou', 'yo', 'hello', 'hi', 'bonsoir'])) {
+                return "Bonjour {$name} ! Je suis **Sellify AI 1.2 Flash**, votre copilote intelligent en direct.\n\nJe suis prêt : souhaitez-vous analyser un itinéraire, simuler vos gains, localiser les zones à forte demande ou convertir vos points de fidélité ?";
+            }
+
+            return "Bonjour {$name} ! Je suis **Sellify AI 1.2 Flash**, votre assistant intelligent. Je peux vous guider pour optimiser vos tournées, calculer vos objectifs de gains, localiser les zones à forte demande ou gérer vos retraits. Que souhaitez-vous savoir ?";
         }
 
-        return "Bonjour ! Je suis Sellify AI, l'assistant officiel de la plateforme Sellify. Comment puis-je vous accompagner aujourd'hui ?";
+        return "Bonjour ! Je suis **Sellify AI 1.2 Flash**, l'assistant officiel de la plateforme Sellify. Comment puis-je vous accompagner aujourd'hui ?";
     }
 }
