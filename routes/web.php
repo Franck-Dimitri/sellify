@@ -319,6 +319,8 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/earnings', [\App\Http\Controllers\Driver\DriverController::class, 'earnings'])->name('earnings');
             Route::get('/notifications', [\App\Http\Controllers\Driver\DriverController::class, 'notifications'])->name('notifications');
             Route::get('/reviews', [\App\Http\Controllers\Driver\DriverController::class, 'reviews'])->name('reviews');
+            Route::get('/assistant', [\App\Http\Controllers\Driver\DriverController::class, 'assistant'])->name('assistant');
+            Route::post('/assistant/chat', [\App\Http\Controllers\Driver\DriverController::class, 'chatAssistant'])->name('assistant.chat');
             Route::get('/settings', [\App\Http\Controllers\Driver\DriverController::class, 'settings'])->name('settings');
             Route::post('/settings', [\App\Http\Controllers\Driver\DriverController::class, 'updateSettings'])->name('settings.update');
 

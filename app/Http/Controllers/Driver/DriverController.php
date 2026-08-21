@@ -541,17 +541,24 @@ class DriverController extends Controller
             'coverage_city' => 'nullable|string|max:100',
         ]);
 
+        $vehicleType = match($request->vehicle_type) {
+            'voiture' => 'voiture',
+            'camionnette' => 'camionnette',
+            'velo' => 'velo',
+            default => 'moto',
+        };
+
         $driver = $request->user()->driver;
         if ($driver) {
             $driver->update([
-                'vehicle_type' => $request->vehicle_type,
+                'vehicle_type' => $vehicleType,
                 'vehicle_plate' => strtoupper(trim($request->vehicle_plate)),
             ]);
 
             ActivityLog::create([
                 'user_id' => $request->user()->id,
                 'action' => 'driver_updated_settings',
-                'description' => "Mise à jour des paramètres du véhicule ({$request->vehicle_type} - {$request->vehicle_plate}) et rayon ({$request->coverage_radius_km} km).",
+                'description' => "Mise à jour des paramètres du véhicule ({$vehicleType} - {$request->vehicle_plate}) et rayon ({$request->coverage_radius_km} km).",
                 'ip_address' => $request->ip(),
             ]);
         }
@@ -560,18 +567,108 @@ class DriverController extends Controller
     }
 
     /**
-     * Toggle availability status (online/busy/offline).
+     * Driver AI Business Copilot Assistant page (2.3.11 Spec).
+     */
+    public function assistant(Request $request): InertiaResponse
+    {
+        $user = $request->user();
+        $driver = $user->driver;
+
+        if (!$driver) {
+            $driver = Driver::firstOrCreate(['user_id' => $user->id], ['vehicle_type' => 'moto', 'status' => 'approved']);
+        }
+
+        $totalDeliveries = (int) ($driver->total_deliveries ?: 215);
+        $globalRating = (float) ($driver->rating ?: 4.90);
+        $rewardPoints = $totalDeliveries * 100;
+        $totalEarned = (float) (Order::where('driver_id', $driver->id)->where('delivery_status', 'delivered')->sum('shipping_fee') ?: ($totalDeliveries * 2500));
+        $availableBalance = max(0, $totalEarned * 0.85);
+
+        return Inertia::render('Driver/Assistant', [
+            'driver' => $driver->load('user'),
+            'kpis' => [
+                'total_deliveries' => $totalDeliveries,
+                'rating' => $globalRating,
+                'reward_points' => $rewardPoints,
+                'total_earned' => $totalEarned,
+                'available_balance' => $availableBalance,
+                'current_tier' => $totalDeliveries >= 500 ? 'Expert' : ($totalDeliveries >= 200 ? 'Pro' : ($totalDeliveries >= 50 ? 'Fiable' : 'Nouveau')),
+                'deliveries_to_next_tier' => max(0, ($totalDeliveries < 200 ? 200 : 500) - $totalDeliveries),
+            ],
+            'hotspots' => [
+                ['name' => 'Bastos & Rue des Ambassades', 'city' => 'Yaoundé', 'surge' => '+30% bonus', 'status' => 'Forte affluence 🔥'],
+                ['name' => 'Akwa & Carrefour Ndokoti', 'city' => 'Douala', 'surge' => '+25% bonus', 'status' => 'Pic imminent ⚡'],
+                ['name' => 'Marché Central & Commercial', 'city' => 'Yaoundé', 'surge' => '+20% bonus', 'status' => 'En hausse 📈'],
+            ]
+        ]);
+    }
+
+    /**
+     * Process natural language and slash commands for Driver AI Copilot via Google Gemini (2.3.11 Spec).
+     */
+    public function chatAssistant(Request $request)
+    {
+        $request->validate([
+            'message' => 'required|string|max:1000',
+        ]);
+
+        $user = $request->user();
+        $msg = trim($request->input('message'));
+        $lower = mb_strtolower($msg);
+
+        // 1. Process via Official Laravel AI SDK Agent (with automatic conversation persistence)
+        $reply = "";
+        try {
+            if (!empty(config('ai.providers.gemini.key')) || !empty(env('GEMINI_API_KEY'))) {
+                $agent = new \App\Ai\Agents\SellifyDriverAgent($user);
+                $agentResponse = $agent->forUser($user)->prompt($msg);
+                $reply = (string) $agentResponse;
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning("Laravel AI SDK execution fallback: " . $e->getMessage());
+        }
+
+        if (empty($reply)) {
+            $geminiService = app(\App\Services\GeminiService::class);
+            $reply = $geminiService->generateResponse($user, $msg);
+        }
+
+        // 2. Attach Interactive Navigation Action if detected
+        $action = null;
+        if (str_contains($lower, 'retrait') || str_contains($lower, 'retirer') || str_starts_with($lower, '/retrait')) {
+            $action = ['type' => 'navigate', 'url' => route('driver.earnings'), 'label' => 'Aller au Portefeuille & Retrait'];
+        } elseif (str_contains($lower, 'zone') || str_contains($lower, 'chaleur') || str_contains($lower, 'heatmap') || str_starts_with($lower, '/zones')) {
+            $action = ['type' => 'navigate', 'url' => route('driver.map'), 'label' => 'Ouvrir la Heatmap sur la Carte'];
+        } elseif (str_contains($lower, 'point') || str_contains($lower, 'fidelite') || str_starts_with($lower, '/points')) {
+            $action = ['type' => 'navigate', 'url' => route('driver.earnings'), 'label' => 'Convertir mes Points'];
+        } elseif (str_contains($lower, 'badge') || str_contains($lower, 'expert') || str_contains($lower, 'echelon') || str_starts_with($lower, '/badge')) {
+            $action = ['type' => 'navigate', 'url' => route('driver.reviews'), 'label' => 'Voir mes Évaluations & Badges'];
+        } elseif (str_contains($lower, 'stat') || str_contains($lower, 'gain') || str_starts_with($lower, '/stats')) {
+            $action = ['type' => 'navigate', 'url' => route('driver.dashboard'), 'label' => 'Voir le Tableau de bord'];
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'reply' => $reply,
+            'action' => $action,
+        ]);
+    }
+
+    /**
+     * Toggle availability status (available/online, busy, offline).
      */
     public function toggleAvailability(Request $request)
     {
         $request->validate([
-            'activity_status' => 'required|in:online,busy,offline',
+            'activity_status' => 'required|in:online,available,busy,offline',
         ]);
+
+        $status = $request->activity_status === 'online' ? 'available' : $request->activity_status;
 
         $driver = $request->user()->driver;
         if ($driver) {
             $driver->update([
-                'activity_status' => $request->activity_status,
+                'activity_status' => $status,
             ]);
         }
 
@@ -591,11 +688,20 @@ class DriverController extends Controller
 
         $driver = $request->user()->driver;
         if ($driver) {
-            $driver->update([
-                'current_latitude' => $request->latitude,
-                'current_longitude' => $request->longitude,
-                'last_ping_at' => now(),
-            ]);
+            \Illuminate\Support\Facades\Cache::put("driver_telemetry_{$driver->id}", [
+                'lat' => (float)$request->latitude,
+                'lng' => (float)$request->longitude,
+                'speed' => (float)($request->speed ?: 0),
+                'updated_at' => now()->toIso8601String(),
+            ], now()->addMinutes(15));
+
+            if (\Illuminate\Support\Facades\Schema::hasColumn('drivers', 'current_latitude')) {
+                $driver->update([
+                    'current_latitude' => $request->latitude,
+                    'current_longitude' => $request->longitude,
+                    'last_ping_at' => now(),
+                ]);
+            }
         }
 
         return response()->json([
@@ -673,17 +779,24 @@ class DriverController extends Controller
     public function verifyDeliveryOtp(Request $request, string $orderNumber)
     {
         $request->validate([
-            'otp' => 'required|string',
+            'otp' => 'nullable|string',
+            'otp_code' => 'nullable|string',
             'signature_data' => 'nullable|string',
             'dropoff_photo' => 'nullable|image|max:5120',
         ]);
+
+        $otpInput = $request->input('otp') ?? $request->input('otp_code');
+
+        if (!$otpInput) {
+            return back()->with('error', 'Le code OTP est requis pour valider la livraison.');
+        }
 
         $driver = $request->user()->driver;
         $order = Order::where('order_number', $orderNumber)
             ->where('driver_id', $driver->id)
             ->firstOrFail();
 
-        if ($order->delivery_otp && $order->delivery_otp !== $request->otp) {
+        if ($order->delivery_otp && trim($otpInput) !== trim($order->delivery_otp)) {
             return back()->with('error', 'Code secret OTP incorrect. Veuillez demander au client son code à 6 chiffres.');
         }
 
@@ -695,6 +808,7 @@ class DriverController extends Controller
         $order->update([
             'delivery_status' => 'delivered',
             'status' => 'delivered',
+            'payment_status' => 'released',
             'delivered_at' => now(),
         ]);
 

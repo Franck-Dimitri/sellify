@@ -28,7 +28,8 @@ import {
     Package,
     Navigation,
     AlertTriangle,
-    Zap
+    Zap,
+    Sparkles
 } from 'lucide-react';
 
 export default function DriverLayout({ children, title }) {
@@ -168,6 +169,7 @@ export default function DriverLayout({ children, title }) {
         { name: 'Livraisons & courses', href: route('driver.deliveries'), icon: Truck, active: route().current('driver.deliveries') },
         { name: 'Carte & itinéraire', href: route('driver.map'), icon: MapPin, active: route().current('driver.map') },
         { name: 'Portefeuille & gains', href: route('driver.earnings'), icon: Wallet, active: route().current('driver.earnings') },
+        { name: 'Sellify AI', href: route('driver.assistant'), icon: Sparkles, active: route().current('driver.assistant') },
         { name: 'Notifications', href: route('driver.notifications'), icon: Bell, active: route().current('driver.notifications') },
         { name: 'Avis & évaluations', href: route('driver.reviews'), icon: Star, active: route().current('driver.reviews') },
         { name: 'Paramètres & véhicule', href: route('driver.settings'), icon: Settings, active: route().current('driver.settings') },
