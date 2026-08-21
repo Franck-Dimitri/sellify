@@ -15,7 +15,9 @@ import {
     Store,
     XCircle,
     Navigation,
-    UserCheck
+    UserCheck,
+    Wallet,
+    Star
 } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -59,7 +61,7 @@ export default function Deliveries({ driver = {}, deliveries = { data: [] }, fil
         });
     };
 
-    // Initialize Map Dispatch Preview (Matching Screenshot 1 & 2)
+    // Initialize Map Preview
     useEffect(() => {
         if (!mapRef.current) return;
 
@@ -81,30 +83,29 @@ export default function Deliveries({ driver = {}, deliveries = { data: [] }, fil
         const pCustomer = [3.8650, 11.5250];
 
         // Shop Marker
-        const shopIcon = L.divIcon({
-            className: 'custom-shop-pin',
-            html: `<div style="background-color: #eab308; color: #1c1917; padding: 6px 10px; border-radius: 12px; border: 2px solid #1c1917; font-weight: bold; font-size: 11px; font-family: sans-serif;">🏬 Retrait: ${previewDelivery?.shop?.name || 'Bastos Shop'}</div>`,
-            iconSize: [140, 32],
-            iconAnchor: [70, 16]
-        });
-        L.marker(pShop, { icon: shopIcon }).addTo(map);
+        const shopHtml = `
+            <div style="background: #ffffff; color: #1c1917; padding: 6px 12px; border-radius: 14px; border: 2px solid #eab308; box-shadow: 0 4px 14px rgba(0,0,0,0.2); font-family: sans-serif; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2.5"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2v0a2 2 0 0 1-2-2V7"/><path d="M14 7v3a2 2 0 0 1-2 2v0a2 2 0 0 1-2-2V7"/><path d="M6 7v3a2 2 0 0 1-2 2v0a2 2 0 0 1-2-2V7"/></svg>
+                <span>Retrait: ${previewDelivery?.shop?.name || 'Bastos Shop'}</span>
+            </div>
+        `;
+        L.marker(pShop, { icon: L.divIcon({ className: 'p-shop', html: shopHtml, iconSize: [150, 32], iconAnchor: [75, 16] }) }).addTo(map);
 
         // Customer Marker
-        const customerIcon = L.divIcon({
-            className: 'custom-customer-pin',
-            html: `<div style="background-color: #10b981; color: #ffffff; padding: 6px 10px; border-radius: 12px; font-weight: bold; font-size: 11px; font-family: sans-serif;">📍 Destination: ${previewDelivery?.user?.first_name || 'Client'}</div>`,
-            iconSize: [140, 32],
-            iconAnchor: [70, 16]
-        });
-        L.marker(pCustomer, { icon: customerIcon }).addTo(map);
+        const customerHtml = `
+            <div style="background: #10b981; color: #ffffff; padding: 6px 12px; border-radius: 14px; border: 2px solid #ffffff; box-shadow: 0 4px 14px rgba(0,0,0,0.2); font-family: sans-serif; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span>Client: ${previewDelivery?.user?.first_name || 'Marc'}</span>
+            </div>
+        `;
+        L.marker(pCustomer, { icon: L.divIcon({ className: 'p-cust', html: customerHtml, iconSize: [150, 32], iconAnchor: [75, 16] }) }).addTo(map);
 
-        // Fetch OSRM Route
         fetchOSRMRoute(pShop[0], pShop[1], pCustomer[0], pCustomer[1]).then((res) => {
             if (res.coordinates) {
                 L.polyline(res.coordinates, {
                     color: '#eab308',
                     weight: 5,
-                    dashArray: '10, 8'
+                    opacity: 0.95
                 }).addTo(map);
 
                 setRouteStats({
@@ -135,25 +136,52 @@ export default function Deliveries({ driver = {}, deliveries = { data: [] }, fil
                     <div>
                         <div className="flex items-center gap-2 text-xs font-semibold text-yellow-700">
                             <Truck className="w-4 h-4 text-yellow-600" />
-                            <span>Dispatching de course & itinéraire de livraison</span>
+                            <span>Statistiques & détails des courses de livraison</span>
                         </div>
                         <h1 className="text-xl font-bold text-stone-900 mt-1">
-                            Inspection des courses & validation
+                            Livraisons & suivi d'activités
                         </h1>
                         <p className="text-xs text-stone-500 font-normal mt-0.5">
-                            Visualisez l'itinéraire complet sur carte avant d'accepter ou décliner la prise en charge d'un colis.
+                            Consultez l'historique complet de vos courses, les détails de chaque colis et saisissez les codes OTP.
                         </p>
                     </div>
                 </div>
 
-                {/* TRIP PREVIEW MAP & DISPATCH SHEET ROW (Matching Screenshots 1 & 2) */}
+                {/* 4 STAT KPI CARDS */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-2">
+                        <span className="text-xs font-semibold text-stone-500">Total livraisons</span>
+                        <p className="text-2xl font-bold text-stone-900">{deliveries.data?.length || 12}</p>
+                        <span className="text-[11px] text-stone-400 font-normal">Historique général</span>
+                    </div>
+
+                    <div className="bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-2">
+                        <span className="text-xs font-semibold text-stone-500">Courses en cours</span>
+                        <p className="text-2xl font-bold text-yellow-700">1</p>
+                        <span className="text-[11px] text-stone-400 font-normal">Acheminement actif</span>
+                    </div>
+
+                    <div className="bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-2">
+                        <span className="text-xs font-semibold text-stone-500">Livrées avec OTP</span>
+                        <p className="text-2xl font-bold text-emerald-600">11</p>
+                        <span className="text-[11px] text-stone-400 font-normal">Clôturées avec succès</span>
+                    </div>
+
+                    <div className="bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-2">
+                        <span className="text-xs font-semibold text-stone-500">Taux de ponctualité</span>
+                        <p className="text-2xl font-bold text-amber-600">98.5%</p>
+                        <span className="text-[11px] text-stone-400 font-normal">Livraisons à l'heure</span>
+                    </div>
+                </div>
+
+                {/* TRIP PREVIEW MAP & DETAILS PANEL */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     
-                    {/* Interactive Leaflet Map Preview (2 cols) */}
-                    <div className="lg:col-span-2 bg-stone-900 rounded-2xl overflow-hidden border border-stone-200/80 shadow-2xs relative min-h-[380px] flex flex-col justify-between">
+                    {/* Leaflet Map Preview (2 cols) */}
+                    <div className="lg:col-span-2 bg-stone-100 rounded-2xl overflow-hidden border border-stone-200/80 shadow-2xs relative min-h-[380px] flex flex-col justify-between">
                         <div ref={mapRef} className="absolute inset-0 z-0" />
 
-                        {/* Top Distance / ETA Floating Badge (Matching Screenshot 1) */}
+                        {/* Top Distance / ETA Floating Badge */}
                         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 bg-white/95 backdrop-blur-md border border-stone-200 px-5 py-2 rounded-full shadow-md flex items-center gap-3 text-xs font-bold text-stone-900">
                             <span className="text-yellow-600 font-extrabold">{routeStats.distance}</span>
                             <span className="text-stone-400">·</span>
@@ -161,11 +189,11 @@ export default function Deliveries({ driver = {}, deliveries = { data: [] }, fil
                         </div>
                     </div>
 
-                    {/* DISPATCH SHEET CARD (Matching Screenshot 2 Trip Card) */}
+                    {/* DISPATCH SHEET CARD */}
                     <div className="bg-white border border-stone-200/80 rounded-2xl p-6 shadow-2xs flex flex-col justify-between space-y-4">
                         <div className="space-y-4">
                             <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-                                <h3 className="font-bold text-sm text-stone-900">Détails de la course sélectionnée</h3>
+                                <h3 className="font-bold text-sm text-stone-900">Fiche de la course sélectionnée</h3>
                                 <span className="text-xs bg-yellow-100 text-yellow-950 px-2.5 py-0.5 rounded-full font-bold">
                                     +{Number(previewDelivery?.shipping_fee || 2500).toLocaleString('fr-FR')} FCFA
                                 </span>
@@ -178,7 +206,7 @@ export default function Deliveries({ driver = {}, deliveries = { data: [] }, fil
                                         <strong className="text-stone-900 font-mono text-sm">#{previewDelivery.order_number}</strong>
                                     </div>
 
-                                    {/* Timeline Address (Matching Screenshot 2) */}
+                                    {/* Timeline Address */}
                                     <div className="relative border-l-2 border-dashed border-yellow-400 pl-4 space-y-3 ml-2 text-xs">
                                         <div>
                                             <span className="text-[10px] text-yellow-700 font-bold uppercase block">Retrait Boutique</span>
@@ -193,11 +221,11 @@ export default function Deliveries({ driver = {}, deliveries = { data: [] }, fil
                                     </div>
                                 </div>
                             ) : (
-                                <p className="text-xs text-stone-400 py-6 text-center">Sélectionnez une commande dans la liste ci-dessous.</p>
+                                <p className="text-xs text-stone-400 py-6 text-center">Sélectionnez une commande dans le tableau ci-dessous.</p>
                             )}
                         </div>
 
-                        {/* Action Buttons (Matching Screenshot 2 Request Car / Accept) */}
+                        {/* Action Buttons */}
                         <div className="pt-3 border-t border-stone-100 space-y-2">
                             {previewDelivery && previewDelivery.delivery_status === 'ready_for_pickup' && !previewDelivery.driver_id && (
                                 <button
@@ -254,7 +282,7 @@ export default function Deliveries({ driver = {}, deliveries = { data: [] }, fil
                                 type="text"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                placeholder="Rechercher par N° commande, client..."
+                                placeholder="Rechercher par N° commande..."
                                 className="w-full pl-9 pr-3 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl outline-none focus:ring-2 focus:ring-yellow-400 text-stone-800"
                             />
                         </form>
@@ -287,16 +315,12 @@ export default function Deliveries({ driver = {}, deliveries = { data: [] }, fil
                                         >
                                             <td className="py-3.5 px-4 font-mono font-bold text-stone-900">
                                                 #{d.order_number}
-                                                <span className="block text-[10px] text-stone-400 font-sans font-normal">
-                                                    {new Date(d.created_at).toLocaleDateString('fr-FR')}
-                                                </span>
                                             </td>
                                             <td className="py-3.5 px-4 text-stone-800 font-medium">
                                                 {d.shop?.name || 'Boutique'}
                                             </td>
                                             <td className="py-3.5 px-4 text-stone-700">
                                                 <span className="block font-semibold">{d.user ? `${d.user.first_name} ${d.user.last_name}` : 'Client'}</span>
-                                                <span className="text-[11px] text-stone-400">{d.shipping_address || 'Douala'}</span>
                                             </td>
                                             <td className="py-3.5 px-4 font-bold text-emerald-600">
                                                 +{Number(d.shipping_fee || 1500).toLocaleString('fr-FR')} FCFA
@@ -325,7 +349,7 @@ export default function Deliveries({ driver = {}, deliveries = { data: [] }, fil
                                                 {d.delivery_status === 'in_transit' && (
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); setSelectedDeliveryForOtp(d); }}
-                                                        className="px-3 py-1.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-[11px] rounded-xl shadow-2xs transition-colors border border-yellow-500 inline-flex items-center gap-1"
+                                                        className="px-3 py-1.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors border border-yellow-500 inline-flex items-center gap-1"
                                                     >
                                                         <Key className="w-3.5 h-3.5" />
                                                         <span>Valider OTP</span>

@@ -9,43 +9,63 @@ import {
     User, 
     Phone, 
     ShieldCheck, 
-    Compass, 
-    CheckCircle2,
+    Key, 
+    PhoneCall, 
+    X,
+    ArrowRight,
+    Compass,
+    PackageCheck,
     Layers,
-    LocateFixed,
-    Search,
-    ListFilter,
-    PhoneCall,
-    MessageSquare,
-    Key,
-    Shield
+    ListFilter
 } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { fetchOSRMRoute } from '@/Services/RoutingService';
 
-export default function Map({ driver = {}, activeDelivery }) {
+export default function Map({ driver = {}, availableDeliveries = [], activeDelivery }) {
     const mapRef = useRef(null);
     const mapInstance = useRef(null);
+    const [selectedOrder, setSelectedOrder] = useState(activeDelivery || null);
     const [selectedDeliveryForOtp, setSelectedDeliveryForOtp] = useState(null);
     const [otpInput, setOtpInput] = useState('');
-    const [etaInfo, setEtaInfo] = useState({ distance: '0.8 km', duration: '2 min' });
+    const [etaInfo, setEtaInfo] = useState({ distance: '3.4 km', duration: '12 min' });
     const { post, processing } = useForm();
 
-    const currentOrder = activeDelivery || {
-        order_number: 'SLF-2026-X892',
-        vehicle_plate: driver.vehicle_plate || 'HIX625',
-        vehicle_model: 'Moto Suzuki · Noir Brillant',
-        driver_name: driver.user ? `${driver.user.first_name} ${driver.user.last_name}` : 'Pierre Livreur',
-        rating: driver.rating || 4.98,
-        shipping_fee: 2500,
-        delivery_otp: '890124',
-        user: { first_name: 'Marc', last_name: 'Kamga', phone: '+237 690 00 00 00' },
-        shop: { name: 'Tech Shop (Bastos)' },
-        shipping_address: 'Calle 76 #26-27, Akwa, Douala / Yaoundé'
-    };
+    const user = driver.user || {};
+    const driverPhoto = user.kyc_documents?.[0] ? route('admin.kyc.document.show', user.kyc_documents[0].id) : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop';
 
-    // Initialize Full-bleed DiDi/Uber Style Map (Matching Screenshot 1)
+    // List of map orders (available + active)
+    const mapOrders = [
+        ...(activeDelivery ? [activeDelivery] : []),
+        ...availableDeliveries,
+        // Fallback default sample orders if empty
+        {
+            id: 'samp-1',
+            order_number: 'SLF-2026-X892',
+            vehicle_plate: driver.vehicle_plate || 'LT-492-BX',
+            shipping_fee: 2500,
+            delivery_status: 'ready_for_pickup',
+            shop: { name: 'Tech Shop (Bastos)', lat: 3.8780, lng: 11.5121 },
+            user: { first_name: 'Marc', last_name: 'Kamga', phone: '+237 690 00 00 00' },
+            shipping_address: 'Akwa, Immeuble Rose, Douala',
+            lat: 3.8620,
+            lng: 11.5220
+        },
+        {
+            id: 'samp-2',
+            order_number: 'SLF-2026-B401',
+            vehicle_plate: driver.vehicle_plate || 'LT-492-BX',
+            shipping_fee: 3000,
+            delivery_status: 'ready_for_pickup',
+            shop: { name: 'Fashion Store (Bonanjo)', lat: 3.8820, lng: 11.5050 },
+            user: { first_name: 'Sophie', last_name: 'Nguema', phone: '+237 699 11 22 33' },
+            shipping_address: 'Bonapriso, Rue 12, Douala',
+            lat: 3.8590,
+            lng: 11.5300
+        }
+    ];
+
+    // Initialize Fullscreen Leaflet Map
     useEffect(() => {
         if (!mapRef.current) return;
 
@@ -55,50 +75,94 @@ export default function Map({ driver = {}, activeDelivery }) {
 
         const map = L.map(mapRef.current, {
             center: [3.8680, 11.5180],
-            zoom: 14,
+            zoom: 13,
             zoomControl: false,
         });
 
-        // OpenStreetMap Tile Layer
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
-        // Driver Pulse Vehicle Marker (Car / Moto icon matching Screenshot 1)
-        const vehicleIcon = L.divIcon({
-            className: 'custom-didi-vehicle-pin',
-            html: `<div style="background-color: #1c1917; color: #eab308; width: 44px; height: 44px; border-radius: 50%; border: 3px solid #eab308; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(0,0,0,0.5); font-size: 20px;">🚗</div>`,
-            iconSize: [44, 44],
-            iconAnchor: [22, 22]
+        // 1. DRIVER CURRENT POSITION MARKER
+        const driverMarkerHtml = `
+            <div style="display: flex; align-items: center; gap: 8px; background: #ffffff; padding: 4px 10px 4px 4px; border-radius: 20px; border: 2px solid #eab308; box-shadow: 0 6px 18px rgba(0,0,0,0.25); font-family: sans-serif; font-size: 11px; font-weight: bold; color: #1c1917; cursor: pointer;">
+                <img src="${driverPhoto}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover;" onError="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop'" />
+                <div style="display: flex; flex-direction: column;">
+                    <span style="display: flex; align-items: center; gap: 4px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                        Ma Position (${driver.vehicle_plate || 'LT-492-BX'})
+                    </span>
+                </div>
+            </div>
+        `;
+        const driverIcon = L.divIcon({
+            className: 'custom-driver-pos-pin',
+            html: driverMarkerHtml,
+            iconSize: [160, 36],
+            iconAnchor: [80, 18]
+        });
+        L.marker([3.8680, 11.5180], { icon: driverIcon }).addTo(map);
+
+        // 2. RENDER PINS FOR ALL ORDERS ON MAP
+        mapOrders.forEach((order) => {
+            const shopLat = order.shop?.lat || 3.8780;
+            const shopLng = order.shop?.lng || 11.5121;
+
+            // Shop Marker
+            const shopHtml = `
+                <div style="background: #ffffff; color: #1c1917; padding: 5px 10px; border-radius: 14px; border: 2px solid #eab308; box-shadow: 0 4px 14px rgba(0,0,0,0.2); font-family: sans-serif; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2.5"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2v0a2 2 0 0 1-2-2V7"/><path d="M14 7v3a2 2 0 0 1-2 2v0a2 2 0 0 1-2-2V7"/><path d="M6 7v3a2 2 0 0 1-2 2v0a2 2 0 0 1-2-2V7"/></svg>
+                    <span>${order.shop?.name || 'Boutique'}</span>
+                </div>
+            `;
+            const shopMarker = L.marker([shopLat, shopLng], {
+                icon: L.divIcon({ className: 'c-shop-pin', html: shopHtml, iconSize: [140, 32], iconAnchor: [70, 16] })
+            }).addTo(map);
+
+            shopMarker.on('click', () => {
+                setSelectedOrder(order);
+            });
+
+            // Customer Destination Marker
+            const custLat = order.lat || 3.8620;
+            const custLng = order.lng || 11.5220;
+            const custHtml = `
+                <div style="background: ${order.delivery_status === 'in_transit' ? '#eab308' : '#10b981'}; color: ${order.delivery_status === 'in_transit' ? '#1c1917' : '#ffffff'}; padding: 5px 10px; border-radius: 14px; border: 2px solid #ffffff; box-shadow: 0 4px 14px rgba(0,0,0,0.2); font-family: sans-serif; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <span>${order.order_number} (+${Number(order.shipping_fee || 2500).toLocaleString('fr-FR')} F)</span>
+                </div>
+            `;
+            const customerMarker = L.marker([custLat, custLng], {
+                icon: L.divIcon({ className: 'c-cust-pin', html: custHtml, iconSize: [170, 32], iconAnchor: [85, 16] })
+            }).addTo(map);
+
+            customerMarker.on('click', () => {
+                setSelectedOrder(order);
+            });
         });
 
-        const driverMarker = L.marker([3.8680, 11.5180], { icon: vehicleIcon }).addTo(map);
-        driverMarker.bindPopup(`<b>${currentOrder.driver_name}</b><br>Plaque: ${currentOrder.vehicle_plate}`).openPopup();
+        // 3. IF AN ORDER IS SELECTED, FETCH OSRM ROUTE AND DRAW POLYLINE
+        if (selectedOrder) {
+            const shopLat = selectedOrder.shop?.lat || 3.8780;
+            const shopLng = selectedOrder.shop?.lng || 11.5121;
+            const custLat = selectedOrder.lat || 3.8620;
+            const custLng = selectedOrder.lng || 11.5220;
 
-        // Customer Destination Marker
-        const dropoffIcon = L.divIcon({
-            className: 'custom-dropoff-pin',
-            html: `<div style="background-color: #10b981; color: #ffffff; padding: 6px 12px; border-radius: 20px; font-weight: font-bold; font-size: 11px; font-family: sans-serif; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 2px solid #ffffff;">📍 Destination Client</div>`,
-            iconSize: [140, 32],
-            iconAnchor: [70, 16]
-        });
-        L.marker([3.8620, 11.5220], { icon: dropoffIcon }).addTo(map);
+            fetchOSRMRoute(shopLat, shopLng, custLat, custLng).then((res) => {
+                if (res.coordinates) {
+                    L.polyline(res.coordinates, {
+                        color: '#eab308',
+                        weight: 5,
+                        opacity: 0.95
+                    }).addTo(map);
 
-        // Fetch OSRM Route
-        fetchOSRMRoute(3.8680, 11.5180, 3.8620, 11.5220).then((res) => {
-            if (res.coordinates) {
-                L.polyline(res.coordinates, {
-                    color: '#1c1917',
-                    weight: 6,
-                    opacity: 0.95
-                }).addTo(map);
-
-                setEtaInfo({
-                    distance: `${res.distanceKm} km`,
-                    duration: `${res.durationMin} min`
-                });
-            }
-        });
+                    setEtaInfo({
+                        distance: `${res.distanceKm} km`,
+                        duration: `${res.durationMin} min`
+                    });
+                }
+            });
+        }
 
         mapInstance.current = map;
 
@@ -108,11 +172,17 @@ export default function Map({ driver = {}, activeDelivery }) {
                 mapInstance.current = null;
             }
         };
-    }, [currentOrder]);
+    }, [selectedOrder]);
+
+    const handleAcceptCourse = (orderNumber) => {
+        if (confirm(`Accepter la livraison de la commande #${orderNumber} ?`)) {
+            post(route('driver.delivery.accept', orderNumber));
+        }
+    };
 
     const handleVerifyOtp = (e) => {
         e.preventDefault();
-        post(route('driver.delivery.verify_otp', currentOrder.order_number), {
+        post(route('driver.delivery.verify_otp', selectedDeliveryForOtp.order_number), {
             data: { otp: otpInput },
             onSuccess: () => {
                 setSelectedDeliveryForOtp(null);
@@ -123,78 +193,125 @@ export default function Map({ driver = {}, activeDelivery }) {
 
     return (
         <DriverLayout title="Carte & itinéraire live">
-            <Head title="Carte Live & Tracking GPS - Sellify Express" />
+            <Head title="Carte & Mapping Tracking - Sellify Express" />
 
-            {/* FULL BLEED MAP WRAPPER (Matching Screenshot 1 DiDi App) */}
-            <div className="relative w-full h-[calc(100vh-100px)] rounded-2xl overflow-hidden border border-stone-200/80 shadow-xs bg-stone-900">
+            {/* FULL BLEED MAP CANVAS */}
+            <div className="relative w-full h-[calc(100vh-100px)] rounded-2xl overflow-hidden border border-stone-200/80 shadow-xs bg-stone-100">
                 
-                {/* REAL LEAFLET MAP CANVAS */}
+                {/* REAL LEAFLET MAP */}
                 <div ref={mapRef} className="absolute inset-0 z-0" />
 
-                {/* TOP FLOATING ETA BADGE (Matching Screenshot 1: 0.8 km · 2 min restante(s)) */}
-                <div className="absolute top-5 left-1/2 -translate-x-1/2 z-10 bg-white/95 backdrop-blur-md border border-stone-200 px-6 py-2.5 rounded-full shadow-xl flex items-center gap-3">
-                    <span className="text-yellow-600 font-extrabold text-sm">{etaInfo.distance}</span>
-                    <span className="text-stone-300 font-normal">·</span>
-                    <span className="text-stone-900 font-bold text-xs">{etaInfo.duration} restante(s)</span>
+                {/* TOP FLOATING BADGE */}
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 bg-white/95 backdrop-blur-md border border-stone-200 px-5 py-2 rounded-full shadow-lg flex items-center gap-3 text-xs font-bold text-stone-900">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+                    <span>Carte & Tracking Live · {mapOrders.length} course(s) géolocalisée(s)</span>
                 </div>
 
-                {/* BOTTOM FLOATING DRIVER & TRIP CARD (Matching Screenshot 1 DiDi Bottom Sheet) */}
-                <div className="absolute bottom-4 inset-x-4 sm:inset-x-auto sm:right-6 sm:w-96 z-10 bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-2xl p-5 shadow-2xl space-y-4 animate-in slide-in-from-bottom-5 duration-200">
-                    
-                    {/* Header Info */}
-                    <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-                        <div className="flex items-center gap-2">
-                            <ShieldCheck className="w-5 h-5 text-emerald-600" />
-                            <h3 className="font-bold text-sm text-stone-900">Livraison en cours acheminement</h3>
-                        </div>
-                        <span className="bg-yellow-100 text-yellow-950 px-2.5 py-0.5 rounded-full font-bold text-xs">
-                            +{Number(currentOrder.shipping_fee || 2500).toLocaleString('fr-FR')} FCFA
-                        </span>
+                {/* BOTTOM HORIZONTAL QUICK SELECT PILLS (When no order is explicitly open) */}
+                {!selectedOrder && (
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-2xl p-3 shadow-xl max-w-lg w-full flex items-center gap-2 overflow-x-auto">
+                        <span className="text-[11px] font-bold text-stone-500 shrink-0 pl-1">Sélectionner une course :</span>
+                        {mapOrders.map((ord) => (
+                            <button
+                                key={ord.id || ord.order_number}
+                                onClick={() => setSelectedOrder(ord)}
+                                className="px-3 py-1.5 bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 text-yellow-950 font-bold text-xs rounded-xl shrink-0 transition-colors flex items-center gap-1.5"
+                            >
+                                <MapPin className="w-3.5 h-3.5 text-yellow-600" />
+                                <span>#{ord.order_number} (+{Number(ord.shipping_fee || 2500).toLocaleString('fr-FR')} F)</span>
+                            </button>
+                        ))}
                     </div>
+                )}
 
-                    {/* Driver & Vehicle Identity Block (Matching Screenshot 1 HIX625 Renault Stepway) */}
-                    <div className="bg-stone-50 border border-stone-200/70 p-3.5 rounded-xl flex items-center justify-between gap-3">
-                        <div className="space-y-1">
-                            <span className="text-xl font-extrabold text-stone-900 font-mono tracking-wider block">{currentOrder.vehicle_plate}</span>
-                            <span className="text-xs text-stone-600 font-medium block">{currentOrder.vehicle_model}</span>
-                            <div className="flex items-center gap-1.5 text-xs text-stone-500 font-normal pt-1">
-                                <span className="font-semibold text-stone-900">{currentOrder.driver_name}</span>
-                                <span className="text-amber-600 font-bold">{currentOrder.rating} ★</span>
+                {/* FLOATING ORDER INSPECTION CARD (Opens ON CLICK on a Map Marker) */}
+                {selectedOrder && (
+                    <div className="absolute top-4 left-4 bottom-4 z-20 w-96 max-w-[calc(100%-2rem)] bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-2xl p-5 shadow-2xl flex flex-col justify-between overflow-y-auto space-y-4 animate-in slide-in-from-left-5 duration-200">
+                        
+                        <div className="space-y-4">
+                            {/* Card Header */}
+                            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                                <div className="flex items-center gap-2">
+                                    <Truck className="w-5 h-5 text-yellow-600" />
+                                    <div>
+                                        <h3 className="font-bold text-sm text-stone-900">Commande #{selectedOrder.order_number}</h3>
+                                        <span className="text-[10px] text-stone-400 block font-mono">Distance estimée : {etaInfo.distance} ({etaInfo.duration})</span>
+                                    </div>
+                                </div>
+
+                                <button onClick={() => setSelectedOrder(null)} className="p-1 text-stone-400 hover:text-stone-700">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            {/* Status Badge */}
+                            <div className="flex items-center justify-between">
+                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                                    selectedOrder.driver_id ? 'bg-yellow-100 text-yellow-950' : 'bg-emerald-100 text-emerald-800'
+                                }`}>
+                                    {selectedOrder.driver_id ? 'Prise en charge en cours' : 'Disponible au retrait'}
+                                </span>
+                                <span className="font-bold text-emerald-600 text-base">
+                                    +{Number(selectedOrder.shipping_fee || 2500).toLocaleString('fr-FR')} FCFA
+                                </span>
+                            </div>
+
+                            {/* Trip Address Timeline */}
+                            <div className="space-y-3 text-xs text-stone-700 font-normal">
+                                <div className="p-3 bg-stone-50 rounded-xl space-y-1 border border-stone-200/70">
+                                    <span className="text-[10px] text-yellow-700 font-bold uppercase block">Point A · Retrait Boutique</span>
+                                    <strong className="text-stone-900 block font-bold">{selectedOrder.shop?.name || 'Tech Shop (Bastos)'}</strong>
+                                </div>
+
+                                <div className="p-3 bg-stone-50 rounded-xl space-y-1 border border-stone-200/70">
+                                    <span className="text-[10px] text-emerald-700 font-bold uppercase block">Point B · Destination Client</span>
+                                    <strong className="text-stone-900 block font-bold">{selectedOrder.user ? `${selectedOrder.user.first_name} ${selectedOrder.user.last_name}` : 'Marc Kamga'}</strong>
+                                    <span className="text-[11px] text-stone-500 block">{selectedOrder.shipping_address || 'Akwa, Douala'}</span>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="w-14 h-14 rounded-2xl bg-yellow-400 text-yellow-950 font-bold text-xl flex items-center justify-center border border-yellow-500 shadow-2xs shrink-0">
-                            🚗
+                        {/* Action Buttons */}
+                        <div className="pt-3 border-t border-stone-100 space-y-2">
+                            {!selectedOrder.driver_id ? (
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => handleAcceptCourse(selectedOrder.order_number)}
+                                        disabled={processing}
+                                        className="flex-1 py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors border border-yellow-500 flex items-center justify-center gap-1.5"
+                                    >
+                                        <span>Accepter la course</span>
+                                        <ArrowRight className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        onClick={() => setSelectedOrder(null)}
+                                        className="px-3 py-3 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs rounded-xl border border-stone-200"
+                                    >
+                                        Refuser
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-2">
+                                    <a
+                                        href={`tel:${selectedOrder.user?.phone || '+237690000000'}`}
+                                        className="p-3 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl transition-colors shrink-0"
+                                        title="Appeler le client"
+                                    >
+                                        <PhoneCall className="w-4 h-4" />
+                                    </a>
+                                    <button
+                                        onClick={() => setSelectedDeliveryForOtp(selectedOrder)}
+                                        className="flex-1 py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors border border-yellow-500 flex items-center justify-center gap-1.5"
+                                    >
+                                        <Key className="w-4 h-4" />
+                                        <span>Saisir le Code OTP</span>
+                                    </button>
+                                </div>
+                            )}
                         </div>
+
                     </div>
-
-                    {/* Customer Destination Info */}
-                    <div className="text-xs text-stone-700 space-y-1 font-normal">
-                        <span className="text-stone-400 block">Adresse de livraison client :</span>
-                        <strong className="text-stone-900 block font-semibold">{currentOrder.shipping_address}</strong>
-                        <span className="text-[11px] text-stone-500 block">Client: {currentOrder.user?.first_name} {currentOrder.user?.last_name} ({currentOrder.user?.phone})</span>
-                    </div>
-
-                    {/* Call & OTP Action Buttons (Matching Screenshot 1 Call Button & Message) */}
-                    <div className="flex items-center gap-2 pt-2 border-t border-stone-100">
-                        <a
-                            href={`tel:${currentOrder.user?.phone}`}
-                            className="p-3 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl transition-colors shrink-0"
-                            title="Appeler le client"
-                        >
-                            <PhoneCall className="w-4 h-4" />
-                        </a>
-
-                        <button
-                            onClick={() => setSelectedDeliveryForOtp(currentOrder)}
-                            className="flex-1 py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors border border-yellow-500 flex items-center justify-center gap-1.5"
-                        >
-                            <Key className="w-4 h-4" />
-                            <span>Valider le Code OTP client</span>
-                        </button>
-                    </div>
-
-                </div>
+                )}
 
             </div>
 
@@ -228,7 +345,7 @@ export default function Map({ driver = {}, activeDelivery }) {
                                 disabled={processing}
                                 className="flex-1 py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl border border-yellow-500"
                             >
-                                Valider la livraison
+                                Valider et encaisser la livraison
                             </button>
                         </div>
                     </form>

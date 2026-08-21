@@ -18,10 +18,7 @@ import {
     Check,
     CircleDot,
     ShoppingBag,
-    ArrowRight,
-    Navigation,
-    PhoneCall,
-    Map
+    ArrowRight
 } from 'lucide-react';
 
 export default function DriverLayout({ children, title }) {
@@ -36,7 +33,7 @@ export default function DriverLayout({ children, title }) {
 
     const [activityStatus, setActivityStatus] = useState(driver.activity_status || 'online');
 
-    // Simulate incoming push dispatch alert (Uber / DiDi style) after 3.5 seconds
+    // Simulate incoming push dispatch alert after 3.5 seconds
     useEffect(() => {
         const timer = setTimeout(() => {
             setPushAlert({
@@ -329,44 +326,44 @@ export default function DriverLayout({ children, title }) {
                         {children}
                     </main>
 
-                    {/* REAL-TIME PUSH DISPATCH POPUP (Matching DiDi / Uber Screenshot 1 & 2) */}
+                    {/* REAL-TIME PUSH DISPATCH POPUP (SVG Icons, NO Emojis) */}
                     {pushAlert && (
-                        <div className="fixed bottom-6 right-6 z-50 max-w-sm w-full bg-stone-900 text-white rounded-2xl p-5 shadow-2xl border border-yellow-500 animate-in slide-in-from-bottom-5 duration-200 space-y-3">
-                            <div className="flex items-center justify-between border-b border-stone-800 pb-2">
+                        <div className="fixed bottom-6 right-6 z-50 max-w-sm w-full bg-white text-stone-900 rounded-2xl p-5 shadow-2xl border-2 border-yellow-400 animate-in slide-in-from-bottom-5 duration-200 space-y-3">
+                            <div className="flex items-center justify-between border-b border-stone-100 pb-2">
                                 <div className="flex items-center gap-2">
-                                    <div className="w-6 h-6 rounded-full bg-yellow-400 text-yellow-950 flex items-center justify-center font-bold text-xs animate-bounce">
-                                        🔔
+                                    <div className="w-7 h-7 rounded-full bg-yellow-400 text-yellow-950 flex items-center justify-center font-bold text-xs shadow-2xs">
+                                        <Bell className="w-3.5 h-3.5 text-yellow-950" />
                                     </div>
-                                    <h4 className="font-bold text-xs text-yellow-400">Nouvelle proposition de course !</h4>
+                                    <h4 className="font-bold text-xs text-stone-900">Nouvelle proposition de course !</h4>
                                 </div>
-                                <button onClick={() => setPushAlert(null)} className="text-stone-400 hover:text-white">
+                                <button onClick={() => setPushAlert(null)} className="text-stone-400 hover:text-stone-700">
                                     <X className="w-4 h-4" />
                                 </button>
                             </div>
 
-                            <div className="space-y-2 text-xs text-stone-300 font-normal">
-                                <div className="flex justify-between items-center bg-stone-800 p-2 rounded-xl">
-                                    <span className="font-mono text-stone-400">#{pushAlert.order_number}</span>
-                                    <span className="text-yellow-400 font-bold">{pushAlert.distance} · {pushAlert.duration}</span>
+                            <div className="space-y-2 text-xs text-stone-700 font-normal">
+                                <div className="flex justify-between items-center bg-stone-50 border border-stone-200/80 p-2 rounded-xl">
+                                    <span className="font-mono text-stone-600 font-bold">#{pushAlert.order_number}</span>
+                                    <span className="text-yellow-700 font-extrabold">{pushAlert.distance} · {pushAlert.duration}</span>
                                 </div>
-                                <p><strong className="text-white">Boutique :</strong> {pushAlert.shop_name}</p>
-                                <p><strong className="text-white">Destination :</strong> {pushAlert.destination}</p>
-                                <p className="text-emerald-400 font-bold text-sm pt-1">
+                                <p><strong className="text-stone-900">Boutique :</strong> {pushAlert.shop_name}</p>
+                                <p><strong className="text-stone-900">Destination :</strong> {pushAlert.destination}</p>
+                                <p className="text-emerald-600 font-bold text-sm pt-1">
                                     Gains : +{pushAlert.fee.toLocaleString('fr-FR')} FCFA
                                 </p>
                             </div>
 
-                            <div className="flex gap-2 pt-2">
+                            <div className="flex gap-2 pt-2 border-t border-stone-100">
                                 <button
                                     onClick={() => handleAcceptPush(pushAlert.order_number)}
-                                    className="flex-1 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-2xs transition-colors flex items-center justify-center gap-1"
+                                    className="flex-1 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors flex items-center justify-center gap-1 border border-yellow-500"
                                 >
                                     <span>Accepter la course</span>
                                     <ArrowRight className="w-3.5 h-3.5" />
                                 </button>
                                 <button
                                     onClick={() => setPushAlert(null)}
-                                    className="px-3 py-2.5 bg-stone-800 hover:bg-stone-700 text-stone-300 font-semibold text-xs rounded-xl"
+                                    className="px-3 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs rounded-xl border border-stone-200"
                                 >
                                     Refuser
                                 </button>
