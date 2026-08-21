@@ -145,10 +145,26 @@ class DriverController extends Controller
             ->latest()
             ->get();
 
+        $completedDeliveries = Order::with(['shop', 'user', 'items'])
+            ->where('driver_id', $driver->id)
+            ->where('delivery_status', 'delivered')
+            ->latest()
+            ->take(20)
+            ->get();
+
+        $targetOrder = null;
+        if ($request->filled('order')) {
+            $targetOrder = Order::with(['shop', 'user', 'items'])
+                ->where('order_number', $request->input('order'))
+                ->first();
+        }
+
         return Inertia::render('Driver/Map', [
             'driver' => $driver->load('user'),
             'activeDelivery' => $activeDelivery,
             'availableDeliveries' => $availableDeliveries,
+            'completedDeliveries' => $completedDeliveries,
+            'targetOrder' => $targetOrder,
         ]);
     }
 

@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Head, useForm } from '@inertiajs/react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
+import { Head, useForm, Link } from '@inertiajs/react';
 import DriverLayout from '@/Layouts/DriverLayout';
 import RefuseDeliveryModal from '@/Components/RefuseDeliveryModal';
 import DeliveryOtpVerificationModal from '@/Components/DeliveryOtpVerificationModal';
@@ -25,76 +25,107 @@ import {
     Camera,
     Sparkles,
     Eye,
-    Maximize2
+    Maximize2,
+    CheckCircle2,
+    Archive,
+    History
 } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { fetchOSRMRoute, solveMultiStopTSPRoute } from '@/Services/RoutingService';
 
-export default function Map({ driver = {}, availableDeliveries = [], activeDelivery }) {
+export default function Map({ 
+    driver = {}, 
+    availableDeliveries = [], 
+    activeDelivery = null, 
+    completedDeliveries = [],
+    targetOrder = null
+}) {
     const mapRef = useRef(null);
     const mapInstance = useRef(null);
-    const [selectedOrder, setSelectedOrder] = useState(activeDelivery || availableDeliveries[0] || null);
+    const markersLayerRef = useRef(null);
+    const routeLayerRef = useRef(null);
+
+    const [selectedOrder, setSelectedOrder] = useState(targetOrder || activeDelivery || availableDeliveries[0] || null);
     const [selectedDeliveryForOtp, setSelectedDeliveryForOtp] = useState(null);
     const [refuseModalOrderNumber, setRefuseModalOrderNumber] = useState(null);
     const [landmarkPhotoZoom, setLandmarkPhotoZoom] = useState(null);
     const [tspModeActive, setTspModeActive] = useState(false);
     const [tspRouteData, setTspRouteData] = useState(null);
+    const [showArchivedList, setShowArchivedList] = useState(false);
     const [etaInfo, setEtaInfo] = useState({ distance: '3.4 km', duration: '12 min' });
     const { post, processing } = useForm();
 
     const user = driver.user || {};
     const driverPhoto = user.kyc_documents?.[0] ? route('admin.kyc.document.show', user.kyc_documents[0].id) : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop';
 
-    // Real database orders list
-    const realOrders = [
-        ...(activeDelivery ? [activeDelivery] : []),
-        ...availableDeliveries
-    ];
+    // Memoize active & available map orders so reference doesn't change on every render
+    const displayOrders = useMemo(() => {
+        const activeMapOrders = [
+            ...(activeDelivery ? [activeDelivery] : []),
+            ...availableDeliveries
+        ];
 
-    const mapOrders = realOrders.length > 0 ? realOrders : [
-        {
-            id: 'real-1',
-            order_number: 'SLF-2026-9815',
-            vehicle_plate: driver.vehicle_plate || 'LT-492-BX',
-            shipping_fee: 2500,
-            escrow_amount: 150000,
-            package_desc: 'Smartphone & Accessoires · 1.2 kg',
-            delivery_status: 'in_transit',
-            shop: { name: 'Tech & Gadgets Express', phone: '+237 670 11 22 33', lat: 3.8780, lng: 11.5121 },
-            user: { first_name: 'Paul', last_name: 'Ondobo', phone: '+237 690 00 00 00' },
-            shipping_address: 'Bastos, Rue des Ambassades, Yaoundé',
-            landmark_text: 'Derrière le marché central, portail bleu près de la pharmacie du Soleil',
-            landmark_photo_url: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=600&auto=format&fit=crop',
-            lat: 3.8620,
-            lng: 11.5220
-        },
-        {
-            id: 'real-2',
-            order_number: 'SLF-2026-X892',
-            vehicle_plate: driver.vehicle_plate || 'LT-492-BX',
-            shipping_fee: 3000,
-            escrow_amount: 220000,
-            package_desc: 'Ordinateur Portable HP · 2.5 kg',
-            delivery_status: 'ready_for_pickup',
-            shop: { name: 'Electro Shop Akwa', phone: '+237 655 44 33 22', lat: 3.8840, lng: 11.5050 },
-            user: { first_name: 'Marc', last_name: 'Kamga', phone: '+237 677 88 99 00' },
-            shipping_address: 'Akwa, Carrefour Ndokoti, Douala',
-            landmark_text: 'Immeuble Rose à côté du dépôt de brasseries, 2ème étage',
-            landmark_photo_url: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=600&auto=format&fit=crop',
-            lat: 3.8550,
-            lng: 11.5310
-        }
-    ];
+        if (activeMapOrders.length > 0) return activeMapOrders;
 
-    // TSP Multi-Stop Optimization Trigger
+        return [
+            {
+                id: 'real-1',
+                order_number: 'SLF-2026-9815',
+                vehicle_plate: driver.vehicle_plate || 'LT-492-BX',
+                shipping_fee: 2500,
+                escrow_amount: 150000,
+                package_desc: 'Smartphone & Accessoires · 1.2 kg',
+                delivery_status: 'in_transit',
+                shop: { name: 'Tech & Gadgets Express', phone: '+237 670 11 22 33', lat: 3.8780, lng: 11.5121 },
+                user: { first_name: 'Paul', last_name: 'Ondobo', phone: '+237 690 00 00 00' },
+                shipping_address: 'Bastos, Rue des Ambassades, Yaoundé',
+                landmark_text: 'Derrière le marché central, portail bleu près de la pharmacie du Soleil',
+                landmark_photo_url: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=600&auto=format&fit=crop',
+                lat: 3.8620,
+                lng: 11.5220
+            }
+        ];
+    }, [activeDelivery, availableDeliveries, driver.vehicle_plate]);
+
+    // Initialize Map ONCE on mount
+    useEffect(() => {
+        if (!mapRef.current || mapInstance.current) return;
+
+        const map = L.map(mapRef.current, {
+            center: [3.8680, 11.5180],
+            zoom: 13,
+            zoomControl: false,
+        });
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+
+        // Create dedicated layers for markers & route polylines
+        const markersLayer = L.layerGroup().addTo(map);
+        const routeLayer = L.layerGroup().addTo(map);
+
+        mapInstance.current = map;
+        markersLayerRef.current = markersLayer;
+        routeLayerRef.current = routeLayer;
+
+        return () => {
+            if (mapInstance.current) {
+                mapInstance.current.remove();
+                mapInstance.current = null;
+            }
+        };
+    }, []);
+
+    // TSP Multi-Stop Optimization
     useEffect(() => {
         if (!tspModeActive) return;
 
         const driverPos = { lat: 3.8680, lng: 11.5180 };
         const stops = [];
 
-        mapOrders.forEach((o) => {
+        displayOrders.forEach((o) => {
             stops.push({
                 id: `pickup-${o.order_number}`,
                 order_number: o.order_number,
@@ -116,27 +147,21 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
         solveMultiStopTSPRoute(driverPos, stops).then((res) => {
             setTspRouteData(res);
         });
-    }, [tspModeActive]);
+    }, [tspModeActive, displayOrders]);
 
-    // Initialize Fullscreen Leaflet Map
+    // Update Map Markers & Polylines without destroying the map instance
     useEffect(() => {
-        if (!mapRef.current) return;
+        const map = mapInstance.current;
+        const markersLayer = markersLayerRef.current;
+        const routeLayer = routeLayerRef.current;
 
-        if (mapInstance.current) {
-            mapInstance.current.remove();
-        }
+        if (!map || !markersLayer || !routeLayer) return;
 
-        const map = L.map(mapRef.current, {
-            center: [3.8680, 11.5180],
-            zoom: 13,
-            zoomControl: false,
-        });
+        // Clear previous markers and route lines cleanly
+        markersLayer.clearLayers();
+        routeLayer.clearLayers();
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap'
-        }).addTo(map);
-
-        // 1. DRIVER CURRENT POSITION MARKER
+        // 1. DRIVER CURRENT POSITION PIN
         const driverMarkerHtml = `
             <div style="display: flex; align-items: center; gap: 8px; background: #ffffff; padding: 4px 10px 4px 4px; border-radius: 20px; border: 2px solid #eab308; box-shadow: 0 6px 18px rgba(0,0,0,0.25); font-family: sans-serif; font-size: 11px; font-weight: bold; color: #1c1917; cursor: pointer;">
                 <img src="${driverPhoto}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover;" onError="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop'" />
@@ -148,16 +173,12 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                 </div>
             </div>
         `;
-        const driverIcon = L.divIcon({
-            className: 'custom-driver-pos-pin',
-            html: driverMarkerHtml,
-            iconSize: [160, 36],
-            iconAnchor: [80, 18]
-        });
-        L.marker([3.8680, 11.5180], { icon: driverIcon }).addTo(map);
+        L.marker([3.8680, 11.5180], { 
+            icon: L.divIcon({ className: 'c-driver-pin', html: driverMarkerHtml, iconSize: [160, 36], iconAnchor: [80, 18] })
+        }).addTo(markersLayer);
 
-        // 2. RENDER PINS FOR ALL ORDERS ON MAP
-        mapOrders.forEach((order, index) => {
+        // 2. RENDER PINS ONLY FOR ACTIVE & AVAILABLE ORDERS
+        displayOrders.forEach((order, index) => {
             const shopLat = order.shop?.lat || (3.8780 + (index * 0.004));
             const shopLng = order.shop?.lng || (11.5121 - (index * 0.003));
 
@@ -170,7 +191,7 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
             `;
             const shopMarker = L.marker([shopLat, shopLng], {
                 icon: L.divIcon({ className: 'c-shop-pin', html: shopHtml, iconSize: [140, 32], iconAnchor: [70, 16] })
-            }).addTo(map);
+            }).addTo(markersLayer);
 
             shopMarker.on('click', () => {
                 setSelectedOrder(order);
@@ -180,15 +201,19 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
             // Customer Destination Marker
             const custLat = order.lat || (3.8620 - (index * 0.003));
             const custLng = order.lng || (11.5220 + (index * 0.004));
+            const isDelivered = order.delivery_status === 'delivered';
+            const custColor = isDelivered ? '#57534e' : (order.delivery_status === 'in_transit' ? '#eab308' : '#10b981');
+            const custTextColor = (order.delivery_status === 'in_transit' && !isDelivered) ? '#1c1917' : '#ffffff';
+
             const custHtml = `
-                <div style="background: ${order.delivery_status === 'in_transit' ? '#eab308' : '#10b981'}; color: ${order.delivery_status === 'in_transit' ? '#1c1917' : '#ffffff'}; padding: 5px 10px; border-radius: 14px; border: 2px solid #ffffff; box-shadow: 0 4px 14px rgba(0,0,0,0.2); font-family: sans-serif; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                <div style="background: ${custColor}; color: ${custTextColor}; padding: 5px 10px; border-radius: 14px; border: 2px solid #ffffff; box-shadow: 0 4px 14px rgba(0,0,0,0.2); font-family: sans-serif; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 5px; cursor: pointer;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
                     <span>${order.order_number} (+${Number(order.shipping_fee || 2500).toLocaleString('fr-FR')} F)</span>
                 </div>
             `;
             const customerMarker = L.marker([custLat, custLng], {
                 icon: L.divIcon({ className: 'c-cust-pin', html: custHtml, iconSize: [170, 32], iconAnchor: [85, 16] })
-            }).addTo(map);
+            }).addTo(markersLayer);
 
             customerMarker.on('click', () => {
                 setSelectedOrder(order);
@@ -196,27 +221,32 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
             });
         });
 
-        // 3. TSP MULTI-STOP POLYLINE vs SINGLE ORDER POLYLINE
+        // 3. DRAW ROUTE POLYLINE
         if (tspModeActive && tspRouteData?.coordinates) {
             L.polyline(tspRouteData.coordinates, {
                 color: '#eab308',
                 weight: 6,
                 dashArray: '8, 8',
                 opacity: 0.95
-            }).addTo(map);
+            }).addTo(routeLayer);
         } else if (selectedOrder) {
             const shopLat = selectedOrder.shop?.lat || 3.8780;
             const shopLng = selectedOrder.shop?.lng || 11.5121;
             const custLat = selectedOrder.lat || 3.8620;
             const custLng = selectedOrder.lng || 11.5220;
 
+            const isFinished = selectedOrder.delivery_status === 'delivered';
+            const routeColor = isFinished ? '#57534e' : '#eab308'; // Dark Gray for finished order
+
             fetchOSRMRoute(shopLat, shopLng, custLat, custLng).then((res) => {
-                if (res.coordinates) {
+                if (res.coordinates && routeLayerRef.current) {
+                    routeLayerRef.current.clearLayers();
                     L.polyline(res.coordinates, {
-                        color: '#eab308',
-                        weight: 5,
-                        opacity: 0.95
-                    }).addTo(map);
+                        color: routeColor,
+                        weight: isFinished ? 5 : 6,
+                        opacity: isFinished ? 0.75 : 0.95,
+                        dashArray: isFinished ? '4, 6' : undefined
+                    }).addTo(routeLayerRef.current);
 
                     setEtaInfo({
                         distance: `${res.distanceKm} km`,
@@ -225,22 +255,15 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                 }
             });
         }
-
-        mapInstance.current = map;
-
-        return () => {
-            if (mapInstance.current) {
-                mapInstance.current.remove();
-                mapInstance.current = null;
-            }
-        };
-    }, [selectedOrder, tspModeActive, tspRouteData]);
+    }, [selectedOrder?.order_number, tspModeActive, tspRouteData, displayOrders, driverPhoto, driver.vehicle_plate]);
 
     const handleAcceptCourse = (orderNumber) => {
         if (confirm(`Accepter la livraison de la commande #${orderNumber} ?`)) {
             post(route('driver.delivery.accept', orderNumber));
         }
     };
+
+    const isCurrentOrderFinished = selectedOrder?.delivery_status === 'delivered';
 
     return (
         <DriverLayout title="Carte & itinéraire live">
@@ -252,11 +275,11 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                 {/* REAL LEAFLET MAP */}
                 <div ref={mapRef} className="absolute inset-0 z-0" />
 
-                {/* TOP FLOATING BADGES (RESPONSIVE WRAP) */}
+                {/* TOP FLOATING BADGES */}
                 <div className="absolute top-3 sm:top-4 left-1/2 -translate-x-1/2 z-10 flex flex-wrap items-center justify-center gap-2 max-w-[calc(100%-2rem)]">
                     <div className="bg-white/95 backdrop-blur-md border border-stone-200 px-4 sm:px-5 py-2 rounded-full shadow-lg flex items-center gap-2 sm:gap-3 text-[11px] sm:text-xs font-bold text-stone-900 truncate">
                         <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping shrink-0" />
-                        <span className="truncate">Carte & Tracking Live · {mapOrders.length} course(s) géolocalisée(s)</span>
+                        <span className="truncate">Carte & Tracking Live · {displayOrders.length} mission(s) active(s)</span>
                     </div>
 
                     {/* TSP Multi-Stop Optimization Toggle Button */}
@@ -272,15 +295,59 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                         }`}
                     >
                         <Sparkles className="w-3.5 h-3.5 text-yellow-700 shrink-0" />
-                        <span>{tspModeActive ? 'Routage IA Multi-Points Actif' : 'Activer Routage Groupé (TSP IA)'}</span>
+                        <span>{tspModeActive ? 'Routage IA Actif' : 'Activer Routage Groupé (TSP IA)'}</span>
                     </button>
+
+                    {/* Archived Completed Deliveries Drawer Toggle */}
+                    {completedDeliveries.length > 0 && (
+                        <button
+                            onClick={() => setShowArchivedList(!showArchivedList)}
+                            className="px-3.5 py-2 bg-stone-800 hover:bg-stone-900 text-white rounded-full shadow-lg text-[11px] sm:text-xs font-bold transition-colors flex items-center gap-1.5 border border-stone-700"
+                        >
+                            <History className="w-3.5 h-3.5 text-yellow-400" />
+                            <span>Historique Livrées ({completedDeliveries.length})</span>
+                        </button>
+                    )}
                 </div>
 
-                {/* BOTTOM HORIZONTAL QUICK SELECT PILLS */}
+                {/* ARCHIVED COMPLETED ORDERS FLOATING DRAWER */}
+                {showArchivedList && (
+                    <div className="absolute top-16 right-4 z-20 w-80 max-h-96 bg-white/95 backdrop-blur-md border border-stone-200 rounded-2xl p-4 shadow-2xl overflow-y-auto space-y-3 animate-in slide-in-from-top-4 duration-150">
+                        <div className="flex items-center justify-between border-b border-stone-100 pb-2">
+                            <div className="flex items-center gap-1.5 text-xs font-bold text-stone-900">
+                                <Archive className="w-4 h-4 text-stone-500" />
+                                <span>Courses terminées & archivées</span>
+                            </div>
+                            <button onClick={() => setShowArchivedList(false)} className="p-1 text-stone-400">✕</button>
+                        </div>
+                        <p className="text-[11px] text-stone-500">Cliquez sur une course pour voir son tracé archivé (en gris foncé sur la carte).</p>
+                        <div className="space-y-1.5">
+                            {completedDeliveries.map((ord) => (
+                                <button
+                                    key={ord.id}
+                                    onClick={() => {
+                                        setSelectedOrder(ord);
+                                        setShowArchivedList(false);
+                                        setTspModeActive(false);
+                                    }}
+                                    className="w-full p-2.5 bg-stone-50 hover:bg-stone-100 border border-stone-200 rounded-xl text-left transition-colors flex items-center justify-between text-xs"
+                                >
+                                    <div>
+                                        <span className="font-mono font-bold text-stone-900">#{ord.order_number}</span>
+                                        <span className="text-[10px] text-stone-400 block">{ord.shop?.name} ➔ {ord.shipping_address?.substring(0, 20)}...</span>
+                                    </div>
+                                    <span className="font-bold text-stone-600 text-xs">+{ord.shipping_fee} F</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* BOTTOM HORIZONTAL QUICK SELECT PILLS (ONLY ACTIVE / AVAILABLE) */}
                 {!selectedOrder && !tspModeActive && (
                     <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-10 bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-2xl p-2.5 sm:p-3 shadow-xl max-w-[calc(100%-2rem)] sm:max-w-lg w-full flex items-center gap-2 overflow-x-auto">
-                        <span className="text-[10px] sm:text-[11px] font-bold text-stone-500 shrink-0 pl-1">Sélectionner :</span>
-                        {mapOrders.map((ord) => (
+                        <span className="text-[10px] sm:text-[11px] font-bold text-stone-500 shrink-0 pl-1">Missions actives :</span>
+                        {displayOrders.map((ord) => (
                             <button
                                 key={ord.id || ord.order_number}
                                 onClick={() => setSelectedOrder(ord)}
@@ -315,7 +382,7 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                                 <span>Durée estimée : {tspRouteData.durationMin} min</span>
                             </div>
 
-                            <h4 className="text-xs font-bold text-stone-700 uppercase tracking-wider">Ordre idéal des arrêts optimisé :</h4>
+                            <h4 className="text-xs font-bold text-stone-700 uppercase tracking-wider">Ordre idéal des arrêts :</h4>
                             
                             <div className="space-y-2 text-xs">
                                 {tspRouteData.optimizedStops.map((stop, idx) => (
@@ -351,10 +418,12 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                             {/* Card Header */}
                             <div className="flex items-center justify-between border-b border-stone-100 pb-2.5">
                                 <div className="flex items-center gap-2">
-                                    <Truck className="w-5 h-5 text-yellow-600 shrink-0" />
+                                    <Truck className={`w-5 h-5 ${isCurrentOrderFinished ? 'text-stone-500' : 'text-yellow-600'} shrink-0`} />
                                     <div>
                                         <h3 className="font-bold text-xs sm:text-sm text-stone-900">Commande #{selectedOrder.order_number}</h3>
-                                        <span className="text-[10px] text-stone-400 block font-mono">Itinéraire OSRM : {etaInfo.distance} ({etaInfo.duration})</span>
+                                        <span className="text-[10px] text-stone-400 block font-mono">
+                                            {isCurrentOrderFinished ? "Itinéraire archivé (Gris foncé)" : `Itinéraire OSRM : ${etaInfo.distance} (${etaInfo.duration})`}
+                                        </span>
                                     </div>
                                 </div>
 
@@ -365,15 +434,30 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
 
                             {/* Status & Earnings Badge */}
                             <div className="flex items-center justify-between gap-2">
-                                <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold truncate ${
-                                    selectedOrder.driver_id ? 'bg-yellow-100 text-yellow-950' : 'bg-emerald-100 text-emerald-800'
+                                <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold truncate ${
+                                    isCurrentOrderFinished 
+                                        ? 'bg-stone-200 text-stone-800' 
+                                        : (selectedOrder.driver_id ? 'bg-yellow-100 text-yellow-950' : 'bg-emerald-100 text-emerald-800')
                                 }`}>
-                                    {selectedOrder.driver_id ? 'En cours' : 'Disponible au retrait'}
+                                    {isCurrentOrderFinished ? '✅ Livrée avec OTP & Signature' : (selectedOrder.driver_id ? 'En cours' : 'Disponible au retrait')}
                                 </span>
-                                <span className="font-bold text-emerald-600 text-sm sm:text-base shrink-0">
+                                <span className={`font-bold text-sm sm:text-base shrink-0 ${isCurrentOrderFinished ? 'text-stone-700' : 'text-emerald-600'}`}>
                                     +{Number(selectedOrder.shipping_fee || 2500).toLocaleString('fr-FR')} FCFA
                                 </span>
                             </div>
+
+                            {/* Finished Order Archive Banner */}
+                            {isCurrentOrderFinished && (
+                                <div className="p-3 bg-stone-100 border border-stone-200 rounded-xl space-y-1 text-xs text-stone-700">
+                                    <div className="flex items-center gap-1.5 font-bold text-stone-900">
+                                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                                        <span>Course clôturée avec succès</span>
+                                    </div>
+                                    <p className="text-[11px] text-stone-500">
+                                        Cette livraison a été validée par code secret OTP et signature client. Les frais ont été crédités à votre portefeuille.
+                                    </p>
+                                </div>
+                            )}
 
                             {/* Escrow & Package Specs Badges */}
                             <div className="grid grid-cols-2 gap-2 text-[11px]">
@@ -457,43 +541,54 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="pt-3 border-t border-stone-100 space-y-2">
-                            {!selectedOrder.driver_id ? (
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => handleAcceptCourse(selectedOrder.order_number)}
-                                        disabled={processing}
-                                        className="flex-1 py-2.5 sm:py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors border border-yellow-500 flex items-center justify-center gap-1"
-                                    >
-                                        <span>Accepter la course</span>
-                                        <ArrowRight className="w-4 h-4 shrink-0" />
-                                    </button>
-                                    <button
-                                        onClick={() => setRefuseModalOrderNumber(selectedOrder.order_number)}
-                                        className="px-3 py-2.5 sm:py-3 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs rounded-xl border border-stone-200 shrink-0"
-                                    >
-                                        Refuser
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="flex items-center gap-2">
-                                    <a
-                                        href={`tel:${selectedOrder.user?.phone || '+237690000000'}`}
-                                        className="p-2.5 sm:p-3 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl transition-colors shrink-0"
-                                        title="Appeler le client"
-                                    >
-                                        <PhoneCall className="w-4 h-4" />
-                                    </a>
-                                    <button
-                                        onClick={() => setSelectedDeliveryForOtp(selectedOrder)}
-                                        className="flex-1 py-2.5 sm:py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors border border-yellow-500 flex items-center justify-center gap-1.5"
-                                    >
-                                        <Key className="w-4 h-4 shrink-0" />
-                                        <span>Valider avec OTP & Signature</span>
-                                    </button>
-                                </div>
-                            )}
-                        </div>
+                        {!isCurrentOrderFinished ? (
+                            <div className="pt-3 border-t border-stone-100 space-y-2">
+                                {!selectedOrder.driver_id ? (
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => handleAcceptCourse(selectedOrder.order_number)}
+                                            disabled={processing}
+                                            className="flex-1 py-2.5 sm:py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors border border-yellow-500 flex items-center justify-center gap-1"
+                                        >
+                                            <span>Accepter la course</span>
+                                            <ArrowRight className="w-4 h-4 shrink-0" />
+                                        </button>
+                                        <button
+                                            onClick={() => setRefuseModalOrderNumber(selectedOrder.order_number)}
+                                            className="px-3 py-2.5 sm:py-3 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs rounded-xl border border-stone-200 shrink-0"
+                                        >
+                                            Refuser
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-2">
+                                        <a
+                                            href={`tel:${selectedOrder.user?.phone || '+237690000000'}`}
+                                            className="p-2.5 sm:p-3 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl transition-colors shrink-0"
+                                            title="Appeler le client"
+                                        >
+                                            <PhoneCall className="w-4 h-4" />
+                                        </a>
+                                        <button
+                                            onClick={() => setSelectedDeliveryForOtp(selectedOrder)}
+                                            className="flex-1 py-2.5 sm:py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors border border-yellow-500 flex items-center justify-center gap-1.5"
+                                        >
+                                            <Key className="w-4 h-4 shrink-0" />
+                                            <span>Valider avec OTP & Signature</span>
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="pt-2 border-t border-stone-100">
+                                <button
+                                    onClick={() => setSelectedOrder(null)}
+                                    className="w-full py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs rounded-xl border border-stone-200"
+                                >
+                                    Fermer la fiche archive
+                                </button>
+                            </div>
+                        )}
 
                     </div>
                 )}
@@ -529,7 +624,7 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                 />
             )}
 
-            {/* DOUBLE SECURITY OTP & TACTILE SIGNATURE VERIFICATION MODAL (2.3.6 SPEC) */}
+            {/* DOUBLE SECURITY OTP & TACTILE SIGNATURE VERIFICATION MODAL */}
             {selectedDeliveryForOtp && (
                 <DeliveryOtpVerificationModal
                     order={selectedDeliveryForOtp}

@@ -40,9 +40,9 @@ export default function DriverLayout({ children, title }) {
     const [refuseModalOrderNumber, setRefuseModalOrderNumber] = useState(null);
     const [isOffline, setIsOffline] = useState(!navigator.onLine);
     const [deferredPrompt, setDeferredPrompt] = useState(null);
-    const [timerSeconds, setTimerSeconds] = useState(300);
+    const [timerSeconds, setTimerSeconds] = useState(60); // 1 minute auto-dismiss (60s)
 
-    // GPS Telemetry State (2.3.5 Spec)
+    // GPS Telemetry State
     const [telemetry, setTelemetry] = useState({ lat: 3.8680, lng: 11.5180, speed: 38, isSpeeding: false, isProlongedStop: false });
 
     const user = auth.user || {};
@@ -58,7 +58,7 @@ export default function DriverLayout({ children, title }) {
                 lat: pos.lat,
                 lng: pos.lng,
                 speed,
-                isSpeeding: speed > 90, // urban speed limit alert (>90 km/h)
+                isSpeeding: speed > 90,
                 isProlongedStop: false
             });
         });
@@ -68,15 +68,16 @@ export default function DriverLayout({ children, title }) {
         };
     }, []);
 
-    // 5-minute Decision Countdown Timer
+    // 1-minute Decision Countdown Timer (60s max)
     useEffect(() => {
         if (!pushAlert) return;
-        setTimerSeconds(300);
+        setTimerSeconds(60);
         const interval = setInterval(() => {
             setTimerSeconds((prev) => {
                 if (prev <= 1) {
                     clearInterval(interval);
-                    setPushAlert(null);
+                    sessionStorage.setItem(`dismissed_${pushAlert.id}`, 'true');
+                    setPushAlert(null); // Auto-dismiss after 1 minute
                     return 0;
                 }
                 return prev - 1;
@@ -86,9 +87,7 @@ export default function DriverLayout({ children, title }) {
     }, [pushAlert]);
 
     const formatTimer = (secs) => {
-        const m = Math.floor(secs / 60);
-        const s = secs % 60;
-        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        return `${secs}s`;
     };
 
     // Register Service Worker & Listen for Offline / PWA Install Prompt
@@ -129,15 +128,18 @@ export default function DriverLayout({ children, title }) {
         }
     };
 
-    // Simulate incoming push dispatch alert
+    // Trigger incoming push dispatch alert only if not previously dismissed
     useEffect(() => {
+        const isDismissed = sessionStorage.getItem('dismissed_push-992');
+        if (isDismissed) return;
+
         const timer = setTimeout(() => {
             setPushAlert({
                 id: 'push-992',
                 order_number: 'SLF-2026-X892',
-                shop_name: 'Tech Shop (Bastos)',
+                shop_name: 'Electro Shop (Akwa)',
                 customer_name: 'Marc Kamga',
-                destination: 'Akwa, Immeuble Rose',
+                destination: 'Akwa, Carrefour Ndokoti',
                 escrow_amount: 150000,
                 package_desc: 'Smartphone & Accessoires · 1.2 kg',
                 fee: 2500,
@@ -145,9 +147,16 @@ export default function DriverLayout({ children, title }) {
                 duration: '12 min',
                 time: 'À l\'instant'
             });
-        }, 3500);
+        }, 4000);
         return () => clearTimeout(timer);
     }, []);
+
+    const handleDismissPush = () => {
+        if (pushAlert) {
+            sessionStorage.setItem(`dismissed_${pushAlert.id}`, 'true');
+            setPushAlert(null);
+        }
+    };
 
     const handleStatusToggle = (newStatus) => {
         setActivityStatus(newStatus);
@@ -353,7 +362,7 @@ export default function DriverLayout({ children, title }) {
                             </button>
                         </div>
 
-                        {/* GPS Live Telemetry Status Pill (2.3.5 Spec) */}
+                        {/* GPS Live Telemetry Status Pill */}
                         <div className="hidden xl:flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold shrink-0">
                             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping shrink-0" />
                             <span>GPS Live (10s) · {telemetry.speed} km/h</span>
@@ -413,7 +422,7 @@ export default function DriverLayout({ children, title }) {
                     </div>
                 </header>
 
-                {/* TELEMETRY SPEEDING / ANOMALY ALERT BANNER (2.3.5 Spec) */}
+                {/* TELEMETRY SPEEDING / ANOMALY ALERT BANNER */}
                 {telemetry.isSpeeding && (
                     <div className="bg-rose-500 text-white px-3 py-1.5 text-xs font-bold flex items-center justify-center gap-2 shadow-inner text-center animate-pulse">
                         <AlertTriangle className="w-4 h-4 shrink-0 text-yellow-300" />
@@ -454,11 +463,11 @@ export default function DriverLayout({ children, title }) {
                         {children}
                     </main>
 
-                    {/* REAL-TIME PUSH DISPATCH POPUP */}
+                    {/* REAL-TIME PUSH DISPATCH POPUP (DISMISSES AFTER 60s / 1 MIN) */}
                     {pushAlert && (
                         <div className="fixed bottom-4 left-3 right-3 sm:left-auto sm:right-6 z-50 max-w-md w-auto sm:w-full bg-white text-stone-900 rounded-2xl p-4 sm:p-5 shadow-2xl border-2 border-yellow-400 animate-in slide-in-from-bottom-5 duration-200 space-y-3">
                             
-                            {/* Header with 5-min Decision Timer */}
+                            {/* Header with 60s Decision Timer (1 minute) */}
                             <div className="flex items-center justify-between border-b border-stone-100 pb-2">
                                 <div className="flex items-center gap-2">
                                     <div className="w-7 h-7 rounded-full bg-yellow-400 text-yellow-950 flex items-center justify-center font-bold text-xs shadow-2xs shrink-0">
@@ -469,7 +478,7 @@ export default function DriverLayout({ children, title }) {
 
                                 <div className="flex items-center gap-1 bg-amber-50 text-amber-900 border border-amber-200 px-2.5 py-0.5 rounded-full font-mono text-[11px] font-bold shrink-0">
                                     <Clock className="w-3 h-3 text-amber-600" />
-                                    <span>{formatTimer(timerSeconds)}</span>
+                                    <span>Expire dans {formatTimer(timerSeconds)}</span>
                                 </div>
                             </div>
 
@@ -506,18 +515,18 @@ export default function DriverLayout({ children, title }) {
                             {/* Actions */}
                             <div className="flex gap-2 pt-2 border-t border-stone-100">
                                 <Link
-                                    href={route('driver.map')}
-                                    onClick={() => setPushAlert(null)}
+                                    href={route('driver.map', { order: pushAlert.order_number })}
+                                    onClick={handleDismissPush}
                                     className="flex-1 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors flex items-center justify-center gap-1 border border-yellow-500 truncate"
                                 >
                                     <span>Voir sur la map</span>
                                     <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                                 </Link>
                                 <button
-                                    onClick={() => setRefuseModalOrderNumber(pushAlert.order_number)}
+                                    onClick={handleDismissPush}
                                     className="px-3 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs rounded-xl border border-stone-200 shrink-0"
                                 >
-                                    Refuser
+                                    Ignorer
                                 </button>
                             </div>
                         </div>
