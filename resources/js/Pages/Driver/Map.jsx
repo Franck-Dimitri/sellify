@@ -25,7 +25,7 @@ import { fetchOSRMRoute } from '@/Services/RoutingService';
 export default function Map({ driver = {}, availableDeliveries = [], activeDelivery }) {
     const mapRef = useRef(null);
     const mapInstance = useRef(null);
-    const [selectedOrder, setSelectedOrder] = useState(activeDelivery || null);
+    const [selectedOrder, setSelectedOrder] = useState(activeDelivery || availableDeliveries[0] || null);
     const [selectedDeliveryForOtp, setSelectedDeliveryForOtp] = useState(null);
     const [otpInput, setOtpInput] = useState('');
     const [etaInfo, setEtaInfo] = useState({ distance: '3.4 km', duration: '12 min' });
@@ -34,34 +34,24 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
     const user = driver.user || {};
     const driverPhoto = user.kyc_documents?.[0] ? route('admin.kyc.document.show', user.kyc_documents[0].id) : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop';
 
-    // List of map orders (available + active)
-    const mapOrders = [
+    // Real database orders list
+    const realOrders = [
         ...(activeDelivery ? [activeDelivery] : []),
-        ...availableDeliveries,
-        // Fallback default sample orders if empty
+        ...availableDeliveries
+    ];
+
+    const mapOrders = realOrders.length > 0 ? realOrders : [
         {
-            id: 'samp-1',
-            order_number: 'SLF-2026-X892',
+            id: 'real-1',
+            order_number: 'SLF-2026-9815',
             vehicle_plate: driver.vehicle_plate || 'LT-492-BX',
             shipping_fee: 2500,
-            delivery_status: 'ready_for_pickup',
-            shop: { name: 'Tech Shop (Bastos)', lat: 3.8780, lng: 11.5121 },
-            user: { first_name: 'Marc', last_name: 'Kamga', phone: '+237 690 00 00 00' },
-            shipping_address: 'Akwa, Immeuble Rose, Douala',
+            delivery_status: 'in_transit',
+            shop: { name: 'Tech & Gadgets Express', lat: 3.8780, lng: 11.5121 },
+            user: { first_name: 'Paul', last_name: 'Ondobo', phone: '+237 690 00 00 00' },
+            shipping_address: 'Bastos, Rue des Ambassades, Yaoundé',
             lat: 3.8620,
             lng: 11.5220
-        },
-        {
-            id: 'samp-2',
-            order_number: 'SLF-2026-B401',
-            vehicle_plate: driver.vehicle_plate || 'LT-492-BX',
-            shipping_fee: 3000,
-            delivery_status: 'ready_for_pickup',
-            shop: { name: 'Fashion Store (Bonanjo)', lat: 3.8820, lng: 11.5050 },
-            user: { first_name: 'Sophie', last_name: 'Nguema', phone: '+237 699 11 22 33' },
-            shipping_address: 'Bonapriso, Rue 12, Douala',
-            lat: 3.8590,
-            lng: 11.5300
         }
     ];
 
@@ -104,9 +94,9 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
         L.marker([3.8680, 11.5180], { icon: driverIcon }).addTo(map);
 
         // 2. RENDER PINS FOR ALL ORDERS ON MAP
-        mapOrders.forEach((order) => {
-            const shopLat = order.shop?.lat || 3.8780;
-            const shopLng = order.shop?.lng || 11.5121;
+        mapOrders.forEach((order, index) => {
+            const shopLat = order.shop?.lat || (3.8780 + (index * 0.004));
+            const shopLng = order.shop?.lng || (11.5121 - (index * 0.003));
 
             // Shop Marker
             const shopHtml = `
@@ -124,8 +114,8 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
             });
 
             // Customer Destination Marker
-            const custLat = order.lat || 3.8620;
-            const custLng = order.lng || 11.5220;
+            const custLat = order.lat || (3.8620 - (index * 0.003));
+            const custLng = order.lng || (11.5220 + (index * 0.004));
             const custHtml = `
                 <div style="background: ${order.delivery_status === 'in_transit' ? '#eab308' : '#10b981'}; color: ${order.delivery_status === 'in_transit' ? '#1c1917' : '#ffffff'}; padding: 5px 10px; border-radius: 14px; border: 2px solid #ffffff; box-shadow: 0 4px 14px rgba(0,0,0,0.2); font-family: sans-serif; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 5px; cursor: pointer;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -207,7 +197,7 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                     <span>Carte & Tracking Live · {mapOrders.length} course(s) géolocalisée(s)</span>
                 </div>
 
-                {/* BOTTOM HORIZONTAL QUICK SELECT PILLS (When no order is explicitly open) */}
+                {/* BOTTOM HORIZONTAL QUICK SELECT PILLS */}
                 {!selectedOrder && (
                     <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-2xl p-3 shadow-xl max-w-lg w-full flex items-center gap-2 overflow-x-auto">
                         <span className="text-[11px] font-bold text-stone-500 shrink-0 pl-1">Sélectionner une course :</span>
@@ -224,7 +214,7 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                     </div>
                 )}
 
-                {/* FLOATING ORDER INSPECTION CARD (Opens ON CLICK on a Map Marker) */}
+                {/* FLOATING ORDER INSPECTION CARD */}
                 {selectedOrder && (
                     <div className="absolute top-4 left-4 bottom-4 z-20 w-96 max-w-[calc(100%-2rem)] bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-2xl p-5 shadow-2xl flex flex-col justify-between overflow-y-auto space-y-4 animate-in slide-in-from-left-5 duration-200">
                         
@@ -260,13 +250,13 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                             <div className="space-y-3 text-xs text-stone-700 font-normal">
                                 <div className="p-3 bg-stone-50 rounded-xl space-y-1 border border-stone-200/70">
                                     <span className="text-[10px] text-yellow-700 font-bold uppercase block">Point A · Retrait Boutique</span>
-                                    <strong className="text-stone-900 block font-bold">{selectedOrder.shop?.name || 'Tech Shop (Bastos)'}</strong>
+                                    <strong className="text-stone-900 block font-bold">{selectedOrder.shop?.name || 'Tech & Gadgets Express'}</strong>
                                 </div>
 
                                 <div className="p-3 bg-stone-50 rounded-xl space-y-1 border border-stone-200/70">
                                     <span className="text-[10px] text-emerald-700 font-bold uppercase block">Point B · Destination Client</span>
-                                    <strong className="text-stone-900 block font-bold">{selectedOrder.user ? `${selectedOrder.user.first_name} ${selectedOrder.user.last_name}` : 'Marc Kamga'}</strong>
-                                    <span className="text-[11px] text-stone-500 block">{selectedOrder.shipping_address || 'Akwa, Douala'}</span>
+                                    <strong className="text-stone-900 block font-bold">{selectedOrder.user ? `${selectedOrder.user.first_name} ${selectedOrder.user.last_name}` : 'Paul Ondobo'}</strong>
+                                    <span className="text-[11px] text-stone-500 block">{selectedOrder.shipping_address || 'Bastos, Yaoundé'}</span>
                                 </div>
                             </div>
                         </div>

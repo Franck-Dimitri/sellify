@@ -33,26 +33,28 @@ class DriverController extends Controller
             ]);
         }
 
-        $availableDeliveries = Order::with(['shop', 'items'])
-            ->where('delivery_status', 'ready_for_pickup')
+        $availableDeliveries = Order::with(['shop', 'user', 'items'])
+            ->whereIn('delivery_status', ['ready_for_pickup', 'preparing', 'pending'])
             ->whereNull('driver_id')
             ->latest()
             ->get();
 
-        $activeDeliveries = Order::with(['shop', 'items'])
+        $activeDeliveries = Order::with(['shop', 'user', 'items'])
             ->where('driver_id', $driver->id)
             ->where('delivery_status', 'in_transit')
             ->latest()
             ->get();
 
-        $completedDeliveries = Order::with(['shop', 'items'])
+        $completedDeliveries = Order::with(['shop', 'user', 'items'])
             ->where('driver_id', $driver->id)
             ->where('delivery_status', 'delivered')
             ->latest()
             ->take(15)
             ->get();
 
-        $totalEarned = $completedDeliveries->sum('shipping_fee') ?: ($driver->total_deliveries * 1500);
+        $totalEarned = Order::where('driver_id', $driver->id)
+            ->where('delivery_status', 'delivered')
+            ->sum('shipping_fee') ?: ($driver->total_deliveries * 1500);
 
         return Inertia::render('Driver/Dashboard', [
             'driver' => $driver->load('user'),
@@ -76,19 +78,37 @@ class DriverController extends Controller
         $user = $request->user();
         $driver = $user->driver;
 
+        if (!$driver) {
+            $driver = Driver::firstOrCreate(['user_id' => $user->id], ['vehicle_type' => 'moto', 'status' => 'approved']);
+        }
+
         $query = Order::with(['shop', 'user', 'items']);
 
         if ($request->input('tab') === 'active') {
             $query->where('driver_id', $driver->id)->where('delivery_status', 'in_transit');
         } elseif ($request->input('tab') === 'available') {
-            $query->where('delivery_status', 'ready_for_pickup')->whereNull('driver_id');
+            $query->whereIn('delivery_status', ['ready_for_pickup', 'preparing', 'pending'])->whereNull('driver_id');
         } elseif ($request->input('tab') === 'completed') {
             $query->where('driver_id', $driver->id)->where('delivery_status', 'delivered');
         } else {
             $query->where(function ($q) use ($driver) {
                 $q->where('driver_id', $driver->id)
                   ->orWhere(function ($q2) {
-                      $q2->where('delivery_status', 'ready_for_pickup')->whereNull('driver_id');
+                      $q2->whereIn('delivery_status', ['ready_for_pickup', 'preparing', 'pending'])->whereNull('driver_id');
+                  });
+            });
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('order_number', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($qu) use ($search) {
+                      $qu->where('first_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('shop', function ($qs) use ($search) {
+                      $qs->where('name', 'like', "%{$search}%");
                   });
             });
         }
@@ -96,7 +116,7 @@ class DriverController extends Controller
         $deliveries = $query->latest()->paginate(12)->withQueryString();
 
         return Inertia::render('Driver/Deliveries', [
-            'driver' => $driver,
+            'driver' => $driver->load('user'),
             'deliveries' => $deliveries,
             'filters' => $request->only(['tab', 'search']),
         ]);
@@ -110,14 +130,25 @@ class DriverController extends Controller
         $user = $request->user();
         $driver = $user->driver;
 
+        if (!$driver) {
+            $driver = Driver::firstOrCreate(['user_id' => $user->id], ['vehicle_type' => 'moto', 'status' => 'approved']);
+        }
+
         $activeDelivery = Order::with(['shop', 'user', 'items'])
             ->where('driver_id', $driver->id)
             ->where('delivery_status', 'in_transit')
             ->first();
 
+        $availableDeliveries = Order::with(['shop', 'user', 'items'])
+            ->whereIn('delivery_status', ['ready_for_pickup', 'preparing', 'pending'])
+            ->whereNull('driver_id')
+            ->latest()
+            ->get();
+
         return Inertia::render('Driver/Map', [
-            'driver' => $driver,
+            'driver' => $driver->load('user'),
             'activeDelivery' => $activeDelivery,
+            'availableDeliveries' => $availableDeliveries,
         ]);
     }
 
@@ -129,7 +160,12 @@ class DriverController extends Controller
         $user = $request->user();
         $driver = $user->driver;
 
-        $completedOrders = Order::where('driver_id', $driver->id)
+        if (!$driver) {
+            $driver = Driver::firstOrCreate(['user_id' => $user->id], ['vehicle_type' => 'moto', 'status' => 'approved']);
+        }
+
+        $completedOrders = Order::with(['shop', 'user'])
+            ->where('driver_id', $driver->id)
             ->where('delivery_status', 'delivered')
             ->latest()
             ->paginate(15);
@@ -139,7 +175,7 @@ class DriverController extends Controller
             ->sum('shipping_fee') ?: ($driver->total_deliveries * 1500);
 
         return Inertia::render('Driver/Earnings', [
-            'driver' => $driver,
+            'driver' => $driver->load('user'),
             'completedOrders' => $completedOrders,
             'stats' => [
                 'total_earned' => (float) $totalEarned,
@@ -150,15 +186,20 @@ class DriverController extends Controller
     }
 
     /**
-     * Driver Notifications page.
+     * Driver Notifications Center page.
      */
     public function notifications(Request $request): InertiaResponse
     {
-        return Inertia::render('Driver/Notifications', []);
+        $user = $request->user();
+        $driver = $user->driver;
+
+        return Inertia::render('Driver/Notifications', [
+            'driver' => $driver ? $driver->load('user') : null,
+        ]);
     }
 
     /**
-     * Driver Customer Reviews & Ratings page.
+     * Driver Reviews page.
      */
     public function reviews(Request $request): InertiaResponse
     {
@@ -166,7 +207,7 @@ class DriverController extends Controller
         $driver = $user->driver;
 
         return Inertia::render('Driver/Reviews', [
-            'driver' => $driver,
+            'driver' => $driver ? $driver->load('user') : null,
         ]);
     }
 
@@ -179,54 +220,44 @@ class DriverController extends Controller
         $driver = $user->driver;
 
         return Inertia::render('Driver/Settings', [
-            'driver' => $driver->load('user'),
+            'driver' => $driver ? $driver->load('user') : null,
         ]);
     }
 
     /**
-     * Toggle availability status (online / busy / offline).
+     * Toggle availability status (online/busy/offline).
      */
     public function toggleAvailability(Request $request)
     {
-        $user = $request->user();
-        $driver = $user->driver;
-
         $request->validate([
-            'activity_status' => ['required', 'in:online,busy,offline'],
+            'activity_status' => 'required|in:online,busy,offline',
         ]);
 
-        $driver->update([
-            'activity_status' => $request->activity_status,
-        ]);
+        $driver = $request->user()->driver;
+        if ($driver) {
+            $driver->update([
+                'activity_status' => $request->activity_status,
+            ]);
+        }
 
-        return back()->with('success', "Votre statut de disponibilité a été mis à jour.");
+        return back()->with('success', 'Statut de disponibilité mis à jour avec succès.');
     }
 
     /**
-     * Request payout to Mobile Money.
+     * Accept a delivery assignment.
      */
-    public function requestPayout(Request $request)
+    public function acceptDelivery(Request $request, string $orderNumber)
     {
-        $request->validate([
-            'amount' => ['required', 'numeric', 'min:1000'],
-            'phone' => ['required', 'string'],
-            'provider' => ['required', 'in:mtn,orange'],
-        ]);
+        $driver = $request->user()->driver;
+        if (!$driver) {
+            return back()->with('error', 'Vous n\'êtes pas configuré comme livreur.');
+        }
 
-        return back()->with('success', "Votre demande de retrait de " . number_format($request->amount, 0, ',', ' ') . " FCFA a été transmise à Mobile Money.");
-    }
+        $order = Order::where('order_number', $orderNumber)->firstOrFail();
 
-    /**
-     * Accept a delivery.
-     */
-    public function acceptDelivery(Request $request, $order_number)
-    {
-        $user = $request->user();
-        $driver = $user->driver;
-
-        $order = Order::where('order_number', $order_number)
-            ->where('delivery_status', 'ready_for_pickup')
-            ->firstOrFail();
+        if ($order->driver_id && $order->driver_id !== $driver->id) {
+            return back()->with('error', 'Cette course a déjà été prise en charge par un autre livreur.');
+        }
 
         $order->update([
             'driver_id' => $driver->id,
@@ -234,51 +265,47 @@ class DriverController extends Controller
         ]);
 
         ActivityLog::create([
-            'user_id' => $user->id,
-            'action' => 'delivery_accepted',
-            'description' => "Le livreur {$user->first_name} a pris en charge la livraison de la commande {$order->order_number}.",
+            'user_id' => $request->user()->id,
+            'action' => 'driver_accepted_delivery',
+            'description' => "Le livreur a pris en charge la livraison de la commande #{$order->order_number}.",
+            'ip_address' => $request->ip(),
         ]);
 
-        return back()->with('success', "Vous avez pris en charge la commande #{$order->order_number}. En route pour la livraison !");
+        return redirect()->route('driver.map')->with('success', "Course #{$order->order_number} prise en charge avec succès !");
     }
 
     /**
      * Verify delivery OTP code.
      */
-    public function verifyDeliveryOtp(Request $request, $order_number)
+    public function verifyDeliveryOtp(Request $request, string $orderNumber)
     {
-        $user = $request->user();
-        $driver = $user->driver;
-
         $request->validate([
-            'otp' => ['required', 'string', 'size:6'],
+            'otp' => 'required|string',
         ]);
 
-        $order = Order::where('order_number', $order_number)
+        $driver = $request->user()->driver;
+        $order = Order::where('order_number', $orderNumber)
             ->where('driver_id', $driver->id)
-            ->where('delivery_status', 'in_transit')
             ->firstOrFail();
 
-        if (trim($request->otp) !== trim($order->delivery_otp)) {
-            return back()->with('error', 'Code OTP incorrect. Veuillez demander au client son code à 6 chiffres affiché sur son reçu.');
+        if ($order->delivery_otp && $order->delivery_otp !== $request->otp) {
+            return back()->with('error', 'Code secret OTP incorrect. Veuillez demander au client son code à 6 chiffres.');
         }
 
-        DB::transaction(function () use ($order, $driver, $user) {
-            $order->update([
-                'delivery_status' => 'delivered',
-                'payment_status' => 'released',
-                'delivered_at' => now(),
-            ]);
+        $order->update([
+            'delivery_status' => 'delivered',
+            'status' => 'delivered',
+        ]);
 
-            $driver->increment('total_deliveries');
+        $driver->increment('total_deliveries');
 
-            ActivityLog::create([
-                'user_id' => $user->id,
-                'action' => 'delivery_completed_otp',
-                'description' => "Livraison finalisée avec succès pour la commande {$order->order_number} par vérification OTP.",
-            ]);
-        });
+        ActivityLog::create([
+            'user_id' => $request->user()->id,
+            'action' => 'driver_completed_delivery',
+            'description' => "Livraison de la commande #{$order->order_number} validée par code OTP.",
+            'ip_address' => $request->ip(),
+        ]);
 
-        return back()->with('success', "Code OTP validé avec succès ! La livraison de #{$order->order_number} est terminée.");
+        return redirect()->route('driver.dashboard')->with('success', "Livraison #{$order->order_number} validée avec succès ! Vos frais de livraison ont été crédités.");
     }
 }
