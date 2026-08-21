@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Driver;
 use App\Models\ActivityLog;
+use App\Models\SellerWallet;
+use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
@@ -390,5 +392,97 @@ class DriverController extends Controller
         ]);
 
         return redirect()->route('driver.dashboard')->with('success', "Livraison #{$order->order_number} sécurisée et validée ! Les fonds Escrow et vos frais (+{$order->shipping_fee} FCFA) ont été débloqués.");
+    }
+
+    /**
+     * Report delivery incident / customer refusal and initiate return to vendor (2.3.7 Spec).
+     */
+    public function reportIncidentAndReturn(Request $request, string $orderNumber)
+    {
+        $request->validate([
+            'reason' => 'required|string',
+            'description' => 'nullable|string',
+            'incident_photo' => 'nullable|image|max:5120',
+        ]);
+
+        $driver = $request->user()->driver;
+        $order = Order::where('order_number', $orderNumber)
+            ->where('driver_id', $driver->id)
+            ->with(['shop.seller', 'items.product'])
+            ->firstOrFail();
+
+        $photoPath = null;
+        if ($request->hasFile('incident_photo')) {
+            $photoPath = $request->file('incident_photo')->store('incident_proofs', 'public');
+        }
+
+        DB::transaction(function () use ($order, $driver, $request, $photoPath) {
+            $orderTotal = (float) $order->total_amount;
+            $shippingFee = (float) ($order->shipping_fee ?: 2500);
+            
+            // Platform ALWAYS retains 5% processing fee in all return/dispute cases (2.3.7 spec)
+            $platformProcessingFee = round($orderTotal * 0.05, 2);
+
+            $isVendorFault = in_array($request->reason, ['vendor_fault_wrong_item', 'vendor_fault_defective', 'damaged_package']);
+
+            if ($isVendorFault) {
+                // Vendor at fault: Customer gets refund of (Order Total - 5% Platform Fee)
+                $customerRefundAmount = max(0, $orderTotal - $platformProcessingFee);
+                
+                // Vendor is charged the shipping fee for faulty delivery
+                $seller = $order->shop->seller ?? null;
+                if ($seller) {
+                    $sellerWallet = SellerWallet::firstOrCreate(['seller_id' => $seller->id]);
+                    $sellerWallet->decrement('pending_balance', min((float)$sellerWallet->pending_balance, $orderTotal));
+                    
+                    WalletTransaction::create([
+                        'wallet_id' => $sellerWallet->id,
+                        'type' => 'debit_penalty',
+                        'amount' => $shippingFee,
+                        'reference' => $order->order_number,
+                        'description' => "Débit frais de course pour expédition non conforme / litige (Commande #{$order->order_number})",
+                        'status' => 'completed',
+                    ]);
+                }
+            } else {
+                // Customer at fault (change of mind / unreachable): Customer pays delivery fee + 5% platform fee
+                $customerRefundAmount = max(0, $orderTotal - $shippingFee - $platformProcessingFee);
+                
+                $seller = $order->shop->seller ?? null;
+                if ($seller) {
+                    $sellerWallet = SellerWallet::firstOrCreate(['seller_id' => $seller->id]);
+                    $sellerWallet->decrement('pending_balance', min((float)$sellerWallet->pending_balance, $orderTotal));
+                }
+            }
+
+            // Restore product inventory to vendor shop
+            foreach ($order->items as $item) {
+                if ($item->product) {
+                    $item->product->increment('stock', $item->quantity);
+                }
+            }
+
+            // 1. DRIVER IS ALWAYS GUARANTEED FULL DELIVERY FEE (100% credited)
+            $driver->increment('total_deliveries');
+
+            // 2. UPDATE ORDER STATUS TO RETURNED
+            $order->update([
+                'delivery_status' => 'returned_to_shop',
+                'payment_status' => 'refunded',
+            ]);
+
+            // 3. LOG ACTIVITY WITH AUDIT TRAIL
+            ActivityLog::create([
+                'user_id' => $request->user()->id,
+                'action' => 'driver_reported_incident_return',
+                'description' => "Incident/Refus déclaré sur #{$order->order_number} (Motif: {$request->reason}). Frais livreur (+{$shippingFee} F) crédités. Retenue plateforme 5% ({$platformProcessingFee} F). Remboursement client: {$customerRefundAmount} F. Photo: " . ($photoPath ?? 'N/A'),
+                'ip_address' => $request->ip(),
+            ]);
+        });
+
+        return redirect()->route('driver.map', ['order' => $order->order_number])->with(
+            'success', 
+            "Incident enregistré avec succès ! Vos frais (+{$order->shipping_fee} FCFA) vous sont intégralement crédités. Veuillez restituer le colis au vendeur."
+        );
     }
 }

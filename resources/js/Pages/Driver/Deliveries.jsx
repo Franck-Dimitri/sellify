@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Head, useForm, router, Link } from '@inertiajs/react';
 import DriverLayout from '@/Layouts/DriverLayout';
 import DeliveryOtpVerificationModal from '@/Components/DeliveryOtpVerificationModal';
+import ReportIncidentModal from '@/Components/ReportIncidentModal';
 import { 
     Truck, 
     Search, 
@@ -22,7 +23,9 @@ import {
     PhoneCall,
     Check,
     Archive,
-    PenTool
+    PenTool,
+    AlertTriangle,
+    RotateCcw
 } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -37,6 +40,7 @@ export default function Deliveries({ driver = {}, deliveries = { data: [] }, fil
     const [tab, setTab] = useState(filters.tab || 'all');
     const [search, setSearch] = useState(filters.search || '');
     const [selectedDeliveryForOtp, setSelectedDeliveryForOtp] = useState(null);
+    const [reportIncidentOrder, setReportIncidentOrder] = useState(null);
     const [previewDelivery, setPreviewDelivery] = useState(deliveries.data?.[0] || null);
     const [routeStats, setRouteStats] = useState({ distance: '3.4 km', duration: '12 min' });
     const { post, processing } = useForm();
@@ -101,7 +105,8 @@ export default function Deliveries({ driver = {}, deliveries = { data: [] }, fil
         const pCustomer = [previewDelivery.lat || 3.8650, previewDelivery.lng || 11.5250];
 
         const isFinished = previewDelivery.delivery_status === 'delivered';
-        const polylineColor = isFinished ? '#57534e' : '#eab308';
+        const isReturned = previewDelivery.delivery_status === 'returned_to_shop';
+        const polylineColor = isReturned ? '#e11d48' : isFinished ? '#57534e' : '#eab308';
 
         // Shop Marker
         const shopHtml = `
@@ -113,7 +118,7 @@ export default function Deliveries({ driver = {}, deliveries = { data: [] }, fil
         L.marker(pShop, { icon: L.divIcon({ className: 'p-shop', html: shopHtml, iconSize: [150, 32], iconAnchor: [75, 16] }) }).addTo(markersLayer);
 
         // Customer Marker
-        const custColor = isFinished ? '#57534e' : '#10b981';
+        const custColor = isFinished ? '#57534e' : isReturned ? '#e11d48' : '#10b981';
         const customerHtml = `
             <div style="background: ${custColor}; color: #ffffff; padding: 6px 12px; border-radius: 14px; border: 2px solid #ffffff; box-shadow: 0 4px 14px rgba(0,0,0,0.2); font-family: sans-serif; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 6px;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -129,7 +134,7 @@ export default function Deliveries({ driver = {}, deliveries = { data: [] }, fil
                     color: polylineColor,
                     weight: isFinished ? 5 : 6,
                     opacity: isFinished ? 0.75 : 0.95,
-                    dashArray: isFinished ? '4, 6' : undefined
+                    dashArray: (isFinished || isReturned) ? '4, 6' : undefined
                 }).addTo(routeLayerRef.current);
 
                 setRouteStats({
@@ -208,6 +213,11 @@ export default function Deliveries({ driver = {}, deliveries = { data: [] }, fil
                                     Itinéraire Archivé (Gris foncé)
                                 </span>
                             )}
+                            {previewDelivery?.delivery_status === 'returned_to_shop' && (
+                                <span className="bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                                    Retour Boutique (Rouge)
+                                </span>
+                            )}
                         </div>
                     </div>
 
@@ -217,7 +227,11 @@ export default function Deliveries({ driver = {}, deliveries = { data: [] }, fil
                             <div className="flex items-center justify-between border-b border-stone-100 pb-3">
                                 <h3 className="font-bold text-sm text-stone-900">Fiche de la course sélectionnée</h3>
                                 <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold ${
-                                    previewDelivery?.delivery_status === 'delivered' ? 'bg-stone-200 text-stone-800' : 'bg-yellow-100 text-yellow-950'
+                                    previewDelivery?.delivery_status === 'delivered' 
+                                        ? 'bg-stone-200 text-stone-800' 
+                                        : previewDelivery?.delivery_status === 'returned_to_shop'
+                                            ? 'bg-rose-100 text-rose-800'
+                                            : 'bg-yellow-100 text-yellow-950'
                                 }`}>
                                     +{Number(previewDelivery?.shipping_fee || 2500).toLocaleString('fr-FR')} FCFA
                                 </span>
@@ -252,6 +266,14 @@ export default function Deliveries({ driver = {}, deliveries = { data: [] }, fil
                                             </div>
                                             <span className="text-[11px] text-stone-500 block">Frais encaissés et Escrow débloqué.</span>
                                         </div>
+                                    ) : previewDelivery.delivery_status === 'returned_to_shop' ? (
+                                        <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl space-y-1 text-rose-900">
+                                            <div className="flex items-center gap-1.5 font-bold">
+                                                <RotateCcw className="w-4 h-4 text-rose-600" />
+                                                <span>Retour boutique en cours (Refus client)</span>
+                                            </div>
+                                            <span className="text-[11px] text-rose-800 block">Vos frais de livraison vous sont crédités. Restituez le colis au vendeur.</span>
+                                        </div>
                                     ) : (
                                         <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-xl flex items-center justify-between">
                                             <span className="font-semibold text-yellow-950">Statut :</span>
@@ -268,20 +290,30 @@ export default function Deliveries({ driver = {}, deliveries = { data: [] }, fil
                         {previewDelivery && (
                             <div className="pt-3 border-t border-stone-100 space-y-2">
                                 {previewDelivery.delivery_status === 'in_transit' && (
-                                    <div className="flex gap-2">
-                                        <Link
-                                            href={route('driver.map', { order: previewDelivery.order_number })}
-                                            className="flex-1 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors flex items-center justify-center gap-1 border border-yellow-500"
-                                        >
-                                            <Navigation className="w-3.5 h-3.5" />
-                                            <span>Suivre sur la Map</span>
-                                        </Link>
+                                    <div className="space-y-2">
+                                        <div className="flex gap-2">
+                                            <Link
+                                                href={route('driver.map', { order: previewDelivery.order_number })}
+                                                className="flex-1 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors flex items-center justify-center gap-1 border border-yellow-500"
+                                            >
+                                                <Navigation className="w-3.5 h-3.5" />
+                                                <span>Suivre sur la Map</span>
+                                            </Link>
+                                            <button
+                                                onClick={() => setSelectedDeliveryForOtp(previewDelivery)}
+                                                className="px-3 py-2.5 bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs rounded-xl shadow-2xs transition-colors flex items-center gap-1"
+                                            >
+                                                <Key className="w-3.5 h-3.5" />
+                                                <span>Clôturer OTP</span>
+                                            </button>
+                                        </div>
+
                                         <button
-                                            onClick={() => setSelectedDeliveryForOtp(previewDelivery)}
-                                            className="px-3 py-2.5 bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs rounded-xl shadow-2xs transition-colors flex items-center gap-1"
+                                            onClick={() => setReportIncidentOrder(previewDelivery)}
+                                            className="w-full py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 transition-colors flex items-center justify-center gap-1"
                                         >
-                                            <Key className="w-3.5 h-3.5" />
-                                            <span>Clôturer OTP</span>
+                                            <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+                                            <span>Signaler un litige / Refus</span>
                                         </button>
                                     </div>
                                 )}
@@ -403,6 +435,11 @@ export default function Deliveries({ driver = {}, deliveries = { data: [] }, fil
                                                         <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                                                         <span>Livrée (OTP + Sign)</span>
                                                     </span>
+                                                ) : del.delivery_status === 'returned_to_shop' ? (
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                                                        <RotateCcw className="w-3 h-3" />
+                                                        <span>Retour Boutique</span>
+                                                    </span>
                                                 ) : del.delivery_status === 'in_transit' ? (
                                                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-yellow-100 text-yellow-950 border border-yellow-300">
                                                         <Truck className="w-3 h-3 text-yellow-700" />
@@ -416,15 +453,26 @@ export default function Deliveries({ driver = {}, deliveries = { data: [] }, fil
                                             </td>
                                             <td className="py-3 px-4 text-right">
                                                 {del.delivery_status === 'in_transit' ? (
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setSelectedDeliveryForOtp(del);
-                                                        }}
-                                                        className="px-3 py-1 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold rounded-lg text-xs border border-yellow-500 shadow-2xs"
-                                                    >
-                                                        Valider OTP
-                                                    </button>
+                                                    <div className="flex items-center justify-end gap-1.5">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setSelectedDeliveryForOtp(del);
+                                                            }}
+                                                            className="px-2.5 py-1 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold rounded-lg text-xs border border-yellow-500 shadow-2xs"
+                                                        >
+                                                            OTP
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setReportIncidentOrder(del);
+                                                            }}
+                                                            className="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-lg text-xs border border-rose-200"
+                                                        >
+                                                            Litige
+                                                        </button>
+                                                    </div>
                                                 ) : del.delivery_status === 'delivered' ? (
                                                     <Link
                                                         href={route('driver.map', { order: del.order_number })}
@@ -466,6 +514,14 @@ export default function Deliveries({ driver = {}, deliveries = { data: [] }, fil
                 <DeliveryOtpVerificationModal
                     order={selectedDeliveryForOtp}
                     onClose={() => setSelectedDeliveryForOtp(null)}
+                />
+            )}
+
+            {/* REPORT INCIDENT & RETURN MODAL (2.3.7 SPEC) */}
+            {reportIncidentOrder && (
+                <ReportIncidentModal
+                    order={reportIncidentOrder}
+                    onClose={() => setReportIncidentOrder(null)}
                 />
             )}
 

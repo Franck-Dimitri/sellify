@@ -3,6 +3,7 @@ import { Head, useForm, Link } from '@inertiajs/react';
 import DriverLayout from '@/Layouts/DriverLayout';
 import RefuseDeliveryModal from '@/Components/RefuseDeliveryModal';
 import DeliveryOtpVerificationModal from '@/Components/DeliveryOtpVerificationModal';
+import ReportIncidentModal from '@/Components/ReportIncidentModal';
 import { 
     MapPin, 
     Navigation, 
@@ -28,7 +29,9 @@ import {
     Maximize2,
     CheckCircle2,
     Archive,
-    History
+    History,
+    AlertTriangle,
+    RotateCcw
 } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -48,6 +51,7 @@ export default function Map({
 
     const [selectedOrder, setSelectedOrder] = useState(targetOrder || activeDelivery || availableDeliveries[0] || null);
     const [selectedDeliveryForOtp, setSelectedDeliveryForOtp] = useState(null);
+    const [reportIncidentOrder, setReportIncidentOrder] = useState(null);
     const [refuseModalOrderNumber, setRefuseModalOrderNumber] = useState(null);
     const [landmarkPhotoZoom, setLandmarkPhotoZoom] = useState(null);
     const [tspModeActive, setTspModeActive] = useState(false);
@@ -202,8 +206,9 @@ export default function Map({
             const custLat = order.lat || (3.8620 - (index * 0.003));
             const custLng = order.lng || (11.5220 + (index * 0.004));
             const isDelivered = order.delivery_status === 'delivered';
-            const custColor = isDelivered ? '#57534e' : (order.delivery_status === 'in_transit' ? '#eab308' : '#10b981');
-            const custTextColor = (order.delivery_status === 'in_transit' && !isDelivered) ? '#1c1917' : '#ffffff';
+            const isReturned = order.delivery_status === 'returned_to_shop';
+            const custColor = isDelivered ? '#57534e' : isReturned ? '#e11d48' : (order.delivery_status === 'in_transit' ? '#eab308' : '#10b981');
+            const custTextColor = (order.delivery_status === 'in_transit' && !isDelivered && !isReturned) ? '#1c1917' : '#ffffff';
 
             const custHtml = `
                 <div style="background: ${custColor}; color: ${custTextColor}; padding: 5px 10px; border-radius: 14px; border: 2px solid #ffffff; box-shadow: 0 4px 14px rgba(0,0,0,0.2); font-family: sans-serif; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 5px; cursor: pointer;">
@@ -236,7 +241,8 @@ export default function Map({
             const custLng = selectedOrder.lng || 11.5220;
 
             const isFinished = selectedOrder.delivery_status === 'delivered';
-            const routeColor = isFinished ? '#57534e' : '#eab308'; // Dark Gray for finished order
+            const isReturned = selectedOrder.delivery_status === 'returned_to_shop';
+            const routeColor = isReturned ? '#e11d48' : isFinished ? '#57534e' : '#eab308'; // Red for return to vendor, Dark Gray for finished order
 
             fetchOSRMRoute(shopLat, shopLng, custLat, custLng).then((res) => {
                 if (res.coordinates && routeLayerRef.current) {
@@ -245,7 +251,7 @@ export default function Map({
                         color: routeColor,
                         weight: isFinished ? 5 : 6,
                         opacity: isFinished ? 0.75 : 0.95,
-                        dashArray: isFinished ? '4, 6' : undefined
+                        dashArray: (isFinished || isReturned) ? '4, 6' : undefined
                     }).addTo(routeLayerRef.current);
 
                     setEtaInfo({
@@ -255,7 +261,7 @@ export default function Map({
                 }
             });
         }
-    }, [selectedOrder?.order_number, tspModeActive, tspRouteData, displayOrders, driverPhoto, driver.vehicle_plate]);
+    }, [selectedOrder?.order_number, selectedOrder?.delivery_status, tspModeActive, tspRouteData, displayOrders, driverPhoto, driver.vehicle_plate]);
 
     const handleAcceptCourse = (orderNumber) => {
         if (confirm(`Accepter la livraison de la commande #${orderNumber} ?`)) {
@@ -264,6 +270,7 @@ export default function Map({
     };
 
     const isCurrentOrderFinished = selectedOrder?.delivery_status === 'delivered';
+    const isCurrentOrderReturned = selectedOrder?.delivery_status === 'returned_to_shop';
 
     return (
         <DriverLayout title="Carte & itinéraire live">
@@ -418,11 +425,11 @@ export default function Map({
                             {/* Card Header */}
                             <div className="flex items-center justify-between border-b border-stone-100 pb-2.5">
                                 <div className="flex items-center gap-2">
-                                    <Truck className={`w-5 h-5 ${isCurrentOrderFinished ? 'text-stone-500' : 'text-yellow-600'} shrink-0`} />
+                                    <Truck className={`w-5 h-5 ${isCurrentOrderFinished ? 'text-stone-500' : isCurrentOrderReturned ? 'text-rose-600' : 'text-yellow-600'} shrink-0`} />
                                     <div>
                                         <h3 className="font-bold text-xs sm:text-sm text-stone-900">Commande #{selectedOrder.order_number}</h3>
                                         <span className="text-[10px] text-stone-400 block font-mono">
-                                            {isCurrentOrderFinished ? "Itinéraire archivé (Gris foncé)" : `Itinéraire OSRM : ${etaInfo.distance} (${etaInfo.duration})`}
+                                            {isCurrentOrderFinished ? "Itinéraire archivé (Gris foncé)" : isCurrentOrderReturned ? "Itinéraire de retour vers boutique (Rouge)" : `Itinéraire OSRM : ${etaInfo.distance} (${etaInfo.duration})`}
                                         </span>
                                     </div>
                                 </div>
@@ -435,16 +442,31 @@ export default function Map({
                             {/* Status & Earnings Badge */}
                             <div className="flex items-center justify-between gap-2">
                                 <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold truncate ${
-                                    isCurrentOrderFinished 
-                                        ? 'bg-stone-200 text-stone-800' 
-                                        : (selectedOrder.driver_id ? 'bg-yellow-100 text-yellow-950' : 'bg-emerald-100 text-emerald-800')
+                                    isCurrentOrderReturned 
+                                        ? 'bg-rose-100 text-rose-900 border border-rose-200' 
+                                        : isCurrentOrderFinished 
+                                            ? 'bg-stone-200 text-stone-800' 
+                                            : (selectedOrder.driver_id ? 'bg-yellow-100 text-yellow-950' : 'bg-emerald-100 text-emerald-800')
                                 }`}>
-                                    {isCurrentOrderFinished ? '✅ Livrée avec OTP & Signature' : (selectedOrder.driver_id ? 'En cours' : 'Disponible au retrait')}
+                                    {isCurrentOrderReturned ? '🔄 Retour Boutique en cours' : isCurrentOrderFinished ? '✅ Livrée avec OTP & Signature' : (selectedOrder.driver_id ? 'En cours' : 'Disponible au retrait')}
                                 </span>
                                 <span className={`font-bold text-sm sm:text-base shrink-0 ${isCurrentOrderFinished ? 'text-stone-700' : 'text-emerald-600'}`}>
                                     +{Number(selectedOrder.shipping_fee || 2500).toLocaleString('fr-FR')} FCFA
                                 </span>
                             </div>
+
+                            {/* Return Notice if order is returned */}
+                            {isCurrentOrderReturned && (
+                                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl space-y-1 text-xs text-rose-900">
+                                    <div className="flex items-center gap-1.5 font-bold">
+                                        <RotateCcw className="w-4 h-4 text-rose-600" />
+                                        <span>Retour Boutique Déclenché</span>
+                                    </div>
+                                    <p className="text-[11px] text-rose-800 leading-snug">
+                                        Le client a refusé le colis. Vos frais de course sont crédités. Restituez le colis intact à la boutique ({selectedOrder.shop?.name}).
+                                    </p>
+                                </div>
+                            )}
 
                             {/* Finished Order Archive Banner */}
                             {isCurrentOrderFinished && (
@@ -541,7 +563,7 @@ export default function Map({
                         </div>
 
                         {/* Action Buttons */}
-                        {!isCurrentOrderFinished ? (
+                        {!isCurrentOrderFinished && !isCurrentOrderReturned ? (
                             <div className="pt-3 border-t border-stone-100 space-y-2">
                                 {!selectedOrder.driver_id ? (
                                     <div className="flex gap-2">
@@ -561,20 +583,31 @@ export default function Map({
                                         </button>
                                     </div>
                                 ) : (
-                                    <div className="flex items-center gap-2">
-                                        <a
-                                            href={`tel:${selectedOrder.user?.phone || '+237690000000'}`}
-                                            className="p-2.5 sm:p-3 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl transition-colors shrink-0"
-                                            title="Appeler le client"
-                                        >
-                                            <PhoneCall className="w-4 h-4" />
-                                        </a>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <a
+                                                href={`tel:${selectedOrder.user?.phone || '+237690000000'}`}
+                                                className="p-2.5 sm:p-3 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl transition-colors shrink-0"
+                                                title="Appeler le client"
+                                            >
+                                                <PhoneCall className="w-4 h-4" />
+                                            </a>
+                                            <button
+                                                onClick={() => setSelectedDeliveryForOtp(selectedOrder)}
+                                                className="flex-1 py-2.5 sm:py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors border border-yellow-500 flex items-center justify-center gap-1.5"
+                                            >
+                                                <Key className="w-4 h-4 shrink-0" />
+                                                <span>Valider avec OTP & Signature</span>
+                                            </button>
+                                        </div>
+
+                                        {/* REPORT INCIDENT & RETURN BUTTON */}
                                         <button
-                                            onClick={() => setSelectedDeliveryForOtp(selectedOrder)}
-                                            className="flex-1 py-2.5 sm:py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors border border-yellow-500 flex items-center justify-center gap-1.5"
+                                            onClick={() => setReportIncidentOrder(selectedOrder)}
+                                            className="w-full py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 transition-colors flex items-center justify-center gap-1.5"
                                         >
-                                            <Key className="w-4 h-4 shrink-0" />
-                                            <span>Valider avec OTP & Signature</span>
+                                            <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                                            <span>Signaler un litige / Refus client (Retour boutique)</span>
                                         </button>
                                     </div>
                                 )}
@@ -585,7 +618,7 @@ export default function Map({
                                     onClick={() => setSelectedOrder(null)}
                                     className="w-full py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs rounded-xl border border-stone-200"
                                 >
-                                    Fermer la fiche archive
+                                    Fermer la fiche
                                 </button>
                             </div>
                         )}
@@ -629,6 +662,14 @@ export default function Map({
                 <DeliveryOtpVerificationModal
                     order={selectedDeliveryForOtp}
                     onClose={() => setSelectedDeliveryForOtp(null)}
+                />
+            )}
+
+            {/* REPORT INCIDENT & RETURN MODAL (2.3.7 SPEC) */}
+            {reportIncidentOrder && (
+                <ReportIncidentModal
+                    order={reportIncidentOrder}
+                    onClose={() => setReportIncidentOrder(null)}
                 />
             )}
 

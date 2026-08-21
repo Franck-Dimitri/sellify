@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Head, useForm } from '@inertiajs/react';
 import DriverLayout from '@/Layouts/DriverLayout';
 import DeliveryOtpVerificationModal from '@/Components/DeliveryOtpVerificationModal';
+import ReportIncidentModal from '@/Components/ReportIncidentModal';
 import { 
     Truck, 
     CheckCircle2, 
@@ -15,7 +16,9 @@ import {
     ShoppingBag,
     TrendingUp,
     Check,
-    WifiOff
+    WifiOff,
+    AlertTriangle,
+    RotateCcw
 } from 'lucide-react';
 import {
     Chart as ChartJS,
@@ -51,6 +54,7 @@ export default function Dashboard({
 }) {
     const { post, processing } = useForm();
     const [selectedDeliveryForOtp, setSelectedDeliveryForOtp] = useState(null);
+    const [reportIncidentOrder, setReportIncidentOrder] = useState(null);
     const [cachedDeliveries, setCachedDeliveries] = useState(activeDeliveries);
 
     // Save active deliveries into IndexedDB/LocalStorage when online for PWA offline resilience
@@ -211,15 +215,24 @@ export default function Dashboard({
 
                         <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
                             <p className="text-xs text-stone-500 font-normal">
-                                Demandez au client son code OTP et faites-le signer sur l'écran tactile pour encaisser vos frais.
+                                Demandez au client son code OTP pour valider ou signalez un refus/litige si le colis n'est pas accepté.
                             </p>
-                            <button
-                                onClick={() => setSelectedDeliveryForOtp(displayActiveDeliveries[0])}
-                                className="px-5 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors shrink-0 flex items-center gap-1.5 border border-yellow-500"
-                            >
-                                <Key className="w-4 h-4 text-yellow-950" />
-                                <span>Valider avec OTP & Signature</span>
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setReportIncidentOrder(displayActiveDeliveries[0])}
+                                    className="px-3.5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 transition-colors flex items-center gap-1"
+                                >
+                                    <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+                                    <span>Litige / Refus</span>
+                                </button>
+                                <button
+                                    onClick={() => setSelectedDeliveryForOtp(displayActiveDeliveries[0])}
+                                    className="px-5 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors shrink-0 flex items-center gap-1.5 border border-yellow-500"
+                                >
+                                    <Key className="w-4 h-4 text-yellow-950" />
+                                    <span>Valider avec OTP & Signature</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -297,6 +310,14 @@ export default function Dashboard({
                 <DeliveryOtpVerificationModal
                     order={selectedDeliveryForOtp}
                     onClose={() => setSelectedDeliveryForOtp(null)}
+                />
+            )}
+
+            {/* REPORT INCIDENT & RETURN MODAL */}
+            {reportIncidentOrder && (
+                <ReportIncidentModal
+                    order={reportIncidentOrder}
+                    onClose={() => setReportIncidentOrder(null)}
                 />
             )}
 
