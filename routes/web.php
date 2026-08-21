@@ -326,6 +326,7 @@ Route::middleware(['auth', 'account.active'])->group(function () {
 
             Route::middleware('kyc.verified')->group(function () {
                 Route::post('/delivery/{order_number}/accept', [\App\Http\Controllers\Driver\DriverController::class, 'acceptDelivery'])->name('delivery.accept');
+                Route::post('/delivery/{order_number}/refuse', [\App\Http\Controllers\Driver\DriverController::class, 'refuseDelivery'])->name('delivery.refuse');
                 Route::post('/delivery/{order_number}/verify-otp', [\App\Http\Controllers\Driver\DriverController::class, 'verifyDeliveryOtp'])->name('delivery.verify_otp');
             });
         });

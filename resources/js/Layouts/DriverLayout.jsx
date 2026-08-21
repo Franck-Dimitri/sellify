@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
 import AIAssistantWidget from '@/Components/AIAssistantWidget';
+import RefuseDeliveryModal from '@/Components/RefuseDeliveryModal';
 import {
     LayoutDashboard,
     Truck,
@@ -20,7 +21,10 @@ import {
     ShoppingBag,
     ArrowRight,
     WifiOff,
-    Download
+    Download,
+    Clock,
+    Lock,
+    Package
 } from 'lucide-react';
 
 export default function DriverLayout({ children, title }) {
@@ -29,30 +33,52 @@ export default function DriverLayout({ children, title }) {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
     const [pushAlert, setPushAlert] = useState(null);
+    const [refuseModalOrderNumber, setRefuseModalOrderNumber] = useState(null);
     const [isOffline, setIsOffline] = useState(!navigator.onLine);
     const [deferredPrompt, setDeferredPrompt] = useState(null);
+    const [timerSeconds, setTimerSeconds] = useState(300); // 5 minutes decision countdown (2.3.3 spec)
 
     const user = auth.user || {};
     const driver = user.driver || {};
 
     const [activityStatus, setActivityStatus] = useState(driver.activity_status || 'online');
 
+    // 5-minute Countdown Timer (2.3.3 spec)
+    useEffect(() => {
+        if (!pushAlert) return;
+        setTimerSeconds(300);
+        const interval = setInterval(() => {
+            setTimerSeconds((prev) => {
+                if (prev <= 1) {
+                    clearInterval(interval);
+                    setPushAlert(null); // Auto-reassign to backup driver if timer expires
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [pushAlert]);
+
+    const formatTimer = (secs) => {
+        const m = Math.floor(secs / 60);
+        const s = secs % 60;
+        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    };
+
     // Register Service Worker & Listen for Offline / PWA Install Prompt
     useEffect(() => {
-        // Register PWA Service Worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js')
-                .then((reg) => console.log('[PWA] Service Worker registered successfully:', reg.scope))
+                .then((reg) => console.log('[PWA] Service Worker registered:', reg.scope))
                 .catch((err) => console.warn('[PWA] Service Worker registration failed:', err));
         }
 
-        // Listen for Network Online/Offline
         const handleOnline = () => setIsOffline(false);
         const handleOffline = () => setIsOffline(true);
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
 
-        // Listen for PWA Installation prompt
         const handleBeforeInstallPrompt = (e) => {
             e.preventDefault();
             setDeferredPrompt(e);
@@ -87,6 +113,8 @@ export default function DriverLayout({ children, title }) {
                 shop_name: 'Tech Shop (Bastos)',
                 customer_name: 'Marc Kamga',
                 destination: 'Akwa, Immeuble Rose',
+                escrow_amount: 150000,
+                package_desc: 'Smartphone & Accessoires · 1.2 kg',
                 fee: 2500,
                 distance: '3.4 km',
                 duration: '12 min',
@@ -392,9 +420,11 @@ export default function DriverLayout({ children, title }) {
                         {children}
                     </main>
 
-                    {/* REAL-TIME PUSH DISPATCH POPUP */}
+                    {/* REAL-TIME PUSH DISPATCH POPUP WITH 5-MIN TIMER & ESCROW SPECS (2.3.3 Spec) */}
                     {pushAlert && (
-                        <div className="fixed bottom-6 right-6 z-50 max-w-sm w-full bg-white text-stone-900 rounded-2xl p-5 shadow-2xl border-2 border-yellow-400 animate-in slide-in-from-bottom-5 duration-200 space-y-3">
+                        <div className="fixed bottom-6 right-6 z-50 max-w-md w-full bg-white text-stone-900 rounded-2xl p-5 shadow-2xl border-2 border-yellow-400 animate-in slide-in-from-bottom-5 duration-200 space-y-3">
+                            
+                            {/* Header with 5-min Decision Timer */}
                             <div className="flex items-center justify-between border-b border-stone-100 pb-2">
                                 <div className="flex items-center gap-2">
                                     <div className="w-7 h-7 rounded-full bg-yellow-400 text-yellow-950 flex items-center justify-center font-bold text-xs shadow-2xs">
@@ -402,23 +432,44 @@ export default function DriverLayout({ children, title }) {
                                     </div>
                                     <h4 className="font-bold text-xs text-stone-900">Nouvelle proposition de course !</h4>
                                 </div>
-                                <button onClick={() => setPushAlert(null)} className="text-stone-400 hover:text-stone-700">
-                                    <X className="w-4 h-4" />
-                                </button>
+
+                                <div className="flex items-center gap-1 bg-amber-50 text-amber-900 border border-amber-200 px-2.5 py-0.5 rounded-full font-mono text-[11px] font-bold">
+                                    <Clock className="w-3 h-3 text-amber-600" />
+                                    <span>{formatTimer(timerSeconds)}</span>
+                                </div>
                             </div>
 
+                            {/* Details (Pickup, Dropoff, Escrow Amount, Package Type - 2.3.3 Spec) */}
                             <div className="space-y-2 text-xs text-stone-700 font-normal">
                                 <div className="flex justify-between items-center bg-stone-50 border border-stone-200/80 p-2 rounded-xl">
                                     <span className="font-mono text-stone-600 font-bold">#{pushAlert.order_number}</span>
                                     <span className="text-yellow-700 font-extrabold">{pushAlert.distance} · {pushAlert.duration}</span>
                                 </div>
-                                <p><strong className="text-stone-900">Boutique :</strong> {pushAlert.shop_name}</p>
-                                <p><strong className="text-stone-900">Destination :</strong> {pushAlert.destination}</p>
+
+                                <div className="grid grid-cols-2 gap-2 text-[11px]">
+                                    <div className="p-2 bg-stone-50 rounded-lg border border-stone-200/60">
+                                        <span className="text-stone-400 block font-normal flex items-center gap-1">
+                                            <Lock className="w-3 h-3 text-stone-500" /> Escrow sécurisé :
+                                        </span>
+                                        <strong className="text-stone-900 font-bold">{Number(pushAlert.escrow_amount).toLocaleString('fr-FR')} FCFA</strong>
+                                    </div>
+                                    <div className="p-2 bg-stone-50 rounded-lg border border-stone-200/60">
+                                        <span className="text-stone-400 block font-normal flex items-center gap-1">
+                                            <Package className="w-3 h-3 text-stone-500" /> Spécification colis :
+                                        </span>
+                                        <strong className="text-stone-900 font-medium truncate block">{pushAlert.package_desc}</strong>
+                                    </div>
+                                </div>
+
+                                <p><strong className="text-stone-900">Retrait boutique :</strong> {pushAlert.shop_name}</p>
+                                <p><strong className="text-stone-900">Destination client :</strong> {pushAlert.destination}</p>
+                                
                                 <p className="text-emerald-600 font-bold text-sm pt-1">
-                                    Gains : +{pushAlert.fee.toLocaleString('fr-FR')} FCFA
+                                    Frais alloués : +{pushAlert.fee.toLocaleString('fr-FR')} FCFA
                                 </p>
                             </div>
 
+                            {/* Actions (Accept / Refuse Modal) */}
                             <div className="flex gap-2 pt-2 border-t border-stone-100">
                                 <button
                                     onClick={() => handleAcceptPush(pushAlert.order_number)}
@@ -428,7 +479,7 @@ export default function DriverLayout({ children, title }) {
                                     <ArrowRight className="w-3.5 h-3.5" />
                                 </button>
                                 <button
-                                    onClick={() => setPushAlert(null)}
+                                    onClick={() => setRefuseModalOrderNumber(pushAlert.order_number)}
                                     className="px-3 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs rounded-xl border border-stone-200"
                                 >
                                     Refuser
@@ -439,6 +490,14 @@ export default function DriverLayout({ children, title }) {
 
                 </div>
             </div>
+
+            {/* REFUSAL JUSTIFICATION MODAL (2.3.3 Spec) */}
+            {refuseModalOrderNumber && (
+                <RefuseDeliveryModal
+                    orderNumber={refuseModalOrderNumber}
+                    onClose={() => setRefuseModalOrderNumber(null)}
+                />
+            )}
 
             <AIAssistantWidget />
         </div>

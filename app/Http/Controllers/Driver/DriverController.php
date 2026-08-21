@@ -275,6 +275,38 @@ class DriverController extends Controller
     }
 
     /**
+     * Refuse a delivery assignment with AI justification data.
+     */
+    public function refuseDelivery(Request $request, string $orderNumber)
+    {
+        $request->validate([
+            'reason' => 'required|string',
+            'explanation' => 'nullable|string',
+        ]);
+
+        $driver = $request->user()->driver;
+        $order = Order::where('order_number', $orderNumber)->firstOrFail();
+
+        // Release order so backup driver can pick it up
+        if ($order->driver_id === $driver->id || $order->driver_id === null) {
+            $order->update([
+                'driver_id' => null,
+                'delivery_status' => 'ready_for_pickup',
+            ]);
+        }
+
+        // Record AI refusal log data for learning & dispatch optimization
+        ActivityLog::create([
+            'user_id' => $request->user()->id,
+            'action' => 'driver_refused_delivery',
+            'description' => "Refus commande #{$order->order_number} (Motif: {$request->reason}) - Note: " . ($request->explanation ?? 'N/A'),
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', "Vous avez décliné la commande #{$order->order_number}. L'algorithme a réaffecté la course au livreur de backup.");
+    }
+
+    /**
      * Verify delivery OTP code.
      */
     public function verifyDeliveryOtp(Request $request, string $orderNumber)
