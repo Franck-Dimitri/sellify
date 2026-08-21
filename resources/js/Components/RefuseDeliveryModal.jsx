@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { useForm } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import { AlertTriangle, X, ShieldAlert, ArrowRight } from 'lucide-react';
 
 export default function RefuseDeliveryModal({ orderNumber, onClose }) {
     const [selectedReason, setSelectedReason] = useState('too_far');
     const [customExplanation, setCustomExplanation] = useState('');
-    const { post, processing } = useForm();
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const reasonsList = [
         { id: 'too_far', label: 'Distance trop éloignée de ma zone' },
@@ -17,15 +17,29 @@ export default function RefuseDeliveryModal({ orderNumber, onClose }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(route('driver.delivery.refuse', orderNumber), {
-            data: {
+        setIsSubmitting(true);
+
+        router.post(
+            route('driver.delivery.refuse', orderNumber),
+            {
                 reason: selectedReason,
                 explanation: customExplanation
             },
-            onSuccess: () => {
-                onClose();
+            {
+                onSuccess: () => {
+                    setIsSubmitting(false);
+                    onClose();
+                },
+                onError: () => {
+                    setIsSubmitting(false);
+                    onClose();
+                },
+                onFinish: () => {
+                    setIsSubmitting(false);
+                    onClose();
+                }
             }
-        });
+        );
     };
 
     return (
@@ -105,10 +119,10 @@ export default function RefuseDeliveryModal({ orderNumber, onClose }) {
                     </button>
                     <button
                         type="submit"
-                        disabled={processing}
+                        disabled={isSubmitting}
                         className="flex-1 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors border border-yellow-500 flex items-center justify-center gap-1.5"
                     >
-                        <span>Confirmer le refus</span>
+                        <span>{isSubmitting ? 'Traitement...' : 'Confirmer le refus'}</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                 </div>

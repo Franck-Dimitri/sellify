@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Head, useForm } from '@inertiajs/react';
 import DriverLayout from '@/Layouts/DriverLayout';
+import RefuseDeliveryModal from '@/Components/RefuseDeliveryModal';
 import { 
     MapPin, 
     Navigation, 
@@ -16,7 +17,10 @@ import {
     Compass,
     PackageCheck,
     Layers,
-    ListFilter
+    ListFilter,
+    Lock,
+    Package,
+    MessageSquare
 } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -27,6 +31,7 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
     const mapInstance = useRef(null);
     const [selectedOrder, setSelectedOrder] = useState(activeDelivery || availableDeliveries[0] || null);
     const [selectedDeliveryForOtp, setSelectedDeliveryForOtp] = useState(null);
+    const [refuseModalOrderNumber, setRefuseModalOrderNumber] = useState(null);
     const [otpInput, setOtpInput] = useState('');
     const [etaInfo, setEtaInfo] = useState({ distance: '3.4 km', duration: '12 min' });
     const { post, processing } = useForm();
@@ -46,8 +51,10 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
             order_number: 'SLF-2026-9815',
             vehicle_plate: driver.vehicle_plate || 'LT-492-BX',
             shipping_fee: 2500,
+            escrow_amount: 150000,
+            package_desc: 'Smartphone & Accessoires · 1.2 kg',
             delivery_status: 'in_transit',
-            shop: { name: 'Tech & Gadgets Express', lat: 3.8780, lng: 11.5121 },
+            shop: { name: 'Tech & Gadgets Express', phone: '+237 670 11 22 33', lat: 3.8780, lng: 11.5121 },
             user: { first_name: 'Paul', last_name: 'Ondobo', phone: '+237 690 00 00 00' },
             shipping_address: 'Bastos, Rue des Ambassades, Yaoundé',
             lat: 3.8620,
@@ -191,73 +198,105 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                 {/* REAL LEAFLET MAP */}
                 <div ref={mapRef} className="absolute inset-0 z-0" />
 
-                {/* TOP FLOATING BADGE */}
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 bg-white/95 backdrop-blur-md border border-stone-200 px-5 py-2 rounded-full shadow-lg flex items-center gap-3 text-xs font-bold text-stone-900">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-                    <span>Carte & Tracking Live · {mapOrders.length} course(s) géolocalisée(s)</span>
+                {/* TOP FLOATING BADGE (RESPONSIVE WRAP) */}
+                <div className="absolute top-3 sm:top-4 left-1/2 -translate-x-1/2 z-10 bg-white/95 backdrop-blur-md border border-stone-200 px-4 sm:px-5 py-2 rounded-full shadow-lg flex items-center gap-2 sm:gap-3 text-[11px] sm:text-xs font-bold text-stone-900 max-w-[calc(100%-2rem)] truncate">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping shrink-0" />
+                    <span className="truncate">Carte & Tracking Live · {mapOrders.length} course(s) géolocalisée(s)</span>
                 </div>
 
                 {/* BOTTOM HORIZONTAL QUICK SELECT PILLS */}
                 {!selectedOrder && (
-                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-2xl p-3 shadow-xl max-w-lg w-full flex items-center gap-2 overflow-x-auto">
-                        <span className="text-[11px] font-bold text-stone-500 shrink-0 pl-1">Sélectionner une course :</span>
+                    <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-10 bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-2xl p-2.5 sm:p-3 shadow-xl max-w-[calc(100%-2rem)] sm:max-w-lg w-full flex items-center gap-2 overflow-x-auto">
+                        <span className="text-[10px] sm:text-[11px] font-bold text-stone-500 shrink-0 pl-1">Sélectionner :</span>
                         {mapOrders.map((ord) => (
                             <button
                                 key={ord.id || ord.order_number}
                                 onClick={() => setSelectedOrder(ord)}
-                                className="px-3 py-1.5 bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 text-yellow-950 font-bold text-xs rounded-xl shrink-0 transition-colors flex items-center gap-1.5"
+                                className="px-2.5 sm:px-3 py-1.5 bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 text-yellow-950 font-bold text-[11px] sm:text-xs rounded-xl shrink-0 transition-colors flex items-center gap-1"
                             >
-                                <MapPin className="w-3.5 h-3.5 text-yellow-600" />
+                                <MapPin className="w-3.5 h-3.5 text-yellow-600 shrink-0" />
                                 <span>#{ord.order_number} (+{Number(ord.shipping_fee || 2500).toLocaleString('fr-FR')} F)</span>
                             </button>
                         ))}
                     </div>
                 )}
 
-                {/* FLOATING ORDER INSPECTION CARD */}
+                {/* FLOATING ORDER INSPECTION CARD (FLAWLESS RESPONSIVE ON DESKTOP & MOBILE) */}
                 {selectedOrder && (
-                    <div className="absolute top-4 left-4 bottom-4 z-20 w-96 max-w-[calc(100%-2rem)] bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-2xl p-5 shadow-2xl flex flex-col justify-between overflow-y-auto space-y-4 animate-in slide-in-from-left-5 duration-200">
+                    <div className="absolute sm:top-4 sm:left-4 sm:bottom-4 bottom-3 inset-x-3 sm:inset-x-auto sm:w-96 max-h-[80vh] sm:max-h-none z-20 bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-2xl p-4 sm:p-5 shadow-2xl flex flex-col justify-between overflow-y-auto space-y-4 animate-in slide-in-from-left-5 duration-200">
                         
-                        <div className="space-y-4">
+                        <div className="space-y-3 sm:space-y-4">
                             {/* Card Header */}
-                            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                            <div className="flex items-center justify-between border-b border-stone-100 pb-2.5">
                                 <div className="flex items-center gap-2">
-                                    <Truck className="w-5 h-5 text-yellow-600" />
+                                    <Truck className="w-5 h-5 text-yellow-600 shrink-0" />
                                     <div>
-                                        <h3 className="font-bold text-sm text-stone-900">Commande #{selectedOrder.order_number}</h3>
-                                        <span className="text-[10px] text-stone-400 block font-mono">Distance estimée : {etaInfo.distance} ({etaInfo.duration})</span>
+                                        <h3 className="font-bold text-xs sm:text-sm text-stone-900">Commande #{selectedOrder.order_number}</h3>
+                                        <span className="text-[10px] text-stone-400 block font-mono">Itinéraire OSRM : {etaInfo.distance} ({etaInfo.duration})</span>
                                     </div>
                                 </div>
 
-                                <button onClick={() => setSelectedOrder(null)} className="p-1 text-stone-400 hover:text-stone-700">
+                                <button onClick={() => setSelectedOrder(null)} className="p-1 text-stone-400 hover:text-stone-700 shrink-0">
                                     <X className="w-5 h-5" />
                                 </button>
                             </div>
 
-                            {/* Status Badge */}
-                            <div className="flex items-center justify-between">
-                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                            {/* Status & Earnings Badge */}
+                            <div className="flex items-center justify-between gap-2">
+                                <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold truncate ${
                                     selectedOrder.driver_id ? 'bg-yellow-100 text-yellow-950' : 'bg-emerald-100 text-emerald-800'
                                 }`}>
-                                    {selectedOrder.driver_id ? 'Prise en charge en cours' : 'Disponible au retrait'}
+                                    {selectedOrder.driver_id ? 'En cours' : 'Disponible au retrait'}
                                 </span>
-                                <span className="font-bold text-emerald-600 text-base">
+                                <span className="font-bold text-emerald-600 text-sm sm:text-base shrink-0">
                                     +{Number(selectedOrder.shipping_fee || 2500).toLocaleString('fr-FR')} FCFA
                                 </span>
                             </div>
 
-                            {/* Trip Address Timeline */}
-                            <div className="space-y-3 text-xs text-stone-700 font-normal">
-                                <div className="p-3 bg-stone-50 rounded-xl space-y-1 border border-stone-200/70">
-                                    <span className="text-[10px] text-yellow-700 font-bold uppercase block">Point A · Retrait Boutique</span>
-                                    <strong className="text-stone-900 block font-bold">{selectedOrder.shop?.name || 'Tech & Gadgets Express'}</strong>
+                            {/* Escrow & Package Specs Badges */}
+                            <div className="grid grid-cols-2 gap-2 text-[11px]">
+                                <div className="p-2 bg-stone-50 rounded-xl border border-stone-200/60">
+                                    <span className="text-stone-400 block font-normal flex items-center gap-1">
+                                        <Lock className="w-3 h-3 text-stone-500 shrink-0" /> Escrow :
+                                    </span>
+                                    <strong className="text-stone-900 font-bold break-all">{Number(selectedOrder.escrow_amount || 150000).toLocaleString('fr-FR')} F</strong>
                                 </div>
+                                <div className="p-2 bg-stone-50 rounded-xl border border-stone-200/60">
+                                    <span className="text-stone-400 block font-normal flex items-center gap-1">
+                                        <Package className="w-3 h-3 text-stone-500 shrink-0" /> Colis :
+                                    </span>
+                                    <strong className="text-stone-900 font-medium truncate block">{selectedOrder.package_desc || 'Électronique · 1.2 kg'}</strong>
+                                </div>
+                            </div>
 
-                                <div className="p-3 bg-stone-50 rounded-xl space-y-1 border border-stone-200/70">
-                                    <span className="text-[10px] text-emerald-700 font-bold uppercase block">Point B · Destination Client</span>
-                                    <strong className="text-stone-900 block font-bold">{selectedOrder.user ? `${selectedOrder.user.first_name} ${selectedOrder.user.last_name}` : 'Paul Ondobo'}</strong>
-                                    <span className="text-[11px] text-stone-500 block">{selectedOrder.shipping_address || 'Bastos, Yaoundé'}</span>
+                            {/* Vendor Information & Direct Contact */}
+                            <div className="p-3 bg-stone-50 rounded-xl border border-stone-200/70 space-y-1 text-xs">
+                                <div className="flex items-center justify-between gap-2">
+                                    <span className="text-[10px] text-yellow-700 font-bold uppercase truncate">Point A · Boutique</span>
+                                    <a
+                                        href={`tel:${selectedOrder.shop?.phone || '+237670112233'}`}
+                                        className="text-[10px] bg-stone-200 hover:bg-stone-300 text-stone-800 px-2 py-0.5 rounded font-semibold flex items-center gap-1 shrink-0"
+                                    >
+                                        <PhoneCall className="w-2.5 h-2.5" /> Appeler Vendeur
+                                    </a>
                                 </div>
+                                <strong className="text-stone-900 block font-bold text-xs sm:text-sm break-words">{selectedOrder.shop?.name || 'Tech & Gadgets Express'}</strong>
+                                <span className="text-[11px] text-stone-500 block truncate">Tél: {selectedOrder.shop?.phone || '+237 670 11 22 33'}</span>
+                            </div>
+
+                            {/* Customer Information & Direct Contact */}
+                            <div className="p-3 bg-stone-50 rounded-xl border border-stone-200/70 space-y-1 text-xs">
+                                <div className="flex items-center justify-between gap-2">
+                                    <span className="text-[10px] text-emerald-700 font-bold uppercase truncate">Point B · Client</span>
+                                    <a
+                                        href={`tel:${selectedOrder.user?.phone || '+237690000000'}`}
+                                        className="text-[10px] bg-stone-200 hover:bg-stone-300 text-stone-800 px-2 py-0.5 rounded font-semibold flex items-center gap-1 shrink-0"
+                                    >
+                                        <PhoneCall className="w-2.5 h-2.5" /> Appeler Client
+                                    </a>
+                                </div>
+                                <strong className="text-stone-900 block font-bold text-xs sm:text-sm break-words">{selectedOrder.user ? `${selectedOrder.user.first_name} ${selectedOrder.user.last_name}` : 'Paul Ondobo'}</strong>
+                                <span className="text-[11px] text-stone-500 block leading-snug break-words">{selectedOrder.shipping_address || 'Bastos, Rue des Ambassades, Yaoundé'}</span>
                             </div>
                         </div>
 
@@ -268,14 +307,14 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                                     <button
                                         onClick={() => handleAcceptCourse(selectedOrder.order_number)}
                                         disabled={processing}
-                                        className="flex-1 py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors border border-yellow-500 flex items-center justify-center gap-1.5"
+                                        className="flex-1 py-2.5 sm:py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors border border-yellow-500 flex items-center justify-center gap-1"
                                     >
                                         <span>Accepter la course</span>
-                                        <ArrowRight className="w-4 h-4" />
+                                        <ArrowRight className="w-4 h-4 shrink-0" />
                                     </button>
                                     <button
-                                        onClick={() => setSelectedOrder(null)}
-                                        className="px-3 py-3 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs rounded-xl border border-stone-200"
+                                        onClick={() => setRefuseModalOrderNumber(selectedOrder.order_number)}
+                                        className="px-3 py-2.5 sm:py-3 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs rounded-xl border border-stone-200 shrink-0"
                                     >
                                         Refuser
                                     </button>
@@ -284,16 +323,16 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                                 <div className="flex items-center gap-2">
                                     <a
                                         href={`tel:${selectedOrder.user?.phone || '+237690000000'}`}
-                                        className="p-3 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl transition-colors shrink-0"
+                                        className="p-2.5 sm:p-3 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl transition-colors shrink-0"
                                         title="Appeler le client"
                                     >
                                         <PhoneCall className="w-4 h-4" />
                                     </a>
                                     <button
                                         onClick={() => setSelectedDeliveryForOtp(selectedOrder)}
-                                        className="flex-1 py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors border border-yellow-500 flex items-center justify-center gap-1.5"
+                                        className="flex-1 py-2.5 sm:py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors border border-yellow-500 flex items-center justify-center gap-1.5"
                                     >
-                                        <Key className="w-4 h-4" />
+                                        <Key className="w-4 h-4 shrink-0" />
                                         <span>Saisir le Code OTP</span>
                                     </button>
                                 </div>
@@ -304,6 +343,14 @@ export default function Map({ driver = {}, availableDeliveries = [], activeDeliv
                 )}
 
             </div>
+
+            {/* REFUSAL JUSTIFICATION MODAL */}
+            {refuseModalOrderNumber && (
+                <RefuseDeliveryModal
+                    orderNumber={refuseModalOrderNumber}
+                    onClose={() => setRefuseModalOrderNumber(null)}
+                />
+            )}
 
             {/* OTP VERIFICATION MODAL */}
             {selectedDeliveryForOtp && (
