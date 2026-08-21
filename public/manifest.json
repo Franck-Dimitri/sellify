@@ -1,0 +1,37 @@
+{
+  "name": "Sellify Express - Console Livreur",
+  "short_name": "Sellify.Express",
+  "description": "Application PWA de livraison et géolocalisation terrain Sellify.me",
+  "start_url": "/driver/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#eab308",
+  "icons": [
+    {
+      "src": "/build/assets/layers-BWBAp2CZ.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/build/assets/layers-2x-Bpkbi35X.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Mes Livraisons",
+      "short_name": "Livraisons",
+      "description": "Consulter les courses en cours",
+      "url": "/driver/deliveries"
+    },
+    {
+      "name": "Carte & Tracking",
+      "short_name": "Carte",
+      "description": "Ouvrir la navigation GPS live",
+      "url": "/driver/map"
+    }
+  ]
+}

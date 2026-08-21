@@ -18,7 +18,9 @@ import {
     Check,
     CircleDot,
     ShoppingBag,
-    ArrowRight
+    ArrowRight,
+    WifiOff,
+    Download
 } from 'lucide-react';
 
 export default function DriverLayout({ children, title }) {
@@ -27,13 +29,56 @@ export default function DriverLayout({ children, title }) {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
     const [pushAlert, setPushAlert] = useState(null);
+    const [isOffline, setIsOffline] = useState(!navigator.onLine);
+    const [deferredPrompt, setDeferredPrompt] = useState(null);
 
     const user = auth.user || {};
     const driver = user.driver || {};
 
     const [activityStatus, setActivityStatus] = useState(driver.activity_status || 'online');
 
-    // Simulate incoming push dispatch alert after 3.5 seconds
+    // Register Service Worker & Listen for Offline / PWA Install Prompt
+    useEffect(() => {
+        // Register PWA Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then((reg) => console.log('[PWA] Service Worker registered successfully:', reg.scope))
+                .catch((err) => console.warn('[PWA] Service Worker registration failed:', err));
+        }
+
+        // Listen for Network Online/Offline
+        const handleOnline = () => setIsOffline(false);
+        const handleOffline = () => setIsOffline(true);
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+
+        // Listen for PWA Installation prompt
+        const handleBeforeInstallPrompt = (e) => {
+            e.preventDefault();
+            setDeferredPrompt(e);
+        };
+        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+            window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+        };
+    }, []);
+
+    const handleInstallPwa = () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('[PWA] Driver accepted PWA installation');
+                }
+                setDeferredPrompt(null);
+            });
+        }
+    };
+
+    // Simulate incoming push dispatch alert
     useEffect(() => {
         const timer = setTimeout(() => {
             setPushAlert({
@@ -105,7 +150,7 @@ export default function DriverLayout({ children, title }) {
                                     Sellify<span className="text-yellow-600">.Express</span>
                                 </span>
                                 <span className="block text-[10px] text-stone-400 font-semibold leading-none mt-0.5">
-                                    Espace Livreur
+                                    Espace Livreur PWA
                                 </span>
                             </div>
                         )}
@@ -156,6 +201,19 @@ export default function DriverLayout({ children, title }) {
                         </Link>
                     ))}
                 </nav>
+
+                {/* PWA Installation Prompt Button */}
+                {deferredPrompt && !isCollapsed && (
+                    <div className="p-3 border-t border-stone-100 bg-yellow-50/60">
+                        <button
+                            onClick={handleInstallPwa}
+                            className="w-full py-2 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors flex items-center justify-center gap-1.5 border border-yellow-500"
+                        >
+                            <Download className="w-4 h-4" />
+                            <span>Installer App PWA</span>
+                        </button>
+                    </div>
+                )}
 
                 {/* Sidebar Footer Driver Profile */}
                 <div className="p-3 border-t border-stone-100 space-y-2 bg-white">
@@ -222,7 +280,7 @@ export default function DriverLayout({ children, title }) {
                                 }`}
                             >
                                 <CircleDot className="w-3 h-3 animate-pulse" />
-                                <span>Disponible</span>
+                                <span>En service</span>
                             </button>
                             <button
                                 onClick={() => handleStatusToggle('busy')}
@@ -243,7 +301,7 @@ export default function DriverLayout({ children, title }) {
                                         : 'text-stone-600 hover:text-stone-900'
                                 }`}
                             >
-                                <span>Hors ligne</span>
+                                <span>Hors service</span>
                             </button>
                         </div>
                     </div>
@@ -301,6 +359,14 @@ export default function DriverLayout({ children, title }) {
                     </div>
                 </header>
 
+                {/* OFFLINE WARNING BANNER */}
+                {isOffline && (
+                    <div className="bg-amber-500 text-white px-4 py-2 text-xs font-semibold flex items-center justify-center gap-2 shadow-inner">
+                        <WifiOff className="w-4 h-4" />
+                        <span>⚡ Mode Hors-ligne activé — Les courses en cours et les adresses restent consultables sans connexion réseau.</span>
+                    </div>
+                )}
+
                 {/* Main View Container */}
                 <div className="flex-1 overflow-y-auto bg-stone-100/60 relative">
                     {/* Flash Messages */}
@@ -326,7 +392,7 @@ export default function DriverLayout({ children, title }) {
                         {children}
                     </main>
 
-                    {/* REAL-TIME PUSH DISPATCH POPUP (SVG Icons, NO Emojis) */}
+                    {/* REAL-TIME PUSH DISPATCH POPUP */}
                     {pushAlert && (
                         <div className="fixed bottom-6 right-6 z-50 max-w-sm w-full bg-white text-stone-900 rounded-2xl p-5 shadow-2xl border-2 border-yellow-400 animate-in slide-in-from-bottom-5 duration-200 space-y-3">
                             <div className="flex items-center justify-between border-b border-stone-100 pb-2">
