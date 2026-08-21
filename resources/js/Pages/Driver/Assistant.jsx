@@ -12,17 +12,16 @@ import {
     PanelLeftClose, 
     PanelLeftOpen, 
     ArrowUp, 
-    Compass, 
     TrendingUp, 
     Fuel, 
     ShieldCheck, 
     Award,
-    ChevronDown,
-    ArrowRight
+    ArrowRight,
+    X
 } from 'lucide-react';
 import MarkdownText from '@/Components/MarkdownText';
 
-const THREADS_STORAGE_KEY = 'sellify_ai_gemini_threads_v1';
+const THREADS_STORAGE_KEY = 'sellify_ai_gemini_threads_v2';
 
 // Typewriter Text Component for Sellify AI Streaming Effect
 function TypewriterMessage({ text, onComplete }) {
@@ -112,7 +111,9 @@ export default function Assistant({ driver = {} }) {
     };
 
     useEffect(() => {
-        scrollToBottom();
+        if (messages.length > 0) {
+            scrollToBottom();
+        }
     }, [messages, loading]);
 
     // Create New Discussion
@@ -168,7 +169,7 @@ export default function Assistant({ driver = {} }) {
         setThreads(prev => prev.map(t => {
             if (t.id === activeThreadId) {
                 const isFirst = t.messages.length === 0;
-                const newTitle = isFirst ? (query.slice(0, 32) + (query.length > 32 ? '...' : '')) : t.title;
+                const newTitle = isFirst ? (query.slice(0, 30) + (query.length > 30 ? '...' : '')) : t.title;
                 return {
                     ...t,
                     title: newTitle,
@@ -266,29 +267,46 @@ export default function Assistant({ driver = {} }) {
         <DriverLayout title="Sellify AI">
             <Head title="Sellify AI - Assistant Intelligent" />
 
-            {/* FULL-CANVAS GEMINI LIGHT THEME WRAPPER */}
-            <div className="w-full h-[calc(100vh-140px)] min-h-[600px] flex bg-white rounded-3xl border border-stone-200/90 shadow-xs overflow-hidden text-stone-800 font-sans antialiased">
+            {/* FULL-CANVAS CONTAINER */}
+            <div className="w-full h-[calc(100vh-130px)] min-h-[580px] flex bg-white rounded-2xl sm:rounded-3xl border border-stone-200 shadow-xs overflow-hidden text-stone-800 font-sans relative">
                 
                 {/* 1. LEFT SIDEBAR (DISCUSSIONS HISTORY) */}
                 <aside 
-                    className={`${
-                        sidebarOpen ? 'w-64 sm:w-72' : 'w-0 -ml-72'
-                    } transition-all duration-300 ease-in-out bg-stone-50/70 border-r border-stone-200/80 flex flex-col shrink-0 overflow-hidden select-none`}
+                    className={`
+                        ${sidebarOpen ? 'w-64 sm:w-72 translate-x-0' : 'w-0 -translate-x-full border-none opacity-0 pointer-events-none'}
+                        transition-all duration-300 ease-in-out bg-stone-50 border-r border-stone-200 flex flex-col shrink-0 overflow-hidden z-20 select-none
+                    `}
                 >
                     {/* Top Action Bar */}
-                    <div className="p-4 flex items-center justify-between border-b border-stone-200/60">
+                    <div className="p-3.5 space-y-2.5 border-b border-stone-200/80">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 rounded-lg bg-yellow-400 text-yellow-950 flex items-center justify-center font-bold text-xs border border-yellow-500 shadow-2xs">
+                                    <Sparkles className="w-3.5 h-3.5" />
+                                </div>
+                                <span className="font-bold text-xs text-stone-900 tracking-tight">Sellify AI</span>
+                            </div>
+                            <button
+                                onClick={() => setSidebarOpen(false)}
+                                className="p-1.5 hover:bg-stone-200/70 text-stone-500 hover:text-stone-800 rounded-lg transition-colors"
+                                title="Masquer l'historique"
+                            >
+                                <PanelLeftClose className="w-4 h-4" />
+                            </button>
+                        </div>
+
                         <button
                             onClick={handleNewChat}
-                            className="flex-1 flex items-center gap-2.5 px-3.5 py-2.5 bg-white hover:bg-stone-100/80 text-stone-800 font-medium text-xs rounded-2xl border border-stone-200 shadow-2xs transition-all"
+                            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-white hover:bg-yellow-50 text-stone-800 hover:text-yellow-950 font-semibold text-xs rounded-xl border border-stone-200 hover:border-yellow-400 shadow-2xs transition-all"
                         >
-                            <Plus className="w-4 h-4 text-stone-600" />
+                            <Plus className="w-4 h-4 text-yellow-700" />
                             <span>Nouvelle discussion</span>
                         </button>
                     </div>
 
                     {/* Discussions List */}
-                    <div className="flex-1 overflow-y-auto p-3 space-y-1">
-                        <div className="px-2 py-1.5 text-[11px] font-semibold text-stone-400 uppercase tracking-wider">
+                    <div className="flex-1 overflow-y-auto p-2.5 space-y-1">
+                        <div className="px-2 py-1 text-[11px] font-semibold text-stone-400 uppercase tracking-wider">
                             Récents
                         </div>
 
@@ -300,11 +318,11 @@ export default function Assistant({ driver = {} }) {
                                     onClick={() => setActiveThreadId(th.id)}
                                     className={`group flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs cursor-pointer transition-colors ${
                                         isActive 
-                                            ? 'bg-yellow-100/70 text-stone-900 font-semibold border border-yellow-300/60' 
+                                            ? 'bg-yellow-100/80 text-stone-900 font-semibold border border-yellow-300/80 shadow-2xs' 
                                             : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
                                     }`}
                                 >
-                                    <div className="flex items-center gap-2.5 truncate flex-1">
+                                    <div className="flex items-center gap-2 truncate flex-1">
                                         <MessageSquare className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-yellow-800' : 'text-stone-400'}`} />
                                         <span className="truncate">{th.title}</span>
                                     </div>
@@ -322,8 +340,8 @@ export default function Assistant({ driver = {} }) {
                     </div>
 
                     {/* User Footer */}
-                    <div className="p-3.5 border-t border-stone-200/60 bg-stone-50 flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
+                    <div className="p-3 border-t border-stone-200/80 bg-stone-100/50 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
                             <div className="w-7 h-7 rounded-full bg-yellow-400 text-yellow-950 flex items-center justify-center font-bold text-xs border border-yellow-500">
                                 {user.first_name ? user.first_name.charAt(0) : 'S'}
                             </div>
@@ -338,20 +356,27 @@ export default function Assistant({ driver = {} }) {
                 </aside>
 
                 {/* 2. MAIN CONVERSATION CANVAS */}
-                <main className="flex-1 flex flex-col bg-white overflow-hidden relative">
+                <main className="flex-1 flex flex-col h-full bg-white overflow-hidden relative">
                     
                     {/* Top Canvas Header with Sidebar Toggle & Model Badge */}
-                    <header className="h-14 px-5 border-b border-stone-100 flex items-center justify-between shrink-0 bg-white">
-                        <div className="flex items-center gap-3">
+                    <header className="h-13 px-4 sm:px-6 border-b border-stone-100 flex items-center justify-between shrink-0 bg-white z-10">
+                        <div className="flex items-center gap-2 sm:gap-3">
                             <button
                                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                                className="p-2 hover:bg-stone-100 text-stone-600 hover:text-stone-900 rounded-xl transition-colors"
-                                title={sidebarOpen ? "Masquer la barre latérale" : "Afficher la barre latérale"}
+                                className={`p-2 rounded-xl transition-all flex items-center gap-1.5 text-xs font-semibold ${
+                                    sidebarOpen 
+                                        ? 'hover:bg-stone-100 text-stone-600 hover:text-stone-900' 
+                                        : 'bg-yellow-50 hover:bg-yellow-100 text-stone-800 hover:text-yellow-950 border border-yellow-200'
+                                }`}
+                                title={sidebarOpen ? "Masquer l'historique des discussions" : "Afficher l'historique des discussions"}
                             >
                                 {sidebarOpen ? (
-                                    <PanelLeftClose className="w-4 h-4" />
+                                    <PanelLeftClose className="w-4 h-4 text-stone-600" />
                                 ) : (
-                                    <PanelLeftOpen className="w-4 h-4" />
+                                    <>
+                                        <PanelLeftOpen className="w-4 h-4 text-yellow-800" />
+                                        <span className="hidden sm:inline text-[11px] font-bold text-stone-800">Historique</span>
+                                    </>
                                 )}
                             </button>
 
@@ -360,76 +385,42 @@ export default function Assistant({ driver = {} }) {
                                     <Sparkles className="w-4 h-4 text-yellow-600" />
                                     <span>Sellify AI</span>
                                 </span>
-                                <span className="px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 text-[10px] font-semibold border border-stone-200">
-                                    Gemini 3.5 Flash
+                                <span className="px-2.5 py-0.5 rounded-full bg-yellow-50 text-yellow-950 text-[10px] font-bold border border-yellow-300 shadow-2xs">
+                                    Sellify AI 1.2 Flash
                                 </span>
                             </div>
                         </div>
 
                         <button
                             onClick={handleNewChat}
-                            className="text-xs font-semibold text-stone-600 hover:text-stone-900 px-3 py-1.5 hover:bg-stone-100 rounded-xl transition-colors flex items-center gap-1.5"
+                            className="text-xs font-semibold text-stone-700 hover:text-stone-900 px-3 py-1.5 hover:bg-yellow-50 border border-stone-200 hover:border-yellow-400 rounded-xl transition-all flex items-center gap-1.5 shadow-2xs"
                         >
-                            <Plus className="w-3.5 h-3.5 text-stone-500" />
+                            <Plus className="w-3.5 h-3.5 text-yellow-700" />
                             <span className="hidden sm:inline">Nouveau chat</span>
                         </button>
                     </header>
 
-                    {/* Chat Content Body */}
+                    {/* Chat Content Body (Scrollable) */}
                     <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-6">
                         
                         {/* CASE A: EMPTY STATE (LIKE GEMINI HOMEPAGE) */}
                         {messages.length === 0 ? (
-                            <div className="max-w-2xl mx-auto h-full flex flex-col justify-center items-center text-center space-y-8 py-8 animate-in fade-in">
+                            <div className="max-w-2xl mx-auto min-h-full flex flex-col justify-center items-center text-center space-y-6 py-6 animate-in fade-in">
                                 
-                                <div className="space-y-3">
+                                <div className="space-y-2.5">
                                     <div className="w-12 h-12 rounded-2xl bg-yellow-400 text-yellow-950 flex items-center justify-center mx-auto shadow-2xs border border-yellow-500">
                                         <Sparkles className="w-6 h-6" />
                                     </div>
                                     <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
                                         Sur quoi devrions-nous nous concentrer ?
                                     </h1>
-                                    <p className="text-xs sm:text-sm text-stone-500 font-normal max-w-md mx-auto">
-                                        Bonjour {user.first_name || 'Chauffeur'}. Je suis Sellify AI, prêt à répondre à toutes vos questions logistiques, gains et tournées.
+                                    <p className="text-xs sm:text-sm text-stone-500 font-normal max-w-md mx-auto leading-relaxed">
+                                        Bonjour {user.first_name || 'Chauffeur'}. Je suis Sellify AI, votre copilote officiel prêt à vous guider sur vos tournées, gains et livraisons.
                                     </p>
                                 </div>
 
-                                {/* Central Big Gemini Search Bar */}
-                                <div className="w-full">
-                                    <form
-                                        onSubmit={(e) => {
-                                            e.preventDefault();
-                                            handleSendMessage();
-                                        }}
-                                        className="w-full bg-stone-50 hover:bg-stone-100/70 border border-stone-200/90 rounded-3xl p-2.5 sm:p-3 shadow-sm transition-all focus-within:ring-2 focus-within:ring-yellow-400 focus-within:bg-white flex items-center gap-3"
-                                    >
-                                        <input
-                                            ref={inputRef}
-                                            type="text"
-                                            value={input}
-                                            onChange={(e) => setInput(e.target.value)}
-                                            placeholder="Demander à Sellify AI..."
-                                            className="flex-1 bg-transparent text-xs sm:text-sm text-stone-900 outline-none placeholder-stone-400 px-3 font-normal"
-                                            disabled={loading}
-                                            autoFocus
-                                        />
-
-                                        <span className="hidden sm:inline-block px-2.5 py-1 rounded-full bg-white text-stone-500 font-semibold text-[10px] border border-stone-200">
-                                            Flash 3.5
-                                        </span>
-
-                                        <button
-                                            type="submit"
-                                            disabled={loading || !input.trim()}
-                                            className="w-9 h-9 rounded-full bg-stone-900 hover:bg-stone-800 disabled:bg-stone-200 text-white flex items-center justify-center transition-all shadow-2xs shrink-0"
-                                        >
-                                            <ArrowUp className="w-4 h-4" />
-                                        </button>
-                                    </form>
-                                </div>
-
                                 {/* 4 Gemini-style Suggestion Cards */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full text-left">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full text-left pt-2">
                                     {suggestions.map((s, idx) => {
                                         const IconComponent = s.icon;
                                         return (
@@ -437,13 +428,13 @@ export default function Assistant({ driver = {} }) {
                                                 key={idx}
                                                 type="button"
                                                 onClick={() => handleSendMessage(s.query)}
-                                                className="p-4 bg-stone-50/80 hover:bg-yellow-50/70 border border-stone-200/80 hover:border-yellow-300 rounded-2xl transition-all text-left space-y-1.5 shadow-2xs group"
+                                                className="p-3.5 bg-stone-50/80 hover:bg-yellow-50/70 border border-stone-200/80 hover:border-yellow-300 rounded-2xl transition-all text-left space-y-1 shadow-2xs group cursor-pointer"
                                             >
                                                 <div className="flex items-center gap-2 text-stone-900 font-bold text-xs group-hover:text-yellow-950">
-                                                    <IconComponent className="w-4 h-4 text-stone-500 group-hover:text-yellow-700" />
+                                                    <IconComponent className="w-4 h-4 text-stone-500 group-hover:text-yellow-700 shrink-0" />
                                                     <span>{s.title}</span>
                                                 </div>
-                                                <p className="text-[11px] text-stone-500 group-hover:text-stone-700 line-clamp-2 leading-relaxed">
+                                                <p className="text-[11px] text-stone-500 group-hover:text-stone-700 line-clamp-2 leading-relaxed font-normal">
                                                     {s.desc}
                                                 </p>
                                             </button>
@@ -454,11 +445,11 @@ export default function Assistant({ driver = {} }) {
                             </div>
                         ) : (
                             /* CASE B: ACTIVE CONVERSATION THREAD */
-                            <div className="max-w-3xl mx-auto space-y-6 pb-24">
+                            <div className="max-w-3xl mx-auto space-y-5 pb-6">
                                 {messages.map((msg) => (
                                     <div
                                         key={msg.id}
-                                        className={`flex items-start gap-3.5 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                                        className={`flex items-start gap-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                                     >
                                         {msg.sender === 'ai' && (
                                             <div className="w-7 h-7 rounded-xl bg-yellow-400 text-yellow-950 flex items-center justify-center shrink-0 border border-yellow-500 shadow-2xs mt-1">
@@ -467,10 +458,10 @@ export default function Assistant({ driver = {} }) {
                                         )}
 
                                         <div
-                                            className={`max-w-[85%] sm:max-w-[80%] rounded-2xl p-4 space-y-3 leading-relaxed ${
+                                            className={`max-w-[85%] sm:max-w-[80%] rounded-2xl p-3.5 sm:p-4 space-y-2.5 leading-relaxed ${
                                                 msg.sender === 'user'
-                                                    ? 'bg-stone-100 text-stone-900 font-medium rounded-tr-none border border-stone-200/70'
-                                                    : 'bg-transparent text-stone-800'
+                                                    ? 'bg-stone-100 text-stone-900 font-medium rounded-tr-none border border-stone-200/80'
+                                                    : 'bg-stone-50/60 text-stone-800 border border-stone-200/60 rounded-tl-none'
                                             }`}
                                         >
                                             {msg.sender === 'ai' && msg.isNew ? (
@@ -511,11 +502,11 @@ export default function Assistant({ driver = {} }) {
                                 ))}
 
                                 {loading && (
-                                    <div className="flex items-start gap-3.5 justify-start">
+                                    <div className="flex items-start gap-3 justify-start">
                                         <div className="w-7 h-7 rounded-xl bg-yellow-400 text-yellow-950 flex items-center justify-center shrink-0 border border-yellow-500 shadow-2xs mt-1">
                                             <Sparkles className="w-3.5 h-3.5" />
                                         </div>
-                                        <div className="text-xs text-stone-500 flex items-center gap-2 p-3">
+                                        <div className="text-xs text-stone-500 flex items-center gap-2 p-3 bg-stone-50 rounded-2xl border border-stone-200/60">
                                             <span className="w-2 h-2 rounded-full bg-yellow-500 animate-ping" />
                                             <span>Sellify AI rédige sa réponse...</span>
                                         </div>
@@ -528,44 +519,43 @@ export default function Assistant({ driver = {} }) {
 
                     </div>
 
-                    {/* Bottom Pinned Gemini Prompt Bar when in active conversation */}
-                    {messages.length > 0 && (
-                        <div className="p-4 bg-gradient-to-t from-white via-white to-transparent shrink-0">
-                            <div className="max-w-3xl mx-auto">
-                                <form
-                                    onSubmit={(e) => {
-                                        e.preventDefault();
-                                        handleSendMessage();
-                                    }}
-                                    className="w-full bg-stone-50 border border-stone-200/90 rounded-3xl p-2 sm:p-2.5 shadow-sm transition-all focus-within:ring-2 focus-within:ring-yellow-400 focus-within:bg-white flex items-center gap-2.5"
+                    {/* Bottom Sticky Gemini Prompt Bar */}
+                    <div className="p-3 sm:p-4 bg-white border-t border-stone-100 shrink-0">
+                        <div className="max-w-3xl mx-auto">
+                            <form
+                                onSubmit={(e) => {
+                                    e.preventDefault();
+                                    handleSendMessage();
+                                }}
+                                className="w-full bg-stone-50 hover:bg-stone-100/70 border border-stone-200 rounded-3xl p-2 sm:p-2.5 shadow-2xs transition-all focus-within:ring-2 focus-within:ring-yellow-400 focus-within:bg-white flex items-center gap-2.5"
+                            >
+                                <input
+                                    ref={inputRef}
+                                    type="text"
+                                    value={input}
+                                    onChange={(e) => setInput(e.target.value)}
+                                    placeholder="Poser une question à Sellify AI..."
+                                    className="flex-1 bg-transparent text-xs sm:text-sm text-stone-900 outline-none placeholder-stone-400 px-3 font-normal"
+                                    disabled={loading}
+                                />
+
+                                <span className="hidden sm:inline-block px-2.5 py-1 rounded-full bg-yellow-50 text-yellow-950 font-bold text-[10px] border border-yellow-300 shrink-0">
+                                    Sellify AI 1.2 Flash
+                                </span>
+
+                                <button
+                                    type="submit"
+                                    disabled={loading || !input.trim()}
+                                    className="w-8 h-8 rounded-full bg-stone-900 hover:bg-stone-800 disabled:bg-stone-200 text-white flex items-center justify-center transition-all shadow-2xs shrink-0"
                                 >
-                                    <input
-                                        type="text"
-                                        value={input}
-                                        onChange={(e) => setInput(e.target.value)}
-                                        placeholder="Poser une question à Sellify AI..."
-                                        className="flex-1 bg-transparent text-xs sm:text-sm text-stone-900 outline-none placeholder-stone-400 px-3 font-normal"
-                                        disabled={loading}
-                                    />
-
-                                    <span className="hidden sm:inline-block px-2.5 py-1 rounded-full bg-white text-stone-500 font-semibold text-[10px] border border-stone-200">
-                                        Flash 3.5
-                                    </span>
-
-                                    <button
-                                        type="submit"
-                                        disabled={loading || !input.trim()}
-                                        className="w-8 h-8 rounded-full bg-stone-900 hover:bg-stone-800 disabled:bg-stone-200 text-white flex items-center justify-center transition-all shadow-2xs shrink-0"
-                                    >
-                                        <ArrowUp className="w-4 h-4" />
-                                    </button>
-                                </form>
-                                <p className="text-[10px] text-stone-400 text-center mt-2">
-                                    Sellify AI peut faire des erreurs. Vérifiez les informations financières et réglementaires.
-                                </p>
-                            </div>
+                                    <ArrowUp className="w-4 h-4" />
+                                </button>
+                            </form>
+                            <p className="text-[10px] text-stone-400 text-center mt-1.5">
+                                Sellify AI 1.2 Flash peut faire des erreurs. Vérifiez les informations financières et réglementaires.
+                            </p>
                         </div>
-                    )}
+                    </div>
 
                 </main>
 

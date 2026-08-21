@@ -175,6 +175,10 @@ class DriverModuleFullTest extends TestCase
 
     public function test_driver_can_interact_with_ai_business_assistant(): void
     {
+        \App\Ai\Agents\SellifyDriverAgent::fake([
+            'Analyse en direct : Forte demande détectée sur Bastos et Akwa avec bonus de commission.'
+        ]);
+
         $chatRes = $this->actingAs($this->driverUser)->postJson(route('driver.assistant.chat'), [
             'message' => '/zones',
         ]);
