@@ -18,7 +18,10 @@ import {
     Check,
     CircleDot,
     ShoppingBag,
-    ArrowRight
+    ArrowRight,
+    Navigation,
+    PhoneCall,
+    Map
 } from 'lucide-react';
 
 export default function DriverLayout({ children, title }) {
@@ -28,11 +31,12 @@ export default function DriverLayout({ children, title }) {
     const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
     const [pushAlert, setPushAlert] = useState(null);
 
-    const user = auth.user;
+    const user = auth.user || {};
     const driver = user.driver || {};
 
     const [activityStatus, setActivityStatus] = useState(driver.activity_status || 'online');
 
+    // Simulate incoming push dispatch alert (Uber / DiDi style) after 3.5 seconds
     useEffect(() => {
         const timer = setTimeout(() => {
             setPushAlert({
@@ -42,9 +46,11 @@ export default function DriverLayout({ children, title }) {
                 customer_name: 'Marc Kamga',
                 destination: 'Akwa, Immeuble Rose',
                 fee: 2500,
+                distance: '3.4 km',
+                duration: '12 min',
                 time: 'À l\'instant'
             });
-        }, 3000);
+        }, 3500);
         return () => clearTimeout(timer);
     }, []);
 
@@ -69,8 +75,8 @@ export default function DriverLayout({ children, title }) {
     ];
 
     const driverNotifications = [
-        { id: 1, title: "Nouvelle course à proximité !", desc: "Colis #SLF-2026-X892 prêt chez Tech Shop (Bastos).", time: "Il y a 2 min" },
-        { id: 2, title: "Paiement de livraison crédité", desc: "+ 2 500 FCFA ajoutés à votre solde.", time: "Il y a 1 heure" }
+        { id: 1, title: "Nouvelle course disponible !", desc: "Colis #SLF-2026-X892 prêt chez Tech Shop (Bastos).", time: "Il y a 2 min" },
+        { id: 2, title: "Paiement de livraison crédité", desc: "+ 2 500 FCFA ajoutés à votre portefeuille.", time: "Il y a 1 heure" }
     ];
 
     return (
@@ -323,7 +329,7 @@ export default function DriverLayout({ children, title }) {
                         {children}
                     </main>
 
-                    {/* REAL-TIME PUSH NOTIFICATION ALERT POPUP */}
+                    {/* REAL-TIME PUSH DISPATCH POPUP (Matching DiDi / Uber Screenshot 1 & 2) */}
                     {pushAlert && (
                         <div className="fixed bottom-6 right-6 z-50 max-w-sm w-full bg-stone-900 text-white rounded-2xl p-5 shadow-2xl border border-yellow-500 animate-in slide-in-from-bottom-5 duration-200 space-y-3">
                             <div className="flex items-center justify-between border-b border-stone-800 pb-2">
@@ -331,15 +337,18 @@ export default function DriverLayout({ children, title }) {
                                     <div className="w-6 h-6 rounded-full bg-yellow-400 text-yellow-950 flex items-center justify-center font-bold text-xs animate-bounce">
                                         🔔
                                     </div>
-                                    <h4 className="font-bold text-xs text-yellow-400">Nouvelle course à proximité !</h4>
+                                    <h4 className="font-bold text-xs text-yellow-400">Nouvelle proposition de course !</h4>
                                 </div>
                                 <button onClick={() => setPushAlert(null)} className="text-stone-400 hover:text-white">
                                     <X className="w-4 h-4" />
                                 </button>
                             </div>
 
-                            <div className="space-y-1.5 text-xs text-stone-300 font-normal">
-                                <p><strong className="text-white">Commande :</strong> #{pushAlert.order_number}</p>
+                            <div className="space-y-2 text-xs text-stone-300 font-normal">
+                                <div className="flex justify-between items-center bg-stone-800 p-2 rounded-xl">
+                                    <span className="font-mono text-stone-400">#{pushAlert.order_number}</span>
+                                    <span className="text-yellow-400 font-bold">{pushAlert.distance} · {pushAlert.duration}</span>
+                                </div>
                                 <p><strong className="text-white">Boutique :</strong> {pushAlert.shop_name}</p>
                                 <p><strong className="text-white">Destination :</strong> {pushAlert.destination}</p>
                                 <p className="text-emerald-400 font-bold text-sm pt-1">
@@ -350,16 +359,16 @@ export default function DriverLayout({ children, title }) {
                             <div className="flex gap-2 pt-2">
                                 <button
                                     onClick={() => handleAcceptPush(pushAlert.order_number)}
-                                    className="flex-1 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-2xs transition-colors flex items-center justify-center gap-1"
+                                    className="flex-1 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-2xs transition-colors flex items-center justify-center gap-1"
                                 >
-                                    <span>Valider / Accepter</span>
+                                    <span>Accepter la course</span>
                                     <ArrowRight className="w-3.5 h-3.5" />
                                 </button>
                                 <button
                                     onClick={() => setPushAlert(null)}
-                                    className="px-3 py-2 bg-stone-800 hover:bg-stone-700 text-stone-300 font-semibold text-xs rounded-xl"
+                                    className="px-3 py-2.5 bg-stone-800 hover:bg-stone-700 text-stone-300 font-semibold text-xs rounded-xl"
                                 >
-                                    Décliner
+                                    Refuser
                                 </button>
                             </div>
                         </div>

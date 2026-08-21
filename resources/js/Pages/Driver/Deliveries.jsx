@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
 import DriverLayout from '@/Layouts/DriverLayout';
 import { 
@@ -11,35 +11,25 @@ import {
     ArrowRight,
     ShoppingBag,
     PackageCheck,
-    TrendingUp
+    TrendingUp,
+    Store,
+    XCircle,
+    Navigation,
+    UserCheck
 } from 'lucide-react';
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend,
-    ArcElement
-} from 'chart.js';
-import { Bar, Doughnut } from 'react-chartjs-2';
-
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend,
-    ArcElement
-);
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { fetchOSRMRoute } from '@/Services/RoutingService';
 
 export default function Deliveries({ driver = {}, deliveries = { data: [] }, filters = {} }) {
+    const mapRef = useRef(null);
+    const mapInstance = useRef(null);
     const [tab, setTab] = useState(filters.tab || 'all');
     const [search, setSearch] = useState(filters.search || '');
     const [selectedDeliveryForOtp, setSelectedDeliveryForOtp] = useState(null);
+    const [previewDelivery, setPreviewDelivery] = useState(deliveries.data?.[0] || null);
     const [otpInput, setOtpInput] = useState('');
+    const [routeStats, setRouteStats] = useState({ distance: '3.4 km', duration: '12 min' });
     const { post, processing } = useForm();
 
     const handleTabChange = (t) => {
@@ -69,46 +59,70 @@ export default function Deliveries({ driver = {}, deliveries = { data: [] }, fil
         });
     };
 
-    // Chart.js Configuration
-    const deliveriesBarData = {
-        labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
-        datasets: [
-            {
-                label: 'Livraisons exécutées',
-                data: [5, 8, 7, 12, 16, 19, 14],
-                backgroundColor: '#eab308',
-                borderRadius: 6,
-            }
-        ]
-    };
+    // Initialize Map Dispatch Preview (Matching Screenshot 1 & 2)
+    useEffect(() => {
+        if (!mapRef.current) return;
 
-    const deliveriesBarOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-            x: { grid: { display: false } },
-            y: { grid: { color: 'rgba(231, 229, 228, 0.6)' } }
+        if (mapInstance.current) {
+            mapInstance.current.remove();
         }
-    };
 
-    const statusDoughnutData = {
-        labels: ['Livrées avec OTP', 'En acheminement', 'Disponibles'],
-        datasets: [
-            {
-                data: [48, 3, 5],
-                backgroundColor: ['#10b981', '#eab308', '#3b82f6'],
-                borderWidth: 0,
+        const map = L.map(mapRef.current, {
+            center: [3.8650, 11.5150],
+            zoom: 13,
+            zoomControl: false
+        });
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+
+        const pShop = [3.8780, 11.5121];
+        const pCustomer = [3.8650, 11.5250];
+
+        // Shop Marker
+        const shopIcon = L.divIcon({
+            className: 'custom-shop-pin',
+            html: `<div style="background-color: #eab308; color: #1c1917; padding: 6px 10px; border-radius: 12px; border: 2px solid #1c1917; font-weight: bold; font-size: 11px; font-family: sans-serif;">🏬 Retrait: ${previewDelivery?.shop?.name || 'Bastos Shop'}</div>`,
+            iconSize: [140, 32],
+            iconAnchor: [70, 16]
+        });
+        L.marker(pShop, { icon: shopIcon }).addTo(map);
+
+        // Customer Marker
+        const customerIcon = L.divIcon({
+            className: 'custom-customer-pin',
+            html: `<div style="background-color: #10b981; color: #ffffff; padding: 6px 10px; border-radius: 12px; font-weight: bold; font-size: 11px; font-family: sans-serif;">📍 Destination: ${previewDelivery?.user?.first_name || 'Client'}</div>`,
+            iconSize: [140, 32],
+            iconAnchor: [70, 16]
+        });
+        L.marker(pCustomer, { icon: customerIcon }).addTo(map);
+
+        // Fetch OSRM Route
+        fetchOSRMRoute(pShop[0], pShop[1], pCustomer[0], pCustomer[1]).then((res) => {
+            if (res.coordinates) {
+                L.polyline(res.coordinates, {
+                    color: '#eab308',
+                    weight: 5,
+                    dashArray: '10, 8'
+                }).addTo(map);
+
+                setRouteStats({
+                    distance: `${res.distanceKm} km`,
+                    duration: `${res.durationMin} min`
+                });
             }
-        ]
-    };
+        });
 
-    const statusDoughnutOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
-        cutout: '70%'
-    };
+        mapInstance.current = map;
+
+        return () => {
+            if (mapInstance.current) {
+                mapInstance.current.remove();
+                mapInstance.current = null;
+            }
+        };
+    }, [previewDelivery]);
 
     return (
         <DriverLayout title="Gestion des courses & livraisons">
@@ -121,84 +135,93 @@ export default function Deliveries({ driver = {}, deliveries = { data: [] }, fil
                     <div>
                         <div className="flex items-center gap-2 text-xs font-semibold text-yellow-700">
                             <Truck className="w-4 h-4 text-yellow-600" />
-                            <span>Répertoire des livraisons attribuées & disponibles</span>
+                            <span>Dispatching de course & itinéraire de livraison</span>
                         </div>
                         <h1 className="text-xl font-bold text-stone-900 mt-1">
-                            Gestion des courses & livraisons
+                            Inspection des courses & validation
                         </h1>
                         <p className="text-xs text-stone-500 font-normal mt-0.5">
-                            Acceptez de nouvelles courses, effectuez le suivi des colis en cours et saisissez les OTP de clôture.
+                            Visualisez l'itinéraire complet sur carte avant d'accepter ou décliner la prise en charge d'un colis.
                         </p>
                     </div>
                 </div>
 
-                {/* 4 Stat Cards Row */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-2">
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs font-semibold text-stone-500">Total livraisons</span>
-                            <div className="w-8 h-8 bg-yellow-50 rounded-xl flex items-center justify-center text-yellow-700 border border-yellow-200">
-                                <ShoppingBag className="w-4 h-4" />
-                            </div>
-                        </div>
-                        <p className="text-2xl font-bold text-stone-900">56</p>
-                        <span className="text-[11px] text-stone-400 font-normal">Historique cumulé</span>
-                    </div>
-
-                    <div className="bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-2">
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs font-semibold text-stone-500">Prêtes au retrait</span>
-                            <div className="w-8 h-8 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 border border-blue-200">
-                                <Clock className="w-4 h-4" />
-                            </div>
-                        </div>
-                        <p className="text-2xl font-bold text-blue-600">5</p>
-                        <span className="text-[11px] text-stone-400 font-normal">Disponibles dans votre secteur</span>
-                    </div>
-
-                    <div className="bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-2">
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs font-semibold text-stone-500">En acheminement</span>
-                            <div className="w-8 h-8 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600 border border-amber-200">
-                                <Truck className="w-4 h-4" />
-                            </div>
-                        </div>
-                        <p className="text-2xl font-bold text-amber-600">3</p>
-                        <span className="text-[11px] text-stone-400 font-normal">Prise en charge active</span>
-                    </div>
-
-                    <div className="bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-2">
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs font-semibold text-stone-500">Livrées avec OTP</span>
-                            <div className="w-8 h-8 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 border border-emerald-200">
-                                <CheckCircle2 className="w-4 h-4" />
-                            </div>
-                        </div>
-                        <p className="text-2xl font-bold text-emerald-600">48</p>
-                        <span className="text-[11px] text-stone-400 font-normal">Validation OTP confirmée</span>
-                    </div>
-                </div>
-
-                {/* CHART.JS CHARTS ROW */}
+                {/* TRIP PREVIEW MAP & DISPATCH SHEET ROW (Matching Screenshots 1 & 2) */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2 bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-4">
-                        <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-                            <h3 className="font-bold text-sm text-stone-900">Volume quotidien des courses exécutées</h3>
-                            <span className="text-xs text-stone-400">Chart.js Graphique</span>
-                        </div>
-                        <div className="h-52">
-                            <Bar data={deliveriesBarData} options={deliveriesBarOptions} />
+                    
+                    {/* Interactive Leaflet Map Preview (2 cols) */}
+                    <div className="lg:col-span-2 bg-stone-900 rounded-2xl overflow-hidden border border-stone-200/80 shadow-2xs relative min-h-[380px] flex flex-col justify-between">
+                        <div ref={mapRef} className="absolute inset-0 z-0" />
+
+                        {/* Top Distance / ETA Floating Badge (Matching Screenshot 1) */}
+                        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 bg-white/95 backdrop-blur-md border border-stone-200 px-5 py-2 rounded-full shadow-md flex items-center gap-3 text-xs font-bold text-stone-900">
+                            <span className="text-yellow-600 font-extrabold">{routeStats.distance}</span>
+                            <span className="text-stone-400">·</span>
+                            <span>{routeStats.duration} de trajet estimé</span>
                         </div>
                     </div>
 
-                    <div className="bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-4">
-                        <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-                            <h3 className="font-bold text-sm text-stone-900">Répartition par statut</h3>
+                    {/* DISPATCH SHEET CARD (Matching Screenshot 2 Trip Card) */}
+                    <div className="bg-white border border-stone-200/80 rounded-2xl p-6 shadow-2xs flex flex-col justify-between space-y-4">
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                                <h3 className="font-bold text-sm text-stone-900">Détails de la course sélectionnée</h3>
+                                <span className="text-xs bg-yellow-100 text-yellow-950 px-2.5 py-0.5 rounded-full font-bold">
+                                    +{Number(previewDelivery?.shipping_fee || 2500).toLocaleString('fr-FR')} FCFA
+                                </span>
+                            </div>
+
+                            {previewDelivery ? (
+                                <div className="space-y-3 text-xs text-stone-700 font-normal">
+                                    <div className="p-3 bg-stone-50 rounded-xl space-y-1">
+                                        <span className="text-stone-400 block font-normal">Numéro de commande :</span>
+                                        <strong className="text-stone-900 font-mono text-sm">#{previewDelivery.order_number}</strong>
+                                    </div>
+
+                                    {/* Timeline Address (Matching Screenshot 2) */}
+                                    <div className="relative border-l-2 border-dashed border-yellow-400 pl-4 space-y-3 ml-2 text-xs">
+                                        <div>
+                                            <span className="text-[10px] text-yellow-700 font-bold uppercase block">Retrait Boutique</span>
+                                            <strong className="text-stone-900 block">{previewDelivery.shop?.name || 'Tech Shop'}</strong>
+                                        </div>
+
+                                        <div>
+                                            <span className="text-[10px] text-emerald-700 font-bold uppercase block">Livraison Client</span>
+                                            <strong className="text-stone-900 block">{previewDelivery.user ? `${previewDelivery.user.first_name} ${previewDelivery.user.last_name}` : 'Marc Kamga'}</strong>
+                                            <span className="text-[11px] text-stone-400 block">{previewDelivery.shipping_address || 'Douala / Yaoundé'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <p className="text-xs text-stone-400 py-6 text-center">Sélectionnez une commande dans la liste ci-dessous.</p>
+                            )}
                         </div>
-                        <div className="h-52 relative flex items-center justify-center">
-                            <Doughnut data={statusDoughnutData} options={statusDoughnutOptions} />
+
+                        {/* Action Buttons (Matching Screenshot 2 Request Car / Accept) */}
+                        <div className="pt-3 border-t border-stone-100 space-y-2">
+                            {previewDelivery && previewDelivery.delivery_status === 'ready_for_pickup' && !previewDelivery.driver_id && (
+                                <button
+                                    onClick={() => handleAccept(previewDelivery.order_number)}
+                                    disabled={processing}
+                                    className="w-full py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors border border-yellow-500 flex items-center justify-center gap-1.5"
+                                >
+                                    <span>Accepter la course</span>
+                                    <ArrowRight className="w-4 h-4" />
+                                </button>
+                            )}
+
+                            {previewDelivery && previewDelivery.delivery_status === 'in_transit' && (
+                                <button
+                                    onClick={() => setSelectedDeliveryForOtp(previewDelivery)}
+                                    className="w-full py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors border border-yellow-500 flex items-center justify-center gap-1.5"
+                                >
+                                    <Key className="w-4 h-4" />
+                                    <span>Saisir l'OTP de livraison</span>
+                                </button>
+                            )}
                         </div>
                     </div>
+
                 </div>
 
                 {/* Filter Tabs & Search */}
@@ -255,7 +278,13 @@ export default function Deliveries({ driver = {}, deliveries = { data: [] }, fil
                             <tbody className="divide-y divide-stone-100">
                                 {deliveries.data && deliveries.data.length > 0 ? (
                                     deliveries.data.map((d) => (
-                                        <tr key={d.id} className="hover:bg-stone-50/60 transition-colors">
+                                        <tr 
+                                            key={d.id} 
+                                            onClick={() => setPreviewDelivery(d)}
+                                            className={`hover:bg-stone-50/60 transition-colors cursor-pointer ${
+                                                previewDelivery?.id === d.id ? 'bg-yellow-50/50 font-semibold' : ''
+                                            }`}
+                                        >
                                             <td className="py-3.5 px-4 font-mono font-bold text-stone-900">
                                                 #{d.order_number}
                                                 <span className="block text-[10px] text-stone-400 font-sans font-normal">
@@ -286,7 +315,7 @@ export default function Deliveries({ driver = {}, deliveries = { data: [] }, fil
                                             <td className="py-3.5 px-4 text-right">
                                                 {d.delivery_status === 'ready_for_pickup' && !d.driver_id && (
                                                     <button
-                                                        onClick={() => handleAccept(d.order_number)}
+                                                        onClick={(e) => { e.stopPropagation(); handleAccept(d.order_number); }}
                                                         disabled={processing}
                                                         className="px-3 py-1.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-[11px] rounded-xl shadow-2xs transition-colors border border-yellow-500"
                                                     >
@@ -295,7 +324,7 @@ export default function Deliveries({ driver = {}, deliveries = { data: [] }, fil
                                                 )}
                                                 {d.delivery_status === 'in_transit' && (
                                                     <button
-                                                        onClick={() => setSelectedDeliveryForOtp(d)}
+                                                        onClick={(e) => { e.stopPropagation(); setSelectedDeliveryForOtp(d); }}
                                                         className="px-3 py-1.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-[11px] rounded-xl shadow-2xs transition-colors border border-yellow-500 inline-flex items-center gap-1"
                                                     >
                                                         <Key className="w-3.5 h-3.5" />
