@@ -6,23 +6,23 @@ import {
     Send, 
     Bot, 
     User, 
-    Flame, 
-    Wallet, 
-    Award, 
+    Plus, 
+    MessageSquare, 
+    Trash2, 
+    PanelLeftClose, 
+    PanelLeftOpen, 
+    ArrowUp, 
+    Compass, 
     TrendingUp, 
-    ArrowRight, 
-    Coins, 
+    Fuel, 
     ShieldCheck, 
-    Trash2,
-    RefreshCw,
-    Compass,
-    HelpCircle,
-    Zap,
-    MapPin
+    Award,
+    ChevronDown,
+    ArrowRight
 } from 'lucide-react';
 import MarkdownText from '@/Components/MarkdownText';
 
-const STORAGE_KEY = 'sellify_ai_driver_chat_history_v1';
+const THREADS_STORAGE_KEY = 'sellify_ai_gemini_threads_v1';
 
 // Typewriter Text Component for Sellify AI Streaming Effect
 function TypewriterMessage({ text, onComplete }) {
@@ -37,7 +37,6 @@ function TypewriterMessage({ text, onComplete }) {
 
         const interval = setInterval(() => {
             if (indexRef.current < text.length) {
-                // Advance by chunks of 4-6 chars for smooth, natural reading speed
                 const nextChunk = text.slice(0, indexRef.current + 5);
                 setDisplayedText(nextChunk);
                 indexRef.current += 5;
@@ -46,7 +45,7 @@ function TypewriterMessage({ text, onComplete }) {
                 clearInterval(interval);
                 if (onComplete) onComplete();
             }
-        }, 16);
+        }, 15);
 
         return () => clearInterval(interval);
     }, [text]);
@@ -59,49 +58,54 @@ function TypewriterMessage({ text, onComplete }) {
     );
 }
 
-export default function Assistant({ 
-    driver = {}, 
-    kpis = {}, 
-    hotspots = [] 
-}) {
+export default function Assistant({ driver = {} }) {
     const user = driver.user || {};
     const chatEndRef = useRef(null);
+    const inputRef = useRef(null);
 
-    const initialWelcomeMessage = {
-        id: 'init-welcome',
-        sender: 'ai',
-        text: `Bonjour ${user.first_name || 'Chauffeur'} ! Je suis Sellify AI, votre assistant intelligent propulsé par Google Gemini.\n\nJe peux analyser vos performances de livraison, vous conseiller les meilleurs créneaux horaires, localiser les zones à forte demande ou simuler vos retraits de gains.\n\nPosez-moi votre question en toute liberté ci-dessous.`,
-        timestamp: 'À l\'instant',
-        isNew: false,
-    };
-
-    // Load persisted chat history from localStorage
-    const [messages, setMessages] = useState(() => {
+    // Multi-Thread state in localStorage
+    const [threads, setThreads] = useState(() => {
         try {
-            const saved = localStorage.getItem(STORAGE_KEY);
+            const saved = localStorage.getItem(THREADS_STORAGE_KEY);
             if (saved) {
                 const parsed = JSON.parse(saved);
                 if (Array.isArray(parsed) && parsed.length > 0) {
-                    return parsed.map((m) => ({ ...m, isNew: false }));
+                    return parsed;
                 }
             }
         } catch (e) {
-            console.warn('Could not read chat history from localStorage:', e);
+            console.warn('Could not read threads from localStorage:', e);
         }
-        return [initialWelcomeMessage];
+        return [
+            {
+                id: 'thread-default',
+                title: 'Nouvelle discussion',
+                createdAt: new Date().toISOString(),
+                messages: []
+            }
+        ];
     });
 
+    const [activeThreadId, setActiveThreadId] = useState(() => {
+        return threads[0]?.id || 'thread-default';
+    });
+
+    const [sidebarOpen, setSidebarOpen] = useState(true);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
 
-    // Save chat history to localStorage whenever messages change
+    // Save threads to localStorage
     useEffect(() => {
         try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+            localStorage.setItem(THREADS_STORAGE_KEY, JSON.stringify(threads));
         } catch (e) {
-            console.warn('Could not save chat history to localStorage:', e);
+            console.warn('Could not save threads to localStorage:', e);
         }
-    }, [messages]);
+    }, [threads]);
+
+    // Active thread object
+    const currentThread = threads.find(t => t.id === activeThreadId) || threads[0];
+    const messages = currentThread ? currentThread.messages : [];
 
     const scrollToBottom = () => {
         chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -111,6 +115,42 @@ export default function Assistant({
         scrollToBottom();
     }, [messages, loading]);
 
+    // Create New Discussion
+    const handleNewChat = () => {
+        const newThread = {
+            id: `thread-${Date.now()}`,
+            title: 'Nouvelle discussion',
+            createdAt: new Date().toISOString(),
+            messages: []
+        };
+        setThreads(prev => [newThread, ...prev]);
+        setActiveThreadId(newThread.id);
+        setInput('');
+        setTimeout(() => inputRef.current?.focus(), 100);
+    };
+
+    // Delete Thread
+    const handleDeleteThread = (e, threadId) => {
+        e.stopPropagation();
+        const filtered = threads.filter(t => t.id !== threadId);
+        if (filtered.length === 0) {
+            const fresh = {
+                id: `thread-${Date.now()}`,
+                title: 'Nouvelle discussion',
+                createdAt: new Date().toISOString(),
+                messages: []
+            };
+            setThreads([fresh]);
+            setActiveThreadId(fresh.id);
+        } else {
+            setThreads(filtered);
+            if (activeThreadId === threadId) {
+                setActiveThreadId(filtered[0].id);
+            }
+        }
+    };
+
+    // Send Message
     const handleSendMessage = async (textToSend) => {
         const query = (textToSend || input).trim();
         if (!query || loading) return;
@@ -124,7 +164,20 @@ export default function Assistant({
             isNew: false,
         };
 
-        setMessages((prev) => [...prev, userMsg]);
+        // Update current thread with user message & title if first message
+        setThreads(prev => prev.map(t => {
+            if (t.id === activeThreadId) {
+                const isFirst = t.messages.length === 0;
+                const newTitle = isFirst ? (query.slice(0, 32) + (query.length > 32 ? '...' : '')) : t.title;
+                return {
+                    ...t,
+                    title: newTitle,
+                    messages: [...t.messages, userMsg]
+                };
+            }
+            return t;
+        }));
+
         setLoading(true);
 
         try {
@@ -146,340 +199,375 @@ export default function Assistant({
                 text: data.reply || "Désolé, je n'ai pas pu traiter votre demande pour le moment.",
                 action: data.action || null,
                 timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                isNew: true, // triggers typewriter animation
+                isNew: true,
             };
 
-            setMessages((prev) => [...prev, aiMsg]);
-        } catch (err) {
-            setMessages((prev) => [
-                ...prev,
-                {
-                    id: `err-${Date.now()}`,
-                    sender: 'ai',
-                    text: "Une erreur de connexion est survenue. Veuillez vérifier votre connexion internet ou réessayer dans un instant.",
-                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                    isNew: false,
+            setThreads(prev => prev.map(t => {
+                if (t.id === activeThreadId) {
+                    return {
+                        ...t,
+                        messages: [...t.messages, aiMsg]
+                    };
                 }
-            ]);
+                return t;
+            }));
+        } catch (err) {
+            setThreads(prev => prev.map(t => {
+                if (t.id === activeThreadId) {
+                    return {
+                        ...t,
+                        messages: [
+                            ...t.messages,
+                            {
+                                id: `err-${Date.now()}`,
+                                sender: 'ai',
+                                text: "Une erreur de connexion est survenue. Veuillez vérifier votre connexion internet ou réessayer.",
+                                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                                isNew: false,
+                            }
+                        ]
+                    };
+                }
+                return t;
+            }));
         } finally {
             setLoading(false);
         }
     };
 
-    const handleClearHistory = () => {
-        if (confirm("Voulez-vous réinitialiser l'historique de votre conversation avec Sellify AI ?")) {
-            localStorage.removeItem(STORAGE_KEY);
-            setMessages([initialWelcomeMessage]);
+    const suggestions = [
+        {
+            title: "Économie de carburant",
+            desc: "Conseils pour réduire ma consommation d'essence en moto lors des tournées",
+            icon: Fuel,
+            query: "Donne-moi des conseils pratiques et efficaces pour réduire ma consommation de carburant en moto lors de mes tournées à Douala et Yaoundé."
+        },
+        {
+            title: "Zones à forte demande",
+            desc: "Quels sont les quartiers avec le plus de commandes et de bonus en ce moment ?",
+            icon: TrendingUp,
+            query: "Quelles sont les zones et quartiers avec le plus de commandes et de bonus de surge pricing en ce moment ?"
+        },
+        {
+            title: "Chauffeur Expert",
+            desc: "Critères et livraisons restantes pour atteindre le rang Expert",
+            icon: Award,
+            query: "Combien de livraisons et quelle note me faut-il pour atteindre le statut Chauffeur Expert et quels sont les avantages ?"
+        },
+        {
+            title: "Paiements & Retraits",
+            desc: "Délais et modalités de transfert vers MTN MoMo et Orange Money",
+            icon: ShieldCheck,
+            query: "Comment fonctionnent les retraits de mes gains de livraison vers mon compte MTN Mobile Money ou Orange Money ?"
         }
-    };
-
-    const quickSuggestions = [
-        { label: "Maximiser mes gains aujourd'hui", query: "Comment puis-je maximiser mes revenus de livraison aujourd'hui ?" },
-        { label: "Où sont les zones à forte demande ?", query: "Quelles sont les zones et quartiers avec le plus de commandes en ce moment ?" },
-        { label: "Objectif Chauffeur Expert", query: "Combien de livraisons et quelle note me faut-il pour atteindre le statut Chauffeur Expert ?" },
-        { label: "Comment retirer mon solde ?", query: "Quelles sont les modalités et délais pour retirer mon argent vers MTN MoMo ou Orange Money ?" },
-        { label: "Astuces gestion carburant", query: "Donne-moi des conseils pratiques pour réduire ma consommation de carburant en moto lors de mes tournées." },
     ];
 
     return (
-        <DriverLayout title="Sellify AI - Assistant Chauffeur">
-            <Head title="Sellify AI - Assistant Logistique Intelligent" />
+        <DriverLayout title="Sellify AI">
+            <Head title="Sellify AI - Assistant Intelligent" />
 
-            <div className="w-full space-y-6 text-stone-800 antialiased font-sans pb-16">
+            {/* FULL-CANVAS GEMINI LIGHT THEME WRAPPER */}
+            <div className="w-full h-[calc(100vh-140px)] min-h-[600px] flex bg-white rounded-3xl border border-stone-200/90 shadow-xs overflow-hidden text-stone-800 font-sans antialiased">
                 
-                {/* Header Banner */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs">
-                    <div>
-                        <div className="flex items-center gap-2 text-xs font-semibold text-yellow-700">
-                            <Sparkles className="w-4 h-4 text-yellow-600" />
-                            <span>Intelligence Artificielle Google Gemini 1.5</span>
-                        </div>
-                        <h1 className="text-xl font-bold text-stone-900 mt-1 flex items-center gap-2">
-                            <span>Sellify AI</span>
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-950 font-semibold border border-yellow-300">
-                                Copilote Chauffeur
-                            </span>
-                        </h1>
-                        <p className="text-xs text-stone-500 font-normal mt-0.5">
-                            Discutez librement en langage naturel avec Sellify AI pour optimiser vos gains, vos itinéraires et vos performances terrain.
-                        </p>
-                    </div>
-
-                    <div className="flex items-center gap-2 shrink-0">
+                {/* 1. LEFT SIDEBAR (DISCUSSIONS HISTORY) */}
+                <aside 
+                    className={`${
+                        sidebarOpen ? 'w-64 sm:w-72' : 'w-0 -ml-72'
+                    } transition-all duration-300 ease-in-out bg-stone-50/70 border-r border-stone-200/80 flex flex-col shrink-0 overflow-hidden select-none`}
+                >
+                    {/* Top Action Bar */}
+                    <div className="p-4 flex items-center justify-between border-b border-stone-200/60">
                         <button
-                            onClick={handleClearHistory}
-                            className="px-3.5 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs rounded-xl transition-colors flex items-center gap-1.5 border border-stone-200"
-                            title="Effacer l'historique de discussion"
+                            onClick={handleNewChat}
+                            className="flex-1 flex items-center gap-2.5 px-3.5 py-2.5 bg-white hover:bg-stone-100/80 text-stone-800 font-medium text-xs rounded-2xl border border-stone-200 shadow-2xs transition-all"
                         >
-                            <Trash2 className="w-3.5 h-3.5 text-stone-500" />
-                            <span>Effacer l'historique</span>
+                            <Plus className="w-4 h-4 text-stone-600" />
+                            <span>Nouvelle discussion</span>
                         </button>
                     </div>
-                </div>
 
-                {/* 4 TOP BUSINESS STAT KPI CARDS */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-white border border-stone-200/80 p-4 rounded-2xl shadow-2xs space-y-1.5">
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs font-semibold text-stone-500">Solde disponible</span>
-                            <Wallet className="w-4 h-4 text-emerald-600" />
-                        </div>
-                        <p className="text-xl font-bold text-emerald-600">
-                            {Number(kpis.available_balance || 0).toLocaleString('fr-FR')} <span className="text-xs text-stone-500 font-normal">FCFA</span>
-                        </p>
-                        <span className="text-[10px] text-stone-400">Transfert immédiat sans frais</span>
-                    </div>
-
-                    <div className="bg-white border border-stone-200/80 p-4 rounded-2xl shadow-2xs space-y-1.5">
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs font-semibold text-stone-500">Échelon & Réputation</span>
-                            <Award className="w-4 h-4 text-yellow-600" />
-                        </div>
-                        <p className="text-xl font-bold text-stone-900">
-                            Chauffeur {kpis.current_tier || 'Pro'}
-                        </p>
-                        <span className="text-[10px] text-stone-400">Note certifiée : <strong>{kpis.rating || 4.90} / 5</strong></span>
-                    </div>
-
-                    <div className="bg-white border border-stone-200/80 p-4 rounded-2xl shadow-2xs space-y-1.5">
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs font-semibold text-stone-500">Points fidélité</span>
-                            <Coins className="w-4 h-4 text-amber-600" />
-                        </div>
-                        <p className="text-xl font-bold text-amber-600">
-                            {Number(kpis.reward_points || 0).toLocaleString('fr-FR')} <span className="text-xs text-stone-500 font-normal">pts</span>
-                        </p>
-                        <span className="text-[10px] text-stone-400">Valeur : {Number(kpis.reward_points || 0).toLocaleString('fr-FR')} FCFA</span>
-                    </div>
-
-                    <div className="bg-white border border-stone-200/80 p-4 rounded-2xl shadow-2xs space-y-1.5">
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs font-semibold text-stone-500">Affluence en direct</span>
-                            <Flame className="w-4 h-4 text-rose-600" />
-                        </div>
-                        <p className="text-xl font-bold text-rose-600">+30% Bonus</p>
-                        <span className="text-[10px] text-stone-400">Secteur Bastos & Akwa</span>
-                    </div>
-                </div>
-
-                {/* MAIN CONVERSATION INTERFACE & SIDEBAR */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    
-                    {/* CHAT CONTAINER (2 COLS) */}
-                    <div className="lg:col-span-2 bg-white border border-stone-200/80 rounded-2xl shadow-2xs flex flex-col h-[620px] overflow-hidden">
-                        
-                        {/* Chat Header */}
-                        <div className="px-5 py-3.5 border-b border-stone-100 bg-stone-50/50 flex items-center justify-between">
-                            <div className="flex items-center gap-2.5">
-                                <div className="w-8 h-8 rounded-xl bg-yellow-400 text-yellow-950 flex items-center justify-center font-bold text-xs border border-yellow-500 shadow-2xs">
-                                    <Sparkles className="w-4 h-4 text-yellow-950" />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-xs sm:text-sm text-stone-900">Discussion avec Sellify AI</h3>
-                                    <span className="text-[10px] text-stone-400 font-normal">Modèle connecté en temps réel avec votre profil</span>
-                                </div>
-                            </div>
-
-                            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                                <span>Actif</span>
-                            </span>
+                    {/* Discussions List */}
+                    <div className="flex-1 overflow-y-auto p-3 space-y-1">
+                        <div className="px-2 py-1.5 text-[11px] font-semibold text-stone-400 uppercase tracking-wider">
+                            Récents
                         </div>
 
-                        {/* Messages Body */}
-                        <div className="flex-1 p-4 sm:p-5 overflow-y-auto space-y-4 bg-stone-50/30 text-xs">
-                            {messages.map((msg) => (
+                        {threads.map((th) => {
+                            const isActive = th.id === activeThreadId;
+                            return (
                                 <div
-                                    key={msg.id}
-                                    className={`flex items-start gap-2.5 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                                    key={th.id}
+                                    onClick={() => setActiveThreadId(th.id)}
+                                    className={`group flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs cursor-pointer transition-colors ${
+                                        isActive 
+                                            ? 'bg-yellow-100/70 text-stone-900 font-semibold border border-yellow-300/60' 
+                                            : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
+                                    }`}
                                 >
-                                    {msg.sender === 'ai' && (
-                                        <div className="w-7 h-7 rounded-lg bg-yellow-400 text-yellow-950 flex items-center justify-center font-bold text-[11px] shrink-0 border border-yellow-500 shadow-2xs mt-0.5">
-                                            <Bot className="w-3.5 h-3.5" />
-                                        </div>
-                                    )}
+                                    <div className="flex items-center gap-2.5 truncate flex-1">
+                                        <MessageSquare className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-yellow-800' : 'text-stone-400'}`} />
+                                        <span className="truncate">{th.title}</span>
+                                    </div>
 
-                                    <div
-                                        className={`max-w-[85%] sm:max-w-[78%] rounded-2xl p-3.5 space-y-2.5 leading-relaxed ${
-                                            msg.sender === 'user'
-                                                ? 'bg-yellow-400 text-yellow-950 font-semibold rounded-tr-none shadow-2xs border border-yellow-500'
-                                                : 'bg-white text-stone-800 border border-stone-200/80 rounded-tl-none shadow-2xs'
-                                        }`}
+                                    <button
+                                        onClick={(e) => handleDeleteThread(e, th.id)}
+                                        className="opacity-0 group-hover:opacity-100 p-1 hover:bg-stone-200 text-stone-400 hover:text-stone-700 rounded-lg transition-opacity"
+                                        title="Supprimer la discussion"
                                     >
-                                        {msg.sender === 'ai' && msg.isNew ? (
-                                            <TypewriterMessage
-                                                text={msg.text}
-                                                onComplete={() => {
-                                                    msg.isNew = false;
-                                                }}
-                                            />
-                                        ) : (
-                                            <MarkdownText content={msg.text} />
-                                        )}
+                                        <Trash2 className="w-3 h-3" />
+                                    </button>
+                                </div>
+                            );
+                        })}
+                    </div>
 
-                                        {/* Action Button inside AI Message if present */}
-                                        {msg.action && (
-                                            <div className="pt-2 border-t border-stone-100">
-                                                <Link
-                                                    href={msg.action.url}
-                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-stone-900 hover:bg-stone-800 text-white font-bold text-[11px] rounded-lg transition-colors shadow-2xs"
-                                                >
-                                                    <span>{msg.action.label}</span>
-                                                    <ArrowRight className="w-3 h-3 text-yellow-400" />
-                                                </Link>
+                    {/* User Footer */}
+                    <div className="p-3.5 border-t border-stone-200/60 bg-stone-50 flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                            <div className="w-7 h-7 rounded-full bg-yellow-400 text-yellow-950 flex items-center justify-center font-bold text-xs border border-yellow-500">
+                                {user.first_name ? user.first_name.charAt(0) : 'S'}
+                            </div>
+                            <div className="text-left leading-tight">
+                                <p className="text-xs font-bold text-stone-800 truncate max-w-[130px]">
+                                    {user.first_name || 'Utilisateur'} {user.last_name || ''}
+                                </p>
+                                <span className="text-[10px] text-stone-400 font-normal">Chauffeur Sellify</span>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+                {/* 2. MAIN CONVERSATION CANVAS */}
+                <main className="flex-1 flex flex-col bg-white overflow-hidden relative">
+                    
+                    {/* Top Canvas Header with Sidebar Toggle & Model Badge */}
+                    <header className="h-14 px-5 border-b border-stone-100 flex items-center justify-between shrink-0 bg-white">
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => setSidebarOpen(!sidebarOpen)}
+                                className="p-2 hover:bg-stone-100 text-stone-600 hover:text-stone-900 rounded-xl transition-colors"
+                                title={sidebarOpen ? "Masquer la barre latérale" : "Afficher la barre latérale"}
+                            >
+                                {sidebarOpen ? (
+                                    <PanelLeftClose className="w-4 h-4" />
+                                ) : (
+                                    <PanelLeftOpen className="w-4 h-4" />
+                                )}
+                            </button>
+
+                            <div className="flex items-center gap-2">
+                                <span className="font-bold text-sm text-stone-900 flex items-center gap-1.5">
+                                    <Sparkles className="w-4 h-4 text-yellow-600" />
+                                    <span>Sellify AI</span>
+                                </span>
+                                <span className="px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 text-[10px] font-semibold border border-stone-200">
+                                    Gemini 3.5 Flash
+                                </span>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={handleNewChat}
+                            className="text-xs font-semibold text-stone-600 hover:text-stone-900 px-3 py-1.5 hover:bg-stone-100 rounded-xl transition-colors flex items-center gap-1.5"
+                        >
+                            <Plus className="w-3.5 h-3.5 text-stone-500" />
+                            <span className="hidden sm:inline">Nouveau chat</span>
+                        </button>
+                    </header>
+
+                    {/* Chat Content Body */}
+                    <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-6">
+                        
+                        {/* CASE A: EMPTY STATE (LIKE GEMINI HOMEPAGE) */}
+                        {messages.length === 0 ? (
+                            <div className="max-w-2xl mx-auto h-full flex flex-col justify-center items-center text-center space-y-8 py-8 animate-in fade-in">
+                                
+                                <div className="space-y-3">
+                                    <div className="w-12 h-12 rounded-2xl bg-yellow-400 text-yellow-950 flex items-center justify-center mx-auto shadow-2xs border border-yellow-500">
+                                        <Sparkles className="w-6 h-6" />
+                                    </div>
+                                    <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
+                                        Sur quoi devrions-nous nous concentrer ?
+                                    </h1>
+                                    <p className="text-xs sm:text-sm text-stone-500 font-normal max-w-md mx-auto">
+                                        Bonjour {user.first_name || 'Chauffeur'}. Je suis Sellify AI, prêt à répondre à toutes vos questions logistiques, gains et tournées.
+                                    </p>
+                                </div>
+
+                                {/* Central Big Gemini Search Bar */}
+                                <div className="w-full">
+                                    <form
+                                        onSubmit={(e) => {
+                                            e.preventDefault();
+                                            handleSendMessage();
+                                        }}
+                                        className="w-full bg-stone-50 hover:bg-stone-100/70 border border-stone-200/90 rounded-3xl p-2.5 sm:p-3 shadow-sm transition-all focus-within:ring-2 focus-within:ring-yellow-400 focus-within:bg-white flex items-center gap-3"
+                                    >
+                                        <input
+                                            ref={inputRef}
+                                            type="text"
+                                            value={input}
+                                            onChange={(e) => setInput(e.target.value)}
+                                            placeholder="Demander à Sellify AI..."
+                                            className="flex-1 bg-transparent text-xs sm:text-sm text-stone-900 outline-none placeholder-stone-400 px-3 font-normal"
+                                            disabled={loading}
+                                            autoFocus
+                                        />
+
+                                        <span className="hidden sm:inline-block px-2.5 py-1 rounded-full bg-white text-stone-500 font-semibold text-[10px] border border-stone-200">
+                                            Flash 3.5
+                                        </span>
+
+                                        <button
+                                            type="submit"
+                                            disabled={loading || !input.trim()}
+                                            className="w-9 h-9 rounded-full bg-stone-900 hover:bg-stone-800 disabled:bg-stone-200 text-white flex items-center justify-center transition-all shadow-2xs shrink-0"
+                                        >
+                                            <ArrowUp className="w-4 h-4" />
+                                        </button>
+                                    </form>
+                                </div>
+
+                                {/* 4 Gemini-style Suggestion Cards */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full text-left">
+                                    {suggestions.map((s, idx) => {
+                                        const IconComponent = s.icon;
+                                        return (
+                                            <button
+                                                key={idx}
+                                                type="button"
+                                                onClick={() => handleSendMessage(s.query)}
+                                                className="p-4 bg-stone-50/80 hover:bg-yellow-50/70 border border-stone-200/80 hover:border-yellow-300 rounded-2xl transition-all text-left space-y-1.5 shadow-2xs group"
+                                            >
+                                                <div className="flex items-center gap-2 text-stone-900 font-bold text-xs group-hover:text-yellow-950">
+                                                    <IconComponent className="w-4 h-4 text-stone-500 group-hover:text-yellow-700" />
+                                                    <span>{s.title}</span>
+                                                </div>
+                                                <p className="text-[11px] text-stone-500 group-hover:text-stone-700 line-clamp-2 leading-relaxed">
+                                                    {s.desc}
+                                                </p>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
+                            </div>
+                        ) : (
+                            /* CASE B: ACTIVE CONVERSATION THREAD */
+                            <div className="max-w-3xl mx-auto space-y-6 pb-24">
+                                {messages.map((msg) => (
+                                    <div
+                                        key={msg.id}
+                                        className={`flex items-start gap-3.5 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                                    >
+                                        {msg.sender === 'ai' && (
+                                            <div className="w-7 h-7 rounded-xl bg-yellow-400 text-yellow-950 flex items-center justify-center shrink-0 border border-yellow-500 shadow-2xs mt-1">
+                                                <Sparkles className="w-3.5 h-3.5" />
                                             </div>
                                         )}
 
-                                        <span className={`block text-[9px] ${msg.sender === 'user' ? 'text-yellow-900' : 'text-stone-400'} text-right`}>
-                                            {msg.timestamp}
-                                        </span>
-                                    </div>
+                                        <div
+                                            className={`max-w-[85%] sm:max-w-[80%] rounded-2xl p-4 space-y-3 leading-relaxed ${
+                                                msg.sender === 'user'
+                                                    ? 'bg-stone-100 text-stone-900 font-medium rounded-tr-none border border-stone-200/70'
+                                                    : 'bg-transparent text-stone-800'
+                                            }`}
+                                        >
+                                            {msg.sender === 'ai' && msg.isNew ? (
+                                                <TypewriterMessage
+                                                    text={msg.text}
+                                                    onComplete={() => {
+                                                        msg.isNew = false;
+                                                    }}
+                                                />
+                                            ) : (
+                                                <MarkdownText content={msg.text} />
+                                            )}
 
-                                    {msg.sender === 'user' && (
-                                        <div className="w-7 h-7 rounded-lg bg-stone-800 text-white flex items-center justify-center font-bold text-[11px] shrink-0 shadow-2xs mt-0.5">
-                                            <User className="w-3.5 h-3.5" />
+                                            {/* Action Button inside AI Message */}
+                                            {msg.action && (
+                                                <div className="pt-2 border-t border-stone-100">
+                                                    <Link
+                                                        href={msg.action.url}
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-stone-900 hover:bg-stone-800 text-white font-bold text-[11px] rounded-xl transition-colors shadow-2xs"
+                                                    >
+                                                        <span>{msg.action.label}</span>
+                                                        <ArrowRight className="w-3 h-3 text-yellow-400" />
+                                                    </Link>
+                                                </div>
+                                            )}
+
+                                            <span className="block text-[9px] text-stone-400 text-right pt-0.5">
+                                                {msg.timestamp}
+                                            </span>
                                         </div>
-                                    )}
-                                </div>
-                            ))}
 
-                            {loading && (
-                                <div className="flex items-start gap-2.5 justify-start">
-                                    <div className="w-7 h-7 rounded-lg bg-yellow-400 text-yellow-950 flex items-center justify-center font-bold text-[11px] shrink-0 border border-yellow-500 shadow-2xs mt-0.5">
-                                        <Bot className="w-3.5 h-3.5" />
-                                    </div>
-                                    <div className="bg-white border border-stone-200/80 rounded-2xl rounded-tl-none p-3.5 shadow-2xs text-xs text-stone-500 flex items-center gap-2">
-                                        <span className="w-2 h-2 rounded-full bg-yellow-500 animate-ping" />
-                                        <span>Sellify AI rédige sa réponse...</span>
-                                    </div>
-                                </div>
-                            )}
-
-                            <div ref={chatEndRef} />
-                        </div>
-
-                        {/* Suggestion Chips */}
-                        <div className="px-4 py-2 bg-stone-100/60 border-t border-stone-200/60 flex items-center gap-1.5 overflow-x-auto text-[11px]">
-                            <span className="font-bold text-stone-400 shrink-0 text-[10px] uppercase">Suggestions :</span>
-                            {quickSuggestions.map((s, idx) => (
-                                <button
-                                    key={idx}
-                                    type="button"
-                                    onClick={() => handleSendMessage(s.query)}
-                                    className="px-2.5 py-1 bg-white hover:bg-yellow-50 border border-stone-200 hover:border-yellow-400 text-stone-700 hover:text-stone-950 rounded-lg shrink-0 font-medium transition-colors shadow-2xs"
-                                >
-                                    {s.label}
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* Input Form */}
-                        <form
-                            onSubmit={(e) => {
-                                e.preventDefault();
-                                handleSendMessage();
-                            }}
-                            className="p-3 border-t border-stone-100 bg-white flex items-center gap-2"
-                        >
-                            <input
-                                type="text"
-                                value={input}
-                                onChange={(e) => setInput(e.target.value)}
-                                placeholder="Posez une question en langage naturel à Sellify AI..."
-                                className="flex-1 px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-stone-900 text-xs outline-none focus:ring-2 focus:ring-yellow-400 font-medium"
-                                disabled={loading}
-                            />
-
-                            <button
-                                type="submit"
-                                disabled={loading || !input.trim()}
-                                className="px-4 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors border border-yellow-500 flex items-center gap-1.5 shrink-0 disabled:opacity-50"
-                            >
-                                <Send className="w-3.5 h-3.5" />
-                                <span className="hidden sm:inline">Envoyer</span>
-                            </button>
-                        </form>
-
-                    </div>
-
-                    {/* RIGHT SIDEBAR WIDGETS (1 COL) */}
-                    <div className="space-y-4">
-                        
-                        {/* WIDGET 1 : OBJECTIF CHAUFFEUR EXPERT */}
-                        <div className="bg-white border border-stone-200/80 rounded-2xl p-5 shadow-2xs space-y-3">
-                            <div className="flex items-center justify-between border-b border-stone-100 pb-2.5">
-                                <div className="flex items-center gap-2 text-xs font-bold text-stone-900">
-                                    <Award className="w-4 h-4 text-purple-600" />
-                                    <span>Objectif Chauffeur Expert</span>
-                                </div>
-                                <span className="text-[10px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
-                                    Rang Élite
-                                </span>
-                            </div>
-
-                            <p className="text-xs text-stone-600 leading-snug">
-                                Accédez aux livraisons B2B prioritaires à haute valeur ajoutée et aux micro-crédits d'équipement en atteignant <strong>500 livraisons</strong> et une note ≥ <strong>4.8 / 5</strong>.
-                            </p>
-
-                            <div className="space-y-1.5 text-xs">
-                                <div className="flex justify-between text-[11px]">
-                                    <span className="text-stone-500">Progression</span>
-                                    <strong className="text-stone-900">{kpis.total_deliveries || 215} / 500 courses</strong>
-                                </div>
-                                <div className="w-full h-2.5 bg-stone-100 rounded-full overflow-hidden border border-stone-200">
-                                    <div 
-                                        className="h-full bg-gradient-to-r from-yellow-400 to-purple-500 rounded-full transition-all duration-500"
-                                        style={{ width: `${Math.min(100, Math.round(((kpis.total_deliveries || 215) / 500) * 100))}%` }}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* WIDGET 2 : SURGE PRICING ZONES CHAUDES */}
-                        <div className="bg-white border border-stone-200/80 rounded-2xl p-5 shadow-2xs space-y-3">
-                            <div className="flex items-center justify-between border-b border-stone-100 pb-2.5">
-                                <div className="flex items-center gap-2 text-xs font-bold text-stone-900">
-                                    <Flame className="w-4 h-4 text-rose-600" />
-                                    <span>Zones à Forte Demande</span>
-                                </div>
-                                <Link
-                                    href={route('driver.map')}
-                                    className="text-[11px] text-yellow-700 hover:underline font-bold flex items-center gap-1"
-                                >
-                                    <span>Carte</span>
-                                    <ArrowRight className="w-3 h-3" />
-                                </Link>
-                            </div>
-
-                            <div className="space-y-2 text-xs">
-                                {hotspots.map((h, idx) => (
-                                    <div key={idx} className="p-2.5 bg-stone-50 border border-stone-200/80 rounded-xl flex items-center justify-between">
-                                        <div>
-                                            <strong className="text-stone-900 block">{h.name}</strong>
-                                            <span className="text-[10px] text-stone-400">{h.city} · {h.status}</span>
-                                        </div>
-                                        <span className="px-2 py-0.5 bg-rose-100 text-rose-900 font-bold text-[10px] rounded">
-                                            {h.surge}
-                                        </span>
+                                        {msg.sender === 'user' && (
+                                            <div className="w-7 h-7 rounded-full bg-stone-800 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs mt-1">
+                                                {user.first_name ? user.first_name.charAt(0) : 'U'}
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
-                            </div>
-                        </div>
 
-                        {/* WIDGET 3 : SÉCURITÉ ET CONFORMITÉ */}
-                        <div className="bg-stone-50 border border-stone-200/80 rounded-2xl p-5 shadow-2xs space-y-2 text-xs text-stone-700">
-                            <div className="flex items-center gap-2 text-emerald-700 font-bold">
-                                <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                                <span>Protection & Confidentialité</span>
+                                {loading && (
+                                    <div className="flex items-start gap-3.5 justify-start">
+                                        <div className="w-7 h-7 rounded-xl bg-yellow-400 text-yellow-950 flex items-center justify-center shrink-0 border border-yellow-500 shadow-2xs mt-1">
+                                            <Sparkles className="w-3.5 h-3.5" />
+                                        </div>
+                                        <div className="text-xs text-stone-500 flex items-center gap-2 p-3">
+                                            <span className="w-2 h-2 rounded-full bg-yellow-500 animate-ping" />
+                                            <span>Sellify AI rédige sa réponse...</span>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div ref={chatEndRef} />
                             </div>
-                            <p className="text-[11px] text-stone-500 leading-snug">
-                                Vos données de livraison et vos historiques de gains sont traités de manière sécurisée sous chiffrement pour vous fournir des conseils personnalisés.
-                            </p>
-                        </div>
+                        )}
 
                     </div>
 
-                </div>
+                    {/* Bottom Pinned Gemini Prompt Bar when in active conversation */}
+                    {messages.length > 0 && (
+                        <div className="p-4 bg-gradient-to-t from-white via-white to-transparent shrink-0">
+                            <div className="max-w-3xl mx-auto">
+                                <form
+                                    onSubmit={(e) => {
+                                        e.preventDefault();
+                                        handleSendMessage();
+                                    }}
+                                    className="w-full bg-stone-50 border border-stone-200/90 rounded-3xl p-2 sm:p-2.5 shadow-sm transition-all focus-within:ring-2 focus-within:ring-yellow-400 focus-within:bg-white flex items-center gap-2.5"
+                                >
+                                    <input
+                                        type="text"
+                                        value={input}
+                                        onChange={(e) => setInput(e.target.value)}
+                                        placeholder="Poser une question à Sellify AI..."
+                                        className="flex-1 bg-transparent text-xs sm:text-sm text-stone-900 outline-none placeholder-stone-400 px-3 font-normal"
+                                        disabled={loading}
+                                    />
+
+                                    <span className="hidden sm:inline-block px-2.5 py-1 rounded-full bg-white text-stone-500 font-semibold text-[10px] border border-stone-200">
+                                        Flash 3.5
+                                    </span>
+
+                                    <button
+                                        type="submit"
+                                        disabled={loading || !input.trim()}
+                                        className="w-8 h-8 rounded-full bg-stone-900 hover:bg-stone-800 disabled:bg-stone-200 text-white flex items-center justify-center transition-all shadow-2xs shrink-0"
+                                    >
+                                        <ArrowUp className="w-4 h-4" />
+                                    </button>
+                                </form>
+                                <p className="text-[10px] text-stone-400 text-center mt-2">
+                                    Sellify AI peut faire des erreurs. Vérifiez les informations financières et réglementaires.
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                </main>
 
             </div>
 
