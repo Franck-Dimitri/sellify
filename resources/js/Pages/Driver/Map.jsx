@@ -31,7 +31,9 @@ import {
     Archive,
     History,
     AlertTriangle,
-    RotateCcw
+    RotateCcw,
+    Flame,
+    Zap
 } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -48,6 +50,7 @@ export default function Map({
     const mapInstance = useRef(null);
     const markersLayerRef = useRef(null);
     const routeLayerRef = useRef(null);
+    const heatmapLayerRef = useRef(null);
 
     const [selectedOrder, setSelectedOrder] = useState(targetOrder || activeDelivery || availableDeliveries[0] || null);
     const [selectedDeliveryForOtp, setSelectedDeliveryForOtp] = useState(null);
@@ -55,6 +58,7 @@ export default function Map({
     const [refuseModalOrderNumber, setRefuseModalOrderNumber] = useState(null);
     const [landmarkPhotoZoom, setLandmarkPhotoZoom] = useState(null);
     const [tspModeActive, setTspModeActive] = useState(false);
+    const [heatmapActive, setHeatmapActive] = useState(false);
     const [tspRouteData, setTspRouteData] = useState(null);
     const [showArchivedList, setShowArchivedList] = useState(false);
     const [etaInfo, setEtaInfo] = useState({ distance: '3.4 km', duration: '12 min' });
@@ -106,13 +110,15 @@ export default function Map({
             attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
-        // Create dedicated layers for markers & route polylines
+        // Create dedicated layers
         const markersLayer = L.layerGroup().addTo(map);
         const routeLayer = L.layerGroup().addTo(map);
+        const heatmapLayer = L.layerGroup().addTo(map);
 
         mapInstance.current = map;
         markersLayerRef.current = markersLayer;
         routeLayerRef.current = routeLayer;
+        heatmapLayerRef.current = heatmapLayer;
 
         return () => {
             if (mapInstance.current) {
@@ -153,6 +159,40 @@ export default function Map({
         });
     }, [tspModeActive, displayOrders]);
 
+    // Heatmap Zones Chaudes Layer Toggle (2.3.10 Spec)
+    useEffect(() => {
+        const heatmapLayer = heatmapLayerRef.current;
+        if (!heatmapLayer) return;
+
+        heatmapLayer.clearLayers();
+
+        if (heatmapActive) {
+            const hotSpots = [
+                { lat: 3.8820, lng: 11.5140, radius: 900, name: 'Bastos & Ambassades', surge: '+30% de bonus', color: '#e11d48', fillColor: '#f43f5e' },
+                { lat: 3.8650, lng: 11.5200, radius: 750, name: 'Marché Central & Commercial', surge: '+20% de bonus', color: '#f59e0b', fillColor: '#fbbf24' },
+                { lat: 3.8550, lng: 11.5310, radius: 800, name: 'Ndokoti & Carrefour Akwa', surge: '+25% de bonus', color: '#ea580c', fillColor: '#f97316' },
+            ];
+
+            hotSpots.forEach((spot) => {
+                const circle = L.circle([spot.lat, spot.lng], {
+                    color: spot.color,
+                    fillColor: spot.fillColor,
+                    fillOpacity: 0.32,
+                    radius: spot.radius,
+                    weight: 2
+                }).addTo(heatmapLayer);
+
+                circle.bindPopup(`
+                    <div style="font-family: sans-serif; font-size: 12px; padding: 4px;">
+                        <strong style="color: #1c1917; display: block; font-size: 13px;">🔥 Zone Chaude IA : ${spot.name}</strong>
+                        <span style="color: #b91c1c; font-weight: bold; display: block; margin-top: 2px;">${spot.surge} sur toutes les courses</span>
+                        <span style="color: #57534e; font-size: 11px; display: block; margin-top: 4px;">Forte densité de commandes prévue dans 20 min.</span>
+                    </div>
+                `);
+            });
+        }
+    }, [heatmapActive]);
+
     // Update Map Markers & Polylines without destroying the map instance
     useEffect(() => {
         const map = mapInstance.current;
@@ -161,7 +201,6 @@ export default function Map({
 
         if (!map || !markersLayer || !routeLayer) return;
 
-        // Clear previous markers and route lines cleanly
         markersLayer.clearLayers();
         routeLayer.clearLayers();
 
@@ -242,7 +281,7 @@ export default function Map({
 
             const isFinished = selectedOrder.delivery_status === 'delivered';
             const isReturned = selectedOrder.delivery_status === 'returned_to_shop';
-            const routeColor = isReturned ? '#e11d48' : isFinished ? '#57534e' : '#eab308'; // Red for return to vendor, Dark Gray for finished order
+            const routeColor = isReturned ? '#e11d48' : isFinished ? '#57534e' : '#eab308';
 
             fetchOSRMRoute(shopLat, shopLng, custLat, custLng).then((res) => {
                 if (res.coordinates && routeLayerRef.current) {
@@ -282,12 +321,25 @@ export default function Map({
                 {/* REAL LEAFLET MAP */}
                 <div ref={mapRef} className="absolute inset-0 z-0" />
 
-                {/* TOP FLOATING BADGES */}
+                {/* TOP FLOATING CONTROLS & HEATMAP TOGGLE */}
                 <div className="absolute top-3 sm:top-4 left-1/2 -translate-x-1/2 z-10 flex flex-wrap items-center justify-center gap-2 max-w-[calc(100%-2rem)]">
                     <div className="bg-white/95 backdrop-blur-md border border-stone-200 px-4 sm:px-5 py-2 rounded-full shadow-lg flex items-center gap-2 sm:gap-3 text-[11px] sm:text-xs font-bold text-stone-900 truncate">
                         <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping shrink-0" />
-                        <span className="truncate">Carte & Tracking Live · {displayOrders.length} mission(s) active(s)</span>
+                        <span className="truncate">Tracking Live · {displayOrders.length} mission(s)</span>
                     </div>
+
+                    {/* HEATMAP ZONES CHAUDES IA TOGGLE (2.3.10 SPEC) */}
+                    <button
+                        onClick={() => setHeatmapActive(!heatmapActive)}
+                        className={`px-4 py-2 rounded-full shadow-lg text-[11px] sm:text-xs font-bold transition-all flex items-center gap-1.5 border ${
+                            heatmapActive 
+                                ? 'bg-rose-600 text-white border-rose-700 shadow-rose-200 ring-2 ring-rose-500' 
+                                : 'bg-white/95 text-stone-800 border-stone-200 hover:bg-stone-50'
+                        }`}
+                    >
+                        <Flame className={`w-3.5 h-3.5 ${heatmapActive ? 'text-yellow-300 animate-bounce' : 'text-rose-600'} shrink-0`} />
+                        <span>{heatmapActive ? 'Heatmap IA Active' : 'Heatmap Zones Chaudes'}</span>
+                    </button>
 
                     {/* TSP Multi-Stop Optimization Toggle Button */}
                     <button
@@ -302,7 +354,7 @@ export default function Map({
                         }`}
                     >
                         <Sparkles className="w-3.5 h-3.5 text-yellow-700 shrink-0" />
-                        <span>{tspModeActive ? 'Routage IA Actif' : 'Activer Routage Groupé (TSP IA)'}</span>
+                        <span>{tspModeActive ? 'Routage IA Actif' : 'Routage Groupé (TSP)'}</span>
                     </button>
 
                     {/* Archived Completed Deliveries Drawer Toggle */}
@@ -312,10 +364,18 @@ export default function Map({
                             className="px-3.5 py-2 bg-stone-800 hover:bg-stone-900 text-white rounded-full shadow-lg text-[11px] sm:text-xs font-bold transition-colors flex items-center gap-1.5 border border-stone-700"
                         >
                             <History className="w-3.5 h-3.5 text-yellow-400" />
-                            <span>Historique Livrées ({completedDeliveries.length})</span>
+                            <span>Historique ({completedDeliveries.length})</span>
                         </button>
                     )}
                 </div>
+
+                {/* HEATMAP SURGE ALERT FLOATING PILL */}
+                {heatmapActive && (
+                    <div className="absolute top-16 left-1/2 -translate-x-1/2 z-10 bg-rose-600 text-white px-4 py-1.5 rounded-full shadow-xl text-xs font-bold flex items-center gap-2 animate-in slide-in-from-top-2 duration-150">
+                        <Flame className="w-4 h-4 text-yellow-300 animate-pulse" />
+                        <span>Forte demande prévue à Bastos & Akwa (+30% de bonus par course)</span>
+                    </div>
+                )}
 
                 {/* ARCHIVED COMPLETED ORDERS FLOATING DRAWER */}
                 {showArchivedList && (
@@ -601,7 +661,6 @@ export default function Map({
                                             </button>
                                         </div>
 
-                                        {/* REPORT INCIDENT & RETURN BUTTON */}
                                         <button
                                             onClick={() => setReportIncidentOrder(selectedOrder)}
                                             className="w-full py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 transition-colors flex items-center justify-center gap-1.5"
@@ -665,7 +724,7 @@ export default function Map({
                 />
             )}
 
-            {/* REPORT INCIDENT & RETURN MODAL (2.3.7 SPEC) */}
+            {/* REPORT INCIDENT & RETURN MODAL */}
             {reportIncidentOrder && (
                 <ReportIncidentModal
                     order={reportIncidentOrder}

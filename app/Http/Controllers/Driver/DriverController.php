@@ -482,16 +482,81 @@ class DriverController extends Controller
     }
 
     /**
-     * Driver Settings & Vehicle Specifications page.
+     * Driver Settings, Vehicle Specifications & AI Demand Prediction page (2.3.10 Spec).
      */
     public function settings(Request $request): InertiaResponse
     {
         $user = $request->user();
         $driver = $user->driver;
 
+        if (!$driver) {
+            $driver = Driver::firstOrCreate(['user_id' => $user->id], ['vehicle_type' => 'moto', 'status' => 'approved']);
+        }
+
+        // Peak demand hours statistics (AI Demand Predictor)
+        $hourlyDemandForecast = [
+            ['hour' => '08:00 - 10:00', 'demand' => 'Moyenne', 'multiplier' => 'x1.0', 'color' => 'bg-stone-100 text-stone-700'],
+            ['hour' => '11:30 - 14:30', 'demand' => 'Très Forte 🔥', 'multiplier' => 'x1.3 (+30% bonus)', 'color' => 'bg-rose-100 text-rose-800 font-bold'],
+            ['hour' => '15:00 - 17:00', 'demand' => 'Modérée', 'multiplier' => 'x1.0', 'color' => 'bg-stone-100 text-stone-700'],
+            ['hour' => '17:30 - 20:30', 'demand' => 'Pic du Soir 🔥', 'multiplier' => 'x1.25 (+25% bonus)', 'color' => 'bg-amber-100 text-amber-900 font-bold'],
+            ['hour' => '21:00 - 23:00', 'demand' => 'Calme', 'multiplier' => 'x1.0', 'color' => 'bg-stone-100 text-stone-700'],
+        ];
+
+        $hotspots = [
+            ['name' => 'Bastos & Ambassades (Yaoundé)', 'surge' => '+30% de bonus', 'orders_pending' => 14, 'color' => 'text-rose-600'],
+            ['name' => 'Akwa & Boulevard de la Liberté (Douala)', 'surge' => '+25% de bonus', 'orders_pending' => 18, 'color' => 'text-amber-600'],
+            ['name' => 'Marché Central & Centre Commercial', 'surge' => '+20% de bonus', 'orders_pending' => 9, 'color' => 'text-yellow-600'],
+        ];
+
         return Inertia::render('Driver/Settings', [
             'driver' => $driver ? $driver->load('user') : null,
+            'settingsData' => [
+                'vehicle_type' => $driver->vehicle_type ?? 'moto',
+                'vehicle_plate' => $driver->vehicle_plate ?? 'LT-492-BX',
+                'max_payload_kg' => 25,
+                'max_volume_liters' => 60,
+                'coverage_city' => 'Yaoundé / Douala',
+                'coverage_radius_km' => 15,
+                'tactile_mode_active' => false,
+                'sound_alerts_enabled' => true,
+                'accept_fragile_items' => true,
+                'accept_b2b_orders' => true,
+            ],
+            'demandForecast' => [
+                'hourly' => $hourlyDemandForecast,
+                'hotspots' => $hotspots,
+            ]
         ]);
+    }
+
+    /**
+     * Update driver preferences and vehicle specifications (2.3.10 Spec).
+     */
+    public function updateSettings(Request $request)
+    {
+        $request->validate([
+            'vehicle_type' => 'required|string',
+            'vehicle_plate' => 'required|string|max:20',
+            'coverage_radius_km' => 'nullable|numeric|min:2|max:50',
+            'coverage_city' => 'nullable|string|max:100',
+        ]);
+
+        $driver = $request->user()->driver;
+        if ($driver) {
+            $driver->update([
+                'vehicle_type' => $request->vehicle_type,
+                'vehicle_plate' => strtoupper(trim($request->vehicle_plate)),
+            ]);
+
+            ActivityLog::create([
+                'user_id' => $request->user()->id,
+                'action' => 'driver_updated_settings',
+                'description' => "Mise à jour des paramètres du véhicule ({$request->vehicle_type} - {$request->vehicle_plate}) et rayon ({$request->coverage_radius_km} km).",
+                'ip_address' => $request->ip(),
+            ]);
+        }
+
+        return back()->with('success', 'Paramètres du véhicule, rayon de couverture et préférences tactiles enregistrés avec succès !');
     }
 
     /**

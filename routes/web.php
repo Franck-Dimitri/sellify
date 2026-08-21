@@ -320,6 +320,7 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/notifications', [\App\Http\Controllers\Driver\DriverController::class, 'notifications'])->name('notifications');
             Route::get('/reviews', [\App\Http\Controllers\Driver\DriverController::class, 'reviews'])->name('reviews');
             Route::get('/settings', [\App\Http\Controllers\Driver\DriverController::class, 'settings'])->name('settings');
+            Route::post('/settings', [\App\Http\Controllers\Driver\DriverController::class, 'updateSettings'])->name('settings.update');
 
             Route::post('/availability', [\App\Http\Controllers\Driver\DriverController::class, 'toggleAvailability'])->name('availability');
             Route::post('/withdraw', [\App\Http\Controllers\Driver\DriverController::class, 'requestPayout'])->name('withdraw');
