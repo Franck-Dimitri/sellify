@@ -7,7 +7,8 @@ use App\Models\Order;
 use App\Models\Driver;
 use App\Models\ActivityLog;
 use App\Models\SellerWallet;
-use App\Models\WalletTransaction;
+use App\Services\Logistics\Optimization\VrpOptimizerService;
+use App\Services\Logistics\Ai\RouteAiBriefingService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
@@ -714,6 +715,104 @@ class DriverController extends Controller
         return response()->json([
             'status' => 'success',
             'timestamp' => now()->toIso8601String(),
+        ]);
+    }
+
+    /**
+     * Solve multi-stop VRP route optimization and generate Sellify AI tactical briefing.
+     */
+    public function optimizeRoutes(Request $request, VrpOptimizerService $optimizer, RouteAiBriefingService $aiBriefing)
+    {
+        $user = $request->user();
+        $driver = $user->driver;
+
+        $driverLat = (float) $request->input('driver_lat', 4.0511);
+        $driverLng = (float) $request->input('driver_lng', 9.7085);
+        $vehicleType = $request->input('vehicle_type', $driver ? $driver->vehicle_type : 'moto');
+
+        $selectedOrderIds = $request->input('order_ids', []);
+
+        // Charger les commandes cibles
+        $ordersQuery = Order::with(['shop.user', 'user', 'items']);
+        if (!empty($selectedOrderIds)) {
+            $ordersQuery->whereIn('id', $selectedOrderIds);
+        } else {
+            $ordersQuery->where(function ($q) use ($driver) {
+                if ($driver) {
+                    $q->where('driver_id', $driver->id)
+                      ->where('delivery_status', 'in_transit');
+                }
+            })->orWhere(function ($q) {
+                $q->whereIn('delivery_status', ['ready_for_pickup', 'preparing', 'pending'])
+                  ->whereNull('driver_id');
+            })->take(5);
+        }
+
+        $orders = $ordersQuery->get();
+
+        // Données géolocalisées Douala/Yaoundé
+        $defaultLocations = [
+            ['p_lat' => 4.0511, 'p_lng' => 9.7085, 'p_name' => 'Boutique Akwa Mode', 'p_addr' => 'Boulevard de la Liberté, Akwa', 'd_lat' => 4.0150, 'd_lng' => 9.7050, 'd_name' => 'Jean Client', 'd_addr' => 'Rue Toyota, Bonapriso'],
+            ['p_lat' => 4.0480, 'p_lng' => 9.6950, 'p_name' => 'Tech Store Bali', 'p_addr' => 'Rue Mandessi Bell, Bali', 'd_lat' => 4.0420, 'd_lng' => 9.6880, 'd_name' => 'Marie Client', 'd_addr' => 'Avenue Charles de Gaulle, Bonanjo'],
+            ['p_lat' => 4.0620, 'p_lng' => 9.7180, 'p_name' => 'Saveurs du Mboa Deïdo', 'p_addr' => 'Rue Deïdo Grand Moulin', 'd_lat' => 4.0750, 'd_lng' => 9.7350, 'd_name' => 'Alain Client', 'd_addr' => 'Carrefour Kotto, Bonamoussadi'],
+        ];
+
+        $deliveriesData = [];
+        foreach ($orders as $index => $ord) {
+            $shop = $ord->shop;
+            $customer = $ord->user;
+            $loc = $defaultLocations[$index % count($defaultLocations)];
+
+            $deliveriesData[] = [
+                'order_id' => $ord->id,
+                'order_number' => $ord->order_number,
+                'seller_shop_name' => $shop ? $shop->name : $loc['p_name'],
+                'pickup_address' => $shop ? ($shop->city . ', ' . $shop->address) : $loc['p_addr'],
+                'pickup_lat' => (float)($ord->pickup_latitude ?: $loc['p_lat']),
+                'pickup_lng' => (float)($ord->pickup_longitude ?: $loc['p_lng']),
+                'seller_name' => $shop && $shop->user ? trim($shop->user->first_name . ' ' . $shop->user->last_name) : 'Vendeur',
+                'seller_phone' => $shop && $shop->user ? $shop->user->phone : '+237670000000',
+                'customer_name' => $customer ? trim($customer->first_name . ' ' . $customer->last_name) : $loc['d_name'],
+                'delivery_address' => $ord->shipping_address ?: $loc['d_addr'],
+                'delivery_lat' => (float)($ord->delivery_latitude ?: $loc['d_lat']),
+                'delivery_lng' => (float)($ord->delivery_longitude ?: $loc['d_lng']),
+                'customer_phone' => $customer ? $customer->phone : '+237690000000',
+                'items_summary' => $ord->items->map(fn($it) => $it->product_name ?? 'Article')->implode(', ') ?: '1 Colis Express',
+            ];
+        }
+
+        // Fallback démo interactif pour test si aucune commande n'existe encore
+        if (empty($deliveriesData)) {
+            foreach (array_slice($defaultLocations, 0, 2) as $idx => $loc) {
+                $deliveriesData[] = [
+                    'order_id' => 100 + $idx,
+                    'order_number' => '#ORD-DEMO-' . (101 + $idx),
+                    'seller_shop_name' => $loc['p_name'],
+                    'pickup_address' => $loc['p_addr'],
+                    'pickup_lat' => $loc['p_lat'],
+                    'pickup_lng' => $loc['p_lng'],
+                    'seller_name' => 'Boutique Partenaire',
+                    'seller_phone' => '+237670112233',
+                    'customer_name' => $loc['d_name'],
+                    'delivery_address' => $loc['d_addr'],
+                    'delivery_lat' => $loc['d_lat'],
+                    'delivery_lng' => $loc['d_lng'],
+                    'customer_phone' => '+237699445566',
+                    'items_summary' => '1 Colis Express',
+                ];
+            }
+        }
+
+        // Optimisation de tournée VRP
+        $tour = $optimizer->optimizeTour(['lat' => $driverLat, 'lng' => $driverLng], $deliveriesData, $vehicleType);
+
+        // Génération du briefing tactique par Sellify AI 1.2 Flash
+        $aiBriefingText = $aiBriefing->generateTacticalBriefing($user, $tour);
+
+        return response()->json([
+            'status' => 'success',
+            'tour' => $tour,
+            'ai_briefing' => $aiBriefingText,
         ]);
     }
 

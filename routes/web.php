@@ -328,6 +328,7 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::post('/withdraw', [\App\Http\Controllers\Driver\DriverController::class, 'requestPayout'])->name('withdraw');
             Route::post('/points/convert', [\App\Http\Controllers\Driver\DriverController::class, 'convertPoints'])->name('points.convert');
             Route::post('/telemetry/location', [\App\Http\Controllers\Driver\DriverController::class, 'updateLocation'])->name('telemetry.location');
+            Route::post('/routes/optimize', [\App\Http\Controllers\Driver\DriverController::class, 'optimizeRoutes'])->name('routes.optimize');
             Route::get('/delivery/{order_number}/slip', [\App\Http\Controllers\Driver\DriverController::class, 'printDeliverySlip'])->name('delivery.slip');
 
             Route::middleware('kyc.verified')->group(function () {
