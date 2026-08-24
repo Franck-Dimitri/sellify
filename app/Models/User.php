@@ -29,6 +29,10 @@ class User extends Authenticatable
         'status',
         'is_active',
         'loyalty_points',
+        'momo_number',
+        'om_number',
+        'preferred_payment_method',
+        'notification_preferences',
         'oauth_provider',
         'oauth_provider_id',
         'last_login_at',
@@ -56,6 +60,7 @@ class User extends Authenticatable
             'otp_expires_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'notification_preferences' => 'array',
         ];
     }
 
@@ -101,6 +106,11 @@ class User extends Authenticatable
     public function reviews(): HasMany
     {
         return $this->hasMany(ProductReview::class);
+    }
+
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(CustomerAddress::class)->orderByDesc('is_default')->latest();
     }
 
     // ──────────── Helpers ────────────

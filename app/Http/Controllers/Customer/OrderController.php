@@ -156,13 +156,16 @@ class OrderController extends Controller
 
     /**
      * Submit a rating and review for an item in a delivered order.
+     * (Sub-Module 2.1.9: Double notation Vendeur 1-5★ + Livreur 1-5★ + Photos réelles)
      */
     public function submitReview(Request $request, string $orderNumber)
     {
         $request->validate([
             'product_id' => 'required|exists:products,id',
             'rating' => 'required|integer|min:1|max:5',
+            'driver_rating' => 'nullable|integer|min:1|max:5',
             'comment' => 'nullable|string|max:1000',
+            'photo' => 'nullable|image|max:4096',
         ]);
 
         $order = Order::where('order_number', $orderNumber)
@@ -171,6 +174,11 @@ class OrderController extends Controller
 
         if ($order->delivery_status !== 'delivered' && $order->payment_status !== 'released') {
             return back()->with('error', 'Vous devez avoir reçu votre commande pour déposer un avis.');
+        }
+
+        $photoPath = null;
+        if ($request->hasFile('photo')) {
+            $photoPath = $request->file('photo')->store('review_photos', 'public');
         }
 
         ProductReview::updateOrCreate(
@@ -182,7 +190,9 @@ class OrderController extends Controller
             [
                 'shop_id' => $order->shop_id,
                 'rating' => $request->rating,
+                'driver_rating' => $request->driver_rating ?? 5,
                 'comment' => $request->comment,
+                'photo_path' => $photoPath,
             ]
         );
 
@@ -192,7 +202,40 @@ class OrderController extends Controller
             'description' => "Avis laissé sur le produit #{$request->product_id} pour la commande #{$order->order_number}.",
         ]);
 
-        return back()->with('success', 'Votre avis vérifié a été publié avec succès ! Merci pour votre retour.');
+        return back()->with('success', 'Votre avis vérifié et évaluation livreur ont été publiés avec succès !');
+    }
+
+    /**
+     * Re-order in 1 click: add order products to cart (Sub-Module 2.1.8).
+     */
+    public function reorder(Request $request, string $orderNumber)
+    {
+        $order = Order::where('order_number', $orderNumber)
+            ->where('user_id', auth()->id())
+            ->with('items.product')
+            ->firstOrFail();
+
+        $cart = \App\Models\Cart::firstOrCreate(['user_id' => auth()->id()]);
+
+        foreach ($order->items as $item) {
+            if ($item->product && $item->product->is_active && $item->product->stock > 0) {
+                $existingItem = \App\Models\CartItem::where('cart_id', $cart->id)
+                    ->where('product_id', $item->product_id)
+                    ->first();
+
+                if ($existingItem) {
+                    $existingItem->increment('quantity', $item->quantity);
+                } else {
+                    \App\Models\CartItem::create([
+                        'cart_id' => $cart->id,
+                        'product_id' => $item->product_id,
+                        'quantity' => $item->quantity,
+                    ]);
+                }
+            }
+        }
+
+        return redirect()->route('public.cart.index')->with('success', "Les articles de la commande #{$order->order_number} ont été réajoutés à votre panier !");
     }
 
     /**

@@ -11,6 +11,8 @@ use App\Models\Product;
 use App\Models\PromoCode;
 use App\Models\SellerWallet;
 use App\Models\WalletTransaction;
+use App\Models\User;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -28,7 +30,7 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Display checkout page.
+     * Display checkout page (Sub-Module 2.1.6 - Tunnel Escrow 10 étapes).
      */
     public function show(Request $request)
     {
@@ -75,7 +77,7 @@ class CheckoutController extends Controller
         });
 
         $subtotal = $formattedItems->sum('subtotal');
-        $shippingFee = 1500; // Fixed shipping per order
+        $shippingFee = 1500; // Frais fixes de livraison standard par boutique
         
         // Calculate applied promo code discount from session if present
         $appliedPromo = $request->session()->get('applied_promo');
@@ -92,6 +94,10 @@ class CheckoutController extends Controller
         $grandTotal = max(0, $subtotal - $discount + $shippingFee);
         $user = auth()->user();
 
+        // Customer's saved addresses with visual landmarks
+        $savedAddresses = $user ? $user->addresses()->get() : [];
+        $defaultAddress = $user ? $user->addresses()->where('is_default', true)->first() : null;
+
         return Inertia::render('Public/Checkout/Index', [
             'items' => $formattedItems,
             'subtotal' => $subtotal,
@@ -101,8 +107,13 @@ class CheckoutController extends Controller
             'grandTotal' => $grandTotal,
             'customerName' => $user ? "{$user->first_name} {$user->last_name}" : '',
             'customerPhone' => $user ? $user->phone : '',
-            'defaultDeliveryAddress' => $user ? ($user->default_delivery_address ?? '') : '',
-            'defaultCity' => $user ? ($user->default_city ?? 'Douala') : 'Douala',
+            'momoNumber' => $user ? ($user->momo_number ?? $user->phone ?? '') : '',
+            'omNumber' => $user ? ($user->om_number ?? '') : '',
+            'preferredPaymentMethod' => $user ? ($user->preferred_payment_method ?? 'momo') : 'momo',
+            'savedAddresses' => $savedAddresses,
+            'defaultDeliveryAddress' => $defaultAddress ? $defaultAddress->address : ($user ? ($user->default_delivery_address ?? '') : ''),
+            'defaultLandmark' => $defaultAddress ? $defaultAddress->landmark_description : '',
+            'defaultCity' => $defaultAddress ? $defaultAddress->city : ($user ? ($user->default_city ?? 'Douala') : 'Douala'),
         ]);
     }
 
@@ -166,7 +177,7 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Process checkout with Escrow hold.
+     * Process checkout with Escrow hold & Loyalty points accumulation (Sub-Module 2.1.6 & 2.1.10).
      */
     public function process(Request $request)
     {
@@ -174,8 +185,9 @@ class CheckoutController extends Controller
             'customer_name' => 'required|string|max:255',
             'customer_phone' => 'required|string|max:20',
             'delivery_address' => 'required|string|max:500',
+            'delivery_landmark' => 'nullable|string|max:500',
             'city' => 'required|string|max:100',
-            'payment_method' => 'required|in:orange_money,mtn_momo,bank_transfer',
+            'payment_method' => 'required|in:orange_money,mtn_momo,bank_transfer,momo',
             'save_default_address' => 'nullable|boolean',
         ]);
 
@@ -209,8 +221,9 @@ class CheckoutController extends Controller
         // Group items by shop_id
         $itemsByShop = $cartItems->groupBy(fn($item) => $item->product->shop_id);
         $createdOrders = [];
+        $totalSpentAllOrders = 0;
 
-        DB::transaction(function () use ($itemsByShop, $request, &$createdOrders, $cart, $appliedPromo) {
+        DB::transaction(function () use ($itemsByShop, $request, &$createdOrders, &$totalSpentAllOrders, $cart, $appliedPromo, $user) {
             foreach ($itemsByShop as $shopId => $items) {
                 $shop = $items->first()->product->shop;
                 $seller = $shop->seller;
@@ -261,19 +274,21 @@ class CheckoutController extends Controller
 
                 $shippingFee = 1500;
                 $totalAmount = max(0, $orderSubtotal - $orderDiscount + $shippingFee);
+                $totalSpentAllOrders += $totalAmount;
 
-                // Create Order
+                // Create Order with visual landmark preserved
                 $order = Order::create([
                     'user_id' => auth()->id(),
                     'shop_id' => $shopId,
                     'customer_name' => $request->customer_name,
                     'customer_phone' => $request->customer_phone,
                     'delivery_address' => $request->delivery_address,
+                    'delivery_landmark' => $request->delivery_landmark,
                     'city' => $request->city,
                     'subtotal' => $orderSubtotal,
                     'shipping_fee' => $shippingFee,
                     'total_amount' => $totalAmount,
-                    'payment_method' => $request->payment_method,
+                    'payment_method' => $request->payment_method === 'momo' ? 'mtn_momo' : $request->payment_method,
                     'payment_status' => 'escrow_held',
                     'delivery_status' => 'pending',
                 ]);
@@ -300,6 +315,18 @@ class CheckoutController extends Controller
                 }
 
                 $createdOrders[] = $order;
+            }
+
+            // Sub-Module 2.1.10: Accumulate Loyalty Points (1 FCFA = 1 pt)
+            if ($user) {
+                $earnedPoints = (int) round($totalSpentAllOrders);
+                $user->increment('loyalty_points', $earnedPoints);
+
+                ActivityLog::create([
+                    'user_id' => $user->id,
+                    'action' => 'points_earned',
+                    'description' => "Gain de {$earnedPoints} points de fidélité pour vos achats.",
+                ]);
             }
 
             // Clear Cart & Promo session

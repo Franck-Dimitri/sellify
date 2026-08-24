@@ -733,7 +733,7 @@ class DriverController extends Controller
         $selectedOrderIds = $request->input('order_ids', []);
 
         // Charger les commandes cibles
-        $ordersQuery = Order::with(['shop.user', 'user', 'items']);
+        $ordersQuery = Order::with(['shop.seller.user', 'user', 'items']);
         if (!empty($selectedOrderIds)) {
             $ordersQuery->whereIn('id', $selectedOrderIds);
         } else {
@@ -761,17 +761,18 @@ class DriverController extends Controller
         foreach ($orders as $index => $ord) {
             $shop = $ord->shop;
             $customer = $ord->user;
+            $sellerUser = $shop?->seller?->user;
             $loc = $defaultLocations[$index % count($defaultLocations)];
 
             $deliveriesData[] = [
                 'order_id' => $ord->id,
                 'order_number' => $ord->order_number,
                 'seller_shop_name' => $shop ? $shop->name : $loc['p_name'],
-                'pickup_address' => $shop ? ($shop->city . ', ' . $shop->address) : $loc['p_addr'],
+                'pickup_address' => $shop ? ($shop->address ?: $loc['p_addr']) : $loc['p_addr'],
                 'pickup_lat' => (float)($ord->pickup_latitude ?: $loc['p_lat']),
                 'pickup_lng' => (float)($ord->pickup_longitude ?: $loc['p_lng']),
-                'seller_name' => $shop && $shop->user ? trim($shop->user->first_name . ' ' . $shop->user->last_name) : 'Vendeur',
-                'seller_phone' => $shop && $shop->user ? $shop->user->phone : '+237670000000',
+                'seller_name' => $sellerUser ? trim($sellerUser->first_name . ' ' . $sellerUser->last_name) : ($shop ? $shop->name : 'Vendeur'),
+                'seller_phone' => $shop?->phone_contact ?: ($sellerUser?->phone ?: '+237670000000'),
                 'customer_name' => $customer ? trim($customer->first_name . ' ' . $customer->last_name) : $loc['d_name'],
                 'delivery_address' => $ord->shipping_address ?: $loc['d_addr'],
                 'delivery_lat' => (float)($ord->delivery_latitude ?: $loc['d_lat']),

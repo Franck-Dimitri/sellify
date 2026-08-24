@@ -35,10 +35,10 @@ Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('welcome');
 
-// Public Store & Marketplace Routes
 Route::get('/store', [StoreController::class, 'indexProducts'])->name('public.products.index');
 Route::get('/produit/{slug}', [StoreController::class, 'showProduct'])->name('public.products.show');
 Route::get('/boutiques', [StoreController::class, 'indexShops'])->name('public.shops.index');
+Route::get('/api/search/suggestions', [StoreController::class, 'searchSuggestions'])->name('public.search.suggestions');
 
 Route::get('/boutique/{slug}', [ShopController::class, 'showPublic'])->name('shop.public');
 Route::post('/boutique/checkout/direct', [ShopController::class, 'directCheckout'])->name('shop.direct_checkout');
@@ -292,6 +292,7 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/orders', [\App\Http\Controllers\Customer\OrderController::class, 'index'])->name('orders.index');
             Route::get('/orders/{order_number}', [\App\Http\Controllers\Customer\OrderController::class, 'show'])->name('orders.show');
             Route::get('/orders/{order_number}/invoice', [\App\Http\Controllers\Customer\OrderController::class, 'invoice'])->name('orders.invoice');
+            Route::post('/orders/{order_number}/reorder', [\App\Http\Controllers\Customer\OrderController::class, 'reorder'])->name('orders.reorder');
             Route::post('/orders/{order_number}/confirm', [\App\Http\Controllers\Customer\OrderController::class, 'confirmDelivery'])->name('orders.confirm');
             Route::post('/orders/{order_number}/cancel', [\App\Http\Controllers\Customer\OrderController::class, 'cancelOrder'])->name('orders.cancel');
             Route::post('/orders/{order_number}/review', [\App\Http\Controllers\Customer\OrderController::class, 'submitReview'])->name('orders.review');
@@ -307,6 +308,12 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/loyalty', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'loyalty'])->name('loyalty');
             Route::get('/profile', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'profile'])->name('profile');
             Route::post('/profile', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'updateProfile'])->name('profile.update');
+            Route::get('/addresses', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'addresses'])->name('addresses.index');
+            Route::post('/addresses', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'storeAddress'])->name('addresses.store');
+            Route::post('/addresses/{address}/update', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'updateAddress'])->name('addresses.update');
+            Route::delete('/addresses/{address}', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'destroyAddress'])->name('addresses.destroy');
+            Route::post('/addresses/{address}/default', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'setDefaultAddress'])->name('addresses.default');
+            Route::post('/settings/sessions/terminate-others', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'terminateOtherSessions'])->name('settings.sessions.terminate');
         });
 
         // ─────────────────────────────────────────────────────────────────────────

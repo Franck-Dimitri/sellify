@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { Head, useForm, Link } from '@inertiajs/react';
 import DriverLayout from '@/Layouts/DriverLayout';
 import RefuseDeliveryModal from '@/Components/RefuseDeliveryModal';
@@ -17,6 +17,7 @@ import {
     PhoneCall, 
     X,
     ArrowRight,
+    ArrowUp,
     Compass, 
     Layers, 
     Lock, 
@@ -33,7 +34,12 @@ import {
     Clock,
     TrendingUp,
     Check,
-    ExternalLink
+    Volume2,
+    VolumeX,
+    Radio,
+    Maximize2,
+    Route,
+    Crosshair
 } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -51,6 +57,7 @@ export default function Map({
     const markersLayerRef = useRef(null);
     const routeLayerRef = useRef(null);
     const heatmapLayerRef = useRef(null);
+    const navigationWatchId = useRef(null);
 
     const [selectedOrder, setSelectedOrder] = useState(targetOrder || activeDelivery || availableDeliveries[0] || null);
     const [selectedDeliveryForOtp, setSelectedDeliveryForOtp] = useState(null);
@@ -67,9 +74,53 @@ export default function Map({
     const [aiTourDrawerOpen, setAiTourDrawerOpen] = useState(false);
     const [activeTourStopIndex, setActiveTourStopIndex] = useState(0);
 
+    // IN-APP LIVE GPS TURN-BY-TURN NAVIGATION HUD
+    const [isNavigatingLive, setIsNavigatingLive] = useState(false);
+    const [liveDriverPos, setLiveDriverPos] = useState([4.0511, 9.7085]);
+    const [liveSpeedKmh, setLiveSpeedKmh] = useState(28);
+    const [voiceMuted, setVoiceMuted] = useState(false);
+    const [liveManeuverText, setLiveManeuverText] = useState("Continuer tout droit sur l'axe principal");
+    const [liveManeuverDistance, setLiveManeuverDistance] = useState("250 m");
+
     const { post, processing } = useForm();
     const user = driver.user || {};
     const driverPhoto = user.kyc_documents?.[0] ? route('admin.kyc.document.show', user.kyc_documents[0].id) : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop';
+
+    // Current Target Stop in Navigation Mode
+    const currentTargetStop = useMemo(() => {
+        if (aiTourData?.tour?.stops && aiTourData.tour.stops[activeTourStopIndex]) {
+            return aiTourData.tour.stops[activeTourStopIndex];
+        }
+        if (selectedOrder) {
+            return {
+                step_number: 1,
+                type: selectedOrder.delivery_status === 'in_transit' ? 'dropoff' : 'pickup',
+                location_name: selectedOrder.delivery_status === 'in_transit' ? `${selectedOrder.user?.first_name || 'Client'}` : `${selectedOrder.shop?.name || 'Boutique'}`,
+                address: selectedOrder.delivery_status === 'in_transit' ? (selectedOrder.shipping_address || 'Adresse Client') : (selectedOrder.shop?.address || 'Adresse Boutique'),
+                lat: selectedOrder.delivery_status === 'in_transit' ? (selectedOrder.lat || 4.0150) : (selectedOrder.shop?.lat || 4.0511),
+                lng: selectedOrder.delivery_status === 'in_transit' ? (selectedOrder.lng || 9.7050) : (selectedOrder.shop?.lng || 9.7085),
+                contact_phone: selectedOrder.delivery_status === 'in_transit' ? selectedOrder.user?.phone : (selectedOrder.shop?.phone_contact || selectedOrder.shop?.phone),
+                order_number: selectedOrder.order_number,
+                order_id: selectedOrder.id
+            };
+        }
+        return null;
+    }, [aiTourData, activeTourStopIndex, selectedOrder]);
+
+    // Vocal Speech Synthesis Helper (French)
+    const speakNavigationInstruction = useCallback((text) => {
+        if (voiceMuted || typeof window === 'undefined' || !window.speechSynthesis) return;
+        try {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'fr-FR';
+            utterance.rate = 1.05;
+            utterance.pitch = 1.0;
+            window.speechSynthesis.speak(utterance);
+        } catch (e) {
+            console.warn("Speech synthesis error:", e);
+        }
+    }, [voiceMuted]);
 
     // Memoize active & available map orders
     const displayOrders = useMemo(() => {
@@ -114,7 +165,6 @@ export default function Map({
             attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
-        // Create dedicated layers
         const markersLayer = L.layerGroup().addTo(map);
         const routeLayer = L.layerGroup().addTo(map);
         const heatmapLayer = L.layerGroup().addTo(map);
@@ -145,8 +195,8 @@ export default function Map({
                     'X-CSRF-TOKEN': csrfToken || '',
                 },
                 body: JSON.stringify({
-                    driver_lat: 4.0511,
-                    driver_lng: 9.7085,
+                    driver_lat: liveDriverPos[0],
+                    driver_lng: liveDriverPos[1],
                     vehicle_type: driver.vehicle_type || 'moto',
                     order_ids: displayOrders.map(o => o.id).filter(Boolean),
                 }),
@@ -158,11 +208,88 @@ export default function Map({
                 setAiTourDrawerOpen(true);
                 setSelectedOrder(null);
                 setActiveTourStopIndex(0);
+                speakNavigationInstruction("Tournée optimisée par Sellify AI. L'itinéraire et le plan de route sont prêts.");
             }
         } catch (error) {
             console.error("AI Tour optimization error:", error);
         } finally {
             setIsAiOptimizing(false);
+        }
+    };
+
+    // START IN-APP LIVE GPS GUIDANCE
+    const startInAppNavigation = (targetStop = null) => {
+        setIsNavigatingLive(true);
+        setAiTourDrawerOpen(false);
+
+        const stop = targetStop || currentTargetStop;
+        if (!stop) return;
+
+        const maneuverMsg = stop.type === 'pickup'
+            ? `Guidage démarré vers le point de ramassage : ${stop.location_name}`
+            : `Guidage démarré vers le client : ${stop.location_name}`;
+        
+        setLiveManeuverText(`Prendre la direction de ${stop.location_name}`);
+        setLiveManeuverDistance("150 m");
+        speakNavigationInstruction(maneuverMsg);
+
+        // Zoom closely into driver position for navigation HUD feel
+        if (mapInstance.current) {
+            mapInstance.current.setView(liveDriverPos, 16, { animate: true });
+        }
+
+        // Live Geolocation Watcher
+        if (navigator.geolocation) {
+            if (navigationWatchId.current) navigator.geolocation.clearWatch(navigationWatchId.current);
+            navigationWatchId.current = navigator.geolocation.watchPosition(
+                (pos) => {
+                    const newPos = [pos.coords.latitude, pos.coords.longitude];
+                    setLiveDriverPos(newPos);
+                    setLiveSpeedKmh(pos.coords.speed ? Math.round(pos.coords.speed * 3.6) : 32);
+
+                    if (mapInstance.current) {
+                        mapInstance.current.panTo(newPos, { animate: true, duration: 1 });
+                    }
+                },
+                (err) => console.warn("GPS live watch:", err.message),
+                { enableHighAccuracy: true, maximumAge: 2000, timeout: 5000 }
+            );
+        }
+    };
+
+    // STOP IN-APP LIVE GPS GUIDANCE
+    const stopInAppNavigation = () => {
+        setIsNavigatingLive(false);
+        if (navigationWatchId.current && navigator.geolocation) {
+            navigator.geolocation.clearWatch(navigationWatchId.current);
+            navigationWatchId.current = null;
+        }
+        if (aiTourData) {
+            setAiTourDrawerOpen(true);
+        }
+    };
+
+    // COMPLETE CURRENT STOP & ADVANCE
+    const handleCompleteCurrentStop = () => {
+        if (!currentTargetStop) return;
+
+        // If it's a delivery (dropoff), trigger OTP validation modal directly
+        if (currentTargetStop.type === 'dropoff') {
+            const targetOrderObj = displayOrders.find(o => o.order_number === currentTargetStop.order_number || o.id === currentTargetStop.order_id) || selectedOrder;
+            if (targetOrderObj) {
+                setSelectedDeliveryForOtp(targetOrderObj);
+            }
+        }
+
+        // Advance to next stop in AI tour if available
+        if (aiTourData?.tour?.stops && activeTourStopIndex < (aiTourData.tour.stops.length - 1)) {
+            const nextIdx = activeTourStopIndex + 1;
+            setActiveTourStopIndex(nextIdx);
+            const nextStop = aiTourData.tour.stops[nextIdx];
+            speakNavigationInstruction(`Étape validée. En route vers l'arrêt ${nextStop.step_number} : ${nextStop.location_name}`);
+        } else {
+            speakNavigationInstruction("Félicitations, vous avez complété tous les arrêts de votre tournée !");
+            stopInAppNavigation();
         }
     };
 
@@ -200,7 +327,7 @@ export default function Map({
         }
     }, [heatmapActive]);
 
-    // Update Map Markers & Polylines (Supports AI Optimized Tour & Single Order Mode)
+    // Update Map Markers & Polylines (Supports In-App Navigation HUD, AI Tour & Single Order Mode)
     useEffect(() => {
         const map = mapInstance.current;
         const markersLayer = markersLayerRef.current;
@@ -211,10 +338,15 @@ export default function Map({
         markersLayer.clearLayers();
         routeLayer.clearLayers();
 
-        const driverPos = [4.0511, 9.7085];
-
-        // 1. DRIVER CURRENT POSITION PIN
-        const driverMarkerHtml = `
+        // 1. DRIVER LIVE VEHICLE PIN (ANIMATED PULSING ARROW IN NAVIGATION MODE)
+        const driverMarkerHtml = isNavigatingLive ? `
+            <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px;">
+                <div style="position: absolute; inset: 0; background: rgba(234, 179, 8, 0.4); border-radius: 50%; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
+                <div style="position: relative; width: 36px; height: 36px; background: #eab308; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 4px 18px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; color: #1c1917;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polygon points="12 2 19 21 12 17 5 21 12 2"/></svg>
+                </div>
+            </div>
+        ` : `
             <div style="display: flex; align-items: center; gap: 8px; background: #ffffff; padding: 4px 10px 4px 4px; border-radius: 20px; border: 2px solid #eab308; box-shadow: 0 6px 18px rgba(0,0,0,0.25); font-family: sans-serif; font-size: 11px; font-weight: bold; color: #1c1917; cursor: pointer;">
                 <img src="${driverPhoto}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover;" onError="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop'" />
                 <div style="display: flex; flex-direction: column;">
@@ -225,15 +357,21 @@ export default function Map({
                 </div>
             </div>
         `;
-        L.marker(driverPos, { 
-            icon: L.divIcon({ className: 'c-driver-pin', html: driverMarkerHtml, iconSize: [160, 36], iconAnchor: [80, 18] })
+
+        L.marker(liveDriverPos, { 
+            icon: L.divIcon({ 
+                className: 'c-driver-pin', 
+                html: driverMarkerHtml, 
+                iconSize: isNavigatingLive ? [44, 44] : [160, 36], 
+                iconAnchor: isNavigatingLive ? [22, 22] : [80, 18] 
+            })
         }).addTo(markersLayer);
 
         // CASE A: AI OPTIMIZED MULTI-STOP TOUR ACTIVE
         if (aiTourData && aiTourData.tour && aiTourData.tour.stops) {
             const tour = aiTourData.tour;
             const stops = tour.stops;
-            const pointsToFit = [driverPos];
+            const pointsToFit = [liveDriverPos];
 
             // Render Numbered Waypoints
             stops.forEach((stop, idx) => {
@@ -245,7 +383,7 @@ export default function Map({
                 const borderColor = isCurrent ? '#eab308' : '#ffffff';
 
                 const stopHtml = `
-                    <div style="background: ${badgeBg}; color: #ffffff; padding: 4px 9px; border-radius: 12px; border: 2px solid ${borderColor}; box-shadow: 0 4px 14px rgba(0,0,0,0.25); font-family: sans-serif; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 4px; cursor: pointer; transform: ${isCurrent ? 'scale(1.15)' : 'scale(1)'}; transition: transform 0.2s;">
+                    <div style="background: ${badgeBg}; color: #ffffff; padding: 4px 9px; border-radius: 12px; border: 2px solid ${borderColor}; box-shadow: 0 4px 14px rgba(0,0,0,0.25); font-family: sans-serif; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 4px; cursor: pointer; transform: ${isCurrent ? 'scale(1.2)' : 'scale(1)'}; transition: transform 0.2s;">
                         <span style="background: rgba(0,0,0,0.25); padding: 1px 5px; border-radius: 6px; font-mono; font-size: 10px;">${stop.step_number}</span>
                         <span>${isPickup ? '📦 ' : '📍 '}${stop.location_name?.substring(0, 14)}</span>
                     </div>
@@ -257,7 +395,9 @@ export default function Map({
 
                 marker.on('click', () => {
                     setActiveTourStopIndex(idx);
-                    setAiTourDrawerOpen(true);
+                    if (!isNavigatingLive) {
+                        setAiTourDrawerOpen(true);
+                    }
                 });
 
                 pointsToFit.push([stop.lat, stop.lng]);
@@ -266,16 +406,17 @@ export default function Map({
             // Render Route Polyline from OSRM GeoJSON geometry
             if (tour.route_geometry && tour.route_geometry.length > 0) {
                 const polyline = L.polyline(tour.route_geometry, {
-                    color: '#eab308',
-                    weight: 6,
+                    color: isNavigatingLive ? '#2563eb' : '#eab308',
+                    weight: isNavigatingLive ? 7 : 6,
                     opacity: 0.9,
                     lineJoin: 'round',
-                    dashArray: '8, 8',
-                    dashSpeed: 20
+                    dashArray: isNavigatingLive ? null : '8, 8',
                 }).addTo(routeLayer);
 
-                map.fitBounds(polyline.getBounds().pad(0.15));
-            } else if (pointsToFit.length > 1) {
+                if (!isNavigatingLive) {
+                    map.fitBounds(polyline.getBounds().pad(0.15));
+                }
+            } else if (pointsToFit.length > 1 && !isNavigatingLive) {
                 map.fitBounds(L.latLngBounds(pointsToFit).pad(0.2));
             }
 
@@ -300,7 +441,7 @@ export default function Map({
 
             shopMarker.on('click', () => {
                 setSelectedOrder(order);
-                setAiTourData(null);
+                setAiTourDrawerOpen(false);
             });
 
             // Customer Destination Marker
@@ -323,7 +464,7 @@ export default function Map({
 
             customerMarker.on('click', () => {
                 setSelectedOrder(order);
-                setAiTourData(null);
+                setAiTourDrawerOpen(false);
             });
         });
 
@@ -337,7 +478,7 @@ export default function Map({
             const cLat = selectedOrder.lat || 4.0150;
             const cLng = selectedOrder.lng || 9.7050;
 
-            const startPoint = isReturned ? [cLat, cLng] : driverPos;
+            const startPoint = isReturned ? [cLat, cLng] : liveDriverPos;
             const endPoint = isReturned ? [sLat, sLng] : [cLat, cLng];
 
             fetchOSRMRoute(startPoint[0], startPoint[1], endPoint[0], endPoint[1]).then(res => {
@@ -346,18 +487,20 @@ export default function Map({
                     duration: `${res.durationMin} min`
                 });
 
-                const routeColor = isReturned ? '#e11d48' : isFinished ? '#78716c' : '#eab308';
+                const routeColor = isReturned ? '#e11d48' : isFinished ? '#78716c' : (isNavigatingLive ? '#2563eb' : '#eab308');
                 L.polyline(res.coordinates, {
                     color: routeColor,
-                    weight: 5,
+                    weight: isNavigatingLive ? 7 : 5,
                     opacity: 0.85,
                     lineJoin: 'round'
                 }).addTo(routeLayer);
 
-                map.fitBounds(L.latLngBounds([startPoint, endPoint]).pad(0.2));
+                if (!isNavigatingLive) {
+                    map.fitBounds(L.latLngBounds([startPoint, endPoint]).pad(0.2));
+                }
             });
         }
-    }, [selectedOrder, displayOrders, driverPhoto, aiTourData, activeTourStopIndex, driver.vehicle_plate]);
+    }, [selectedOrder, displayOrders, driverPhoto, aiTourData, activeTourStopIndex, driver.vehicle_plate, isNavigatingLive, liveDriverPos]);
 
     const isCurrentOrderReturned = selectedOrder?.delivery_status === 'returned_to_shop';
     const isCurrentOrderFinished = selectedOrder?.delivery_status === 'delivered';
@@ -371,50 +514,167 @@ export default function Map({
                 {/* 1. MAP CONTAINER */}
                 <div ref={mapRef} className="w-full h-full z-0" />
 
-                {/* 2. TOP ACTION CONTROL BAR */}
-                <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between pointer-events-none">
-                    
-                    {/* Left: AI Tour Optimization & Heatmap Buttons */}
-                    <div className="flex items-center gap-2 pointer-events-auto flex-wrap">
-                        {/* Sellify AI Tour Optimization Button */}
-                        <button
-                            onClick={handleRunAiTourOptimization}
-                            disabled={isAiOptimizing}
-                            className="flex items-center gap-2 px-3.5 sm:px-4 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-lg border border-yellow-500 transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50"
-                        >
-                            <Sparkles className={`w-4 h-4 text-yellow-950 ${isAiOptimizing ? 'animate-spin' : ''}`} />
-                            <span>{isAiOptimizing ? 'Calcul VRP Sellify AI...' : '⚡ Optimiser ma tournée (Sellify AI 1.2 Flash)'}</span>
-                        </button>
+                {/* 2. TOP ACTION CONTROL BAR (HIDDEN WHEN IN ACTIVE LIVE NAVIGATION HUD) */}
+                {!isNavigatingLive && (
+                    <div className="absolute top-3 sm:top-4 inset-x-3 sm:inset-x-4 z-40 flex items-center justify-between pointer-events-none gap-2">
+                        
+                        {/* Left: AI Tour Optimization & Heatmap Buttons in Pill Container */}
+                        <div className="flex items-center gap-2 pointer-events-auto flex-wrap bg-white/95 backdrop-blur-md border border-stone-200/90 shadow-lg rounded-2xl p-1.5">
+                            {/* Sellify AI Tour Optimization Button */}
+                            <button
+                                onClick={handleRunAiTourOptimization}
+                                disabled={isAiOptimizing}
+                                className="flex items-center gap-2 px-3.5 sm:px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-sm border border-yellow-500 transition-all transform active:scale-95 disabled:opacity-50"
+                                title="Calculer l'ordre idéal des arrêts et économiser du carburant"
+                            >
+                                <Sparkles className={`w-4 h-4 text-yellow-950 ${isAiOptimizing ? 'animate-spin' : ''}`} />
+                                <span>{isAiOptimizing ? 'Calcul VRP Sellify AI...' : '⚡ Optimiser ma tournée (Sellify AI 1.2 Flash)'}</span>
+                            </button>
 
-                        {/* Heatmap Toggle */}
-                        <button
-                            onClick={() => setHeatmapActive(!heatmapActive)}
-                            className={`flex items-center gap-2 px-3 sm:px-3.5 py-2.5 rounded-xl text-xs font-bold shadow-md transition-all ${
-                                heatmapActive 
-                                    ? 'bg-rose-500 text-white border border-rose-600 ring-2 ring-rose-300' 
-                                    : 'bg-white/95 text-stone-800 border border-stone-200 hover:bg-stone-50'
-                            }`}
-                        >
-                            <Flame className="w-4 h-4 text-rose-500" />
-                            <span className="hidden sm:inline">Zones Chaudes (+30%)</span>
-                        </button>
+                            {/* If AI Tour was calculated, allow toggling the drawer back open */}
+                            {aiTourData && !aiTourDrawerOpen && (
+                                <button
+                                    onClick={() => {
+                                        setAiTourDrawerOpen(true);
+                                        setSelectedOrder(null);
+                                    }}
+                                    className="flex items-center gap-1.5 px-3 py-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-950 border border-yellow-300 rounded-xl text-xs font-bold transition-all"
+                                >
+                                    <Route className="w-4 h-4 text-yellow-700" />
+                                    <span>Voir Tournée IA ({aiTourData.tour?.stops?.length || 0} arrêts)</span>
+                                </button>
+                            )}
+
+                            {/* Heatmap Toggle */}
+                            <button
+                                onClick={() => setHeatmapActive(!heatmapActive)}
+                                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                                    heatmapActive 
+                                        ? 'bg-rose-500 text-white border border-rose-600 ring-2 ring-rose-300' 
+                                        : 'text-stone-700 hover:bg-stone-100'
+                                }`}
+                            >
+                                <Flame className={`w-4 h-4 ${heatmapActive ? 'text-white' : 'text-rose-500'}`} />
+                                <span className="hidden sm:inline">Zones Chaudes (+30%)</span>
+                            </button>
+                        </div>
+
+                        {/* Right: History Archive Button */}
+                        <div className="pointer-events-auto flex items-center gap-2 bg-white/95 backdrop-blur-md border border-stone-200/90 shadow-lg rounded-2xl p-1.5">
+                            <button
+                                onClick={() => setShowArchivedList(!showArchivedList)}
+                                className="flex items-center gap-1.5 px-3 py-2 text-stone-700 hover:text-stone-900 rounded-xl text-xs font-bold transition-all"
+                            >
+                                <Archive className="w-4 h-4 text-stone-500" />
+                                <span className="hidden sm:inline">Historique</span>
+                            </button>
+                        </div>
                     </div>
+                )}
 
-                    {/* Right: History Archive Button */}
-                    <div className="pointer-events-auto flex items-center gap-2">
-                        <button
-                            onClick={() => setShowArchivedList(!showArchivedList)}
-                            className="flex items-center gap-1.5 px-3 py-2.5 bg-white/95 text-stone-700 hover:text-stone-900 border border-stone-200 rounded-xl text-xs font-bold shadow-md transition-all"
-                        >
-                            <Archive className="w-4 h-4 text-stone-500" />
-                            <span className="hidden sm:inline">Historique</span>
-                        </button>
+                {/* 3. IN-APP LIVE GPS TURN-BY-TURN HUD (STYLE WAZE/CARPLAY INTEGRE) */}
+                {isNavigatingLive && currentTargetStop && (
+                    <div className="absolute inset-0 z-50 pointer-events-none flex flex-col justify-between p-3 sm:p-5">
+                        
+                        {/* TOP HUD: Turn Maneuver & Destination Card */}
+                        <div className="pointer-events-auto w-full max-w-xl mx-auto bg-stone-950/95 text-white border-2 border-yellow-400/80 rounded-2xl sm:rounded-3xl p-4 shadow-2xl backdrop-blur-md space-y-3 animate-in slide-in-from-top-4 duration-200">
+                            <div className="flex items-start justify-between gap-3">
+                                {/* Large Green Turn Maneuver Box */}
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-stone-950 flex items-center justify-center font-bold text-lg shadow-lg shrink-0">
+                                        <ArrowUp className="w-7 h-7" />
+                                    </div>
+                                    <div>
+                                        <span className="text-emerald-400 font-mono font-bold text-sm block">
+                                            Dans {liveManeuverDistance}
+                                        </span>
+                                        <h2 className="text-white font-bold text-sm sm:text-base leading-tight">
+                                            {liveManeuverText}
+                                        </h2>
+                                    </div>
+                                </div>
+
+                                {/* Speed Gauge & Sound Toggle */}
+                                <div className="flex items-center gap-2 shrink-0">
+                                    <button 
+                                        onClick={() => setVoiceMuted(!voiceMuted)}
+                                        className={`p-2 rounded-xl border transition-colors ${
+                                            voiceMuted ? 'bg-stone-800 text-stone-400 border-stone-700' : 'bg-yellow-400 text-yellow-950 border-yellow-500'
+                                        }`}
+                                        title={voiceMuted ? 'Activer la voix GPS' : 'Couper la voix GPS'}
+                                    >
+                                        {voiceMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                                    </button>
+
+                                    <div className="p-2 bg-stone-900 border border-stone-800 rounded-xl text-center min-w-[56px]">
+                                        <span className="font-mono font-bold text-yellow-400 text-sm block">{liveSpeedKmh}</span>
+                                        <span className="text-[9px] text-stone-400 uppercase block font-semibold">km/h</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Destination Mini-Bar */}
+                            <div className="pt-2 border-t border-stone-800/80 flex items-center justify-between text-xs">
+                                <div className="flex items-center gap-2 truncate">
+                                    <span className={`px-2 py-0.5 rounded font-mono font-bold text-[10px] uppercase ${
+                                        currentTargetStop.type === 'pickup' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                                    }`}>
+                                        {currentTargetStop.type === 'pickup' ? '📦 Ramassage' : '📍 Livraison'}
+                                    </span>
+                                    <strong className="text-stone-200 truncate">{currentTargetStop.location_name}</strong>
+                                </div>
+
+                                {currentTargetStop.contact_phone && (
+                                    <a
+                                        href={`tel:${currentTargetStop.contact_phone}`}
+                                        className="px-2.5 py-1 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold rounded-lg text-[11px] flex items-center gap-1 shrink-0"
+                                    >
+                                        <PhoneCall className="w-3 h-3" />
+                                        <span>Appeler</span>
+                                    </a>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* BOTTOM HUD: Complete Step & Quit Controls */}
+                        <div className="pointer-events-auto w-full max-w-xl mx-auto flex items-center gap-2 bg-stone-950/90 backdrop-blur-md border border-stone-800 rounded-2xl p-2.5 shadow-2xl animate-in slide-in-from-bottom-4 duration-200">
+                            {/* Exit Navigation */}
+                            <button
+                                onClick={stopInAppNavigation}
+                                className="px-3.5 py-3 bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white font-bold text-xs rounded-xl border border-stone-700 transition-colors shrink-0"
+                            >
+                                ✕ Quitter
+                            </button>
+
+                            {/* Arrived at destination / Complete Step */}
+                            <button
+                                onClick={handleCompleteCurrentStop}
+                                className="flex-1 py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs sm:text-sm rounded-xl shadow-lg border border-yellow-500 transition-all flex items-center justify-center gap-2 active:scale-98"
+                            >
+                                <CheckCircle2 className="w-5 h-5 text-yellow-950" />
+                                <span>
+                                    {currentTargetStop.type === 'dropoff' 
+                                        ? '🏁 Arrivé · Valider avec OTP Client' 
+                                        : '📦 Colis Récupéré · Passer à la suite'}
+                                </span>
+                            </button>
+
+                            {/* Re-center Camera */}
+                            <button
+                                onClick={() => mapInstance.current?.setView(liveDriverPos, 16, { animate: true })}
+                                className="p-3 bg-stone-800 hover:bg-stone-700 text-yellow-400 rounded-xl border border-stone-700 transition-colors shrink-0"
+                                title="Recentrer sur ma position"
+                            >
+                                <Crosshair className="w-4 h-4" />
+                            </button>
+                        </div>
+
                     </div>
-                </div>
+                )}
 
-                {/* 3. SELLIFY AI 1.2 FLASH - TACTICAL LOGISTICS DRAWER */}
-                {aiTourData && aiTourDrawerOpen && (
-                    <div className="absolute sm:top-4 sm:left-4 sm:bottom-4 bottom-3 inset-x-3 sm:inset-x-auto sm:w-[420px] max-h-[85vh] sm:max-h-none z-30 bg-white/95 backdrop-blur-md border-2 border-yellow-400 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-2xl flex flex-col justify-between overflow-y-auto space-y-4 animate-in slide-in-from-left-6 duration-200">
+                {/* 4. SELLIFY AI 1.2 FLASH - TACTICAL LOGISTICS DRAWER (RIGHT SIDE, UNDER TOP BAR) */}
+                {aiTourData && aiTourDrawerOpen && !isNavigatingLive && (
+                    <div className="absolute sm:top-20 sm:right-4 sm:bottom-4 bottom-2 inset-x-2 sm:inset-x-auto sm:w-[410px] max-h-[82vh] sm:max-h-none z-30 bg-white/95 backdrop-blur-md border-2 border-yellow-400 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-2xl flex flex-col justify-between overflow-y-auto space-y-4 animate-in slide-in-from-right-6 duration-200">
                         
                         <div className="space-y-3.5">
                             {/* Drawer Header */}
@@ -544,18 +804,15 @@ export default function Map({
 
                         {/* Drawer Actions */}
                         <div className="pt-2 border-t border-stone-100 space-y-2">
-                            {/* External GPS Deep Link (Google Maps / Waze) */}
+                            {/* IN-APP LIVE GPS GUIDANCE LAUNCHER */}
                             {aiTourData.tour?.stops?.[activeTourStopIndex] && (
-                                <a
-                                    href={`https://www.google.com/maps/dir/?api=1&destination=${aiTourData.tour.stops[activeTourStopIndex].lat},${aiTourData.tour.stops[activeTourStopIndex].lng}`}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="w-full py-2.5 bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs rounded-xl shadow-sm transition-colors flex items-center justify-center gap-1.5"
+                                <button
+                                    onClick={() => startInAppNavigation(aiTourData.tour.stops[activeTourStopIndex])}
+                                    className="w-full py-3 bg-stone-950 hover:bg-stone-900 text-yellow-400 font-bold text-xs rounded-xl shadow-lg border border-stone-800 transition-all flex items-center justify-center gap-2 active:scale-98"
                                 >
                                     <Navigation className="w-4 h-4 text-yellow-400" />
-                                    <span>Lancer le Guidage GPS (Google Maps / Waze)</span>
-                                    <ExternalLink className="w-3 h-3 text-stone-400" />
-                                </a>
+                                    <span>🧭 Démarrer le Guidage GPS Intégré (Arrêt #{activeTourStopIndex + 1})</span>
+                                </button>
                             )}
 
                             {/* Next Stop Advancer */}
@@ -572,9 +829,9 @@ export default function Map({
                     </div>
                 )}
 
-                {/* 4. ARCHIVED COMPLETED ORDERS FLOATING DRAWER */}
-                {showArchivedList && (
-                    <div className="absolute top-16 right-4 z-20 w-80 max-h-96 bg-white/95 backdrop-blur-md border border-stone-200 rounded-2xl p-4 shadow-2xl overflow-y-auto space-y-3 animate-in slide-in-from-top-4 duration-150">
+                {/* 5. ARCHIVED COMPLETED ORDERS FLOATING DRAWER */}
+                {showArchivedList && !isNavigatingLive && (
+                    <div className="absolute top-16 right-4 z-30 w-80 max-h-96 bg-white/95 backdrop-blur-md border border-stone-200 rounded-2xl p-4 shadow-2xl overflow-y-auto space-y-3 animate-in slide-in-from-top-4 duration-150">
                         <div className="flex items-center justify-between border-b border-stone-100 pb-2">
                             <div className="flex items-center gap-1.5 text-xs font-bold text-stone-900">
                                 <Archive className="w-4 h-4 text-stone-500" />
@@ -590,7 +847,7 @@ export default function Map({
                                     onClick={() => {
                                         setSelectedOrder(ord);
                                         setShowArchivedList(false);
-                                        setAiTourData(null);
+                                        setAiTourDrawerOpen(false);
                                     }}
                                     className="w-full p-2.5 bg-stone-50 hover:bg-stone-100 border border-stone-200 rounded-xl text-left transition-colors flex items-center justify-between text-xs"
                                 >
@@ -605,16 +862,16 @@ export default function Map({
                     </div>
                 )}
 
-                {/* 5. BOTTOM HORIZONTAL QUICK SELECT PILLS */}
-                {!selectedOrder && !aiTourDrawerOpen && (
-                    <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-10 bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-2xl p-2.5 sm:p-3 shadow-xl max-w-[calc(100%-2rem)] sm:max-w-lg w-full flex items-center gap-2 overflow-x-auto">
+                {/* 6. BOTTOM HORIZONTAL QUICK SELECT PILLS */}
+                {!selectedOrder && !aiTourDrawerOpen && !isNavigatingLive && (
+                    <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-2xl p-2.5 sm:p-3 shadow-xl max-w-[calc(100%-2rem)] sm:max-w-lg w-full flex items-center gap-2 overflow-x-auto">
                         <span className="text-[10px] sm:text-[11px] font-bold text-stone-500 shrink-0 pl-1">Missions actives :</span>
                         {displayOrders.map((ord) => (
                             <button
                                 key={ord.id || ord.order_number}
                                 onClick={() => {
                                     setSelectedOrder(ord);
-                                    setAiTourData(null);
+                                    setAiTourDrawerOpen(false);
                                 }}
                                 className="px-2.5 sm:px-3 py-1.5 bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 text-yellow-950 font-bold text-[11px] sm:text-xs rounded-xl shrink-0 transition-colors flex items-center gap-1"
                             >
@@ -625,9 +882,9 @@ export default function Map({
                     </div>
                 )}
 
-                {/* 6. FLOATING ORDER INSPECTION CARD */}
-                {selectedOrder && !aiTourDrawerOpen && (
-                    <div className="absolute sm:top-4 sm:left-4 sm:bottom-4 bottom-3 inset-x-3 sm:inset-x-auto sm:w-96 max-h-[80vh] sm:max-h-none z-20 bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-2xl p-4 sm:p-5 shadow-2xl flex flex-col justify-between overflow-y-auto space-y-4 animate-in slide-in-from-left-5 duration-200">
+                {/* 7. FLOATING ORDER INSPECTION CARD */}
+                {selectedOrder && !aiTourDrawerOpen && !isNavigatingLive && (
+                    <div className="absolute sm:top-20 sm:right-4 sm:bottom-4 bottom-2 inset-x-2 sm:inset-x-auto sm:w-96 max-h-[80vh] sm:max-h-none z-30 bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-2xl flex flex-col justify-between overflow-y-auto space-y-4 animate-in slide-in-from-right-5 duration-200">
                         
                         <div className="space-y-3 sm:space-y-4">
                             {/* Card Header */}
@@ -702,8 +959,16 @@ export default function Map({
                         {!isCurrentOrderFinished && !isCurrentOrderReturned && (
                             <div className="pt-2 border-t border-stone-100 space-y-2">
                                 <button
+                                    onClick={() => startInAppNavigation()}
+                                    className="w-full py-2.5 bg-stone-950 hover:bg-stone-900 text-yellow-400 font-bold text-xs rounded-xl shadow-md border border-stone-800 transition-colors flex items-center justify-center gap-1.5"
+                                >
+                                    <Navigation className="w-4 h-4 text-yellow-400" />
+                                    <span>🧭 Démarrer le Guidage GPS Intégré</span>
+                                </button>
+
+                                <button
                                     onClick={() => setSelectedDeliveryForOtp(selectedOrder)}
-                                    className="w-full py-2.5 sm:py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors border border-yellow-500 flex items-center justify-center gap-1.5"
+                                    className="w-full py-2 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors border border-yellow-500 flex items-center justify-center gap-1.5"
                                 >
                                     <Key className="w-4 h-4 shrink-0" />
                                     <span>Valider avec OTP & Signature</span>
