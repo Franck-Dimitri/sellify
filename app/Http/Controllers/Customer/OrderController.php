@@ -89,7 +89,7 @@ class OrderController extends Controller
     /**
      * Cancel an order before dispatch (status pending or preparing).
      */
-    public function cancelOrder(Request $request, string $orderNumber)
+    public function cancelOrder(Request $request, string $orderNumber, \App\Services\EscrowService $escrowService)
     {
         $order = Order::where('order_number', $orderNumber)
             ->where('user_id', auth()->id())
@@ -100,44 +100,7 @@ class OrderController extends Controller
             return back()->with('error', 'Cette commande ne peut plus être annulée car elle est déjà en cours de livraison ou livrée.');
         }
 
-        DB::transaction(function () use ($order) {
-            // Restore product stock
-            foreach ($order->items as $item) {
-                if ($item->product) {
-                    $item->product->increment('stock', $item->quantity);
-                }
-            }
-
-            // Reverse seller escrow pending balance
-            $seller = $order->shop->seller;
-            if ($seller && $order->payment_status === 'escrow_held') {
-                $wallet = SellerWallet::firstOrCreate(['seller_id' => $seller->id]);
-                $amountToDecrement = (float) min((float) $wallet->pending_balance, (float) $order->total_amount);
-                if ($amountToDecrement > 0) {
-                    $wallet->decrement('pending_balance', $amountToDecrement);
-                }
-
-                WalletTransaction::create([
-                    'wallet_id' => $wallet->id,
-                    'type' => 'debit_escrow',
-                    'amount' => $order->total_amount,
-                    'reference' => $order->order_number,
-                    'description' => "Annulation de commande par le client (Commande #{$order->order_number})",
-                    'status' => 'completed',
-                ]);
-            }
-
-            $order->update([
-                'delivery_status' => 'cancelled',
-                'payment_status' => 'refunded',
-            ]);
-
-            ActivityLog::create([
-                'user_id' => auth()->id(),
-                'action' => 'order_cancelled_by_customer',
-                'description' => "Le client a annulé la commande #{$order->order_number}. Fonds sous séquestre restitués.",
-            ]);
-        });
+        $escrowService->refundEscrow($order, 'Annulation par le client', auth()->id());
 
         return back()->with('success', 'Votre commande a été annulée et le remboursement sous séquestre a été déclenché.');
     }
@@ -145,7 +108,7 @@ class OrderController extends Controller
     /**
      * Customer confirms delivery receipt (Releases Escrow hold to Seller).
      */
-    public function confirmDelivery(Request $request, string $orderNumber)
+    public function confirmDelivery(Request $request, string $orderNumber, \App\Services\EscrowService $escrowService)
     {
         $order = Order::where('order_number', $orderNumber)
             ->where('user_id', auth()->id())
@@ -156,41 +119,7 @@ class OrderController extends Controller
             return back()->with('info', 'Cette commande a déjà été confirmée.');
         }
 
-        DB::transaction(function () use ($order) {
-            $order->update([
-                'delivery_status' => 'delivered',
-                'payment_status' => 'released',
-                'delivered_at' => now(),
-            ]);
-
-            // Release Escrow funds from seller pending_balance to balance
-            $seller = $order->shop->seller;
-            if ($seller) {
-                $wallet = SellerWallet::firstOrCreate(['seller_id' => $seller->id]);
-                
-                // Deduct from pending, add to available balance
-                $amountToRelease = (float) $order->total_amount;
-                $pendingToDeduct = (float) min((float) $wallet->pending_balance, $amountToRelease);
-                if ($pendingToDeduct > 0) {
-                    $wallet->decrement('pending_balance', $pendingToDeduct);
-                }
-                $wallet->increment('balance', $amountToRelease);
-
-                WalletTransaction::create([
-                    'wallet_id' => $wallet->id,
-                    'type' => 'release_escrow',
-                    'amount' => $amountToRelease,
-                    'reference' => $order->order_number,
-                    'description' => "Libération des fonds séquestres (Commande #{$order->order_number} livrée & confirmée)",
-                    'status' => 'completed',
-                ]);
-                ActivityLog::create([
-                    'user_id' => auth()->id(),
-                    'action' => 'escrow_released',
-                    'description' => "Le client a confirmé la réception du colis pour la commande #{$order->order_number}. Fonds séquestres débloqués.",
-                ]);
-            }
-        });
+        $escrowService->releaseEscrow($order, 'customer_confirmation', auth()->id());
 
         return back()->with('success', 'Merci ! Votre confirmation a libéré les fonds séquestres en toute sécurité au vendeur.');
     }

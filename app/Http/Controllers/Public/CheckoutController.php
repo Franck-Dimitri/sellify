@@ -299,20 +299,8 @@ class CheckoutController extends Controller
                     OrderItem::create($itemData);
                 }
 
-                // Credit seller's wallet pending_balance (Escrow Hold)
-                if ($seller) {
-                    $wallet = SellerWallet::firstOrCreate(['seller_id' => $seller->id]);
-                    $wallet->increment('pending_balance', $totalAmount);
-
-                    WalletTransaction::create([
-                        'wallet_id' => $wallet->id,
-                        'type' => 'credit_escrow',
-                        'amount' => $totalAmount,
-                        'reference' => $order->order_number,
-                        'description' => "Vente sous séquestre Escrow (Commande #{$order->order_number})",
-                        'status' => 'completed',
-                    ]);
-                }
+                // Credit seller's wallet pending_balance (Escrow Hold) via EscrowService
+                app(\App\Services\EscrowService::class)->holdEscrow($order);
 
                 $createdOrders[] = $order;
             }

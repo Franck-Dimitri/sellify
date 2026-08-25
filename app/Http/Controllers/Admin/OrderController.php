@@ -108,48 +108,15 @@ class OrderController extends Controller
     /**
      * Admin forces Escrow hold release to Seller.
      */
-    public function forceReleaseEscrow(Request $request, string $orderNumber)
+    public function forceReleaseEscrow(Request $request, string $orderNumber, \App\Services\EscrowService $escrowService)
     {
-        $order = Order::where('order_number', $orderNumber)->with('shop.seller')->firstOrFail();
+        $order = Order::where('order_number', $orderNumber)->with('shop.seller', 'user')->firstOrFail();
 
         if ($order->payment_status === 'released') {
-            return back()->with('info', 'Cette consigne Escrow a déjà été libérée.');
+            return back()->with('info', 'Les fonds de cette commande ont déjà été libérés.');
         }
 
-        DB::transaction(function () use ($order) {
-            $order->update([
-                'delivery_status' => 'delivered',
-                'payment_status' => 'released',
-                'delivered_at' => now(),
-            ]);
-
-            $seller = $order->shop ? $order->shop->seller : null;
-            if ($seller) {
-                $wallet = SellerWallet::firstOrCreate(['seller_id' => $seller->id]);
-                $amountToRelease = (float) $order->total_amount;
-                $pendingToDeduct = (float) min((float) $wallet->pending_balance, $amountToRelease);
-
-                if ($pendingToDeduct > 0) {
-                    $wallet->decrement('pending_balance', $pendingToDeduct);
-                }
-                $wallet->increment('balance', $amountToRelease);
-
-                WalletTransaction::create([
-                    'wallet_id' => $wallet->id,
-                    'type' => 'credit_escrow',
-                    'amount' => $amountToRelease,
-                    'reference' => $order->order_number,
-                    'description' => "Libération manuelle du séquestre par l'Administrateur (Commande #{$order->order_number})",
-                    'status' => 'completed',
-                ]);
-            }
-
-            ActivityLog::create([
-                'user_id' => auth()->id(),
-                'action' => 'admin_escrow_forced_release',
-                'description' => "L'administrateur a forcé la libération des fonds Escrow de " . number_format($order->total_amount, 0, ',', ' ') . " FCFA au vendeur pour la commande #{$order->order_number}.",
-            ]);
-        });
+        $escrowService->releaseEscrow($order, 'admin_forced_arbitrage', auth()->id());
 
         return back()->with('success', "Les fonds sous séquestre de la commande #{$order->order_number} ont été versés au vendeur.");
     }
@@ -157,7 +124,7 @@ class OrderController extends Controller
     /**
      * Admin forces Escrow refund to Buyer.
      */
-    public function forceRefundEscrow(Request $request, string $orderNumber)
+    public function forceRefundEscrow(Request $request, string $orderNumber, \App\Services\EscrowService $escrowService)
     {
         $order = Order::where('order_number', $orderNumber)->with('shop.seller', 'items.product')->firstOrFail();
 
@@ -165,35 +132,9 @@ class OrderController extends Controller
             return back()->with('info', 'Cette commande a déjà été remboursée.');
         }
 
-        DB::transaction(function () use ($order) {
-            foreach ($order->items as $item) {
-                if ($item->product) {
-                    $item->product->increment('stock', $item->quantity);
-                }
-            }
+        $escrowService->refundEscrow($order, 'Remboursement forcé par l\'administrateur', auth()->id());
 
-            $order->update([
-                'delivery_status' => 'cancelled',
-                'payment_status' => 'refunded',
-            ]);
-
-            $seller = $order->shop ? $order->shop->seller : null;
-            if ($seller) {
-                $wallet = SellerWallet::firstOrCreate(['seller_id' => $seller->id]);
-                $pendingToDeduct = (float) min((float) $wallet->pending_balance, (float) $order->total_amount);
-                if ($pendingToDeduct > 0) {
-                    $wallet->decrement('pending_balance', $pendingToDeduct);
-                }
-            }
-
-            ActivityLog::create([
-                'user_id' => auth()->id(),
-                'action' => 'admin_escrow_forced_refund',
-                'description' => "L'administrateur a forcé le remboursement intégral de " . number_format($order->total_amount, 0, ',', ' ') . " FCFA à l'acheteur pour la commande #{$order->order_number}.",
-            ]);
-        });
-
-        return back()->with('success', "La commande #{$order->order_number} a été annulée et le remboursement sous séquestre a été effectué.");
+        return back()->with('success', "La commande #{$order->order_number} a été annulée et le remboursement de l'acheteur a été effectué.");
     }
 
     /**

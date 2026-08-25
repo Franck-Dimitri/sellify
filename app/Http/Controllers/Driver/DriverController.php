@@ -883,7 +883,7 @@ class DriverController extends Controller
     /**
      * Verify delivery with double security: OTP code + Client digital signature + Optional dropoff photo (2.3.6 Spec).
      */
-    public function verifyDeliveryOtp(Request $request, string $orderNumber)
+    public function verifyDeliveryOtp(Request $request, string $orderNumber, \App\Services\EscrowService $escrowService)
     {
         $request->validate([
             'otp' => 'nullable|string',
@@ -901,6 +901,7 @@ class DriverController extends Controller
         $driver = $request->user()->driver;
         $order = Order::where('order_number', $orderNumber)
             ->where('driver_id', $driver->id)
+            ->with(['shop.seller', 'user'])
             ->firstOrFail();
 
         if ($order->delivery_otp && trim($otpInput) !== trim($order->delivery_otp)) {
@@ -912,16 +913,9 @@ class DriverController extends Controller
             $photoPath = $request->file('dropoff_photo')->store('dropoff_proofs', 'public');
         }
 
-        $order->update([
-            'delivery_status' => 'delivered',
-            'status' => 'delivered',
-            'payment_status' => 'released',
-            'delivered_at' => now(),
-        ]);
+        // Automatic Escrow Release & Driver Delivery increment via EscrowService
+        $escrowService->releaseEscrow($order, 'driver_otp_verification', $request->user()->id);
 
-        $driver->increment('total_deliveries');
-
-        // Instant escrow release & driver payout record
         ActivityLog::create([
             'user_id' => $request->user()->id,
             'action' => 'driver_completed_delivery_otp_signature',
@@ -929,7 +923,7 @@ class DriverController extends Controller
             'ip_address' => $request->ip(),
         ]);
 
-        return redirect()->route('driver.dashboard')->with('success', "Livraison #{$order->order_number} sécurisée et validée ! Les fonds Escrow et vos frais (+{$order->shipping_fee} FCFA) ont été débloqués.");
+        return redirect()->route('driver.dashboard')->with('success', "Livraison #{$order->order_number} sécurisée et validée ! Les fonds Escrow ont été automatiquement transférés au solde disponible du vendeur (+{$order->subtotal} FCFA) et votre course est validée.");
     }
 
     /**
