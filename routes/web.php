@@ -241,6 +241,7 @@ Route::middleware(['auth', 'account.active'])->group(function () {
                 // Portefeuille & Retraits
                 Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
                 Route::post('/wallet/withdraw', [WalletController::class, 'requestWithdrawal'])->name('wallet.withdraw');
+                Route::get('/wallet/export/csv', [WalletController::class, 'exportCsv'])->name('wallet.export_csv');
 
                 // Smart-Links
                 Route::get('/smart-links', [SmartLinkController::class, 'index'])->name('smart_links.index');

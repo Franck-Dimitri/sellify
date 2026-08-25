@@ -47,10 +47,10 @@ export default function SellerLayout({ children, title }) {
             active: route().current('seller.ai.*') 
         },
         { 
-            name: shop ? 'Gérer Boutique' : 'Créer Boutique', 
-            href: shop ? route('seller.shop.edit') : route('seller.shop.create'), 
+            name: 'Mes Boutiques', 
+            href: route('seller.shop.index'), 
             icon: Store, 
-            active: route().current('seller.shop.edit') || route().current('seller.shop.create') 
+            active: route().current('seller.shop.*') 
         },
         { 
             name: 'Produits', 
