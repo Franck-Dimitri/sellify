@@ -19,6 +19,8 @@ class Order extends Model
         'customer_phone',
         'delivery_address',
         'delivery_landmark',
+        'latitude',
+        'longitude',
         'city',
         'subtotal',
         'shipping_fee',

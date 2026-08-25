@@ -27,6 +27,8 @@ class Driver extends Model
         'total_deliveries',
         'current_latitude',
         'current_longitude',
+        'heading',
+        'last_location_updated_at',
         'last_ping_at',
     ];
 
