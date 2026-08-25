@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Head, Link, useForm, router } from '@inertiajs/react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
+import LiveOrderTrackingMap from '@/Components/LiveOrderTrackingMap';
 import { 
     ArrowLeft, 
     ShieldCheck, 
@@ -18,7 +19,9 @@ import {
     ExternalLink,
     FileText,
     Star,
-    Ban
+    Ban,
+    Navigation,
+    Compass
 } from 'lucide-react';
 
 export default function Show({ order }) {
@@ -200,6 +203,22 @@ export default function Show({ order }) {
                             <span className="font-bold">Cette commande a été annulée.</span>
                             <p className="text-rose-700 mt-0.5">Les fonds consignés sous séquestre Escrow ont été intégralement remboursés et le stock a été remis à disposition.</p>
                         </div>
+                    </div>
+                )}
+
+                {/* INTERACTIVE LIVE GPS TRACKING MAP */}
+                {order.delivery_status !== 'cancelled' && (
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-xs font-bold text-stone-900 uppercase tracking-wider flex items-center gap-2">
+                                <Navigation className="w-4 h-4 text-yellow-600 animate-pulse" />
+                                <span>Suivi Cartographique en Direct · Trajet & Géolocalisation</span>
+                            </h2>
+                            <span className="text-[11px] text-stone-500 font-medium">
+                                Itinéraire Boutique ➔ Livreur ➔ Votre Domicile
+                            </span>
+                        </div>
+                        <LiveOrderTrackingMap order={order} />
                     </div>
                 )}
 

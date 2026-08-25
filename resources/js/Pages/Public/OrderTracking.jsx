@@ -1,5 +1,6 @@
 import React from 'react';
 import { Head } from '@inertiajs/react';
+import LiveOrderTrackingMap from '@/Components/LiveOrderTrackingMap';
 import { 
     PackageCheck, 
     Truck, 
@@ -13,7 +14,8 @@ import {
     ArrowLeft,
     Copy,
     Share2,
-    MessageCircle
+    MessageCircle,
+    Navigation
 } from 'lucide-react';
 
 export default function OrderTracking({ found = true, trackingCode, smartLink, shop, seller, deliveryInfo }) {
@@ -122,6 +124,27 @@ export default function OrderTracking({ found = true, trackingCode, smartLink, s
                             ))}
                         </div>
                     </div>
+                </div>
+
+                {/* LIVE MAP TRACKING */}
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-xs font-bold text-stone-900 uppercase tracking-wider flex items-center gap-2">
+                            <Navigation className="w-4 h-4 text-yellow-600 animate-pulse" />
+                            <span>Carte de Géolocalisation & Itinéraire en Direct</span>
+                        </h2>
+                        <span className="text-[11px] text-stone-500 font-medium">
+                            Itinéraire Boutique ➔ Livreur ➔ Destination
+                        </span>
+                    </div>
+                    <LiveOrderTrackingMap order={{
+                        shop: shop,
+                        customer_name: customerName,
+                        delivery_address: deliveryAddress,
+                        city: city,
+                        delivery_otp: deliveryInfo?.otp || '123456',
+                        delivery_landmark: deliveryInfo?.landmark || null
+                    }} />
                 </div>
 
                 {/* Delivery Information Recap */}

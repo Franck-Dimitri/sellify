@@ -46,6 +46,47 @@ class OrderController extends Controller
     }
 
     /**
+     * API Endpoint for live GPS coordinates and dynamic delivery updates.
+     */
+    public function liveLocation(string $orderNumber)
+    {
+        $order = Order::where('order_number', $orderNumber)
+            ->with(['shop', 'driver.user'])
+            ->firstOrFail();
+
+        return response()->json([
+            'order_number' => $order->order_number,
+            'delivery_status' => $order->delivery_status,
+            'driver' => $order->driver ? [
+                'id' => $order->driver->id,
+                'name' => $order->driver->user ? $order->driver->user->first_name . ' ' . $order->driver->user->last_name : 'Livreur Sellify',
+                'phone' => $order->driver->user ? $order->driver->user->phone : null,
+                'avatar' => $order->driver->user ? $order->driver->user->avatar : null,
+                'latitude' => (float)($order->driver->current_latitude ?? 0),
+                'longitude' => (float)($order->driver->current_longitude ?? 0),
+                'vehicle_type' => $order->driver->vehicle_type ?? 'moto',
+                'vehicle_plate' => $order->driver->vehicle_plate ?? 'LT-492-BX',
+                'rating' => (float)($order->driver->rating ?? 4.9),
+            ] : null,
+            'shop' => [
+                'name' => $order->shop->name ?? 'Boutique Partenaire',
+                'latitude' => (float)($order->shop->latitude ?? 0),
+                'longitude' => (float)($order->shop->longitude ?? 0),
+                'address' => $order->shop->address ?? null,
+            ],
+            'customer' => [
+                'address' => $order->delivery_address,
+                'landmark' => $order->delivery_landmark,
+                'city' => $order->city,
+                'latitude' => (float)($order->latitude ?? 0),
+                'longitude' => (float)($order->longitude ?? 0),
+            ],
+            'otp' => $order->delivery_otp,
+            'updated_at' => now()->toIso8601String(),
+        ]);
+    }
+
+    /**
      * Cancel an order before dispatch (status pending or preparing).
      */
     public function cancelOrder(Request $request, string $orderNumber)

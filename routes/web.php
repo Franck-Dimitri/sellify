@@ -62,6 +62,7 @@ Route::post('/pay/{token}', [SmartLinkCheckoutController::class, 'processPayment
 
 // Suivi de colis public sans compte
 Route::get('/track/{tracking_code}', [OrderTrackingController::class, 'show'])->name('public.order_tracking');
+Route::get('/api/orders/{order_number}/live-location', [\App\Http\Controllers\Customer\OrderController::class, 'liveLocation'])->name('api.orders.live_location');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Routes Invité (Guest Auth)
