@@ -23,7 +23,8 @@ import {
     ArrowRight,
     Check,
     Tag,
-    Store
+    Store,
+    Sparkles
 } from 'lucide-react';
 
 export default function AdminLayout({ children, title }) {
@@ -54,6 +55,13 @@ export default function AdminLayout({ children, title }) {
                     href: route('admin.dashboard'), 
                     icon: LayoutDashboard, 
                     active: route().current('admin.dashboard') 
+                },
+                { 
+                    name: 'Sellify AI 1.2 Flash', 
+                    href: route('admin.ai.index'), 
+                    icon: Sparkles, 
+                    badge: '⚡ IA',
+                    active: route().current('admin.ai.*') 
                 },
                 { 
                     name: 'Statistiques', 

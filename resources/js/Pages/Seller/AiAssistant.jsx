@@ -1,21 +1,19 @@
 import React from 'react';
 import { Head } from '@inertiajs/react';
-import DriverLayout from '@/Layouts/DriverLayout';
+import SellerLayout from '@/Layouts/SellerLayout';
 import UniversalAiChat from '@/Components/UniversalAiChat';
 
-export default function Assistant({ driver = {} }) {
-    const user = driver.user || {};
-
+export default function AiAssistant({ user }) {
     return (
-        <DriverLayout title="Sellify AI">
-            <Head title="Sellify AI - Assistant Chauffeur" />
+        <SellerLayout title="Sellify AI 1.2 Flash">
+            <Head title="Sellify AI 1.2 Flash - Copilote Vendeur" />
 
             <div className="w-full h-[calc(100vh-130px)] min-h-[580px] pb-4">
                 <UniversalAiChat 
-                    role="driver" 
+                    role="seller" 
                     user={user} 
                 />
             </div>
-        </DriverLayout>
+        </SellerLayout>
     );
 }

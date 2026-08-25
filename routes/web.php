@@ -115,6 +115,7 @@ Route::middleware(['auth', 'account.active'])->group(function () {
         Route::middleware('role:admin,superadmin')->prefix('admin')->name('admin.')->group(function () {
             // Dashboard principal
             Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+            Route::get('/ai', fn(\Illuminate\Http\Request $request) => Inertia::render('Admin/AiAssistant', ['user' => $request->user()]))->name('ai.index');
 
             // Gestion des utilisateurs
             Route::get('/users', function () {
@@ -207,6 +208,8 @@ Route::middleware(['auth', 'account.active'])->group(function () {
                     'activityLogs' => $logs,
                 ]);
             })->name('dashboard');
+
+            Route::get('/ai', fn(\Illuminate\Http\Request $request) => Inertia::render('Seller/AiAssistant', ['user' => $request->user()]))->name('ai.index');
 
             // Actions liées à la boutique, restreintes par le KYC
             Route::middleware('kyc.verified')->group(function () {
@@ -306,6 +309,7 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::post('/settings', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'updateSettings'])->name('settings.update');
             Route::get('/disputes', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'disputes'])->name('disputes.index');
             Route::get('/loyalty', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'loyalty'])->name('loyalty');
+            Route::get('/ai', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'aiChat'])->name('ai.index');
             Route::get('/profile', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'profile'])->name('profile');
             Route::post('/profile', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'updateProfile'])->name('profile.update');
             Route::get('/addresses', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'addresses'])->name('addresses.index');

@@ -156,4 +156,16 @@ class CustomerOrdersAndReviewsTest extends TestCase
         $this->assertStringContainsStringIgnoringCase('commande', $data['reply']);
         $this->assertStringContainsStringIgnoringCase('OTP', $data['reply']);
     }
+
+    public function test_customer_can_access_disputes_loyalty_and_ai_pages(): void
+    {
+        $disputesRes = $this->actingAs($this->customer)->get(route('customer.disputes.index'));
+        $disputesRes->assertOk();
+
+        $loyaltyRes = $this->actingAs($this->customer)->get(route('customer.loyalty'));
+        $loyaltyRes->assertOk();
+
+        $aiRes = $this->actingAs($this->customer)->get(route('customer.ai.index'));
+        $aiRes->assertOk();
+    }
 }

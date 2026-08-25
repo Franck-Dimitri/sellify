@@ -208,7 +208,8 @@ class StoreController extends Controller
 
         // Check if there is an active SmartLink for this product
         $smartLink = SmartLink::where('product_id', $product->id)
-            ->where('is_active', true)
+            ->where('status', 'active')
+            ->where('expires_at', '>', now())
             ->first();
 
         // Dynamic Delivery ETA Estimation by Zone (Sub-Module 2.1.4)

@@ -356,6 +356,62 @@ class CustomerDashboardController extends Controller
     }
 
     /**
+     * Display customer disputes list & mediation tracking.
+     */
+    public function disputes(Request $request)
+    {
+        $user = $request->user();
+
+        $disputes = Dispute::whereHas('order', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        })
+        ->with(['order.shop', 'order.items'])
+        ->latest()
+        ->paginate(10);
+
+        return Inertia::render('Customer/Disputes/Index', [
+            'disputes' => $disputes,
+        ]);
+    }
+
+    /**
+     * Display customer loyalty & reward points.
+     */
+    public function loyalty(Request $request)
+    {
+        $user = $request->user();
+
+        $promoCodes = PromoCode::where('is_active', true)
+            ->whereDate('end_date', '>=', now())
+            ->with('shop')
+            ->get();
+
+        return Inertia::render('Customer/Loyalty', [
+            'loyaltyPoints' => $user->loyalty_points ?? 0,
+            'availableCoupons' => $promoCodes,
+        ]);
+    }
+
+    /**
+     * Display dedicated Sellify AI 1.2 Flash Assistant Espace Client.
+     */
+    public function aiChat(Request $request)
+    {
+        $user = $request->user();
+        $recentOrders = Order::where('user_id', $user->id)
+            ->with(['shop', 'items.product', 'driver.user'])
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return Inertia::render('Customer/AiAssistant', [
+            'user' => $user,
+            'recentOrders' => $recentOrders,
+            'loyaltyPoints' => $user->loyalty_points ?? 0,
+        ]);
+    }
+
+    /**
      * Display customer delivery addresses (Sub-Module 2.1.2).
      */
     public function addresses(Request $request)
