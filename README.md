@@ -1,47 +1,28 @@
 <div align="center">
 
-# ⚡ SELLIFY.ME
-### *La Plateforme E-Commerce de Confiance pour l'Afrique Numérique*
-**Marketplace Multi-Acteurs · Séquestre Escrow Mobile Money · Logistique IA & Télémétrie · Smart-Links de Vente Sociale**
-
-[![PHP](https://img.shields.io/badge/PHP-8.3%2B-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://php.net)
-[![Laravel](https://img.shields.io/badge/Laravel-11.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
-[![React](https://img.shields.io/badge/React-19.x-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
-[![Inertia.js](https://img.shields.io/badge/Inertia.js-2.x-9553E9?style=for-the-badge&logo=inertia&logoColor=white)](https://inertiajs.com)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://postgresql.org)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
-[![PHPUnit](https://img.shields.io/badge/PHPUnit-47%2F47_Passing-10B981?style=for-the-badge&logo=php&logoColor=white)](https://phpunit.de)
-
-```
-═══════════════════════════════════════════════════════════════════════════════════════════
-  ÉCOSYSTÈME COMPLET : SÉQUESTRE ESCROW · ROUTAGE ROUTIER OSRM · SUITE SAAS · IA FLASH 1.2
-═══════════════════════════════════════════════════════════════════════════════════════════
-```
-
-</div>
-
 ---
 
 ## 📖 Sommaire
+
 1. [À Propos de Sellify.me](#-à-propos-de-sellifyme)
 2. [Les 4 Piliers Fondateurs](#-les-4-piliers-fondateurs)
-3. [Dossier de Présentation & Supports Officiels](#-dossier-de-présentation--supports-officiels)
-4. [Architecture Fonctionnelle & Modules](#-architecture-fonctionnelle--modules)
-5. [Cycle de Vie du Séquestre Escrow](#-cycle-de-vie-du-séquestre-escrow)
-6. [Logistique Routière OSRM & Télémétrie](#-logistique-routière-osrm--télémétrie)
-7. [Moteur Sellify AI 1.2 Flash](#-moteur-sellify-ai-12-flash)
-8. [Comptes de Démonstration (Seeded Credentials)](#-comptes-de-démonstration-seeded-credentials)
-9. [Stack Technique & Architecture Logicielle](#-stack-technique--architecture-logicielle)
-10. [Guide d'Installation & Lancement Local](#-guide-dinstallation--lancement-local)
-11. [Tests Automatisés & Assurance Qualité](#-tests-automatisés--assurance-qualité)
-12. [Modèle Économique (Business Model)](#-modèle-économique-business-model)
-13. [Feuille de Route Panafricaine](#-feuille-de-route-panafricaine)
+3. [Architecture Fonctionnelle & Modules](#-architecture-fonctionnelle--modules)
+4. [Cycle de Vie du Séquestre Escrow](#-cycle-de-vie-du-séquestre-escrow)
+5. [Logistique Routière OSRM & Télémétrie](#-logistique-routière-osrm--télémétrie)
+6. [Moteur Sellify AI 1.2 Flash](#-moteur-sellify-ai-12-flash)
+7. [Comptes de Démonstration (Seeded Credentials)](#-comptes-de-démonstration-seeded-credentials)
+8. [Stack Technique & Architecture Logicielle](#-stack-technique--architecture-logicielle)
+9. [Guide d'Installation & Lancement Local](#-guide-dinstallation--lancement-local)
+10. [Tests Automatisés & Assurance Qualité](#-tests-automatisés--assurance-qualité)
+11. [Modèle Économique (Business Model)](#-modèle-économique-business-model)
+12. [Feuille de Route Panafricaine](#-feuille-de-route-panafricaine)
 
 ---
 
 ## 🌟 À Propos de Sellify.me
 
 **Sellify.me** est une infrastructure technologique et financière tout-en-un conçue pour éliminer les deux freins majeurs qui paralysent l'essor du e-commerce en Afrique francophone subsaharienne :
+
 1. **La crise de confiance structurelle** entre acheteurs et vendeurs en ligne due aux arnaques et aux défaillances de livraison.
 2. **L'inefficacité logistique et les pertes financières** causées par l'absence d'adresses formelles et le modèle destructeur du *Cash on Delivery (COD)* (plus de 35% de commandes refusées ou annulées à l'arrivée).
 
@@ -67,25 +48,14 @@ En combinant un **système de paiement sous séquestre (Escrow) adossé au Mobil
 3. 🛍️ **Suite SaaS Marchande & Smart-Links de Vente Sociale** : Administration multi-boutiques, suivi des stocks et variantes, liens de paiement 1-clic pour WhatsApp/TikTok et Grand Livre financier avec export CSV et Relevé PDF officiel certifié.
 4. 🤖 **Moteur Sellify AI 1.2 Flash** : Assistant vocal et textuel multirôles supervisant les flux, guidant les chauffeurs, optimisant les prix et détectant les fraudes transactionnelles.
 
----
 
-## 📁 Dossier de Présentation & Supports Officiels
-
-Pour toute soutenance, audit technique ou présentation investisseurs, le projet intègre un ensemble de supports corporate prêts à l'emploi :
-
-| Support | Format | Emplacement | Description |
-| :--- | :---: | :--- | :--- |
-| **Document Word Corporate** | `.docx` | [`Dossier_Presentation_Projet_Sellify.docx`](./Dossier_Presentation_Projet_Sellify.docx) | **Dossier de référence complet (6+ pages)** avec couverture, analyse de marché, architecture fonctionnelle, cycle Escrow, modèles économiques et roadmap. |
-| **Rapport PDF Haute Définition** | `.pdf` | [`Dossier_Presentation_Projet_Sellify.pdf`](./Dossier_Presentation_Projet_Sellify.pdf) | Rapport officiel certifié prêt pour l'impression ou la soumission institutionnelle. |
-| **Présentation PowerPoint 16:9** | `.pptx` | [`Presentation_Projet_Sellify.pptx`](./Presentation_Projet_Sellify.pptx) | Diaporama corporate de 12 diapositives pour pitch investisseurs et jurys. |
-| **Deck Web Animé Plein Écran** | `.html` | [`Presentation_Slides_Animees.html`](./Presentation_Slides_Animees.html) | Support de projection interactif projetable dans le navigateur (`←` / `→` / `Espace`, mode plein écran `F`). |
-| **Document Master Markdown** | `.md` | [`DOCUMENT_PRESENTATION_PROJET_SELLIFY.md`](./DOCUMENT_PRESENTATION_PROJET_SELLIFY.md) | Spécifications complètes avec diagrammes Mermaid. |
 
 ---
 
 ## 🧩 Architecture Fonctionnelle & Modules
 
 ### 👤 1. Module Client (Acheteur)
+
 - Recherche en direct, filtres par quartier/ville et catalogue multi-boutiques.
 - Panier intelligent avec application automatique des remises quantitatives.
 - Paiement sous séquestre Mobile Money (Orange Money / MTN MoMo).
@@ -94,6 +64,7 @@ Pour toute soutenance, audit technique ou présentation investisseurs, le projet
 - Programme de fidélité récompensant chaque achat (1 pt / 100 FCFA).
 
 ### 🏬 2. Module Vendeur (Marchand & Suite SaaS)
+
 - Tableau de bord multi-boutiques avec isolation des inventaires.
 - Gestion des articles avec déclinaisons de variantes (tailles, couleurs, capacités).
 - Générateur de **Smart-Links 1-clic** pour vendre directement sur WhatsApp, TikTok, Facebook et Instagram.
@@ -101,6 +72,7 @@ Pour toute soutenance, audit technique ou présentation investisseurs, le projet
 - Gestion des codes promo, remises dégressives et bannières promotionnelles.
 
 ### 🛵 3. Module Livreur (Chauffeur & Télémétrie)
+
 - Agrément et vérification KYC (CNI, permis de conduire, carte grise).
 - Console chauffeur avec bascule de statut En Ligne / Hors Ligne et dispatch IA.
 - **Guidage GPS Turn-by-Turn embarqué** sans dépendance externe à Google Maps.
@@ -108,6 +80,7 @@ Pour toute soutenance, audit technique ou présentation investisseurs, le projet
 - Portefeuille livreur avec rémunération à la course et 100 points de récompense par livraison.
 
 ### 🛡️ 4. Module SuperAdmin (Gouvernance & Arbitrage)
+
 - Supervision en temps réel du volume global sous séquestre, du solde bloqué et des commissions (3%).
 - Centre de validation KYC des marchands et des chauffeurs livreurs.
 - Module d'arbitrage des litiges Escrow (libération forcée vendeur ou remboursement acheteur).
@@ -151,6 +124,7 @@ Pour toute soutenance, audit technique ou présentation investisseurs, le projet
 ## 🤖 Moteur Sellify AI 1.2 Flash
 
 Assistant conversationnel multimodal intégré sous forme de page dédiée et de widget persistant sur tous les dashboards :
+
 - 🎙️ **Reconnaissance Vocale (Speech-to-Text)** et **Synthèse Vocale (Text-to-Speech)**.
 - 🛍️ **Copilote Acheteur** : Recherche naturelle de produits, statut de livraison et litiges.
 - 🏬 **Copilote Vendeur** : Optimisation de pricing, génération de fiches produits et calcul de marge.
@@ -163,14 +137,15 @@ Assistant conversationnel multimodal intégré sous forme de page dédiée et de
 
 Tous les comptes de test sont pré-configurés avec le mot de passe standard : `password`.
 
-| Rôle | Nom / Profil | Email | Mot de passe | Rôle & Spécificités |
-| :--- | :--- | :--- | :---: | :--- |
-| **SuperAdmin** | Sellify Admin | `admin@sellify.me` | `password` | Supervision globale, KYC, Arbitrage Escrow & Audit |
-| **Vendeur Pro** | Jean Vendeur | `vendeur.approved@sellify.me` | `password` | Compte Pro certifié, 2 boutiques actives (*Tech & Gadgets Express*, *Mode & Élégance Cameroun*), Grand Livre & Smart-Links |
-| **Vendeur Pending** | Marc Pending | `vendeur.pending@sellify.me` | `password` | Compte vendeur en attente de validation KYC |
-| **Livreur Moto** | Pierre Livreur | `livreur.approved@sellify.me` | `password` | Chauffeur moto certifié Douala (Akwa/Bonapriso), console GPS active |
-| **Livreur Auto** | Alice Pending | `livreur.pending@sellify.me` | `password` | Chauffeur voiture en attente KYC (Yaoundé) |
-| **Clients** | Client 1 à 5 | `client1@sellify.me` | `password` | Acheteurs avec commandes sous séquestre et points fidélité |
+| Rôle                     | Nom / Profil   | Email                           | Mot de passe | Rôle & Spécificités                                                                                                            |
+| :------------------------ | :------------- | :------------------------------ | :----------: | :-------------------------------------------------------------------------------------------------------------------------------- |
+| **Vendeur Pro**     | Jean Vendeur   | `vendeur.approved@sellify.me` | `password` | Compte Pro certifié, 2 boutiques actives (*Tech & Gadgets Express*, *Mode & Élégance Cameroun*), Grand Livre & Smart-Links |
+| **Vendeur Pending** | Marc Pending   | `vendeur.pending@sellify.me`  | `password` | Compte vendeur en attente de validation KYC                                                                                       |
+| **Livreur Moto**    | Pierre Livreur | `livreur.approved@sellify.me` | `password` | Chauffeur moto certifié Douala (Akwa/Bonapriso), console GPS active                                                              |
+| **Livreur Auto**    | Alice Pending  | `livreur.pending@sellify.me`  | `password` | Chauffeur voiture en attente KYC (Yaoundé)                                                                                       |
+| **Clients**         | Client 1 à 5  | `client1@sellify.me`          | `password` | Acheteurs avec commandes sous séquestre et points fidélité                                                                     |
+
+> 🔒 *Note de Sécurité : Les accès d'administration SuperAdmin sont restreints et gérés de manière sécurisée en production via les variables d'environnement.*
 
 ---
 
@@ -195,6 +170,7 @@ Tous les comptes de test sont pré-configurés avec le mot de passe standard : `
 ## 🚀 Guide d'Installation & Lancement Local
 
 ### Prérequis
+
 - **PHP** >= 8.3 avec extensions (`pdo_pgsql`, `mbstring`, `openssl`, `curl`, `gd`)
 - **Composer** >= 2.x
 - **Node.js** >= 20.x & **NPM**
@@ -269,6 +245,7 @@ Result:   100% Success
 ## 💰 Modèle Économique (Business Model)
 
 Sellify.me génère ses revenus à travers **3 flux financiers scalables** :
+
 1. **Commission Escrow (3%)** : Prélèvement de 3% sur chaque transaction sécurisée conclue via la marketplace ou les Smart-Links.
 2. **Abonnements SaaS Marchands** :
    - *Starter* : Gratuit (jusqu'à 30 produits, 1 boutique).
@@ -293,13 +270,3 @@ Sellify.me génère ses revenus à travers **3 flux financiers scalables** :
 ---
 
 <div align="center">
-
-### ⚡ SELLIFY.ME — BÂTIR LA CONFIANCE DU COMMERCE AFRICAIN
-**Direction Générale & Support Technique**  
-Email : `direction@sellify.me` · `contact@sellify.me`  
-Siège : Boulevard de la Liberté, Akwa, Douala — Cameroun  
-Site Web : [https://sellify.me](https://sellify.me)
-
-*Sellify.me © 2026 — Tous droits réservés.*
-
-</div>
