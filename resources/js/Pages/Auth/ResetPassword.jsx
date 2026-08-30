@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Head, useForm, Link } from '@inertiajs/react';
-import { Lock, ArrowRight } from 'lucide-react';
+import { Lock, ArrowRight, Eye, EyeOff, ShieldCheck, Mail } from 'lucide-react';
 
 export default function ResetPassword({ token, email }) {
+    const [showPassword, setShowPassword] = useState(false);
+
     const { data, setData, post, processing, errors } = useForm({
         token: token,
         email: email || '',
@@ -17,75 +19,110 @@ export default function ResetPassword({ token, email }) {
 
     return (
         <div className="min-h-screen bg-stone-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans text-stone-800">
-            <Head title="Réinitialiser le mot de passe" />
+            <Head title="Nouveau mot de passe - Sellify.me" />
 
             <div className="max-w-md w-full mx-auto space-y-6">
                 <div className="text-center">
-                    <Link href="/" className="inline-flex items-center space-x-2">
-                        <span className="w-9 h-9 rounded-lg bg-yellow-500 flex items-center justify-center font-bold text-stone-950 shadow-xs">S</span>
-                        <span className="font-bold text-xl tracking-tight text-stone-900">
+                    <Link href="/" className="inline-flex items-center space-x-2.5 group">
+                        <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center font-black text-stone-950 shadow-md group-hover:scale-105 transition-transform">
+                            S
+                        </span>
+                        <span className="font-extrabold text-2xl tracking-tight text-stone-900">
                             Sellify<span className="text-yellow-600">.me</span>
                         </span>
                     </Link>
                 </div>
 
-                <div className="bg-white border border-stone-200 rounded-xl p-8 shadow-sm space-y-6">
-                    <div className="text-center space-y-1">
-                        <h1 className="text-xl font-semibold text-stone-900">Nouveau Mot de Passe</h1>
+                <div className="bg-white border border-stone-200 rounded-2xl p-8 shadow-sm space-y-6">
+                    <div className="text-center space-y-1.5">
+                        <h1 className="text-2xl font-bold text-stone-900">Créer un nouveau mot de passe</h1>
                         <p className="text-xs text-stone-500 font-normal">
-                            Définissez votre nouveau mot de passe sécurisé.
+                            Définissez votre nouveau mot de passe sécurisé pour accéder à votre compte.
                         </p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4 text-xs">
                         <input type="hidden" name="token" value={data.token} />
 
-                        <div>
-                            <label className="font-medium text-stone-700 block mb-1">Adresse Email</label>
-                            <input
-                                type="email"
-                                value={data.email}
-                                onChange={(e) => setData('email', e.target.value)}
-                                className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none focus:border-yellow-500 focus:bg-white text-stone-800"
-                                required
-                            />
+                        <div className="space-y-1.5">
+                            <label className="font-semibold text-stone-700 block">Adresse Email</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                                    <Mail className="w-4 h-4" />
+                                </div>
+                                <input
+                                    type="email"
+                                    value={data.email}
+                                    onChange={(e) => setData('email', e.target.value)}
+                                    className="w-full pl-10 pr-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl outline-none focus:border-yellow-500 focus:bg-white text-stone-800 transition-all shadow-2xs"
+                                    required
+                                />
+                            </div>
                             {errors.email && <p className="text-rose-600 text-[11px] mt-0.5">{errors.email}</p>}
                         </div>
 
-                        <div>
-                            <label className="font-medium text-stone-700 block mb-1">Nouveau mot de passe</label>
-                            <input
-                                type="password"
-                                value={data.password}
-                                onChange={(e) => setData('password', e.target.value)}
-                                placeholder="••••••••"
-                                className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none focus:border-yellow-500 focus:bg-white text-stone-800"
-                                required
-                            />
+                        <div className="space-y-1.5">
+                            <label className="font-semibold text-stone-700 block">Nouveau mot de passe</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                                    <Lock className="w-4 h-4" />
+                                </div>
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={data.password}
+                                    onChange={(e) => setData('password', e.target.value)}
+                                    placeholder="••••••••"
+                                    className="w-full pl-10 pr-10 py-2.5 bg-stone-50 border border-stone-200 rounded-xl outline-none focus:border-yellow-500 focus:bg-white text-stone-800 transition-all shadow-2xs"
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-stone-400 hover:text-stone-600 cursor-pointer"
+                                >
+                                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
+                            </div>
                             {errors.password && <p className="text-rose-600 text-[11px] mt-0.5">{errors.password}</p>}
                         </div>
 
-                        <div>
-                            <label className="font-medium text-stone-700 block mb-1">Confirmer nouveau mot de passe</label>
-                            <input
-                                type="password"
-                                value={data.password_confirmation}
-                                onChange={(e) => setData('password_confirmation', e.target.value)}
-                                placeholder="••••••••"
-                                className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none focus:border-yellow-500 focus:bg-white text-stone-800"
-                                required
-                            />
+                        <div className="space-y-1.5">
+                            <label className="font-semibold text-stone-700 block">Confirmer nouveau mot de passe</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                                    <Lock className="w-4 h-4" />
+                                </div>
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={data.password_confirmation}
+                                    onChange={(e) => setData('password_confirmation', e.target.value)}
+                                    placeholder="••••••••"
+                                    className="w-full pl-10 pr-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl outline-none focus:border-yellow-500 focus:bg-white text-stone-800 transition-all shadow-2xs"
+                                    required
+                                />
+                            </div>
                         </div>
 
                         <button
                             type="submit"
                             disabled={processing}
-                            className="w-full py-2.5 bg-yellow-500 hover:bg-yellow-600 text-stone-950 font-medium rounded-lg shadow-xs flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+                            className="w-full py-3 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-stone-950 font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
                         >
-                            <span>Enregistrer le mot de passe</span>
-                            <ArrowRight className="w-3.5 h-3.5" />
+                            {processing ? (
+                                <span className="inline-block animate-spin rounded-full h-4 w-4 border-2 border-stone-950 border-t-transparent"></span>
+                            ) : (
+                                <>
+                                    <span>Enregistrer le mot de passe</span>
+                                    <ArrowRight className="w-4 h-4" />
+                                </>
+                            )}
                         </button>
                     </form>
+                </div>
+
+                <div className="text-center text-[11px] text-stone-400 flex items-center justify-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Sécurité garantie par Sellify Identity Protection</span>
                 </div>
             </div>
         </div>
