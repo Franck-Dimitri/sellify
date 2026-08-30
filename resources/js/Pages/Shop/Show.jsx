@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import PublicLayout from '../../Layouts/PublicLayout';
 import { 
     Store, 
@@ -10,22 +10,14 @@ import {
     Award, 
     ShoppingBag,
     Truck,
-    Lock,
     RotateCcw,
     Star,
     Flame,
-    Tag,
     Search,
     BadgeCheck,
-    X,
-    CreditCard,
-    Plus,
-    Minus,
-    CheckCircle2,
     Shield,
     Package,
     ArrowRight,
-    MessageCircle,
     Building2,
     Smartphone
 } from 'lucide-react';
@@ -34,16 +26,6 @@ export default function Show({ shop, products = [] }) {
     const [openStatus, setOpenStatus] = useState({ isOpen: false, text: 'Vérification...' });
     const [activeTab, setActiveTab] = useState('all'); // 'all', 'promos', 'about', 'contact'
     const [searchTerm, setSearchTerm] = useState('');
-
-    // Modal state for direct on-platform checkout
-    const [selectedProduct, setSelectedProduct] = useState(null);
-    const [quantity, setQuantity] = useState(1);
-    const [customerName, setCustomerName] = useState('');
-    const [phoneNumber, setPhoneNumber] = useState('');
-    const [deliveryAddress, setDeliveryAddress] = useState('');
-    const [cityNeighborhood, setCityNeighborhood] = useState('');
-    const [paymentMethod, setPaymentMethod] = useState('orange_money');
-    const [submittingOrder, setSubmittingOrder] = useState(false);
 
     const safeProducts = Array.isArray(products) ? products : [];
 
@@ -108,38 +90,6 @@ export default function Show({ shop, products = [] }) {
         }
     };
 
-    const handleOpenOrderModal = (product) => {
-        setSelectedProduct(product);
-        setQuantity(1);
-    };
-
-    const handleDirectOrderSubmit = (e) => {
-        e.preventDefault();
-        if (!selectedProduct) return;
-
-        setSubmittingOrder(true);
-
-        const payload = {
-            product_id: selectedProduct.id,
-            quantity: quantity,
-            customer_name: customerName,
-            phone_number: phoneNumber,
-            delivery_address: deliveryAddress,
-            city_neighborhood: cityNeighborhood,
-            payment_method: paymentMethod,
-        };
-
-        router.post(route('shop.direct_checkout'), payload, {
-            onSuccess: () => {
-                setSubmittingOrder(false);
-                setSelectedProduct(null);
-            },
-            onError: () => {
-                setSubmittingOrder(false);
-            }
-        });
-    };
-
     // Filter products
     const filteredProducts = safeProducts.filter(product => {
         const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -152,8 +102,6 @@ export default function Show({ shop, products = [] }) {
     });
 
     const promoProductsCount = safeProducts.filter(p => p.promotions && p.promotions.length > 0).length;
-
-    const sellerUser = shop.seller?.user;
 
     return (
         <PublicLayout>
@@ -254,7 +202,7 @@ export default function Show({ shop, products = [] }) {
                                 </div>
                             </div>
 
-                            {/* Contact Action */}
+                            {/* Share Action */}
                             <div className="w-full md:w-auto flex flex-col sm:flex-row gap-2 shrink-0">
                                 <button
                                     onClick={handleShare}
@@ -267,7 +215,7 @@ export default function Show({ shop, products = [] }) {
 
                         </div>
 
-                        {/* TRUST REASSURANCE PILLS (LIGHT & CLEAN) */}
+                        {/* TRUST REASSURANCE PILLS */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-4 border-t border-stone-100 text-xs">
                             <div className="flex items-center gap-2.5 p-3 bg-[#fcfbf9] border border-stone-200/80 rounded-2xl">
                                 <Shield className="w-4.5 h-4.5 text-emerald-600 shrink-0" />
@@ -438,7 +386,7 @@ export default function Show({ shop, products = [] }) {
                         </div>
                     )}
 
-                    {/* PRODUCTS CATALOG GRID */}
+                    {/* PRODUCTS CATALOG GRID WITH DIRECT NAVIGATION TO PRODUCT DETAILS */}
                     {(activeTab === 'all' || activeTab === 'promos') && (
                         <div className="space-y-4">
                             {filteredProducts.length === 0 ? (
@@ -471,28 +419,30 @@ export default function Show({ shop, products = [] }) {
                                                 <div className="space-y-2">
                                                     
                                                     {/* Image Box */}
-                                                    <div className="relative w-full aspect-square bg-stone-50 rounded-xl overflow-hidden flex items-center justify-center border border-stone-100">
-                                                        {firstImage ? (
-                                                            <img 
-                                                                src={firstImage} 
-                                                                alt={product.name} 
-                                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                                            />
-                                                        ) : (
-                                                            <Package className="w-8 h-8 text-stone-300 stroke-[1.5]" />
-                                                        )}
+                                                    <Link href={route('public.products.show', product.slug)} className="block">
+                                                        <div className="relative w-full aspect-square bg-stone-50 rounded-xl overflow-hidden flex items-center justify-center border border-stone-100">
+                                                            {firstImage ? (
+                                                                <img 
+                                                                    src={firstImage} 
+                                                                    alt={product.name} 
+                                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                                />
+                                                            ) : (
+                                                                <Package className="w-8 h-8 text-stone-300 stroke-[1.5]" />
+                                                            )}
 
-                                                        {hasPromo && (
-                                                            <span className="absolute top-2 right-2 bg-rose-500 text-white font-semibold text-[10px] px-2 py-0.5 rounded-full shadow-2xs">
-                                                                -{discountPercentage}%
+                                                            {hasPromo && (
+                                                                <span className="absolute top-2 right-2 bg-rose-500 text-white font-semibold text-[10px] px-2 py-0.5 rounded-full shadow-2xs">
+                                                                    -{discountPercentage}%
+                                                                </span>
+                                                            )}
+
+                                                            <span className="absolute bottom-2 left-2 bg-white/95 backdrop-blur-xs text-stone-800 text-[9px] font-medium px-2 py-0.5 rounded-md flex items-center gap-1 shadow-2xs">
+                                                                <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                                                                <span>Escrow</span>
                                                             </span>
-                                                        )}
-
-                                                        <span className="absolute bottom-2 left-2 bg-white/95 backdrop-blur-xs text-stone-800 text-[9px] font-medium px-2 py-0.5 rounded-md flex items-center gap-1 shadow-2xs">
-                                                            <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                                                            <span>Escrow</span>
-                                                        </span>
-                                                    </div>
+                                                        </div>
+                                                    </Link>
 
                                                     {/* Product Title */}
                                                     <Link href={route('public.products.show', product.slug)} className="block">
@@ -502,7 +452,7 @@ export default function Show({ shop, products = [] }) {
                                                     </Link>
                                                 </div>
 
-                                                {/* Price & Action */}
+                                                {/* Price & Action Button to Product Page */}
                                                 <div className="pt-2 border-t border-stone-100 space-y-2">
                                                     <div>
                                                         <div className="text-xs sm:text-sm font-semibold text-stone-900 tracking-tight">
@@ -515,14 +465,15 @@ export default function Show({ shop, products = [] }) {
                                                         )}
                                                     </div>
 
-                                                    <button
-                                                        onClick={() => handleOpenOrderModal(product)}
-                                                        disabled={product.stock === 0}
-                                                        className="w-full py-2 bg-yellow-400 hover:bg-yellow-500 disabled:opacity-50 text-stone-950 font-semibold text-[11px] rounded-xl transition-all shadow-2xs flex items-center justify-center gap-1 cursor-pointer"
-                                                    >
-                                                        <span>Commander</span>
-                                                        <ArrowRight className="w-3 h-3" />
-                                                    </button>
+                                                    <Link href={route('public.products.show', product.slug)} className="block">
+                                                        <button
+                                                            disabled={product.stock === 0}
+                                                            className="w-full py-2 bg-yellow-400 hover:bg-yellow-500 disabled:opacity-50 text-stone-950 font-semibold text-[11px] rounded-xl transition-all shadow-2xs flex items-center justify-center gap-1 cursor-pointer"
+                                                        >
+                                                            <span>Voir l'article</span>
+                                                            <ArrowRight className="w-3 h-3" />
+                                                        </button>
+                                                    </Link>
                                                 </div>
                                             </div>
                                         );
@@ -532,155 +483,6 @@ export default function Show({ shop, products = [] }) {
                         </div>
                     )}
                 </div>
-
-                {/* 6. ON-PLATFORM DIRECT FAST ORDER MODAL */}
-                {selectedProduct && (
-                    <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-                        <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 text-stone-700 max-h-[90vh] overflow-y-auto border border-stone-200 animate-scale-up">
-                            
-                            <div className="flex justify-between items-center border-b border-stone-100 pb-3">
-                                <div className="flex items-center gap-2">
-                                    <ShieldCheck className="w-5 h-5 text-emerald-600" />
-                                    <h3 className="font-semibold text-stone-900 text-sm">Commande Sécurisée Escrow</h3>
-                                </div>
-                                <button onClick={() => setSelectedProduct(null)} className="text-stone-400 hover:text-stone-600 p-1 cursor-pointer">
-                                    <X className="w-5 h-5" />
-                                </button>
-                            </div>
-
-                            {/* Product Mini Summary */}
-                            <div className="p-3 bg-amber-50/60 border border-amber-200/80 rounded-2xl flex items-center gap-3">
-                                <div className="w-12 h-12 bg-white rounded-xl border border-stone-200 overflow-hidden shrink-0 flex items-center justify-center">
-                                    {selectedProduct.image_paths && selectedProduct.image_paths[0] ? (
-                                        <img src={`/storage/${selectedProduct.image_paths[0]}`} alt={selectedProduct.name} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <Package className="w-6 h-6 text-stone-400" />
-                                    )}
-                                </div>
-                                <div className="flex-1">
-                                    <h4 className="font-semibold text-stone-900 text-xs line-clamp-1">{selectedProduct.name}</h4>
-                                    <p className="text-[11px] text-stone-500 font-normal">Boutique : {shop.name}</p>
-                                    <span className="font-semibold text-stone-900 text-xs">
-                                        {Number(selectedProduct.promotions && selectedProduct.promotions.length > 0 ? selectedProduct.promotions[0].promo_price : selectedProduct.price).toLocaleString()} FCFA / unité
-                                    </span>
-                                </div>
-                            </div>
-
-                            <form onSubmit={handleDirectOrderSubmit} className="space-y-3.5 text-xs font-normal">
-                                
-                                {/* Quantity Picker */}
-                                <div>
-                                    <label className="block font-medium text-stone-700 mb-1">Quantité souhaitée</label>
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                                            className="w-8 h-8 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-800 flex items-center justify-center font-bold cursor-pointer"
-                                        >
-                                            <Minus className="w-4 h-4" />
-                                        </button>
-                                        <span className="w-10 text-center font-semibold text-sm text-stone-900">{quantity}</span>
-                                        <button
-                                            type="button"
-                                            onClick={() => setQuantity(q => Math.min(selectedProduct.stock || 99, q + 1))}
-                                            className="w-8 h-8 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-800 flex items-center justify-center font-bold cursor-pointer"
-                                        >
-                                            <Plus className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Customer Info */}
-                                <div>
-                                    <label className="block font-medium text-stone-700 mb-1">Votre Nom Complet *</label>
-                                    <input
-                                        type="text"
-                                        value={customerName}
-                                        onChange={e => setCustomerName(e.target.value)}
-                                        placeholder="Ex: Paul Mbarga"
-                                        className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-900 focus:border-yellow-400 outline-none"
-                                        required
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block font-medium text-stone-700 mb-1">Numéro Mobile Money (Livraison & Paiement) *</label>
-                                    <input
-                                        type="tel"
-                                        value={phoneNumber}
-                                        onChange={e => setPhoneNumber(e.target.value)}
-                                        placeholder="+237 6XX XX XX XX"
-                                        className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-900 focus:border-yellow-400 outline-none"
-                                        required
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block font-medium text-stone-700 mb-1">Adresse de Livraison Précise *</label>
-                                    <input
-                                        type="text"
-                                        value={deliveryAddress}
-                                        onChange={e => setDeliveryAddress(e.target.value)}
-                                        placeholder="Ex: Douala, Akwa face Direction Orange"
-                                        className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-900 focus:border-yellow-400 outline-none"
-                                        required
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block font-medium text-stone-700 mb-1">Mode de Paiement Séquestre *</label>
-                                    <select
-                                        value={paymentMethod}
-                                        onChange={e => setPaymentMethod(e.target.value)}
-                                        className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-900 focus:border-yellow-400 outline-none font-medium cursor-pointer"
-                                    >
-                                        <option value="orange_money">Orange Money (Séquestre Protégé)</option>
-                                        <option value="mtn_momo">MTN Mobile Money (Séquestre Protégé)</option>
-                                    </select>
-                                </div>
-
-                                {/* Reassurance Box */}
-                                <div className="p-3 bg-amber-50/70 border border-amber-200/80 rounded-xl text-[11px] text-amber-950 font-normal space-y-1">
-                                    <div className="font-semibold flex items-center gap-1 text-amber-950">
-                                        <ShieldCheck className="w-3.5 h-3.5 text-yellow-700" />
-                                        <span>Garantie de Sécurité Escrow</span>
-                                    </div>
-                                    <p>
-                                        Vos fonds restent verrouillés en sécurité chez Sellify. Le commerçant n'est payé qu'après validation de votre colis à la remise.
-                                    </p>
-                                </div>
-
-                                {/* Total & Submit */}
-                                <div className="pt-3 border-t border-stone-100 flex items-center justify-between">
-                                    <div>
-                                        <span className="text-[10px] text-stone-400 block">Total à régler</span>
-                                        <span className="text-base font-semibold text-stone-900">
-                                            {Number((selectedProduct.promotions && selectedProduct.promotions.length > 0 ? selectedProduct.promotions[0].promo_price : selectedProduct.price) * quantity).toLocaleString()} FCFA
-                                        </span>
-                                    </div>
-
-                                    <div className="flex gap-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => setSelectedProduct(null)}
-                                            className="px-4 py-2.5 border border-stone-200 rounded-xl text-stone-600 font-medium hover:bg-stone-50 cursor-pointer"
-                                        >
-                                            Annuler
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            disabled={submittingOrder}
-                                            className="px-5 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-stone-950 font-semibold rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
-                                        >
-                                            {submittingOrder ? 'Validation...' : 'Valider la commande'}
-                                        </button>
-                                    </div>
-                                </div>
-
-                            </form>
-                        </div>
-                    </div>
-                )}
 
             </div>
         </PublicLayout>
