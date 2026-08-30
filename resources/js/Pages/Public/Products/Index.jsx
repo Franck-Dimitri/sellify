@@ -45,17 +45,17 @@ export default function Index({
     const safeFilters = (!Array.isArray(filters) && typeof filters === 'object' && filters !== null) ? filters : {};
     const safeProducts = (products && products.data) ? products : { data: Array.isArray(products) ? products : [], links: [] };
     const safeCategories = Array.isArray(categories) && categories.length > 0 ? categories : [
-        { id: 'tech', name: 'High-Tech & Smartphones', count: 124 },
-        { id: 'fashion', name: 'Mode & Bazin Africain', count: 88 },
-        { id: 'home', name: 'Maison & Électroménager', count: 54 },
-        { id: 'beauty', name: 'Beauté & Soins Bio', count: 42 },
-        { id: 'auto', name: 'Auto, Moto & Pièces', count: 31 },
-        { id: 'food', name: 'Alimentation & Épicerie', count: 29 },
+        { id: 'tech', name: 'High-Tech & Smartphones', count: 10, icon: 'Smartphone' },
+        { id: 'fashion', name: 'Mode & Vêtements Africains', count: 10, icon: 'Shirt' },
+        { id: 'home', name: 'Maison & Électroménager', count: 8, icon: 'Home' },
+        { id: 'beauty', name: 'Beauté & Soins Naturels', count: 8, icon: 'Sparkles' },
+        { id: 'auto', name: 'Auto, Moto & Pièces', count: 7, icon: 'Car' },
+        { id: 'food', name: 'Alimentation & Épicerie', count: 7, icon: 'ShoppingBag' },
     ];
     const safeTopShops = Array.isArray(topShops) ? topShops : [];
     const safeCities = Array.isArray(cities) && cities.length > 0 ? cities : ['Douala', 'Yaoundé', 'Bafoussam', 'Garoua', 'Kribi', 'Bamenda', 'Maroua'];
 
-    // Safe initial states (guaranteed strings/booleans to avoid Array.prototype.sort invocation)
+    // Safe initial states
     const initialSearch = typeof safeFilters.search === 'string' ? safeFilters.search : '';
     const initialTab = safeFilters.shop_slug ? 'fabricants' : (safeFilters.on_sale ? 'promotions' : 'produits');
     const initialCity = typeof safeFilters.city === 'string' ? safeFilters.city : 'all';
@@ -74,18 +74,31 @@ export default function Index({
     const [maxPrice, setMaxPrice] = useState(initialMaxPrice);
     const [sort, setSort] = useState(initialSort);
 
+    const applyFilters = (overrides = {}) => {
+        const targetSearch = overrides.search !== undefined ? overrides.search : search;
+        const targetCat = overrides.category !== undefined ? overrides.category : selectedCategory;
+        const targetCity = overrides.city !== undefined ? overrides.city : selectedCity;
+        const targetTab = overrides.tab !== undefined ? overrides.tab : activeTab;
+        const targetVerified = overrides.verified !== undefined ? overrides.verified : verifiedOnly;
+        const targetMin = overrides.minPrice !== undefined ? overrides.minPrice : minPrice;
+        const targetMax = overrides.maxPrice !== undefined ? overrides.maxPrice : maxPrice;
+        const targetSort = overrides.sort !== undefined ? overrides.sort : sort;
+
+        router.get(route('public.products.index'), {
+            search: targetSearch || undefined,
+            category: targetCat !== 'all' ? targetCat : undefined,
+            city: targetCity !== 'all' ? targetCity : undefined,
+            on_sale: targetTab === 'promotions' ? 1 : undefined,
+            verified_only: targetVerified ? 1 : undefined,
+            min_price: targetMin || undefined,
+            max_price: targetMax || undefined,
+            sort: targetSort !== 'relevance' ? targetSort : undefined,
+        }, { preserveState: true });
+    };
+
     const handleSearchSubmit = (e) => {
         if (e) e.preventDefault();
-        router.get(route('public.products.index'), {
-            search: search || undefined,
-            category: selectedCategory !== 'all' ? selectedCategory : undefined,
-            city: selectedCity !== 'all' ? selectedCity : undefined,
-            on_sale: activeTab === 'promotions' ? 1 : undefined,
-            verified_only: verifiedOnly ? 1 : undefined,
-            min_price: minPrice || undefined,
-            max_price: maxPrice || undefined,
-            sort: sort !== 'relevance' ? sort : undefined,
-        }, { preserveState: true });
+        applyFilters();
     };
 
     const handleReset = () => {
@@ -122,7 +135,10 @@ export default function Index({
                         {/* Tab Selector */}
                         <div className="flex items-center justify-center gap-6 sm:gap-10 text-xs sm:text-sm font-medium text-stone-600 border-b border-stone-100 pb-3">
                             <button 
-                                onClick={() => { setActiveTab('produits'); }}
+                                onClick={() => { 
+                                    setActiveTab('produits'); 
+                                    applyFilters({ tab: 'produits' });
+                                }}
                                 className={`flex items-center gap-1.5 pb-2 transition-all cursor-pointer ${
                                     activeTab === 'produits' ? 'border-b-2 border-yellow-500 text-stone-900 font-semibold' : 'text-stone-500 hover:text-stone-800'
                                 }`}
@@ -132,7 +148,10 @@ export default function Index({
                             </button>
 
                             <button 
-                                onClick={() => { setActiveTab('promotions'); }}
+                                onClick={() => { 
+                                    setActiveTab('promotions'); 
+                                    applyFilters({ tab: 'promotions' });
+                                }}
                                 className={`flex items-center gap-1.5 pb-2 transition-all cursor-pointer ${
                                     activeTab === 'promotions' ? 'border-b-2 border-yellow-500 text-stone-900 font-semibold' : 'text-stone-500 hover:text-stone-800'
                                 }`}
@@ -142,7 +161,9 @@ export default function Index({
                             </button>
 
                             <button 
-                                onClick={() => { setActiveTab('fabricants'); }}
+                                onClick={() => { 
+                                    setActiveTab('fabricants'); 
+                                }}
                                 className={`flex items-center gap-1.5 pb-2 transition-all cursor-pointer ${
                                     activeTab === 'fabricants' ? 'border-b-2 border-yellow-500 text-stone-900 font-semibold' : 'text-stone-500 hover:text-stone-800'
                                 }`}
@@ -158,7 +179,7 @@ export default function Index({
                                 <Search className="w-4 h-4 text-stone-400 shrink-0" />
                                 <input
                                     type="text"
-                                    placeholder={activeTab === 'fabricants' ? "Rechercher une boutique par nom, ville (ex: Douala, Yaoundé) ou secteur..." : "Que recherchez-vous aujourd'hui ? (ex: Téléphones, Bazin, Sacs, Électroménager)..."}
+                                    placeholder={activeTab === 'fabricants' ? "Rechercher une boutique par nom, ville (ex: Douala, Yaoundé) ou secteur..." : "Que recherchez-vous aujourd'hui ? (ex: iPhone, Bazin, Réfrigérateur, Karité, Pneu)..."}
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                     className="w-full bg-transparent border-none text-xs sm:text-sm text-stone-800 focus:ring-0 outline-none placeholder:text-stone-400 px-3 font-normal"
@@ -167,8 +188,11 @@ export default function Index({
                                 {search && (
                                     <button 
                                         type="button" 
-                                        onClick={() => setSearch('')} 
-                                        className="p-1 text-stone-400 hover:text-stone-600 mr-1"
+                                        onClick={() => {
+                                            setSearch('');
+                                            applyFilters({ search: '' });
+                                        }} 
+                                        className="p-1 text-stone-400 hover:text-stone-600 mr-1 cursor-pointer"
                                     >
                                         <X className="w-3.5 h-3.5" />
                                     </button>
@@ -197,7 +221,7 @@ export default function Index({
                             <span className="text-stone-300">•</span>
                             <span className="flex items-center gap-1">
                                 <BadgeCheck className="w-3.5 h-3.5 text-yellow-600" />
-                                <span>Commerçants vérifiés RCCM</span>
+                                <span>Commerçants certifiés RCCM</span>
                             </span>
                         </div>
 
@@ -210,7 +234,10 @@ export default function Index({
                     {/* CATEGORY SELECTOR CAROUSEL PILLS */}
                     <div className="bg-white border border-stone-200/80 rounded-2xl p-3 shadow-2xs flex items-center gap-2 overflow-x-auto">
                         <button
-                            onClick={() => { setSelectedCategory('all'); handleSearchSubmit(); }}
+                            onClick={() => { 
+                                setSelectedCategory('all'); 
+                                applyFilters({ category: 'all' });
+                            }}
                             className={`px-3.5 py-1.5 rounded-xl text-xs font-medium shrink-0 transition-colors flex items-center gap-1.5 cursor-pointer ${
                                 selectedCategory === 'all' 
                                     ? 'bg-yellow-400 text-stone-950 shadow-2xs font-semibold' 
@@ -230,7 +257,7 @@ export default function Index({
                                     onClick={() => {
                                         const newCat = isSelected ? 'all' : cat.id;
                                         setSelectedCategory(newCat);
-                                        router.get(route('public.products.index'), { category: newCat !== 'all' ? newCat : undefined }, { preserveState: true });
+                                        applyFilters({ category: newCat });
                                     }}
                                     className={`px-3.5 py-1.5 rounded-xl text-xs font-medium shrink-0 transition-colors flex items-center gap-1.5 cursor-pointer ${
                                         isSelected 
@@ -258,7 +285,11 @@ export default function Index({
                                 <span className="text-[11px] text-stone-500">Ville :</span>
                                 <select
                                     value={selectedCity}
-                                    onChange={(e) => { setSelectedCity(e.target.value); }}
+                                    onChange={(e) => { 
+                                        const newCity = e.target.value;
+                                        setSelectedCity(newCity);
+                                        applyFilters({ city: newCity });
+                                    }}
                                     className="bg-transparent border-none text-xs font-medium text-stone-800 outline-none cursor-pointer pr-2"
                                 >
                                     <option value="all">Toutes les villes</option>
@@ -271,7 +302,11 @@ export default function Index({
                             {/* Verified Only Toggle */}
                             <button
                                 type="button"
-                                onClick={() => setVerifiedOnly(!verifiedOnly)}
+                                onClick={() => {
+                                    const newVerified = !verifiedOnly;
+                                    setVerifiedOnly(newVerified);
+                                    applyFilters({ verified: newVerified });
+                                }}
                                 className={`px-3 py-1.5 rounded-xl border flex items-center gap-1.5 transition-colors cursor-pointer ${
                                     verifiedOnly 
                                         ? 'bg-amber-50 border-yellow-400 text-yellow-900 font-semibold' 
@@ -283,7 +318,7 @@ export default function Index({
                             </button>
 
                             {/* Price Inputs */}
-                            <div className="hidden sm:flex items-center gap-1.5 text-stone-500 text-[11px]">
+                            <div className="flex items-center gap-1.5 text-stone-500 text-[11px]">
                                 <span>Prix :</span>
                                 <input
                                     type="number"
@@ -301,15 +336,14 @@ export default function Index({
                                     className="w-16 px-2 py-1 bg-stone-50 border border-stone-200 rounded-lg text-xs outline-none"
                                 />
                                 <span className="text-[10px]">FCFA</span>
+                                <button
+                                    type="button"
+                                    onClick={() => applyFilters()}
+                                    className="px-2.5 py-1 bg-stone-900 hover:bg-stone-800 text-white rounded-lg text-[11px] font-medium cursor-pointer"
+                                >
+                                    Appliquer
+                                </button>
                             </div>
-
-                            <button
-                                type="button"
-                                onClick={handleSearchSubmit}
-                                className="px-3 py-1.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-medium transition-colors cursor-pointer"
-                            >
-                                Filtrer
-                            </button>
 
                             {(search || selectedCategory !== 'all' || selectedCity !== 'all' || verifiedOnly || minPrice || maxPrice) && (
                                 <button
@@ -329,12 +363,13 @@ export default function Index({
                             <select
                                 value={sort}
                                 onChange={(e) => {
-                                    setSort(e.target.value);
-                                    router.get(route('public.products.index'), { sort: e.target.value }, { preserveState: true });
+                                    const newSort = e.target.value;
+                                    setSort(newSort);
+                                    applyFilters({ sort: newSort });
                                 }}
                                 className="bg-stone-50 border border-stone-200 rounded-xl px-2.5 py-1.5 text-xs font-medium text-stone-800 outline-none cursor-pointer"
                             >
-                                <option value="relevance">Recommandés</option>
+                                <option value="relevance">Recommandés & Nouveautés</option>
                                 <option value="price_asc">Prix croissant</option>
                                 <option value="price_desc">Prix décroissant</option>
                             </select>
@@ -363,7 +398,6 @@ export default function Index({
 
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                                 {safeTopShops.map((shop) => {
-                                    const sellerUser = shop.seller?.user;
                                     const shopProducts = shop.products ? shop.products.slice(0, 3) : [];
 
                                     return (
@@ -491,30 +525,32 @@ export default function Index({
                                                 <div className="space-y-2">
                                                     
                                                     {/* Image Box */}
-                                                    <div className="relative w-full aspect-square bg-stone-50 rounded-xl overflow-hidden flex items-center justify-center border border-stone-100">
-                                                        {firstImg ? (
-                                                            <img 
-                                                                src={firstImg} 
-                                                                alt={product.name} 
-                                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                                            />
-                                                        ) : (
-                                                            <Package className="w-8 h-8 text-stone-300" />
-                                                        )}
+                                                    <Link href={route('public.products.show', product.slug)} className="block">
+                                                        <div className="relative w-full aspect-square bg-stone-50 rounded-xl overflow-hidden flex items-center justify-center border border-stone-100">
+                                                            {firstImg ? (
+                                                                <img 
+                                                                    src={firstImg} 
+                                                                    alt={product.name} 
+                                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                                />
+                                                            ) : (
+                                                                <Package className="w-8 h-8 text-stone-300" />
+                                                            )}
 
-                                                        {/* Promo Badge */}
-                                                        {hasPromo && (
-                                                            <span className="absolute top-2 right-2 bg-rose-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-2xs">
-                                                                -{product.active_promotion.discount_percentage}%
+                                                            {/* Promo Badge */}
+                                                            {hasPromo && (
+                                                                <span className="absolute top-2 right-2 bg-rose-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-2xs">
+                                                                    -{product.active_promotion.discount_percentage}%
+                                                                </span>
+                                                            )}
+
+                                                            {/* Escrow Tag */}
+                                                            <span className="absolute bottom-2 left-2 bg-white/95 backdrop-blur-xs text-stone-800 text-[9px] font-medium px-2 py-0.5 rounded-md flex items-center gap-1 shadow-2xs">
+                                                                <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                                                                <span>Escrow</span>
                                                             </span>
-                                                        )}
-
-                                                        {/* Escrow Tag */}
-                                                        <span className="absolute bottom-2 left-2 bg-white/95 backdrop-blur-xs text-stone-800 text-[9px] font-medium px-2 py-0.5 rounded-md flex items-center gap-1 shadow-2xs">
-                                                            <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                                                            <span>Escrow</span>
-                                                        </span>
-                                                    </div>
+                                                        </div>
+                                                    </Link>
 
                                                     {/* Boutique Name */}
                                                     {product.shop && (

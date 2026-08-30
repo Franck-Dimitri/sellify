@@ -12,8 +12,43 @@ use Inertia\Inertia;
 class StoreController extends Controller
 {
     /**
+     * Category definitions with associated keywords and icons.
+     */
+    protected array $categoryDefinitions = [
+        'tech' => [
+            'name' => 'High-Tech & Smartphones',
+            'keywords' => ['tech', 'smartphone', 'téléphone', 'ordinateur', 'laptop', 'écouteurs', 'casque audio', 'gadget', 'montre connectée', 'tv', 'tablette', 'iphone', 'samsung', 'macbook', 'redmi', 'airpods', 'playstation', 'sony', 'apple'],
+            'icon' => 'Smartphone'
+        ],
+        'fashion' => [
+            'name' => 'Mode & Vêtements Africains',
+            'keywords' => ['fashion', 'mode', 'bazin', 'vêtement', 'robe', 'costume', 'chaussure', 'sac', 'wax', 'tissu', 'chemise', 'sandale', 'boubou', 'sneakers', 'ndop', 'kente', 'foulard'],
+            'icon' => 'Shirt'
+        ],
+        'home' => [
+            'name' => 'Maison & Électroménager',
+            'keywords' => ['home', 'maison', 'électroménager', 'cuisine', 'meuble', 'déco', 'salon', 'ventilateur', 'frigo', 'climatiseur', 'mixeur', 'machine à laver', 'matelas', 'cuisinière', 'repassage'],
+            'icon' => 'Home'
+        ],
+        'beauty' => [
+            'name' => 'Beauté & Soins Naturels',
+            'keywords' => ['beauty', 'beauté', 'soin', 'bio', 'parfum', 'cheveux', 'karité', 'savon', 'peau', 'lotion', 'crème', 'sérum', 'gommage', 'barbe', 'baobab'],
+            'icon' => 'Sparkles'
+        ],
+        'auto' => [
+            'name' => 'Auto, Moto & Pièces',
+            'keywords' => ['auto', 'moto', 'véhicule', 'pièce', 'pneu', 'batterie', 'huile moteur', 'casque moto', 'frein', 'accessoire auto', 'michelin', 'varta', 'total quartz', 'compresseur'],
+            'icon' => 'Car'
+        ],
+        'food' => [
+            'name' => 'Alimentation & Épicerie',
+            'keywords' => ['food', 'alimentation', 'épicerie', 'café', 'chocolat', 'miel', 'riz', 'épice', 'boisson', 'thé', 'poivre', 'penja', 'plantain', 'huile rouge', 'terroir'],
+            'icon' => 'ShoppingBag'
+        ],
+    ];
+
+    /**
      * Display the public marketplace product catalog with advanced multi-criteria filters & sorting.
-     * (Sub-Module 2.1.3)
      */
     public function indexProducts(Request $request)
     {
@@ -24,30 +59,40 @@ class StoreController extends Controller
 
         // 1. Search by keyword
         if ($request->filled('search')) {
-            $search = $request->input('search');
+            $search = trim($request->input('search'));
             $query->where(function ($q) use ($search) {
                 $q->where('products.name', 'like', "%{$search}%")
                   ->orWhere('products.description', 'like', "%{$search}%")
+                  ->orWhere('products.sku', 'like', "%{$search}%")
                   ->orWhereHas('shop', function ($qs) use ($search) {
-                      $qs->where('name', 'like', "%{$search}%");
+                      $qs->where('name', 'like', "%{$search}%")
+                        ->orWhere('city', 'like', "%{$search}%");
                   });
             });
         }
 
-        // 2. Filter by Category
+        // 2. Filter by Category with rich keyword matching
         if ($request->filled('category') && $request->input('category') !== 'all') {
-            $cat = $request->input('category');
-            $query->where(function ($q) use ($cat) {
-                $q->where('products.name', 'like', "%{$cat}%")
-                  ->orWhere('products.description', 'like', "%{$cat}%");
-            });
+            $catKey = strtolower($request->input('category'));
+            if (isset($this->categoryDefinitions[$catKey])) {
+                $keywords = $this->categoryDefinitions[$catKey]['keywords'];
+                $query->where(function ($q) use ($keywords, $catKey) {
+                    $q->where('products.name', 'like', "%{$catKey}%")
+                      ->orWhere('products.description', 'like', "%{$catKey}%");
+                    foreach ($keywords as $kw) {
+                        $q->orWhere('products.name', 'like', "%{$kw}%")
+                          ->orWhere('products.description', 'like', "%{$kw}%");
+                    }
+                });
+            }
         }
 
         // 3. Filter by City / Seller Location
         if ($request->filled('city') && $request->input('city') !== 'all') {
             $city = $request->input('city');
             $query->whereHas('shop', function ($q) use ($city) {
-                $q->where('address', 'like', "%{$city}%")
+                $q->where('city', 'like', "%{$city}%")
+                  ->orWhere('address', 'like', "%{$city}%")
                   ->orWhere('description', 'like', "%{$city}%");
             });
         }
@@ -59,7 +104,7 @@ class StoreController extends Controller
             });
         }
 
-        // 5. Filter by promo
+        // 5. Filter by promo / flash deals
         if ($request->boolean('on_sale')) {
             $query->whereHas('activePromotion');
         }
@@ -73,36 +118,35 @@ class StoreController extends Controller
 
         // 7. Filter by price range
         if ($request->filled('min_price')) {
-            $query->where('products.price', '>=', $request->input('min_price'));
+            $query->where('products.price', '>=', (float) $request->input('min_price'));
         }
 
         if ($request->filled('max_price')) {
-            $query->where('products.price', '<=', $request->input('max_price'));
+            $query->where('products.price', '<=', (float) $request->input('max_price'));
         }
 
-        // 8. Sorting (Sub-Module 2.1.3)
+        // 8. Sorting
         $sort = $request->input('sort', 'relevance');
         if ($sort === 'price_asc') {
             $query->orderBy('products.price', 'asc');
         } elseif ($sort === 'price_desc') {
             $query->orderBy('products.price', 'desc');
         } else {
-            // Priority to verified sellers & newest
             $query->latest('products.created_at');
         }
 
-        $products = $query->paginate(16)->withQueryString();
+        $products = $query->paginate(18)->withQueryString();
 
-        // Daily Deals / Flash Sale Products
+        // Featured Daily Deals / Flash Sale Products
         $featuredDeals = Product::where('is_archived', false)
             ->where('is_active', true)
             ->where('stock', '>', 0)
             ->whereHas('activePromotion')
             ->with(['shop.seller.user', 'activePromotion'])
-            ->take(6)
+            ->take(8)
             ->get();
 
-        // AI Personalized "Pour Vous" Recommendations (Sub-Module 2.1.12)
+        // AI Personalized "Pour Vous" Recommendations
         $recommendedForYou = Product::where('is_archived', false)
             ->where('is_active', true)
             ->where('stock', '>', 0)
@@ -115,20 +159,33 @@ class StoreController extends Controller
         $topShops = Shop::where('is_active', true)
             ->where('is_holiday_mode', false)
             ->with(['seller.user', 'products' => function ($q) {
-                $q->where('is_archived', false)->where('is_active', true);
+                $q->where('is_archived', false)->where('is_active', true)->take(3);
             }])
             ->take(8)
             ->get();
 
-        // Categories List with static icons
-        $categories = [
-            ['id' => 'tech', 'name' => 'High-Tech & Smartphones', 'count' => 124, 'icon' => 'Smartphone'],
-            ['id' => 'fashion', 'name' => 'Mode & Vêtements Africains', 'count' => 88, 'icon' => 'Shirt'],
-            ['id' => 'home', 'name' => 'Maison & Électroménager', 'count' => 54, 'icon' => 'Home'],
-            ['id' => 'beauty', 'name' => 'Beauté & Soins Naturels', 'count' => 42, 'icon' => 'Sparkles'],
-            ['id' => 'auto', 'name' => 'Auto, Moto & Pièces', 'count' => 31, 'icon' => 'Car'],
-            ['id' => 'food', 'name' => 'Alimentation & Épicerie', 'count' => 29, 'icon' => 'ShoppingBag'],
-        ];
+        // Compute dynamic counts per category
+        $categories = [];
+        foreach ($this->categoryDefinitions as $id => $def) {
+            $count = Product::where('is_archived', false)
+                ->where('is_active', true)
+                ->where('stock', '>', 0)
+                ->where(function ($q) use ($def, $id) {
+                    $q->where('products.name', 'like', "%{$id}%")
+                      ->orWhere('products.description', 'like', "%{$id}%");
+                    foreach ($def['keywords'] as $kw) {
+                        $q->orWhere('products.name', 'like', "%{$kw}%")
+                          ->orWhere('products.description', 'like', "%{$kw}%");
+                    }
+                })->count();
+
+            $categories[] = [
+                'id' => $id,
+                'name' => $def['name'],
+                'count' => $count,
+                'icon' => $def['icon'],
+            ];
+        }
 
         // Available Cities list in Cameroon
         $cities = ['Douala', 'Yaoundé', 'Bafoussam', 'Garoua', 'Kribi', 'Bamenda', 'Maroua'];
@@ -140,7 +197,7 @@ class StoreController extends Controller
             'topShops' => $topShops,
             'categories' => $categories,
             'cities' => $cities,
-            'filters' => $request->only(['search', 'category', 'city', 'shop_slug', 'on_sale', 'verified_only', 'min_price', 'max_price', 'sort']),
+            'filters' => (object) $request->only(['search', 'category', 'city', 'shop_slug', 'on_sale', 'verified_only', 'min_price', 'max_price', 'sort']),
         ]);
     }
 
@@ -158,85 +215,59 @@ class StoreController extends Controller
                     'Chaussures Cuir Homme',
                     'Smart TV 4K 55 pouces',
                     'Samsung Galaxy S24 Ultra',
+                    'Machine à Laver Inverter',
+                    'Beurre de Karité Bio',
+                    'Poivre Blanc de Penja',
                 ]
             ]);
         }
 
-        $productNames = Product::where('is_active', true)
+        $productMatches = Product::where('is_archived', false)
+            ->where('is_active', true)
             ->where('name', 'like', "%{$q}%")
             ->pluck('name')
             ->take(5)
             ->toArray();
 
-        $shopNames = Shop::where('is_active', true)
+        $shopMatches = Shop::where('is_active', true)
             ->where('name', 'like', "%{$q}%")
             ->pluck('name')
             ->take(3)
             ->toArray();
 
         return response()->json([
-            'suggestions' => array_unique(array_merge($productNames, $shopNames)),
+            'suggestions' => array_unique(array_merge($productMatches, $shopMatches))
         ]);
     }
 
     /**
-     * Display a detailed product page with AI ETA, Escrow breakdown & similar recommendations.
-     * (Sub-Module 2.1.4 & 2.1.12)
+     * Display a single product detail page with rich media, smart tiers & Escrow checkout.
      */
     public function showProduct(string $slug)
     {
         $product = Product::where('slug', $slug)
             ->where('is_archived', false)
-            ->with(['shop.seller.user', 'activePromotion', 'reviews.user'])
+            ->where('is_active', true)
+            ->with(['shop.seller.user', 'promotions', 'reviews.user'])
             ->firstOrFail();
 
-        // Fetch related products (Sub-Module 2.1.4 & 2.1.12 collaborative recommendations)
-        $relatedProducts = Product::where('id', '!=', $product->id)
+        // Similar/Related Products in same shop or category
+        $relatedProducts = Product::where('shop_id', $product->shop_id)
+            ->where('id', '!=', $product->id)
             ->where('is_archived', false)
             ->where('is_active', true)
-            ->where('shop_id', $product->shop_id)
-            ->with(['shop.seller.user', 'activePromotion'])
-            ->latest()
-            ->take(6)
+            ->with(['activePromotion', 'shop'])
+            ->take(4)
             ->get();
-
-        $user = auth()->user();
-        $isWishlisted = $user ? \App\Models\Wishlist::where('user_id', $user->id)->where('product_id', $product->id)->exists() : false;
-
-        $averageRating = (float) round($product->reviews->avg('rating') ?? 4.9, 1);
-        $totalReviews = $product->reviews->count();
-
-        // Check if there is an active SmartLink for this product
-        $smartLink = SmartLink::where('product_id', $product->id)
-            ->where('status', 'active')
-            ->where('expires_at', '>', now())
-            ->first();
-
-        // Dynamic Delivery ETA Estimation by Zone (Sub-Module 2.1.4)
-        $estimatedDeliveryDays = "24h - 48h";
-        $estimatedShippingFee = 2500; // FCFA standard
 
         return Inertia::render('Public/Products/Show', [
             'product' => $product,
-            'shop' => $product->shop,
-            'seller' => $product->shop?->seller,
-            'sellerUser' => $product->shop?->seller?->user,
             'relatedProducts' => $relatedProducts,
-            'reviews' => $product->reviews,
-            'averageRating' => $averageRating,
-            'totalReviews' => $totalReviews,
-            'isWishlisted' => $isWishlisted,
-            'smartLinkToken' => $smartLink ? $smartLink->token : null,
-            'logisticsInfo' => [
-                'estimated_eta' => $estimatedDeliveryDays,
-                'estimated_shipping_fee' => $estimatedShippingFee,
-                'escrow_guarantee_text' => "Fonds bloqués sous séquestre jusqu'à validation physique de conformité.",
-            ],
         ]);
     }
 
     /**
-     * Display the public directory of verified shops.
+     * Public Verified Shops Directory (Sub-Module 2.1.4).
      */
     public function indexShops(Request $request)
     {
@@ -249,16 +280,25 @@ class StoreController extends Controller
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('slogan', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('city', 'like', "%{$search}%")
                   ->orWhere('address', 'like', "%{$search}%");
             });
         }
 
-        $shops = $query->latest()->paginate(9)->withQueryString();
+        if ($request->filled('city') && $request->input('city') !== 'all') {
+            $city = $request->input('city');
+            $query->where(function ($q) use ($city) {
+                $q->where('city', 'like', "%{$city}%")
+                  ->orWhere('address', 'like', "%{$city}%");
+            });
+        }
+
+        $shops = $query->paginate(12)->withQueryString();
 
         return Inertia::render('Public/Shops/Index', [
             'shops' => $shops,
-            'filters' => $request->only(['search']),
+            'filters' => (object) $request->only(['search', 'city']),
         ]);
     }
 }
