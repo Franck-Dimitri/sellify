@@ -250,8 +250,15 @@ export default function PublicLayout({ children }) {
                     </div>
 
                     {/* Legal Copyright Bar */}
-                    <div className="text-center text-[11px] text-stone-400 space-y-2 font-normal">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-stone-400 font-normal pt-2">
                         <p>&copy; {new Date().getFullYear()} Sellify.me • La Première Marketplace Sécurisée d'Afrique.</p>
+                        <div className="flex items-center gap-4 text-stone-500">
+                            <Link href={route('legal.privacy')} className="hover:underline hover:text-stone-800">Politique de Confidentialité</Link>
+                            <span>•</span>
+                            <Link href={route('legal.terms')} className="hover:underline hover:text-stone-800">CGU / CGV</Link>
+                            <span>•</span>
+                            <Link href={route('legal.escrow')} className="hover:underline hover:text-stone-800">Protocole Escrow & Mentions Légales</Link>
+                        </div>
                     </div>
 
                 </div>

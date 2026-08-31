@@ -64,6 +64,19 @@ Route::post('/pay/{token}', [SmartLinkCheckoutController::class, 'processPayment
 Route::get('/track/{tracking_code}', [OrderTrackingController::class, 'show'])->name('public.order_tracking');
 Route::get('/api/orders/{order_number}/live-location', [\App\Http\Controllers\Customer\OrderController::class, 'liveLocation'])->name('api.orders.live_location');
 
+// Pages Légales & Conformité
+Route::get('/politique-de-confidentialite', function () {
+    return Inertia::render('Public/Legal/Privacy');
+})->name('legal.privacy');
+
+Route::get('/conditions-generales', function () {
+    return Inertia::render('Public/Legal/Terms');
+})->name('legal.terms');
+
+Route::get('/mentions-legales', function () {
+    return Inertia::render('Public/Legal/Escrow');
+})->name('legal.escrow');
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Routes Invité (Guest Auth)
 // ─────────────────────────────────────────────────────────────────────────────
