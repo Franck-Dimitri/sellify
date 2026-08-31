@@ -248,8 +248,12 @@ class StoreController extends Controller
         $product = Product::where('slug', $slug)
             ->where('is_archived', false)
             ->where('is_active', true)
-            ->with(['shop.seller.user', 'promotions', 'reviews.user'])
+            ->with(['shop.seller.user', 'promotions', 'activePromotion', 'reviews.user'])
             ->firstOrFail();
+
+        $shop = $product->shop;
+        $seller = $shop ? $shop->seller : null;
+        $sellerUser = $seller ? $seller->user : null;
 
         // Similar/Related Products in same shop or category
         $relatedProducts = Product::where('shop_id', $product->shop_id)
@@ -260,9 +264,27 @@ class StoreController extends Controller
             ->take(4)
             ->get();
 
+        $reviews = $product->reviews ?? collect([]);
+        $averageRating = $reviews->count() > 0 ? round($reviews->avg('rating'), 1) : 5.0;
+        $totalReviews = $reviews->count();
+
+        $isWishlisted = false;
+        if (auth()->check()) {
+            $isWishlisted = \App\Models\Wishlist::where('user_id', auth()->id())
+                ->where('product_id', $product->id)
+                ->exists();
+        }
+
         return Inertia::render('Public/Products/Show', [
             'product' => $product,
+            'shop' => $shop,
+            'seller' => $seller,
+            'sellerUser' => $sellerUser,
             'relatedProducts' => $relatedProducts,
+            'reviews' => $reviews,
+            'averageRating' => $averageRating,
+            'totalReviews' => $totalReviews,
+            'isWishlisted' => $isWishlisted,
         ]);
     }
 

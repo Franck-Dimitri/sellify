@@ -22,6 +22,7 @@ import {
     Smartphone,
     ShoppingBag
 } from 'lucide-react';
+import AIAssistantWidget from '@/Components/AIAssistantWidget';
 
 export default function PublicLayout({ children }) {
     const { auth } = usePage().props;
@@ -263,6 +264,9 @@ export default function PublicLayout({ children }) {
 
                 </div>
             </footer>
+
+            {/* Draggable Floating Sellify AI Bubble */}
+            <AIAssistantWidget />
 
         </div>
     );
