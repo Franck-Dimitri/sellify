@@ -33,7 +33,7 @@ use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
-})->name('welcome');
+})->name('home');
 
 Route::get('/store', [StoreController::class, 'indexProducts'])->name('public.products.index');
 Route::get('/produit/{slug}', [StoreController::class, 'showProduct'])->name('public.products.show');
