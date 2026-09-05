@@ -40,6 +40,13 @@ export default function SellerCentralLayout({ children, title }) {
                     active: route().current('seller.dashboard') 
                 },
                 { 
+                    name: 'Sellify AI 1.2 Flash', 
+                    href: route('seller.ai.index'), 
+                    icon: Sparkles, 
+                    badge: '⚡ IA',
+                    active: route().current('seller.ai.*') 
+                },
+                { 
                     name: 'Commandes', 
                     href: route('seller.orders.index'), 
                     icon: ShoppingBag, 

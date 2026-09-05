@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Head, Link, useForm, router } from '@inertiajs/react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
+import LiveOrderTrackingMap from '@/Components/LiveOrderTrackingMap';
 import { 
     ArrowLeft, 
     ShieldCheck, 
@@ -18,14 +19,18 @@ import {
     ExternalLink,
     FileText,
     Star,
-    Ban
+    Ban,
+    Navigation,
+    Compass
 } from 'lucide-react';
 
 export default function Show({ order }) {
     const [isDisputeOpen, setIsDisputeOpen] = useState(false);
     const [reviewModalItem, setReviewModalItem] = useState(null);
     const [rating, setRating] = useState(5);
+    const [driverRating, setDriverRating] = useState(5);
     const [comment, setComment] = useState('');
+    const [reviewPhoto, setReviewPhoto] = useState(null);
 
     const { post: confirmPost, processing: confirmProcessing } = useForm();
     const { post: cancelPost, processing: cancelProcessing } = useForm();
@@ -47,6 +52,10 @@ export default function Show({ order }) {
         }
     };
 
+    const handleReorder = () => {
+        router.post(route('customer.orders.reorder', order.order_number));
+    };
+
     const handleDisputeSubmit = (e) => {
         e.preventDefault();
         disputePost(route('customer.orders.dispute', order.order_number), {
@@ -58,15 +67,23 @@ export default function Show({ order }) {
         e.preventDefault();
         if (!reviewModalItem) return;
         
-        router.post(route('customer.orders.review', order.order_number), {
-            product_id: reviewModalItem.product_id,
-            rating: rating,
-            comment: comment,
-        }, {
+        const formData = new FormData();
+        formData.append('product_id', reviewModalItem.product_id);
+        formData.append('rating', rating);
+        formData.append('driver_rating', driverRating);
+        formData.append('comment', comment);
+        if (reviewPhoto) {
+            formData.append('photo', reviewPhoto);
+        }
+
+        router.post(route('customer.orders.review', order.order_number), formData, {
+            forceFormData: true,
             onSuccess: () => {
                 setReviewModalItem(null);
                 setComment('');
                 setRating(5);
+                setDriverRating(5);
+                setReviewPhoto(null);
             }
         });
     };
@@ -115,6 +132,15 @@ export default function Show({ order }) {
                     </div>
 
                     <div className="flex items-center gap-2 flex-wrap">
+                        {/* 1-Click Re-order Button (Sub-Module 2.1.8) */}
+                        <button
+                            onClick={handleReorder}
+                            className="px-3.5 py-2 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors shadow-xs"
+                        >
+                            <Package className="w-3.5 h-3.5" />
+                            <span>Re-commander en 1 clic</span>
+                        </button>
+
                         <a
                             href={route('customer.orders.invoice', order.order_number)}
                             target="_blank"
@@ -177,6 +203,22 @@ export default function Show({ order }) {
                             <span className="font-bold">Cette commande a été annulée.</span>
                             <p className="text-rose-700 mt-0.5">Les fonds consignés sous séquestre Escrow ont été intégralement remboursés et le stock a été remis à disposition.</p>
                         </div>
+                    </div>
+                )}
+
+                {/* INTERACTIVE LIVE GPS TRACKING MAP */}
+                {order.delivery_status !== 'cancelled' && (
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-xs font-bold text-stone-900 uppercase tracking-wider flex items-center gap-2">
+                                <Navigation className="w-4 h-4 text-yellow-600 animate-pulse" />
+                                <span>Suivi Cartographique en Direct · Trajet & Géolocalisation</span>
+                            </h2>
+                            <span className="text-[11px] text-stone-500 font-medium">
+                                Itinéraire Boutique ➔ Livreur ➔ Votre Domicile
+                            </span>
+                        </div>
+                        <LiveOrderTrackingMap order={order} />
                     </div>
                 )}
 
@@ -322,7 +364,7 @@ export default function Show({ order }) {
 
                             <form onSubmit={handleReviewSubmit} className="space-y-4 text-xs">
                                 <div>
-                                    <label className="font-semibold text-stone-700 block mb-2 text-center">Note globale :</label>
+                                    <label className="font-semibold text-stone-700 block mb-1 text-center">1. Note du Produit & Vendeur :</label>
                                     <div className="flex justify-center gap-2">
                                         {[1, 2, 3, 4, 5].map((star) => (
                                             <button
@@ -331,20 +373,46 @@ export default function Show({ order }) {
                                                 onClick={() => setRating(star)}
                                                 className="p-1 hover:scale-110 transition-transform"
                                             >
-                                                <Star className={`w-7 h-7 ${star <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-stone-300'}`} />
+                                                <Star className={`w-6 h-6 ${star <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-stone-300'}`} />
                                             </button>
                                         ))}
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label className="font-semibold text-stone-700 block mb-1">Votre commentaire :</label>
+                                    <label className="font-semibold text-stone-700 block mb-1 text-center">2. Note du Service Livreur :</label>
+                                    <div className="flex justify-center gap-2">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <button
+                                                key={star}
+                                                type="button"
+                                                onClick={() => setDriverRating(star)}
+                                                className="p-1 hover:scale-110 transition-transform"
+                                            >
+                                                <Star className={`w-5 h-5 ${star <= driverRating ? 'text-yellow-500 fill-yellow-500' : 'text-stone-300'}`} />
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="font-semibold text-stone-700 block mb-1">Votre commentaire d'expérience :</label>
                                     <textarea
-                                        rows="3"
+                                        rows="2"
                                         value={comment}
                                         onChange={(e) => setComment(e.target.value)}
-                                        placeholder="Qu'avez-vous pensé de la qualité du produit et des délais ?"
-                                        className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl outline-none focus:ring-2 focus:ring-yellow-400 text-stone-800 text-xs"
+                                        placeholder="Qualité du produit reçu, conformité à la description..."
+                                        className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl outline-none focus:ring-2 focus:ring-yellow-400 text-stone-800 text-xs"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="font-semibold text-stone-700 block mb-1">Photo du produit reçu (Optionnel) :</label>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => setReviewPhoto(e.target.files[0])}
+                                        className="w-full text-xs file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-stone-200 file:text-stone-800"
                                     />
                                 </div>
 

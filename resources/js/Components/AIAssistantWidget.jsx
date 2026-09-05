@@ -1,120 +1,177 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { usePage } from '@inertiajs/react';
+import { Sparkles, X, Maximize2, Minimize2, Move, MessageSquare } from 'lucide-react';
+import UniversalAiChat from '@/Components/UniversalAiChat';
 
 export default function AIAssistantWidget() {
-    const { auth } = usePage().props;
+    const { auth } = usePage().props || {};
     const [isOpen, setIsOpen] = useState(false);
-    const [messages, setMessages] = useState([
-        {
-            sender: 'ai',
-            text: `Bonjour ${auth?.user?.first_name || ''} ! Je suis votre Copilote IA Sellify. Comment puis-je vous aider aujourd'hui ?`
+    const [isExpanded, setIsExpanded] = useState(false);
+    
+    // Position state: null initially so it uses default CSS positioning (bottom-6 right-6)
+    // When dragged, { x, y } represents absolute pixel coords from top-left of screen
+    const [position, setPosition] = useState(null);
+    const [isDragging, setIsDragging] = useState(false);
+    
+    const dragRef = useRef(null);
+    const dragStartPos = useRef({ x: 0, y: 0 });
+    const elementStartPos = useRef({ x: 0, y: 0 });
+    const hasMoved = useRef(false);
+
+    const user = auth?.user || {};
+    const role = user.role || 'customer';
+
+    // Handle mouse / touch drag start
+    const handleDragStart = (e) => {
+        if (isOpen) return; // Don't drag when modal is open
+
+        const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+
+        const rect = dragRef.current ? dragRef.current.getBoundingClientRect() : { left: window.innerWidth - 180, top: window.innerHeight - 80 };
+
+        dragStartPos.current = { x: clientX, y: clientY };
+        elementStartPos.current = { x: rect.left, y: rect.top };
+        hasMoved.current = false;
+        setIsDragging(true);
+    };
+
+    // Global drag move & end listeners
+    useEffect(() => {
+        const handleDragMove = (e) => {
+            if (!isDragging) return;
+
+            const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+
+            const deltaX = clientX - dragStartPos.current.x;
+            const deltaY = clientY - dragStartPos.current.y;
+
+            if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
+                hasMoved.current = true;
+            }
+
+            // Calculate new position bounded to screen edges
+            const bubbleWidth = 140;
+            const bubbleHeight = 56;
+            const maxX = window.innerWidth - bubbleWidth - 10;
+            const maxY = window.innerHeight - bubbleHeight - 10;
+
+            const newX = Math.max(10, Math.min(elementStartPos.current.x + deltaX, maxX));
+            const newY = Math.max(10, Math.min(elementStartPos.current.y + deltaY, maxY));
+
+            setPosition({ x: newX, y: newY });
+        };
+
+        const handleDragEnd = () => {
+            if (isDragging) {
+                setIsDragging(false);
+            }
+        };
+
+        if (isDragging) {
+            window.addEventListener('mousemove', handleDragMove, { passive: false });
+            window.addEventListener('mouseup', handleDragEnd);
+            window.addEventListener('touchmove', handleDragMove, { passive: false });
+            window.addEventListener('touchend', handleDragEnd);
         }
-    ]);
-    const [input, setInput] = useState('');
-    const [loading, setLoading] = useState(false);
 
-    const handleSend = async (e) => {
-        e.preventDefault();
-        if (!input.trim() || loading) return;
+        return () => {
+            window.removeEventListener('mousemove', handleDragMove);
+            window.removeEventListener('mouseup', handleDragEnd);
+            window.removeEventListener('touchmove', handleDragMove);
+            window.removeEventListener('touchend', handleDragEnd);
+        };
+    }, [isDragging]);
 
-        const userMsg = input.trim();
-        setInput('');
-        setMessages(prev => [...prev, { sender: 'user', text: userMsg }]);
-        setLoading(true);
-
-        try {
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-            const res = await fetch('/ai/chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken || '',
-                },
-                body: JSON.stringify({ message: userMsg }),
-            });
-            const data = await res.json();
-            setMessages(prev => [...prev, { sender: 'ai', text: data.reply }]);
-        } catch (err) {
-            setMessages(prev => [...prev, { sender: 'ai', text: "Désolé, une erreur est survenue lors de la communication avec le moteur IA." }]);
-        } finally {
-            setLoading(false);
+    const handleClick = (e) => {
+        // Only open if it wasn't an active drag gesture
+        if (!hasMoved.current) {
+            setIsOpen(true);
         }
     };
 
+    const floatingStyle = position 
+        ? { left: `${position.x}px`, top: `${position.y}px`, right: 'auto', bottom: 'auto' }
+        : {};
+
     return (
-        <div className="fixed bottom-6 right-6 z-50">
+        <div 
+            ref={dragRef}
+            style={floatingStyle}
+            className={`fixed ${!position ? 'bottom-6 right-6' : ''} z-50 select-none`}
+        >
             {!isOpen ? (
-                <button
-                    onClick={() => setIsOpen(true)}
-                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-3 rounded-full shadow-xl transition-all transform hover:scale-105"
+                <div 
+                    onMouseDown={handleDragStart}
+                    onTouchStart={handleDragStart}
+                    onClick={handleClick}
+                    className={`flex items-center gap-2.5 bg-yellow-400 hover:bg-yellow-500 text-stone-950 font-semibold px-4 py-3 rounded-full shadow-2xl transition-transform border border-yellow-500 cursor-grab active:cursor-grabbing group ${
+                        isDragging ? 'scale-105 opacity-90 shadow-2xl ring-4 ring-yellow-400/30' : 'hover:scale-105'
+                    }`}
+                    title="Glissez-déposez pour déplacer la bulle Sellify AI"
                 >
-                    <span className="text-xl">✨</span>
-                    <span>Copilote IA</span>
-                </button>
+                    <div className="relative">
+                        <Sparkles className="w-5 h-5 text-stone-950 group-hover:rotate-12 transition-transform" />
+                        <span className="flex h-2 w-2 absolute -top-0.5 -right-0.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                    </div>
+
+                    <span className="text-xs sm:text-sm font-semibold tracking-tight">Sellify AI</span>
+
+                    <Move className="w-3.5 h-3.5 text-stone-700 opacity-40 group-hover:opacity-100 transition-opacity ml-0.5" />
+                </div>
             ) : (
-                <div className="w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col h-[500px] overflow-hidden animate-in fade-in slide-in-from-bottom-5">
-                    {/* Header */}
-                    <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white px-4 py-3 flex items-center justify-between">
+                <div 
+                    className={`
+                        ${isExpanded 
+                            ? 'fixed inset-4 sm:inset-10 z-50' 
+                            : 'w-[92vw] sm:w-[500px] h-[620px] max-h-[85vh]'
+                        } 
+                        bg-white rounded-3xl shadow-2xl border border-stone-200 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 transition-all duration-200
+                    `}
+                >
+                    {/* Top control bar for modal */}
+                    <div className="h-11 px-4 bg-stone-900 text-white flex items-center justify-between text-xs font-semibold select-none">
                         <div className="flex items-center gap-2">
-                            <span className="text-xl">✨</span>
-                            <div>
-                                <h3 className="font-semibold text-sm">Copilote IA Sellify</h3>
-                                <p className="text-xs text-indigo-200">En ligne • Assistant personnel</p>
+                            <div className="w-6 h-6 rounded-lg bg-yellow-400 text-stone-950 flex items-center justify-center font-bold text-xs">
+                                AI
                             </div>
+                            <span className="font-semibold text-stone-100">Sellify AI 1.2 Flash · Assistant Flottant</span>
                         </div>
-                        <button
-                            onClick={() => setIsOpen(false)}
-                            className="text-white hover:bg-white/20 rounded-full w-8 h-8 flex items-center justify-center transition"
-                        >
-                            ✕
-                        </button>
-                    </div>
-
-                    {/* Messages Body */}
-                    <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-gray-50 text-sm">
-                        {messages.map((msg, idx) => (
-                            <div
-                                key={idx}
-                                className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                        <div className="flex items-center gap-1">
+                            <button
+                                onClick={() => setIsExpanded(!isExpanded)}
+                                className="p-1.5 hover:bg-stone-800 rounded-lg text-stone-400 hover:text-white transition-colors cursor-pointer"
+                                title={isExpanded ? "Réduire" : "Plein écran"}
                             >
-                                <div
-                                    className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${
-                                        msg.sender === 'user'
-                                            ? 'bg-indigo-600 text-white rounded-br-none'
-                                            : 'bg-white text-gray-800 border border-gray-200 shadow-sm rounded-bl-none'
-                                    }`}
-                                >
-                                    <p className="whitespace-pre-line leading-relaxed">{msg.text}</p>
-                                </div>
-                            </div>
-                        ))}
-                        {loading && (
-                            <div className="flex justify-start">
-                                <div className="bg-white border border-gray-200 shadow-sm rounded-2xl px-4 py-2 text-gray-500 text-xs flex items-center gap-2">
-                                    <span className="animate-spin">⏳</span> Réflexion en cours...
-                                </div>
-                            </div>
-                        )}
+                                {isExpanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setIsOpen(false);
+                                    setIsExpanded(false);
+                                }}
+                                className="p-1.5 hover:bg-stone-800 rounded-lg text-stone-400 hover:text-white transition-colors cursor-pointer"
+                                title="Fermer"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
                     </div>
 
-                    {/* Input Footer */}
-                    <form onSubmit={handleSend} className="p-3 bg-white border-t border-gray-100 flex gap-2">
-                        <input
-                            type="text"
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            placeholder="Posez une question à l'IA..."
-                            className="flex-1 text-xs sm:text-sm px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    {/* Universal AI Chat Body */}
+                    <div className="flex-1 overflow-hidden">
+                        <UniversalAiChat 
+                            role={role} 
+                            user={user}
+                            compact={!isExpanded}
+                            onClose={() => setIsOpen(false)}
+                            className="rounded-none border-none shadow-none min-h-0"
                         />
-                        <button
-                            type="submit"
-                            disabled={loading || !input.trim()}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs px-4 py-2 rounded-xl transition disabled:opacity-50"
-                        >
-                            Envoyer
-                        </button>
-                    </form>
+                    </div>
                 </div>
             )}
         </div>

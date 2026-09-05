@@ -46,6 +46,13 @@ export default function CustomerLayout({ children, title }) {
                     active: route().current('customer.dashboard') 
                 },
                 { 
+                    name: 'Sellify AI 1.2 Flash', 
+                    href: route('customer.ai.index'), 
+                    icon: Sparkles, 
+                    badge: '⚡ IA',
+                    active: route().current('customer.ai.*') 
+                },
+                { 
                     name: 'Mes commandes', 
                     href: route('customer.orders.index'), 
                     icon: ShoppingBag, 

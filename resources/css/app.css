@@ -79,6 +79,10 @@
     --animate-slide-down: slide-down 0.3s ease-out;
     --animate-scale-in: scale-in 0.3s ease-out;
     --animate-float: float 6s ease-in-out infinite;
+    --animate-float-slow: float-slow 8s ease-in-out infinite;
+    --animate-float-reverse: float-reverse 7s ease-in-out infinite;
+    --animate-pulse-glow: pulse-glow 3s ease-in-out infinite;
+    --animate-shimmer: shimmer 2.5s infinite linear;
 }
 
 @keyframes fade-in {
@@ -104,6 +108,65 @@
 @keyframes float {
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-12px); }
+}
+
+@keyframes float-slow {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-16px) rotate(1deg); }
+}
+
+@keyframes float-reverse {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(14px) rotate(-1deg); }
+}
+
+@keyframes pulse-glow {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.animate-float-slow {
+    animation: float-slow 8s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+    animation: float-reverse 7s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+    animation: pulse-glow 4s ease-in-out infinite;
+}
+
+/* Glassmorphism and Backdrop utilities */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.glass-panel-dark {
+    background: rgba(24, 24, 27, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pattern-grid-amber {
+    background-size: 32px 32px;
+    background-image: 
+        linear-gradient(to right, rgba(234, 179, 8, 0.07) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(234, 179, 8, 0.07) 1px, transparent 1px);
+}
+
+.pattern-dots-dark {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px);
+    background-size: 20px 20px;
 }
 
 /* Bento Grid Utilities */
@@ -151,3 +214,117 @@
     background: var(--color-primary-200);
     color: var(--color-primary-900);
 }
+
+/* ============================================
+   SELLIFY.ME — UI/UX Cursors & Interaction Rules
+   ============================================ */
+
+/* 1. Clickable Elements (Pointer) */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+a,
+input[type="submit"]:not(:disabled),
+input[type="button"]:not(:disabled),
+input[type="reset"]:not(:disabled),
+input[type="checkbox"]:not(:disabled),
+input[type="radio"]:not(:disabled),
+select:not(:disabled),
+summary,
+label[for],
+[tabindex]:not([tabindex="-1"]):not(:disabled),
+.cursor-pointer {
+    cursor: pointer !important;
+}
+
+/* 2. Disabled & Blocked Elements (Not Allowed) */
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled,
+[disabled],
+.disabled,
+[aria-disabled="true"],
+.cursor-not-allowed {
+    cursor: not-allowed !important;
+    pointer-events: auto !important;
+}
+
+/* 3. Text & Editable Elements (Text I-Beam) */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+textarea,
+[contenteditable="true"],
+.cursor-text {
+    cursor: text;
+}
+
+/* 4. Map & Draggable Surface (Grab / Grabbing) */
+.leaflet-container,
+.map-canvas,
+.cursor-grab {
+    cursor: grab !important;
+}
+
+.leaflet-container.leaflet-drag-target,
+.leaflet-container:active,
+.cursor-grabbing,
+.is-dragging {
+    cursor: grabbing !important;
+}
+
+/* Leaflet Markers, Controls & Overlays */
+.leaflet-marker-icon,
+.leaflet-clickable,
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out,
+.leaflet-popup-close-button,
+.c-shop-pin,
+.c-driver-pin,
+.c-dest-pin,
+.c-stop-pin {
+    cursor: pointer !important;
+}
+
+/* 5. Utility Cursors */
+.cursor-copy {
+    cursor: copy !important;
+}
+
+.cursor-help {
+    cursor: help !important;
+}
+
+.cursor-zoom-in {
+    cursor: zoom-in !important;
+}
+
+.cursor-zoom-out {
+    cursor: zoom-out !important;
+}
+
+.cursor-move {
+    cursor: move !important;
+}
+
+/* 6. Interactive Card Micro-Feedback */
+.interactive-card,
+[data-clickable="true"] {
+    cursor: pointer;
+    transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s ease;
+}
+
+.interactive-card:hover,
+[data-clickable="true"]:hover {
+    transform: translateY(-2px);
+}
+
+.interactive-card:active,
+[data-clickable="true"]:active {
+    transform: translateY(0px) scale(0.985);
+}
+

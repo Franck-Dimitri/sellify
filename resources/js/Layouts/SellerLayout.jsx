@@ -18,7 +18,8 @@ import {
     ExternalLink,
     Clock,
     UserCheck,
-    CreditCard
+    CreditCard,
+    Sparkles
 } from 'lucide-react';
 import Button from '../Components/ui/Button';
 
@@ -30,7 +31,7 @@ export default function SellerLayout({ children, title }) {
     const seller = user?.seller;
     const shop = seller?.shop;
 
-    // 7 Tabs
+    // Navigation Tabs
     const navigation = [
         { 
             name: 'Tableau de bord', 
@@ -39,10 +40,17 @@ export default function SellerLayout({ children, title }) {
             active: route().current('seller.dashboard') 
         },
         { 
-            name: shop ? 'Gérer Boutique' : 'Créer Boutique', 
-            href: shop ? route('seller.shop.edit') : route('seller.shop.create'), 
+            name: 'Sellify AI 1.2 Flash', 
+            href: route('seller.ai.index'), 
+            icon: Sparkles, 
+            badge: '⚡ IA',
+            active: route().current('seller.ai.*') 
+        },
+        { 
+            name: 'Mes Boutiques', 
+            href: route('seller.shop.index'), 
             icon: Store, 
-            active: route().current('seller.shop.edit') || route().current('seller.shop.create') 
+            active: route().current('seller.shop.*') 
         },
         { 
             name: 'Produits', 

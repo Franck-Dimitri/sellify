@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Head, useForm } from '@inertiajs/react';
 import DriverLayout from '@/Layouts/DriverLayout';
+import DeliveryOtpVerificationModal from '@/Components/DeliveryOtpVerificationModal';
+import ReportIncidentModal from '@/Components/ReportIncidentModal';
 import { 
     Truck, 
     CheckCircle2, 
@@ -13,7 +15,10 @@ import {
     Navigation,
     ShoppingBag,
     TrendingUp,
-    Check
+    Check,
+    WifiOff,
+    AlertTriangle,
+    RotateCcw
 } from 'lucide-react';
 import {
     Chart as ChartJS,
@@ -27,6 +32,7 @@ import {
     Filler
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import { OfflineStorageService } from '@/Services/OfflineStorageService';
 
 ChartJS.register(
     CategoryScale,
@@ -48,27 +54,26 @@ export default function Dashboard({
 }) {
     const { post, processing } = useForm();
     const [selectedDeliveryForOtp, setSelectedDeliveryForOtp] = useState(null);
-    const [otpInput, setOtpInput] = useState('');
+    const [reportIncidentOrder, setReportIncidentOrder] = useState(null);
+    const [cachedDeliveries, setCachedDeliveries] = useState(activeDeliveries);
+
+    // Save active deliveries into IndexedDB/LocalStorage when online for PWA offline resilience
+    useEffect(() => {
+        if (navigator.onLine && activeDeliveries.length > 0) {
+            OfflineStorageService.saveActiveDeliveries(activeDeliveries);
+            setCachedDeliveries(activeDeliveries);
+        } else if (!navigator.onLine) {
+            const offlineData = OfflineStorageService.getActiveDeliveries();
+            if (offlineData && offlineData.length > 0) {
+                setCachedDeliveries(offlineData);
+            }
+        }
+    }, [activeDeliveries]);
 
     const handleAccept = (orderNumber) => {
         if (confirm(`Voulez-vous accepter la livraison de la commande #${orderNumber} ?`)) {
             post(route('driver.delivery.accept', orderNumber));
         }
-    };
-
-    const handleVerifyOtp = (e) => {
-        e.preventDefault();
-        if (!otpInput || otpInput.length !== 6) {
-            alert("Veuillez saisir le code OTP à 6 chiffres transmis par le client.");
-            return;
-        }
-        post(route('driver.delivery.verify_otp', selectedDeliveryForOtp.order_number), {
-            data: { otp: otpInput },
-            onSuccess: () => {
-                setSelectedDeliveryForOtp(null);
-                setOtpInput('');
-            }
-        });
     };
 
     const earningsChartData = {
@@ -96,9 +101,11 @@ export default function Dashboard({
         }
     };
 
+    const displayActiveDeliveries = cachedDeliveries.length > 0 ? cachedDeliveries : activeDeliveries;
+
     return (
-        <DriverLayout title="Tableau de bord livreur">
-            <Head title="Tableau de bord Livreur - Sellify Express" />
+        <DriverLayout title="Tableau de bord livreur PWA">
+            <Head title="Tableau de bord Livreur PWA - Sellify Express" />
 
             <div className="w-full space-y-6 text-stone-800 antialiased font-sans pb-16">
                 
@@ -107,7 +114,7 @@ export default function Dashboard({
                     <div>
                         <div className="flex items-center gap-2 text-xs font-semibold text-yellow-700">
                             <Truck className="w-4 h-4 text-yellow-600" />
-                            <span>Vue d'ensemble des métriques & activités</span>
+                            <span>Vue d'ensemble PWA des métriques & activités</span>
                         </div>
                         <h1 className="text-xl font-bold text-stone-900 mt-1">
                             Bonjour, {driver.user?.first_name || 'Livreur'} 👋
@@ -124,7 +131,7 @@ export default function Dashboard({
                     </div>
                 </div>
 
-                {/* 4 Stat Cards Row (Clean White Theme) */}
+                {/* 4 Stat Cards Row */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="bg-white border border-stone-200/80 p-5 rounded-2xl shadow-2xs space-y-2">
                         <div className="flex items-center justify-between">
@@ -146,7 +153,7 @@ export default function Dashboard({
                                 <Truck className="w-4 h-4" />
                             </div>
                         </div>
-                        <p className="text-2xl font-bold text-yellow-700">{stats.active_count || 0}</p>
+                        <p className="text-2xl font-bold text-yellow-700">{displayActiveDeliveries.length}</p>
                         <span className="text-[11px] text-stone-400 font-normal">Colis en acheminement</span>
                     </div>
 
@@ -173,13 +180,13 @@ export default function Dashboard({
                     </div>
                 </div>
 
-                {/* ACTIVE DELIVERY CARD (Clean White / Yellow Border Card) */}
-                {activeDeliveries && activeDeliveries.length > 0 && (
+                {/* ACTIVE DELIVERY CARD */}
+                {displayActiveDeliveries && displayActiveDeliveries.length > 0 && (
                     <div className="bg-white border-2 border-yellow-400 rounded-2xl p-6 shadow-2xs space-y-4">
                         <div className="flex items-center justify-between border-b border-stone-100 pb-3">
                             <div className="flex items-center gap-2">
                                 <Navigation className="w-5 h-5 text-yellow-600 animate-bounce" />
-                                <h3 className="font-bold text-base text-stone-900">Mission de livraison active #{activeDeliveries[0].order_number}</h3>
+                                <h3 className="font-bold text-base text-stone-900">Mission de livraison active #{displayActiveDeliveries[0].order_number}</h3>
                             </div>
                             <span className="px-3 py-1 bg-yellow-100 text-yellow-950 text-xs font-bold rounded-full border border-yellow-300">
                                 En acheminement
@@ -189,34 +196,43 @@ export default function Dashboard({
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-stone-700 font-normal">
                             <div className="p-3 bg-stone-50 rounded-xl space-y-0.5 border border-stone-200/70">
                                 <span className="text-stone-400 block font-normal">Boutique de retrait (Point A) :</span>
-                                <strong className="text-stone-900 text-sm block font-bold">{activeDeliveries[0].shop?.name}</strong>
+                                <strong className="text-stone-900 text-sm block font-bold">{displayActiveDeliveries[0].shop?.name}</strong>
                                 <span className="text-[11px] text-stone-500">Prise en charge colis</span>
                             </div>
 
                             <div className="p-3 bg-stone-50 rounded-xl space-y-0.5 border border-stone-200/70">
                                 <span className="text-stone-400 block font-normal">Adresse du client (Point B) :</span>
-                                <strong className="text-stone-900 text-sm block font-bold">{activeDeliveries[0].shipping_address || 'Douala, Cameroun'}</strong>
+                                <strong className="text-stone-900 text-sm block font-bold">{displayActiveDeliveries[0].shipping_address || 'Douala, Cameroun'}</strong>
                                 <span className="text-[11px] text-stone-500">Destination finale</span>
                             </div>
 
                             <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl space-y-0.5">
                                 <span className="text-emerald-800 block font-semibold">Frais de course livreur :</span>
-                                <strong className="text-emerald-700 text-base block font-bold">{Number(activeDeliveries[0].shipping_fee || 1500).toLocaleString('fr-FR')} FCFA</strong>
-                                <span className="text-[11px] text-emerald-600">Crédité à la saisie OTP</span>
+                                <strong className="text-emerald-700 text-base block font-bold">{Number(displayActiveDeliveries[0].shipping_fee || 1500).toLocaleString('fr-FR')} FCFA</strong>
+                                <span className="text-[11px] text-emerald-600">Crédité à la validation OTP & Signature</span>
                             </div>
                         </div>
 
                         <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
                             <p className="text-xs text-stone-500 font-normal">
-                                Saisissez le code secret OTP à 6 chiffres transmis par le client pour finaliser la livraison.
+                                Demandez au client son code OTP pour valider ou signalez un refus/litige si le colis n'est pas accepté.
                             </p>
-                            <button
-                                onClick={() => setSelectedDeliveryForOtp(activeDeliveries[0])}
-                                className="px-5 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors shrink-0 flex items-center gap-1.5 border border-yellow-500"
-                            >
-                                <Key className="w-4 h-4 text-yellow-950" />
-                                <span>Saisir le Code OTP</span>
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setReportIncidentOrder(displayActiveDeliveries[0])}
+                                    className="px-3.5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 transition-colors flex items-center gap-1"
+                                >
+                                    <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+                                    <span>Litige / Refus</span>
+                                </button>
+                                <button
+                                    onClick={() => setSelectedDeliveryForOtp(displayActiveDeliveries[0])}
+                                    className="px-5 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors shrink-0 flex items-center gap-1.5 border border-yellow-500"
+                                >
+                                    <Key className="w-4 h-4 text-yellow-950" />
+                                    <span>Valider avec OTP & Signature</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -224,7 +240,7 @@ export default function Dashboard({
                 {/* Gains Trend & Courses disponibles Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     
-                    {/* Available Courses Stream (2 cols) */}
+                    {/* Available Courses Stream */}
                     <div className="lg:col-span-2 bg-white border border-stone-200/80 rounded-2xl p-6 shadow-2xs space-y-4">
                         <div className="flex items-center justify-between border-b border-stone-100 pb-3">
                             <div className="flex items-center gap-2">
@@ -274,7 +290,7 @@ export default function Dashboard({
                         </div>
                     </div>
 
-                    {/* Chart.js Gains Trend (1 col) */}
+                    {/* Chart.js Gains Trend */}
                     <div className="bg-white border border-stone-200/80 rounded-2xl p-6 shadow-2xs space-y-4">
                         <div className="flex items-center justify-between border-b border-stone-100 pb-3">
                             <h3 className="font-bold text-sm text-stone-900">Évolution hebdomadaire des gains</h3>
@@ -289,41 +305,20 @@ export default function Dashboard({
 
             </div>
 
-            {/* OTP VERIFICATION MODAL */}
+            {/* DOUBLE SECURITY OTP & DIGITAL SIGNATURE VERIFICATION MODAL */}
             {selectedDeliveryForOtp && (
-                <div className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-                    <form onSubmit={handleVerifyOtp} className="bg-white border border-stone-200/90 rounded-2xl max-w-md w-full p-6 shadow-xl space-y-5">
-                        <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-                            <div className="flex items-center gap-2">
-                                <Key className="w-5 h-5 text-yellow-600" />
-                                <h3 className="font-bold text-base text-stone-900">Validation OTP #{selectedDeliveryForOtp.order_number}</h3>
-                            </div>
-                            <button type="button" onClick={() => setSelectedDeliveryForOtp(null)} className="p-1 text-stone-400">✕</button>
-                        </div>
+                <DeliveryOtpVerificationModal
+                    order={selectedDeliveryForOtp}
+                    onClose={() => setSelectedDeliveryForOtp(null)}
+                />
+            )}
 
-                        <div className="space-y-3 text-xs text-stone-600 font-normal">
-                            <p>Saisissez le code secret à 6 chiffres affiché sur le reçu du client.</p>
-                            <input
-                                type="text"
-                                maxLength="6"
-                                value={otpInput}
-                                onChange={(e) => setOtpInput(e.target.value)}
-                                placeholder="Ex: 890124"
-                                className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-center text-lg font-mono font-bold tracking-widest text-stone-900 focus:ring-2 focus:ring-yellow-400 outline-none"
-                            />
-                        </div>
-
-                        <div className="pt-2 flex gap-2">
-                            <button
-                                type="submit"
-                                disabled={processing}
-                                className="flex-1 py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors border border-yellow-500"
-                            >
-                                Valider et encaisser la livraison
-                            </button>
-                        </div>
-                    </form>
-                </div>
+            {/* REPORT INCIDENT & RETURN MODAL */}
+            {reportIncidentOrder && (
+                <ReportIncidentModal
+                    order={reportIncidentOrder}
+                    onClose={() => setReportIncidentOrder(null)}
+                />
             )}
 
         </DriverLayout>

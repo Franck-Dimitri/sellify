@@ -33,12 +33,12 @@ use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
-})->name('welcome');
+})->name('home');
 
-// Public Store & Marketplace Routes
 Route::get('/store', [StoreController::class, 'indexProducts'])->name('public.products.index');
 Route::get('/produit/{slug}', [StoreController::class, 'showProduct'])->name('public.products.show');
 Route::get('/boutiques', [StoreController::class, 'indexShops'])->name('public.shops.index');
+Route::get('/api/search/suggestions', [StoreController::class, 'searchSuggestions'])->name('public.search.suggestions');
 
 Route::get('/boutique/{slug}', [ShopController::class, 'showPublic'])->name('shop.public');
 Route::post('/boutique/checkout/direct', [ShopController::class, 'directCheckout'])->name('shop.direct_checkout');
@@ -53,8 +53,13 @@ Route::post('/cart/clear', [\App\Http\Controllers\Public\CartController::class, 
 // Public Checkout Routes
 Route::get('/checkout', [\App\Http\Controllers\Public\CheckoutController::class, 'show'])->name('public.checkout.index');
 Route::post('/checkout/process', [\App\Http\Controllers\Public\CheckoutController::class, 'process'])->name('public.checkout.process');
+Route::get('/checkout/payment/status/{reference}', [\App\Http\Controllers\Public\CheckoutController::class, 'checkStatus'])->name('public.checkout.payment.status');
+Route::get('/checkout/payment/card-callback', [\App\Http\Controllers\Public\CheckoutController::class, 'cardCallback'])->name('public.checkout.card.callback');
 Route::post('/checkout/promo/apply', [\App\Http\Controllers\Public\CheckoutController::class, 'applyPromoCode'])->name('public.checkout.promo.apply');
 Route::post('/checkout/promo/remove', [\App\Http\Controllers\Public\CheckoutController::class, 'removePromoCode'])->name('public.checkout.promo.remove');
+
+// HR-Skills Pay Webhook
+Route::post('/api/webhooks/hrpay', [\App\Http\Controllers\Payment\HrPayWebhookController::class, 'handle'])->name('webhooks.hrpay');
 
 // Fast Checkout via Smart-Link
 Route::get('/pay/{token}', [SmartLinkCheckoutController::class, 'show'])->name('smartlink.checkout');
@@ -62,6 +67,20 @@ Route::post('/pay/{token}', [SmartLinkCheckoutController::class, 'processPayment
 
 // Suivi de colis public sans compte
 Route::get('/track/{tracking_code}', [OrderTrackingController::class, 'show'])->name('public.order_tracking');
+Route::get('/api/orders/{order_number}/live-location', [\App\Http\Controllers\Customer\OrderController::class, 'liveLocation'])->name('api.orders.live_location');
+
+// Pages Légales & Conformité
+Route::get('/politique-de-confidentialite', function () {
+    return Inertia::render('Public/Legal/Privacy');
+})->name('legal.privacy');
+
+Route::get('/conditions-generales', function () {
+    return Inertia::render('Public/Legal/Terms');
+})->name('legal.terms');
+
+Route::get('/mentions-legales', function () {
+    return Inertia::render('Public/Legal/Escrow');
+})->name('legal.escrow');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Routes Invité (Guest Auth)
@@ -115,6 +134,7 @@ Route::middleware(['auth', 'account.active'])->group(function () {
         Route::middleware('role:admin,superadmin')->prefix('admin')->name('admin.')->group(function () {
             // Dashboard principal
             Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+            Route::get('/ai', fn(\Illuminate\Http\Request $request) => Inertia::render('Admin/AiAssistant', ['user' => $request->user()]))->name('ai.index');
 
             // Gestion des utilisateurs
             Route::get('/users', function () {
@@ -228,6 +248,8 @@ Route::middleware(['auth', 'account.active'])->group(function () {
                 ]);
             })->name('dashboard');
 
+            Route::get('/ai', fn(\Illuminate\Http\Request $request) => Inertia::render('Seller/AiAssistant', ['user' => $request->user()]))->name('ai.index');
+
             // Actions liées à la boutique, restreintes par le KYC
             Route::middleware('kyc.verified')->group(function () {
                 // Central shop list and management
@@ -257,6 +279,7 @@ Route::middleware(['auth', 'account.active'])->group(function () {
                 // Portefeuille & Retraits
                 Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
                 Route::post('/wallet/withdraw', [WalletController::class, 'requestWithdrawal'])->name('wallet.withdraw');
+                Route::get('/wallet/export/csv', [WalletController::class, 'exportCsv'])->name('wallet.export_csv');
 
                 // Smart-Links
                 Route::get('/smart-links', [SmartLinkController::class, 'index'])->name('smart_links.index');
@@ -312,6 +335,7 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/orders', [\App\Http\Controllers\Customer\OrderController::class, 'index'])->name('orders.index');
             Route::get('/orders/{order_number}', [\App\Http\Controllers\Customer\OrderController::class, 'show'])->name('orders.show');
             Route::get('/orders/{order_number}/invoice', [\App\Http\Controllers\Customer\OrderController::class, 'invoice'])->name('orders.invoice');
+            Route::post('/orders/{order_number}/reorder', [\App\Http\Controllers\Customer\OrderController::class, 'reorder'])->name('orders.reorder');
             Route::post('/orders/{order_number}/confirm', [\App\Http\Controllers\Customer\OrderController::class, 'confirmDelivery'])->name('orders.confirm');
             Route::post('/orders/{order_number}/cancel', [\App\Http\Controllers\Customer\OrderController::class, 'cancelOrder'])->name('orders.cancel');
             Route::post('/orders/{order_number}/review', [\App\Http\Controllers\Customer\OrderController::class, 'submitReview'])->name('orders.review');
@@ -325,8 +349,15 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::post('/settings', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'updateSettings'])->name('settings.update');
             Route::get('/disputes', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'disputes'])->name('disputes.index');
             Route::get('/loyalty', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'loyalty'])->name('loyalty');
+            Route::get('/ai', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'aiChat'])->name('ai.index');
             Route::get('/profile', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'profile'])->name('profile');
             Route::post('/profile', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'updateProfile'])->name('profile.update');
+            Route::get('/addresses', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'addresses'])->name('addresses.index');
+            Route::post('/addresses', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'storeAddress'])->name('addresses.store');
+            Route::post('/addresses/{address}/update', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'updateAddress'])->name('addresses.update');
+            Route::delete('/addresses/{address}', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'destroyAddress'])->name('addresses.destroy');
+            Route::post('/addresses/{address}/default', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'setDefaultAddress'])->name('addresses.default');
+            Route::post('/settings/sessions/terminate-others', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'terminateOtherSessions'])->name('settings.sessions.terminate');
         });
 
         // ─────────────────────────────────────────────────────────────────────────
@@ -339,14 +370,23 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/earnings', [\App\Http\Controllers\Driver\DriverController::class, 'earnings'])->name('earnings');
             Route::get('/notifications', [\App\Http\Controllers\Driver\DriverController::class, 'notifications'])->name('notifications');
             Route::get('/reviews', [\App\Http\Controllers\Driver\DriverController::class, 'reviews'])->name('reviews');
+            Route::get('/assistant', [\App\Http\Controllers\Driver\DriverController::class, 'assistant'])->name('assistant');
+            Route::post('/assistant/chat', [\App\Http\Controllers\Driver\DriverController::class, 'chatAssistant'])->name('assistant.chat');
             Route::get('/settings', [\App\Http\Controllers\Driver\DriverController::class, 'settings'])->name('settings');
+            Route::post('/settings', [\App\Http\Controllers\Driver\DriverController::class, 'updateSettings'])->name('settings.update');
 
             Route::post('/availability', [\App\Http\Controllers\Driver\DriverController::class, 'toggleAvailability'])->name('availability');
             Route::post('/withdraw', [\App\Http\Controllers\Driver\DriverController::class, 'requestPayout'])->name('withdraw');
+            Route::post('/points/convert', [\App\Http\Controllers\Driver\DriverController::class, 'convertPoints'])->name('points.convert');
+            Route::post('/telemetry/location', [\App\Http\Controllers\Driver\DriverController::class, 'updateLocation'])->name('telemetry.location');
+            Route::post('/routes/optimize', [\App\Http\Controllers\Driver\DriverController::class, 'optimizeRoutes'])->name('routes.optimize');
+            Route::get('/delivery/{order_number}/slip', [\App\Http\Controllers\Driver\DriverController::class, 'printDeliverySlip'])->name('delivery.slip');
 
             Route::middleware('kyc.verified')->group(function () {
                 Route::post('/delivery/{order_number}/accept', [\App\Http\Controllers\Driver\DriverController::class, 'acceptDelivery'])->name('delivery.accept');
+                Route::post('/delivery/{order_number}/refuse', [\App\Http\Controllers\Driver\DriverController::class, 'refuseDelivery'])->name('delivery.refuse');
                 Route::post('/delivery/{order_number}/verify-otp', [\App\Http\Controllers\Driver\DriverController::class, 'verifyDeliveryOtp'])->name('delivery.verify_otp');
+                Route::post('/delivery/{order_number}/incident', [\App\Http\Controllers\Driver\DriverController::class, 'reportIncidentAndReturn'])->name('delivery.incident');
             });
         });
     });

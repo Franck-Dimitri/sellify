@@ -1,410 +1,653 @@
-import React from 'react';
-import { Head, Link } from '@inertiajs/react';
-import PublicLayout from '../Layouts/PublicLayout';
-import Button from '../Components/ui/Button';
-import { Card } from '../Components/ui/Card';
-    
-import {
-    ShieldCheck,
-    Zap,
-    Store,
-    TrendingUp,
-    Navigation,
-    Cpu,
-    ArrowRight,
-    ShoppingBag,
+import React, { useState, useEffect } from 'react';
+import { Head, Link, router } from '@inertiajs/react';
+import PublicLayout from '@/Layouts/PublicLayout';
+import { Logos3 } from '@/Components/ui/logos3';
+import { FeaturesSectionWithHoverEffects } from '@/Components/ui/feature-section-with-hover-effects';
+import { PricingSection } from '@/Components/ui/PricingSection';
+import { 
+    Search, 
+    Sparkles, 
+    ShieldCheck, 
+    Truck, 
+    ArrowRight, 
+    CheckCircle2, 
+    Star, 
+    Flame, 
+    Store, 
+    Package, 
+    BadgeCheck, 
+    Smartphone, 
+    CreditCard, 
+    MapPin, 
+    Clock, 
+    ChevronRight,
     Users,
-    Truck,
-    LineChart,
-    Layers,
-    DollarSign,
-    Lock
+    TrendingUp,
+    Lock,
+    Zap,
+    Shirt,
+    Home as HomeIcon,
+    Car,
+    Building2,
+    Check,
+    MessageCircle,
+    Play
 } from 'lucide-react';
 
-export default function Welcome() {
+export default function Welcome({ 
+    featuredDeals = [], 
+    topShops = [], 
+    categories = [] 
+}) {
+    const [searchQuery, setSearchQuery] = useState('');
+    const [activePersona, setActivePersona] = useState('sellers'); // 'sellers', 'buyers', 'drivers'
+    const [activeStep, setActiveStep] = useState(1);
+
+    // Auto rotate step showcase every 5s
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setActiveStep((prev) => (prev % 4) + 1);
+        }, 5000);
+        return () => clearInterval(timer);
+    }, []);
+
+    const handleSearchSubmit = (e) => {
+        if (e) e.preventDefault();
+        if (searchQuery.trim()) {
+            router.get(route('public.products.index'), { search: searchQuery });
+        } else {
+            router.get(route('public.products.index'));
+        }
+    };
+
+    const categoriesList = [
+        { id: 'tech', name: 'High-Tech & Smartphones', count: '124+', icon: Smartphone },
+        { id: 'fashion', name: 'Mode & Bazin Africain', count: '88+', icon: Shirt },
+        { id: 'home', name: 'Maison & Électroménager', count: '54+', icon: HomeIcon },
+        { id: 'beauty', name: 'Beauté & Soins Bio', count: '42+', icon: Sparkles },
+        { id: 'auto', name: 'Auto, Moto & Pièces', count: '31+', icon: Car },
+        { id: 'food', name: 'Alimentation & Terroir', count: '29+', icon: Package },
+    ];
+
+    const pipelineSteps = [
+        {
+            num: "01",
+            step: 1,
+            title: "Créez votre boutique & Catalogue en 2 min",
+            description: "Ajoutez vos articles avec photos, prix en FCFA et options de livraison sans aucune compétence technique.",
+            tag: "Boutique Officielle",
+            badgeColor: "bg-amber-100 text-yellow-900 border-yellow-300",
+        },
+        {
+            num: "02",
+            step: 2,
+            title: "Partagez vos Smart-Links WhatsApp en 1 Clic",
+            description: "Envoyez des liens de commande pré-remplis sur WhatsApp, TikTok et Instagram. Le client clique et valide son panier immédiatement.",
+            tag: "Smart-Link Express",
+            badgeColor: "bg-emerald-100 text-emerald-900 border-emerald-300",
+        },
+        {
+            num: "03",
+            step: 3,
+            title: "Paiement Sécurisé sous Séquestre Escrow",
+            description: "L'acheteur règle par Orange Money ou MTN MoMo. Les fonds sont consignés en sécurité chez Sellify jusqu'à la livraison.",
+            tag: "Protection 100%",
+            badgeColor: "bg-yellow-100 text-yellow-950 border-yellow-400",
+        },
+        {
+            num: "04",
+            step: 4,
+            title: "Dispatch IA du Coursier & Déblocage par OTP",
+            description: "Le livreur le plus proche prend en charge le colis, le remet en main propre et l'acheteur communique son code secret pour libérer les gains.",
+            tag: "Validation OTP",
+            badgeColor: "bg-blue-100 text-blue-900 border-blue-300",
+        },
+    ];
+
     return (
         <PublicLayout>
-            <Head title="La Plateforme E-commerce de Confiance" />
+            <Head title="Sellify.me - La Première Marketplace Sécurisée d'Afrique" />
 
-            {/* 1. HERO SECTION */}
-            <section className="relative overflow-hidden bg-white pt-16 pb-20 md:pt-24 md:pb-28">
-                {/* Background glows */}
-                <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary-100 rounded-full blur-3xl opacity-40 animate-pulse"></div>
-                <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-secondary-100 rounded-full blur-3xl opacity-30 animate-pulse"></div>
+            <div className="w-full bg-[#fbf9f5] font-sans text-stone-700 antialiased overflow-hidden">
+                
+                {/* 1. HERO SECTION (INSPIRED BY QUSO.AI & PROJECTY) */}
+                <section className="relative pt-8 pb-16 md:pt-14 md:pb-24 border-b border-stone-200/80">
+                    
+                    {/* Background Dot Matrix Grid */}
+                    <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:20px_20px] opacity-70 pointer-events-none" />
+                    
+                    {/* Soft Ambient Glows */}
+                    <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 sm:w-[600px] h-96 sm:h-[400px] bg-gradient-to-tr from-yellow-300/20 via-amber-200/20 to-orange-200/10 rounded-full blur-3xl pointer-events-none" />
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-8">
-                    <div className="inline-flex items-center space-x-2 bg-primary-50 border border-primary-200 px-4 py-1.5 rounded-full text-xs md:text-sm font-semibold text-primary-900">
-                        <Cpu className="w-4 h-4 text-primary-600" />
-                        <span>Propulsé par le Moteur IA de Sellify</span>
-                    </div>
-
-                    <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-surface-900 max-w-4xl mx-auto leading-tight md:leading-none">
-                        Vendez en toute sécurité. <br className="hidden md:inline" />
-                        Achetez en confiance. <br className="hidden md:inline" />
-                        Livrez avec précision.
-                    </h1>
-
-                    <p className="text-base md:text-lg text-surface-500 max-w-2xl mx-auto leading-relaxed font-medium">
-                        La solution e-commerce tout-en-un pour l'Afrique. Connectant vendeurs ambitieux, clients exigeants et livreurs agiles à travers des paiements Escrow garantis.
-                    </p>
-
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <Link href={route('register')}>
-                            <Button variant="primary" size="lg" className="w-full sm:w-auto shadow-md hover:-translate-y-0.5">
-                                Commencer l'aventure
-                                <ArrowRight className="ml-2 w-5 h-5" />
-                            </Button>
-                        </Link>
-                        <a href="#piliers">
-                            <Button variant="outline" size="lg" className="w-full sm:w-auto hover:bg-surface-50">
-                                Découvrir nos technologies
-                            </Button>
-                        </a>
-                    </div>
-                </div>
-            </section>
-
-            {/* 2. DASHBOARD MOCKUP SCREENSHOT (FLOATING EFFECT TO BOTTOM) */}
-            <section className="relative bg-surface-50 -mt-10 pb-20">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="relative rounded-3xl border border-surface-200 bg-white/50 backdrop-blur-sm p-4 shadow-xl animate-float">
-                        <div className="bg-surface-100 rounded-2xl overflow-hidden border border-surface-200 shadow-2xl">
-                            {/* Window Header */}
-                            <div className="bg-surface-200 px-6 py-4 flex items-center justify-between border-b border-surface-300">
-                                <div className="flex items-center space-x-2">
-                                    <div className="w-3 h-3 rounded-full bg-accent-500"></div>
-                                    <div className="w-3 h-3 rounded-full bg-primary-400"></div>
-                                    <div className="w-3 h-3 rounded-full bg-secondary-500"></div>
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-8">
+                        
+                        {/* Top Trust Social Pill */}
+                        <div className="flex items-center justify-center">
+                            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-stone-200/80 shadow-2xs text-xs text-stone-600 animate-fade-in">
+                                <div className="flex -space-x-1.5 overflow-hidden">
+                                    <div className="w-5 h-5 rounded-full bg-yellow-400 border border-white flex items-center justify-center text-[9px] font-bold text-stone-950">A</div>
+                                    <div className="w-5 h-5 rounded-full bg-emerald-500 border border-white flex items-center justify-center text-[9px] font-bold text-white">M</div>
+                                    <div className="w-5 h-5 rounded-full bg-blue-500 border border-white flex items-center justify-center text-[9px] font-bold text-white">D</div>
+                                    <div className="w-5 h-5 rounded-full bg-amber-600 border border-white flex items-center justify-center text-[9px] font-bold text-white">P</div>
                                 </div>
-                                <div className="text-xs text-surface-600 font-mono">sellify-intelligence-dashboard.json</div>
-                                <div className="w-16"></div>
-                            </div>
-
-                            {/* Bento style UI Layout inside Mockup */}
-                            <div className="p-6 bg-white text-surface-900 grid grid-cols-1 md:grid-cols-3 gap-4 font-sans text-left">
-                                {/* Large Card */}
-                                <div className="md:col-span-2 bg-surface-50 border border-surface-200 rounded-xl p-5 flex flex-col justify-between space-y-4">
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <span className="text-xs text-primary-600 font-bold uppercase tracking-wider">Statistiques de ventes</span>
-                                            <h4 className="text-2xl font-black mt-1">1 249 500 FCFA</h4>
-                                        </div>
-                                        <span className="bg-secondary-500/20 text-secondary-600 text-xs px-2.5 py-1 rounded-full font-bold">+28.4% ce mois</span>
-                                    </div>
-                                    <div className="h-28 flex items-end justify-between space-x-2 pt-4">
-                                        <div className="w-full bg-surface-200 rounded-t h-1/3"></div>
-                                        <div className="w-full bg-surface-200 rounded-t h-2/3"></div>
-                                        <div className="w-full bg-primary-500 rounded-t h-1/2"></div>
-                                        <div className="w-full bg-surface-200 rounded-t h-3/4"></div>
-                                        <div className="w-full bg-secondary-500 rounded-t h-full"></div>
-                                    </div>
-                                </div>
-
-                                {/* Escrow Card */}
-                                <div className="bg-surface-50 border border-surface-200 rounded-xl p-5 flex flex-col justify-between space-y-4">
-                                    <div className="flex items-center justify-between">
-                                        <Lock className="w-8 h-8 text-secondary-500" />
-                                        <span className="text-xs font-bold bg-secondary-500/20 text-secondary-600 px-2 py-0.5 rounded-full">Actif</span>
-                                    </div>
-                                    <div>
-                                        <h5 className="text-sm font-bold text-surface-600">Escrow Mobile Money</h5>
-                                        <p className="text-2xl font-black mt-1">450 000 FCFA</p>
-                                    </div>
-                                    <span className="text-xs text-surface-500 leading-snug">Fonds sécurisés en attente de livraison client.</span>
-                                </div>
-
-                                {/* Logistics AI Mini Bento */}
-                                <div className="bg-surface-50 border border-surface-200 rounded-xl p-5 space-y-3">
-                                    <div className="flex items-center space-x-2 text-primary-600">
-                                        <Cpu className="w-5 h-5 animate-pulse" />
-                                        <span className="text-xs font-bold uppercase tracking-wider">Logistique IA</span>
-                                    </div>
-                                    <h5 className="text-sm font-bold">Optimisation des tournées</h5>
-                                    <div className="space-y-2 text-xs text-surface-600 font-mono">
-                                        <div className="flex justify-between border-b border-surface-200 pb-1">
-                                            <span>Douala Akwa</span>
-                                            <span className="text-secondary-600 font-bold">12 min restants</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span>Livreur ID #882</span>
-                                            <span className="text-primary-600 font-bold">Moto (En transit)</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Fast orders widget */}
-                                <div className="bg-surface-50 border border-surface-200 rounded-xl p-5 md:col-span-2 space-y-3">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-xs text-surface-600 font-bold uppercase tracking-wider">Commandes rapides</span>
-                                        <span className="text-xs font-mono text-primary-600">Smart-Link actif</span>
-                                    </div>
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs pt-1">
-                                        <div className="bg-white p-2.5 rounded-lg border border-surface-200">
-                                            <p className="text-surface-500 font-bold">Produit</p>
-                                            <p className="font-semibold truncate">Chaussures Sport</p>
-                                        </div>
-                                        <div className="bg-white p-2.5 rounded-lg border border-surface-200">
-                                            <p className="text-surface-500 font-bold">Prix</p>
-                                            <p className="font-semibold">25 000 FCFA</p>
-                                        </div>
-                                        <div className="bg-white p-2.5 rounded-lg border border-surface-200">
-                                            <p className="text-surface-500 font-bold">Paiement</p>
-                                            <p className="font-semibold text-secondary-600">OM/Momo</p>
-                                        </div>
-                                        <div className="bg-white p-2.5 rounded-lg border border-surface-200">
-                                            <p className="text-surface-500 font-bold">Statut</p>
-                                            <p className="font-semibold text-primary-600">Payé (Escrow)</p>
-                                        </div>
-                                    </div>
-                                </div>
+                                <span className="font-semibold text-stone-900">+50 000 commerçants & acheteurs</span>
+                                <span className="text-stone-300">•</span>
+                                <span className="text-yellow-700 font-medium flex items-center gap-1">
+                                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                                    <span>Garantie Escrow</span>
+                                </span>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </section>
 
-            {/* 3. PILIERS DE LA PLATEFORME (BENTO GRID STYLE) */}
-            <section id="piliers" className="py-20 bg-white">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-                    <div className="text-center space-y-3">
-                        <h2 className="text-xs font-bold uppercase tracking-wider text-primary-600">Technologie & Confiance</h2>
-                        <h3 className="text-3xl font-extrabold text-surface-900 md:text-4xl">Nos Piliers Fondamentaux</h3>
-                        <p className="text-surface-500 max-w-xl mx-auto text-sm md:text-base leading-relaxed">
-                            Nous combinons les meilleurs outils de paiement, de commande et d'intelligence artificielle logistique pour offrir une expérience sans friction.
-                        </p>
-                    </div>
+                        {/* Main Hero Headline */}
+                        <div className="text-center max-w-4xl mx-auto space-y-4">
+                            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-semibold text-stone-950 tracking-tight leading-[1.15] text-pretty">
+                                Achetez et vendez partout en Afrique en toute <span className="relative inline-block text-stone-950 underline decoration-yellow-400 decoration-wavy decoration-2">confiance</span>
+                            </h1>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {/* Pilier 1 */}
-                        <Card className="bento-card flex flex-col justify-between">
-                            <div className="space-y-4">
-                                <div className="p-3 bg-primary-100 text-primary-800 rounded-2xl w-fit">
-                                    <ShieldCheck className="w-6 h-6" />
+                            <p className="text-sm sm:text-base lg:text-lg text-stone-600 max-w-2xl mx-auto font-normal leading-relaxed">
+                                La première plateforme panafricaine qui sécurise vos transactions par <strong>séquestre Escrow</strong>, booste vos ventes WhatsApp par <strong>Smart-Links</strong> et optimise vos livraisons par <strong>IA</strong>.
+                            </p>
+                        </div>
+
+                        {/* Search Bar Interactive Hero Input */}
+                        <div className="max-w-2xl mx-auto">
+                            <form onSubmit={handleSearchSubmit} className="relative flex items-center bg-white border-2 border-stone-200 focus-within:border-yellow-400 rounded-2xl shadow-lg p-1.5 pl-4 transition-all">
+                                <Search className="w-5 h-5 text-stone-400 shrink-0" />
+                                <input
+                                    type="text"
+                                    placeholder="Rechercher un produit, une boutique ou une ville (ex: iPhone, Bazin, Douala)..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full bg-transparent border-none text-xs sm:text-sm text-stone-900 focus:ring-0 outline-none placeholder:text-stone-400 px-3 font-normal"
+                                />
+                                <button
+                                    type="submit"
+                                    className="px-5 sm:px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-stone-950 font-semibold text-xs sm:text-sm rounded-xl shadow-xs transition-all shrink-0 flex items-center gap-1.5 cursor-pointer"
+                                >
+                                    <span>Explorer</span>
+                                    <ArrowRight className="w-4 h-4" />
+                                </button>
+                            </form>
+                        </div>
+
+                        {/* Hero 3D Composition & Interactive Bento Mockup (Convertio & Projecty inspired) */}
+                        <div className="relative pt-6 max-w-5xl mx-auto">
+                            
+                            <div className="bg-white rounded-3xl p-4 sm:p-6 border border-stone-200/80 shadow-2xl space-y-6">
+                                
+                                {/* Top Browser/App Bar */}
+                                <div className="flex items-center justify-between border-b border-stone-100 pb-3 text-xs text-stone-400">
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex gap-1.5">
+                                            <div className="w-2.5 h-2.5 rounded-full bg-rose-400" />
+                                            <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+                                            <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+                                        </div>
+                                        <span className="text-[11px] font-mono text-stone-500 pl-2">sellify.me/app/ecosystem</span>
+                                    </div>
+                                    <span className="text-[11px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                        <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                                        <span>Séquestre Actif</span>
+                                    </span>
                                 </div>
-                                <h4 className="text-xl font-bold text-surface-900">Escrow Paiement</h4>
-                                <p className="text-sm text-surface-500 leading-relaxed">
-                                    Sécurisez vos transactions. L'argent de l'acheteur est bloqué de manière sécurisée (Mobile Money Orange/MTN) et n'est libéré au vendeur qu'une fois le colis inspecté et accepté par le client.
-                                </p>
-                            </div>
-                        </Card>
 
-                        {/* Pilier 2 */}
-                        <Card className="bento-card flex flex-col justify-between">
-                            <div className="space-y-4">
-                                <div className="p-3 bg-secondary-100 text-secondary-800 rounded-2xl w-fit">
-                                    <Zap className="w-6 h-6" />
-                                </div>
-                                <h4 className="text-xl font-bold text-surface-900">Commandes rapides & Liens de paiement</h4>
-                                <p className="text-sm text-surface-500 leading-relaxed">
-                                    Générez un Smart-Link en un clic. Partagez-le sur WhatsApp, Instagram ou Facebook. Vos clients cliquent, payent et programment leur livraison en 30 secondes chrono.
-                                </p>
-                            </div>
-                        </Card>
+                                {/* Dual Visual Canvas */}
+                                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                                    
+                                    {/* Left: 3D Illustration Showcase */}
+                                    <div className="md:col-span-7 relative rounded-2xl overflow-hidden aspect-4/3 sm:aspect-16/10 bg-stone-100 border border-stone-200 shadow-inner flex items-center justify-center">
+                                        <img 
+                                            src="/images/landing-hero.jpg" 
+                                            alt="Sellify Panafrican Marketplace" 
+                                            className="w-full h-full object-cover"
+                                        />
 
-                        {/* Pilier 3 */}
-                        <Card className="bento-card flex flex-col justify-between">
-                            <div className="space-y-4">
-                                <div className="p-3 bg-blue-100 text-blue-800 rounded-2xl w-fit">
-                                    <Cpu className="w-6 h-6" />
+                                        {/* Floating Badge 1: Escrow Protected */}
+                                        <div className="absolute top-4 left-4 p-3 bg-white/95 backdrop-blur-md rounded-2xl border border-stone-200 shadow-lg flex items-center gap-2.5 animate-float">
+                                            <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
+                                                <ShieldCheck className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                                <span className="text-[10px] text-stone-400 block font-normal">Protection Achat</span>
+                                                <span className="text-xs font-semibold text-stone-900">Séquestre 100% Détenu</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Floating Badge 2: Mobile Money */}
+                                        <div className="absolute bottom-4 right-4 p-3 bg-white/95 backdrop-blur-md rounded-2xl border border-stone-200 shadow-lg flex items-center gap-2.5 animate-float-reverse">
+                                            <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-yellow-700 font-bold text-xs">
+                                                MoMo
+                                            </div>
+                                            <div>
+                                                <span className="text-[10px] text-stone-400 block font-normal">Paiement Mobile</span>
+                                                <span className="text-xs font-semibold text-stone-900">Orange & MTN Validés</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Right: Live Interactive Workflow Bento Cards */}
+                                    <div className="md:col-span-5 space-y-3">
+                                        
+                                        <div className="p-4 bg-[#fcfbf9] rounded-2xl border border-stone-200/80 space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-[10px] font-semibold text-yellow-800 uppercase bg-amber-100 px-2 py-0.5 rounded-md">Smart-Link Actif</span>
+                                                <span className="text-[11px] font-mono text-stone-400">SL-89412</span>
+                                            </div>
+                                            <h4 className="font-semibold text-stone-900 text-xs">iPhone 15 Pro Max 256Go</h4>
+                                            <div className="flex items-center justify-between pt-1 border-t border-stone-100 text-xs">
+                                                <span className="text-stone-500 font-normal">Total Consigné :</span>
+                                                <span className="font-semibold text-stone-900">890 000 FCFA</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-4 bg-[#fcfbf9] rounded-2xl border border-stone-200/80 space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-[10px] font-semibold text-emerald-800 uppercase bg-emerald-100 px-2 py-0.5 rounded-md">Livreur en Route</span>
+                                                <span className="text-[11px] font-medium text-emerald-600">Arrivée 18 min</span>
+                                            </div>
+                                            <div className="flex items-center gap-2.5 pt-1">
+                                                <div className="w-8 h-8 rounded-full bg-amber-400 text-stone-950 font-bold flex items-center justify-center text-xs">
+                                                    YA
+                                                </div>
+                                                <div className="text-left">
+                                                    <span className="font-medium text-xs text-stone-900 block">Yvan Assomo (Moto Express)</span>
+                                                    <span className="text-[10px] text-stone-400 font-normal">Douala • Akwa vers Bonapriso</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-4 bg-amber-50/60 rounded-2xl border border-amber-200 space-y-1.5">
+                                            <div className="flex items-center gap-1.5 text-xs font-semibold text-yellow-950">
+                                                <Lock className="w-3.5 h-3.5 text-yellow-700" />
+                                                <span>Code Secret Déblocage OTP</span>
+                                            </div>
+                                            <p className="text-[11px] text-yellow-900 font-normal leading-relaxed">
+                                                Le vendeur n'est crédité que lorsque vous inspectez le colis et communiquez votre code à la livraison.
+                                            </p>
+                                        </div>
+
+                                    </div>
+
                                 </div>
-                                <h4 className="text-xl font-bold text-surface-900">Analyse de ventes & Logistique AI</h4>
-                                <p className="text-sm text-surface-500 leading-relaxed">
-                                    Optimisez vos trajets et prévoyez vos stocks. Notre intelligence artificielle distribue automatiquement les colis aux livreurs les plus proches et fournit des tableaux prédictifs de ventes.
-                                </p>
+
                             </div>
-                        </Card>
+
+                        </div>
+
+                        {/* Category Hub Pills */}
+                        <div className="pt-4">
+                            <div className="text-center mb-3">
+                                <span className="text-xs text-stone-400 font-normal">Rayons populaires disponibles immédiatement :</span>
+                            </div>
+                            <div className="flex flex-wrap items-center justify-center gap-2.5">
+                                {categoriesList.map((cat) => {
+                                    const IconCmp = cat.icon;
+                                    return (
+                                        <Link 
+                                            key={cat.id} 
+                                            href={route('public.products.index', { category: cat.id })}
+                                            className="px-4 py-2 bg-white hover:bg-yellow-400 border border-stone-200/80 hover:border-yellow-400 rounded-2xl shadow-2xs hover:shadow-md transition-all duration-200 flex items-center gap-2 group cursor-pointer"
+                                        >
+                                            <IconCmp className="w-4 h-4 text-stone-500 group-hover:text-stone-950 transition-colors" />
+                                            <span className="text-xs font-medium text-stone-800 group-hover:text-stone-950">{cat.name}</span>
+                                            <span className="text-[10px] text-stone-400 group-hover:text-stone-800">({cat.count})</span>
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
                     </div>
-                </div>
-            </section>
+                </section>
 
-            {/* 4. POUR LES VENDEURS */}
-            <section id="vendeurs" className="py-20 bg-surface-50 border-t border-b border-surface-200">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                    <div className="space-y-6">
-                        <span className="inline-flex items-center space-x-2 bg-primary-100 text-primary-900 px-3.5 py-1 rounded-full text-xs font-bold">
-                            <ShoppingBag className="w-4 h-4" />
-                            <span>Vendeurs</span>
+                {/* 2. PARTNERS AUTO-SCROLL MARQUEE (LOGOS3) */}
+                <Logos3 />
+
+                {/* 3. INTERACTIVE HOW IT WORKS PIPELINE (CONVERTIO STYLE - IMAGE 2) */}
+                <section className="py-16 md:py-24 border-b border-stone-200/80 bg-white">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+                        
+                        <div className="text-center space-y-3">
+                            <span className="text-[11px] font-semibold text-yellow-800 uppercase tracking-widest bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
+                                Fonctionnement Simple & Transparent
+                            </span>
+                            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-stone-900 tracking-tight">
+                                Comment Sellify sécurise chaque étape de votre vente
+                            </h2>
+                            <p className="text-xs sm:text-sm text-stone-500 max-w-2xl mx-auto font-normal">
+                                Une chaîne de valeur fluide du clic sur WhatsApp jusqu'à la remise du colis en main propre.
+                            </p>
+                        </div>
+
+                        {/* Interactive Steps Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {pipelineSteps.map((pStep) => (
+                                <div
+                                    key={pStep.step}
+                                    onClick={() => setActiveStep(pStep.step)}
+                                    className={`p-6 rounded-3xl border transition-all duration-300 cursor-pointer flex flex-col justify-between space-y-4 ${
+                                        activeStep === pStep.step
+                                            ? 'bg-amber-50/60 border-yellow-400 shadow-md ring-2 ring-yellow-400/20'
+                                            : 'bg-[#fcfbf9] border-stone-200/80 hover:border-yellow-400 hover:bg-white shadow-2xs'
+                                    }`}
+                                >
+                                    <div className="space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-2xl font-mono font-bold text-stone-400">
+                                                {pStep.num}
+                                            </span>
+                                            <span className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full border ${pStep.badgeColor}`}>
+                                                {pStep.tag}
+                                            </span>
+                                        </div>
+                                        <h3 className="font-semibold text-sm text-stone-900 leading-snug">
+                                            {pStep.title}
+                                        </h3>
+                                        <p className="text-xs text-stone-500 leading-relaxed font-normal">
+                                            {pStep.description}
+                                        </p>
+                                    </div>
+
+                                    <div className="pt-2 flex items-center gap-1.5 text-xs font-semibold text-yellow-900">
+                                        <span>Étape {pStep.step}</span>
+                                        <ChevronRight className="w-3.5 h-3.5 text-yellow-600" />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Pipeline Showcase Visual Card */}
+                        <div className="bg-[#fbf9f5] border border-stone-200/80 rounded-3xl p-6 sm:p-8 shadow-sm">
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                                
+                                <div className="lg:col-span-5 space-y-4">
+                                    <span className="text-xs font-semibold text-yellow-800 uppercase tracking-wide">
+                                        Étape Active • {pipelineSteps[activeStep - 1].tag}
+                                    </span>
+                                    <h3 className="text-xl sm:text-2xl font-semibold text-stone-900 leading-tight">
+                                        {pipelineSteps[activeStep - 1].title}
+                                    </h3>
+                                    <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-normal">
+                                        {pipelineSteps[activeStep - 1].description}
+                                    </p>
+                                    <div className="pt-2">
+                                        <Link href={route('register')}>
+                                            <button className="px-5 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-stone-950 font-semibold text-xs rounded-xl shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer">
+                                                <span>Tester la plateforme</span>
+                                                <ArrowRight className="w-3.5 h-3.5" />
+                                            </button>
+                                        </Link>
+                                    </div>
+                                </div>
+
+                                <div className="lg:col-span-7 bg-white rounded-2xl p-4 sm:p-6 border border-stone-200/80 shadow-xs space-y-4">
+                                    {activeStep === 1 && (
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-between border-b border-stone-100 pb-2 text-xs">
+                                                <span className="font-semibold text-stone-900">Catalogue & Produits</span>
+                                                <span className="text-emerald-600 font-medium">Boutique Prête</span>
+                                            </div>
+                                            <div className="grid grid-cols-3 gap-3">
+                                                <div className="p-3 bg-stone-50 rounded-xl border border-stone-100 text-center space-y-1">
+                                                    <Smartphone className="w-6 h-6 text-yellow-600 mx-auto" />
+                                                    <span className="text-[11px] font-semibold block text-stone-900">High-Tech</span>
+                                                </div>
+                                                <div className="p-3 bg-stone-50 rounded-xl border border-stone-100 text-center space-y-1">
+                                                    <Shirt className="w-6 h-6 text-yellow-600 mx-auto" />
+                                                    <span className="text-[11px] font-semibold block text-stone-900">Bazin & Mode</span>
+                                                </div>
+                                                <div className="p-3 bg-stone-50 rounded-xl border border-stone-100 text-center space-y-1">
+                                                    <Package className="w-6 h-6 text-yellow-600 mx-auto" />
+                                                    <span className="text-[11px] font-semibold block text-stone-900">Épicerie Bio</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {activeStep === 2 && (
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-between border-b border-stone-100 pb-2 text-xs">
+                                                <span className="font-semibold text-stone-900">Lien Généré pour WhatsApp</span>
+                                                <span className="text-emerald-600 font-medium">Prêt au partage</span>
+                                            </div>
+                                            <div className="p-3.5 bg-emerald-50/70 border border-emerald-200 rounded-xl space-y-1.5 font-mono text-xs text-emerald-950">
+                                                <div className="flex items-center gap-1.5 text-[11px] font-sans font-semibold text-emerald-900">
+                                                    <MessageCircle className="w-4 h-4 text-emerald-600" />
+                                                    <span>sellify.me/pay/sl_iphone15promax</span>
+                                                </div>
+                                                <p className="font-sans text-[11px] text-stone-600">
+                                                    "Bonjour, voici votre lien de commande direct avec paiement Escrow et livraison express."
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {activeStep === 3 && (
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-between border-b border-stone-100 pb-2 text-xs">
+                                                <span className="font-semibold text-stone-900">Statut du Compte Séquestre</span>
+                                                <span className="text-emerald-600 font-medium">Fonds Verrouillés</span>
+                                            </div>
+                                            <div className="p-4 bg-amber-50/80 border border-amber-200 rounded-xl flex items-center justify-between">
+                                                <div>
+                                                    <span className="text-[10px] text-stone-400 uppercase font-medium">Montant Consigné</span>
+                                                    <p className="text-base font-semibold text-stone-900">890 000 FCFA</p>
+                                                </div>
+                                                <span className="px-3 py-1 bg-yellow-400 text-stone-950 font-semibold text-xs rounded-full">
+                                                    En Attente de Livraison
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {activeStep === 4 && (
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-between border-b border-stone-100 pb-2 text-xs">
+                                                <span className="font-semibold text-stone-900">Confirmation de Livraison</span>
+                                                <span className="text-emerald-600 font-medium">Déblocage Effectué</span>
+                                            </div>
+                                            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl space-y-1 text-xs text-emerald-950">
+                                                <div className="flex items-center gap-1.5 font-semibold">
+                                                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                                                    <span>Code OTP validé avec succès (4 chiffres)</span>
+                                                </div>
+                                                <p className="text-[11px] text-stone-600 font-normal">
+                                                    Les 890 000 FCFA ont été crédités immédiatement sur le compte Orange Money du commerçant.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                {/* 4. 8 FEATURES GRID WITH HOVER GLOW EFFECTS */}
+                <FeaturesSectionWithHoverEffects />
+
+                {/* 5. PERSONAS HUB (SELLERS, BUYERS, DRIVERS) */}
+                <section className="py-16 md:py-24 border-b border-stone-200/80 bg-white">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+                        
+                        <div className="text-center space-y-3">
+                            <span className="text-[11px] font-semibold text-yellow-800 uppercase tracking-widest bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
+                                Un Écosystème Créé pour Tous
+                            </span>
+                            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-stone-900 tracking-tight">
+                                Une solution sur-mesure pour chaque acteur du commerce
+                            </h2>
+                        </div>
+
+                        {/* Persona Tabs */}
+                        <div className="flex justify-center gap-3">
+                            <button
+                                onClick={() => setActivePersona('sellers')}
+                                className={`px-5 py-2.5 rounded-2xl text-xs font-semibold transition-all cursor-pointer ${
+                                    activePersona === 'sellers'
+                                        ? 'bg-yellow-400 text-stone-950 shadow-md scale-102'
+                                        : 'bg-stone-50 hover:bg-stone-100 text-stone-700 border border-stone-200'
+                                }`}
+                            >
+                                Pour les Vendeurs & Grossistes
+                            </button>
+
+                            <button
+                                onClick={() => setActivePersona('buyers')}
+                                className={`px-5 py-2.5 rounded-2xl text-xs font-semibold transition-all cursor-pointer ${
+                                    activePersona === 'buyers'
+                                        ? 'bg-yellow-400 text-stone-950 shadow-md scale-102'
+                                        : 'bg-stone-50 hover:bg-stone-100 text-stone-700 border border-stone-200'
+                                }`}
+                            >
+                                Pour les Acheteurs
+                            </button>
+
+                            <button
+                                onClick={() => setActivePersona('drivers')}
+                                className={`px-5 py-2.5 rounded-2xl text-xs font-semibold transition-all cursor-pointer ${
+                                    activePersona === 'drivers'
+                                        ? 'bg-yellow-400 text-stone-950 shadow-md scale-102'
+                                        : 'bg-stone-50 hover:bg-stone-100 text-stone-700 border border-stone-200'
+                                }`}
+                            >
+                                Pour les Livreurs & Coursiers
+                            </button>
+                        </div>
+
+                        {/* Persona Dynamic Showcase */}
+                        <div className="bg-[#fbf9f5] border border-stone-200/80 rounded-3xl p-6 sm:p-10 shadow-sm">
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                                
+                                <div className="lg:col-span-6 space-y-4">
+                                    {activePersona === 'sellers' && (
+                                        <>
+                                            <span className="text-[11px] font-semibold text-yellow-800 uppercase tracking-widest bg-amber-100 px-3 py-1 rounded-full">
+                                                Commerçants, Fabricants & Marques
+                                            </span>
+                                            <h3 className="text-2xl sm:text-3xl font-semibold text-stone-900">
+                                                Multipliez vos ventes sans crainte d'impayés
+                                            </h3>
+                                            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-normal">
+                                                Ne perdez plus de temps avec les clients hésitants sur WhatsApp. Générez des Smart-Links de paiement sécurisé, rassurez vos acheteurs avec la garantie Escrow et recevez vos fonds directement sur votre Mobile Money dès la livraison.
+                                            </p>
+                                            <ul className="space-y-2 text-xs text-stone-700 font-medium">
+                                                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-600" /> Encaissement garanti avant expédition du colis</li>
+                                                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-600" /> Boutique officielle avec gestion de stock en temps réel</li>
+                                                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-600" /> Retraits instantanés Orange Money & MTN MoMo</li>
+                                            </ul>
+                                        </>
+                                    )}
+
+                                    {activePersona === 'buyers' && (
+                                        <>
+                                            <span className="text-[11px] font-semibold text-emerald-800 uppercase tracking-widest bg-emerald-100 px-3 py-1 rounded-full">
+                                                Acheteurs Particuliers & Pros
+                                            </span>
+                                            <h3 className="text-2xl sm:text-3xl font-semibold text-stone-900">
+                                                Commandez en toute sérénité, zéro risque d'arnaque
+                                            </h3>
+                                            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-normal">
+                                                Finies les mauvaises surprises ! Votre argent ne va pas directement au vendeur : il est bloqué chez Sellify jusqu'à ce que vous receviez, ouvriez et validiez votre article en mains propres.
+                                            </p>
+                                            <ul className="space-y-2 text-xs text-stone-700 font-medium">
+                                                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-600" /> Contrôle physique du colis avant validation du code OTP</li>
+                                                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-600" /> Remboursement intégral garanti en cas de produit non-conforme</li>
+                                                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-600" /> Suivi GPS en direct du coursier sur votre téléphone</li>
+                                            </ul>
+                                        </>
+                                    )}
+
+                                    {activePersona === 'drivers' && (
+                                        <>
+                                            <span className="text-[11px] font-semibold text-yellow-800 uppercase tracking-widest bg-amber-100 px-3 py-1 rounded-full">
+                                                Coursiers & Flottes de Livraison
+                                            </span>
+                                            <h3 className="text-2xl sm:text-3xl font-semibold text-stone-900">
+                                                Rejoignez le réseau logistique et gagnez chaque jour
+                                            </h3>
+                                            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-normal">
+                                                Recevez des courses optimisées par intelligence artificielle directement sur votre smartphone. Vos gains de livraison sont versés quotidiennement sur votre compte Mobile Money.
+                                            </p>
+                                            <ul className="space-y-2 text-xs text-stone-700 font-medium">
+                                                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-600" /> Tournées optimisées avec navigation GPS intégrée</li>
+                                                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-600" /> Paiements quotidiens automatiques sans frais cachés</li>
+                                                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-600" /> Bonus et primes pour les livreurs les plus rapides</li>
+                                            </ul>
+                                        </>
+                                    )}
+
+                                    <div className="pt-3">
+                                        <Link href={route('register')}>
+                                            <button className="px-5 py-2.5 bg-stone-900 hover:bg-stone-800 text-white font-semibold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer">
+                                                <span>Rejoindre Sellify gratuitement</span>
+                                                <ArrowRight className="w-3.5 h-3.5" />
+                                            </button>
+                                        </Link>
+                                    </div>
+                                </div>
+
+                                <div className="lg:col-span-6 rounded-2xl overflow-hidden aspect-4/3 sm:aspect-16/10 bg-white border border-stone-200 shadow-md">
+                                    <img 
+                                        src={
+                                            activePersona === 'sellers' 
+                                                ? '/images/seller-step1.jpg' 
+                                                : (activePersona === 'buyers' ? '/images/buyer-onboarding.jpg' : '/images/driver-step2.jpg')
+                                        } 
+                                        alt="Persona Showcase" 
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                {/* 6. COMPLETE PRICING SECTION (0$, 5$, 20$, 200$) */}
+                <PricingSection />
+
+                {/* 7. BOTTOM HIGH-CONVERSION CTA BANNER */}
+                <section className="py-16 bg-stone-950 text-white relative overflow-hidden">
+                    
+                    {/* Background Glow */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-yellow-400/15 rounded-full blur-3xl pointer-events-none" />
+
+                    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6 relative z-10">
+                        <span className="text-[11px] font-semibold text-yellow-400 uppercase tracking-widest bg-yellow-400/10 border border-yellow-400/30 px-3 py-1 rounded-full inline-block">
+                            Propulsez Votre Commerce Dès Aujourd'hui
                         </span>
-                        <h3 className="text-3xl font-extrabold text-surface-900 md:text-4xl">
-                            Créez votre boutique et boostez vos ventes
-                        </h3>
-                        <p className="text-sm md:text-base text-surface-500 leading-relaxed">
-                            Que vous vendiez sur les réseaux sociaux ou possédiez un commerce physique, Sellify.me vous fournit une boutique professionnelle sans connaissances techniques. Configurez votre catalogue de produits, gérez vos stocks, et recevez vos gains par Mobile Money ou virement bancaire.
+
+                        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-white tracking-tight leading-tight">
+                            Prêt à révolutionner vos ventes en Afrique ?
+                        </h2>
+
+                        <p className="text-xs sm:text-sm text-stone-300 max-w-xl mx-auto font-normal leading-relaxed">
+                            Créez votre boutique en 2 minutes, activez la protection Escrow et commencez à encaisser vos paiements Mobile Money en toute sécurité.
                         </p>
-                        <div className="space-y-3 font-semibold text-sm text-surface-700">
-                            <div className="flex items-center space-x-3">
-                                <div className="w-5 h-5 rounded-full bg-secondary-100 text-secondary-800 flex items-center justify-center">✓</div>
-                                <span>Multi-boutiques (Jusqu'à 3) sur un seul compte</span>
-                            </div>
-                            <div className="flex items-center space-x-3">
-                                <div className="w-5 h-5 rounded-full bg-secondary-100 text-secondary-800 flex items-center justify-center">✓</div>
-                                <span>Générateur de Smart-Links de paiement WhatsApp</span>
-                            </div>
-                            <div className="flex items-center space-x-3">
-                                <div className="w-5 h-5 rounded-full bg-secondary-100 text-secondary-800 flex items-center justify-center">✓</div>
-                                <span>Tableau de bord de ventes et de prévisions IA</span>
-                            </div>
-                        </div>
-                        <Link href={route('register')}>
-                            <Button variant="primary" size="lg" className="space-x-2">
-                                <span>Rejoindre en tant que vendeur</span>
-                                <ArrowRight className="w-5 h-5" />
-                            </Button>
-                        </Link>
-                    </div>
-                    {/* Visual Illustration instead of photos */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-white rounded-3xl border border-surface-200 p-6 flex flex-col justify-between h-48 shadow-sm">
-                            <Store className="w-8 h-8 text-primary-500" />
-                            <div>
-                                <h4 className="font-bold text-surface-900">Boutique SaaS</h4>
-                                <p className="text-xs text-surface-400 mt-1">Configurez et lancez en quelques secondes.</p>
-                            </div>
-                        </div>
-                        <div className="bg-white rounded-3xl border border-surface-200 p-6 flex flex-col justify-between h-48 shadow-sm mt-8">
-                            <LineChart className="w-8 h-8 text-secondary-500" />
-                            <div>
-                                <h4 className="font-bold text-surface-900">Prédictions IA</h4>
-                                <p className="text-xs text-surface-400 mt-1">Visualisez les tendances de vos ventes.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
 
-            {/* 5. POUR LES LIVREURS */}
-            <section id="livreurs" className="py-20 bg-white">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                    {/* Visual Illustration instead of photos */}
-                    <div className="grid grid-cols-2 gap-4 order-last lg:order-first">
-                        <div className="bg-surface-50 rounded-3xl border border-surface-200 p-6 flex flex-col justify-between h-48 shadow-sm mt-8">
-                            <Navigation className="w-8 h-8 text-primary-500 animate-bounce" />
-                            <div>
-                                <h4 className="font-bold text-surface-900">Logistique Intelligente</h4>
-                                <p className="text-xs text-surface-400 mt-1">L'IA vous indique les itinéraires optimisés.</p>
-                            </div>
-                        </div>
-                        <div className="bg-surface-50 rounded-3xl border border-surface-200 p-6 flex flex-col justify-between h-48 shadow-sm">
-                            <DollarSign className="w-8 h-8 text-secondary-500" />
-                            <div>
-                                <h4 className="font-bold text-surface-900">Revenus Garantis</h4>
-                                <p className="text-xs text-surface-400 mt-1">Recevez vos gains instantanément par Momo.</p>
-                            </div>
-                        </div>
-                    </div>
+                        <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+                            <Link href={route('register')}>
+                                <button className="w-full sm:w-auto px-7 py-3.5 bg-yellow-400 hover:bg-yellow-500 text-stone-950 font-semibold text-xs sm:text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer">
+                                    <span>Commencer Gratuitement (0$)</span>
+                                    <ArrowRight className="w-4 h-4" />
+                                </button>
+                            </Link>
 
-                    <div className="space-y-6">
-                        <span className="inline-flex items-center space-x-2 bg-primary-100 text-primary-900 px-3.5 py-1 rounded-full text-xs font-bold">
-                            <Truck className="w-4 h-4" />
-                            <span>Livreurs</span>
-                        </span>
-                        <h3 className="text-3xl font-extrabold text-surface-900 md:text-4xl">
-                            Augmentez vos livraisons avec l'IA logistique
-                        </h3>
-                        <p className="text-sm md:text-base text-surface-500 leading-relaxed">
-                            Devenez livreur partenaire Sellify.me et accédez à une file d'attente intelligente de courses. Notre système affecte automatiquement les colis aux livreurs les plus proches pour réduire les temps de trajet et maximiser vos gains par jour.
-                        </p>
-                        <div className="space-y-3 font-semibold text-sm text-surface-700">
-                            <div className="flex items-center space-x-3">
-                                <div className="w-5 h-5 rounded-full bg-secondary-100 text-secondary-800 flex items-center justify-center">✓</div>
-                                <span>Itinéraires optimisés par notre moteur de cartographie</span>
-                            </div>
-                            <div className="flex items-center space-x-3">
-                                <div className="w-5 h-5 rounded-full bg-secondary-100 text-secondary-800 flex items-center justify-center">✓</div>
-                                <span>Notifications de courses en temps réel</span>
-                            </div>
-                            <div className="flex items-center space-x-3">
-                                <div className="w-5 h-5 rounded-full bg-secondary-100 text-secondary-800 flex items-center justify-center">✓</div>
-                                <span>Paiement sécurisé et instantané après validation client</span>
-                            </div>
+                            <Link href={route('public.products.index')}>
+                                <button className="w-full sm:w-auto px-6 py-3.5 bg-stone-800 hover:bg-stone-700 text-white font-medium text-xs sm:text-sm rounded-xl border border-stone-700 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                                    <span>Visiter le Store Marketplace</span>
+                                </button>
+                            </Link>
                         </div>
-                        <Link href={route('register')}>
-                            <Button variant="primary" size="lg" className="space-x-2">
-                                <span>Rejoindre en tant que livreur</span>
-                                <ArrowRight className="w-5 h-5" />
-                            </Button>
-                        </Link>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            {/* 6. STATISTIQUES */}
-            <section className="py-16 bg-surface-100 text-surface-900 border-t border-b border-surface-200 relative">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-12">
-                    <h3 className="text-2xl md:text-3xl font-bold">Sellify.me en Chiffres</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                        <div className="space-y-2">
-                            <p className="text-3xl md:text-5xl font-black text-primary-600">10K+</p>
-                            <p className="text-xs md:text-sm font-semibold uppercase tracking-wider text-surface-600">Transactions sécurisées</p>
-                        </div>
-                        <div className="space-y-2">
-                            <p className="text-3xl md:text-5xl font-black text-primary-600">2K+</p>
-                            <p className="text-xs md:text-sm font-semibold uppercase tracking-wider text-surface-600">Vendeurs vérifiés</p>
-                        </div>
-                        <div className="space-y-2">
-                            <p className="text-3xl md:text-5xl font-black text-primary-600">500+</p>
-                            <p className="text-xs md:text-sm font-semibold uppercase tracking-wider text-surface-600">Livreurs actifs</p>
-                        </div>
-                        <div className="space-y-2">
-                            <p className="text-3xl md:text-5xl font-black text-primary-600">99.8%</p>
-                            <p className="text-xs md:text-sm font-semibold uppercase tracking-wider text-surface-600">Taux de réussite logistique</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* 7. ILLUSTRATIONS AND DYNAMIC COMPONENT SECTION */}
-            <section className="py-20 bg-surface-50 border-b border-surface-200">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-12">
-                    <div className="space-y-3">
-                        <h3 className="text-2xl md:text-4xl font-extrabold text-surface-900">Comment le flux Escrow fonctionne</h3>
-                        <p className="text-surface-500 text-sm md:text-base max-w-xl mx-auto">
-                            De la commande à la livraison, nous veillons à la sécurité de l'argent et du produit.
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                        <div className="bg-white border border-surface-200 p-6 rounded-2xl shadow-sm text-left space-y-4">
-                            <span className="w-8 h-8 rounded-full bg-primary-100 text-primary-800 flex items-center justify-center font-bold">1</span>
-                            <h4 className="font-bold text-surface-900">Achat & Commande</h4>
-                            <p className="text-xs text-surface-500">Le client sélectionne le produit et commande par Smart-Link.</p>
-                        </div>
-                        <div className="bg-white border border-surface-200 p-6 rounded-2xl shadow-sm text-left space-y-4">
-                            <span className="w-8 h-8 rounded-full bg-primary-100 text-primary-800 flex items-center justify-center font-bold">2</span>
-                            <h4 className="font-bold text-surface-900">Fonds Bloqués (Escrow)</h4>
-                            <p className="text-xs text-surface-500">L'argent est sécurisé sur le compte Escrow Mobile Money de Sellify.</p>
-                        </div>
-                        <div className="bg-white border border-surface-200 p-6 rounded-2xl shadow-sm text-left space-y-4">
-                            <span className="w-8 h-8 rounded-full bg-primary-100 text-primary-800 flex items-center justify-center font-bold">3</span>
-                            <h4 className="font-bold text-surface-900">Livraison AI</h4>
-                            <p className="text-xs text-surface-500">Un livreur partenaire validé achemine le colis par trajet optimisé.</p>
-                        </div>
-                        <div className="bg-white border border-surface-200 p-6 rounded-2xl shadow-sm text-left space-y-4">
-                            <span className="w-8 h-8 rounded-full bg-primary-100 text-primary-800 flex items-center justify-center font-bold">4</span>
-                            <h4 className="font-bold text-surface-900">Validation & Paiement</h4>
-                            <p className="text-xs text-surface-500">Le client accepte le colis et les fonds sont débloqués pour le vendeur.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* 8. FINAL CALL TO ACTION (CTA) */}
-            <section className="py-20 bg-white text-center relative overflow-hidden">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary-100 rounded-full blur-3xl opacity-30 z-0"></div>
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 relative z-10">
-                    <h3 className="text-3xl md:text-5xl font-black text-surface-900">Prêt à transformer votre commerce ?</h3>
-                    <p className="text-base md:text-lg text-surface-500 max-w-2xl mx-auto">
-                        Inscrivez-vous dès aujourd'hui sur Sellify.me et accédez à l'écosystème de commerce le plus sécurisé et innovant d'Afrique.
-                    </p>
-                    <div>
-                        <Link href={route('login')}>
-                            <Button variant="primary" size="lg" className="shadow-lg hover:-translate-y-0.5">
-                                Se connecter et démarrer
-                            </Button>
-                        </Link>
-                    </div>
-                </div>
-            </section>
+            </div>
         </PublicLayout>
     );
 }

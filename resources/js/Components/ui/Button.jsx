@@ -25,12 +25,13 @@ export default function Button({
         sm: "px-3 py-1.5 text-sm",
         md: "px-4 py-2 text-sm md:text-base",
         lg: "px-6 py-3 text-base md:text-lg",
+        icon: "h-8 w-8 p-1",
     };
 
     return (
         <button
             type={type}
-            className={`${baseStyle} ${variants[variant]} ${sizes[size]} ${className}`}
+            className={`${baseStyle} ${variants[variant] || ''} ${sizes[size] || ''} ${className}`}
             disabled={disabled}
             onClick={onClick}
             {...props}
@@ -39,3 +40,5 @@ export default function Button({
         </button>
     );
 }
+
+export { Button };

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
 import AIAssistantWidget from '@/Components/AIAssistantWidget';
+import RefuseDeliveryModal from '@/Components/RefuseDeliveryModal';
+import { GpsTrackerService } from '@/Services/GpsTrackerService';
 import {
     LayoutDashboard,
     Truck,
@@ -18,7 +20,16 @@ import {
     Check,
     CircleDot,
     ShoppingBag,
-    ArrowRight
+    ArrowRight,
+    WifiOff,
+    Download,
+    Clock,
+    Lock,
+    Package,
+    Navigation,
+    AlertTriangle,
+    Zap,
+    Sparkles
 } from 'lucide-react';
 
 export default function DriverLayout({ children, title }) {
@@ -27,38 +38,130 @@ export default function DriverLayout({ children, title }) {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
     const [pushAlert, setPushAlert] = useState(null);
+    const [refuseModalOrderNumber, setRefuseModalOrderNumber] = useState(null);
+    const [isOffline, setIsOffline] = useState(!navigator.onLine);
+    const [deferredPrompt, setDeferredPrompt] = useState(null);
+    const [timerSeconds, setTimerSeconds] = useState(60); // 1 minute auto-dismiss (60s)
+
+    // GPS Telemetry State
+    const [telemetry, setTelemetry] = useState({ lat: 3.8680, lng: 11.5180, speed: 38, isSpeeding: false, isProlongedStop: false });
 
     const user = auth.user || {};
     const driver = user.driver || {};
 
     const [activityStatus, setActivityStatus] = useState(driver.activity_status || 'online');
 
-    // Simulate incoming push dispatch alert after 3.5 seconds
+    // Start 10-second GPS Telemetry tracking
     useEffect(() => {
+        GpsTrackerService.startTracking((pos) => {
+            const speed = pos.speed || 38;
+            setTelemetry({
+                lat: pos.lat,
+                lng: pos.lng,
+                speed,
+                isSpeeding: speed > 90,
+                isProlongedStop: false
+            });
+        });
+
+        return () => {
+            GpsTrackerService.stopTracking();
+        };
+    }, []);
+
+    // 1-minute Decision Countdown Timer (60s max)
+    useEffect(() => {
+        if (!pushAlert) return;
+        setTimerSeconds(60);
+        const interval = setInterval(() => {
+            setTimerSeconds((prev) => {
+                if (prev <= 1) {
+                    clearInterval(interval);
+                    sessionStorage.setItem(`dismissed_${pushAlert.id}`, 'true');
+                    setPushAlert(null); // Auto-dismiss after 1 minute
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [pushAlert]);
+
+    const formatTimer = (secs) => {
+        return `${secs}s`;
+    };
+
+    // Register Service Worker & Listen for Offline / PWA Install Prompt
+    useEffect(() => {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then((reg) => console.log('[PWA] Service Worker registered:', reg.scope))
+                .catch((err) => console.warn('[PWA] Service Worker registration failed:', err));
+        }
+
+        const handleOnline = () => setIsOffline(false);
+        const handleOffline = () => setIsOffline(true);
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+
+        const handleBeforeInstallPrompt = (e) => {
+            e.preventDefault();
+            setDeferredPrompt(e);
+        };
+        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+            window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+        };
+    }, []);
+
+    const handleInstallPwa = () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('[PWA] Driver accepted PWA installation');
+                }
+                setDeferredPrompt(null);
+            });
+        }
+    };
+
+    // Trigger incoming push dispatch alert only if not previously dismissed
+    useEffect(() => {
+        const isDismissed = sessionStorage.getItem('dismissed_push-992');
+        if (isDismissed) return;
+
         const timer = setTimeout(() => {
             setPushAlert({
                 id: 'push-992',
                 order_number: 'SLF-2026-X892',
-                shop_name: 'Tech Shop (Bastos)',
+                shop_name: 'Electro Shop (Akwa)',
                 customer_name: 'Marc Kamga',
-                destination: 'Akwa, Immeuble Rose',
+                destination: 'Akwa, Carrefour Ndokoti',
+                escrow_amount: 150000,
+                package_desc: 'Smartphone & Accessoires · 1.2 kg',
                 fee: 2500,
                 distance: '3.4 km',
                 duration: '12 min',
                 time: 'À l\'instant'
             });
-        }, 3500);
+        }, 4000);
         return () => clearTimeout(timer);
     }, []);
+
+    const handleDismissPush = () => {
+        if (pushAlert) {
+            sessionStorage.setItem(`dismissed_${pushAlert.id}`, 'true');
+            setPushAlert(null);
+        }
+    };
 
     const handleStatusToggle = (newStatus) => {
         setActivityStatus(newStatus);
         router.post(route('driver.availability'), { activity_status: newStatus }, { preserveState: true });
-    };
-
-    const handleAcceptPush = (orderNumber) => {
-        setPushAlert(null);
-        router.post(route('driver.delivery.accept', orderNumber));
     };
 
     const navigation = [
@@ -66,6 +169,7 @@ export default function DriverLayout({ children, title }) {
         { name: 'Livraisons & courses', href: route('driver.deliveries'), icon: Truck, active: route().current('driver.deliveries') },
         { name: 'Carte & itinéraire', href: route('driver.map'), icon: MapPin, active: route().current('driver.map') },
         { name: 'Portefeuille & gains', href: route('driver.earnings'), icon: Wallet, active: route().current('driver.earnings') },
+        { name: 'Sellify AI', href: route('driver.assistant'), icon: Sparkles, active: route().current('driver.assistant') },
         { name: 'Notifications', href: route('driver.notifications'), icon: Bell, active: route().current('driver.notifications') },
         { name: 'Avis & évaluations', href: route('driver.reviews'), icon: Star, active: route().current('driver.reviews') },
         { name: 'Paramètres & véhicule', href: route('driver.settings'), icon: Settings, active: route().current('driver.settings') },
@@ -105,7 +209,7 @@ export default function DriverLayout({ children, title }) {
                                     Sellify<span className="text-yellow-600">.Express</span>
                                 </span>
                                 <span className="block text-[10px] text-stone-400 font-semibold leading-none mt-0.5">
-                                    Espace Livreur
+                                    Espace Livreur PWA
                                 </span>
                             </div>
                         )}
@@ -151,11 +255,24 @@ export default function DriverLayout({ children, title }) {
                         >
                             <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2.5'}`}>
                                 <item.icon className={`w-4 h-4 flex-shrink-0 ${item.active ? 'text-yellow-600' : 'text-stone-400'}`} />
-                                {!isCollapsed && <span>{item.name}</span>}
+                                {!isCollapsed && <span className="truncate">{item.name}</span>}
                             </div>
                         </Link>
                     ))}
                 </nav>
+
+                {/* PWA Installation Prompt Button */}
+                {deferredPrompt && !isCollapsed && (
+                    <div className="p-3 border-t border-stone-100 bg-yellow-50/60">
+                        <button
+                            onClick={handleInstallPwa}
+                            className="w-full py-2 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors flex items-center justify-center gap-1.5 border border-yellow-500"
+                        >
+                            <Download className="w-4 h-4" />
+                            <span>Installer App PWA</span>
+                        </button>
+                    </div>
+                )}
 
                 {/* Sidebar Footer Driver Profile */}
                 <div className="p-3 border-t border-stone-100 space-y-2 bg-white">
@@ -202,31 +319,31 @@ export default function DriverLayout({ children, title }) {
             <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
                 
                 {/* Topbar */}
-                <header className="h-16 bg-white border-b border-stone-200/80 flex items-center justify-between px-4 sm:px-6 flex-shrink-0 z-20">
-                    <div className="flex items-center flex-1 max-w-xl gap-3">
+                <header className="h-16 bg-white border-b border-stone-200/80 flex items-center justify-between px-3 sm:px-6 flex-shrink-0 z-20">
+                    <div className="flex items-center flex-1 max-w-2xl gap-2 sm:gap-3">
                         <button
                             onClick={() => setSidebarOpen(!sidebarOpen)}
-                            className="text-stone-500 hover:text-stone-700 focus:outline-none md:hidden p-1.5 bg-stone-100 rounded-lg"
+                            className="text-stone-500 hover:text-stone-700 focus:outline-none md:hidden p-1.5 bg-stone-100 rounded-lg shrink-0"
                         >
                             <Menu className="w-5 h-5" />
                         </button>
 
                         {/* Status Toggle Button */}
-                        <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-xl">
+                        <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-xl overflow-x-auto shrink-0">
                             <button
                                 onClick={() => handleStatusToggle('online')}
-                                className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                                className={`px-2.5 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-semibold flex items-center gap-1 transition-all shrink-0 ${
                                     activityStatus === 'online'
                                         ? 'bg-emerald-500 text-white shadow-2xs'
                                         : 'text-stone-600 hover:text-stone-900'
                                 }`}
                             >
                                 <CircleDot className="w-3 h-3 animate-pulse" />
-                                <span>Disponible</span>
+                                <span>En service</span>
                             </button>
                             <button
                                 onClick={() => handleStatusToggle('busy')}
-                                className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                                className={`px-2.5 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-semibold flex items-center gap-1 transition-all shrink-0 ${
                                     activityStatus === 'busy'
                                         ? 'bg-yellow-400 text-yellow-950 font-bold shadow-2xs border border-yellow-500'
                                         : 'text-stone-600 hover:text-stone-900'
@@ -237,19 +354,25 @@ export default function DriverLayout({ children, title }) {
                             </button>
                             <button
                                 onClick={() => handleStatusToggle('offline')}
-                                className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                                className={`px-2.5 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-semibold flex items-center gap-1 transition-all shrink-0 ${
                                     activityStatus === 'offline'
                                         ? 'bg-stone-600 text-white shadow-2xs'
                                         : 'text-stone-600 hover:text-stone-900'
                                 }`}
                             >
-                                <span>Hors ligne</span>
+                                <span>Hors service</span>
                             </button>
+                        </div>
+
+                        {/* GPS Live Telemetry Status Pill */}
+                        <div className="hidden xl:flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold shrink-0">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping shrink-0" />
+                            <span>GPS Live (10s) · {telemetry.speed} km/h</span>
                         </div>
                     </div>
 
                     {/* Right Items */}
-                    <div className="flex items-center space-x-3 relative">
+                    <div className="flex items-center space-x-2 sm:space-x-3 relative shrink-0">
                         
                         {/* Notifications Bell */}
                         <div className="relative">
@@ -264,7 +387,7 @@ export default function DriverLayout({ children, title }) {
 
                             {/* Notifications Dropdown */}
                             {notifDropdownOpen && (
-                                <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl border border-stone-200 shadow-xl z-50 p-4 space-y-3">
+                                <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white rounded-2xl border border-stone-200 shadow-xl z-50 p-4 space-y-3">
                                     <div className="flex items-center justify-between border-b border-stone-100 pb-2">
                                         <div className="flex items-center gap-1.5">
                                             <Bell className="w-4 h-4 text-yellow-600" />
@@ -287,85 +410,125 @@ export default function DriverLayout({ children, title }) {
                             )}
                         </div>
                         
-                        <div className="h-5 w-px bg-stone-200"></div>
+                        <div className="h-5 w-px bg-stone-200 hidden sm:block"></div>
 
                         {/* Driver Profile */}
                         <div className="flex items-center space-x-2">
                             <div className="w-8 h-8 rounded-xl bg-yellow-400 text-yellow-950 font-bold text-xs flex items-center justify-center border border-yellow-500 uppercase shadow-2xs">
                                 {user.first_name ? user.first_name[0] : 'L'}
                             </div>
-                            <span className="text-xs font-semibold text-stone-800 hidden sm:inline-block">
+                            <span className="text-xs font-semibold text-stone-800 hidden lg:inline-block">
                                 {user.first_name} {user.last_name}
                             </span>
                         </div>
                     </div>
                 </header>
 
+                {/* TELEMETRY SPEEDING / ANOMALY ALERT BANNER */}
+                {telemetry.isSpeeding && (
+                    <div className="bg-rose-500 text-white px-3 py-1.5 text-xs font-bold flex items-center justify-center gap-2 shadow-inner text-center animate-pulse">
+                        <AlertTriangle className="w-4 h-4 shrink-0 text-yellow-300" />
+                        <span>⚠️ Alerte Télémétrie : Vitesse excessive détectée en zone urbaine ({telemetry.speed} km/h). Veuillez ralentir.</span>
+                    </div>
+                )}
+
+                {/* OFFLINE WARNING BANNER */}
+                {isOffline && (
+                    <div className="bg-amber-500 text-white px-3 py-1.5 text-xs font-semibold flex items-center justify-center gap-2 shadow-inner text-center">
+                        <WifiOff className="w-4 h-4 shrink-0" />
+                        <span className="leading-tight">⚡ Mode Hors-ligne activé — Les positions GPS sont enregistrées localement et seront synchronisées à la reconnexion.</span>
+                    </div>
+                )}
+
                 {/* Main View Container */}
                 <div className="flex-1 overflow-y-auto bg-stone-100/60 relative">
                     {/* Flash Messages */}
                     {flash?.success && (
-                        <div className="px-6 pt-4">
+                        <div className="px-4 sm:px-6 pt-4">
                             <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-2.5 rounded-xl flex items-center justify-between text-xs font-semibold shadow-2xs">
                                 <div className="flex items-center gap-2">
-                                    <Check className="w-4 h-4 text-emerald-600" />
-                                    <span>{flash.success}</span>
+                                    <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                                    <span className="break-words">{flash.success}</span>
                                 </div>
                             </div>
                         </div>
                     )}
                     {flash?.error && (
-                        <div className="px-6 pt-4">
+                        <div className="px-4 sm:px-6 pt-4">
                             <div className="bg-rose-50 border border-rose-200 text-rose-800 px-4 py-2.5 rounded-xl flex items-center justify-between text-xs font-semibold shadow-2xs">
-                                <span>{flash.error}</span>
+                                <span className="break-words">{flash.error}</span>
                             </div>
                         </div>
                     )}
 
-                    <main className="p-4 sm:p-6 w-full">
+                    <main className="p-3 sm:p-6 w-full">
                         {children}
                     </main>
 
-                    {/* REAL-TIME PUSH DISPATCH POPUP (SVG Icons, NO Emojis) */}
+                    {/* REAL-TIME PUSH DISPATCH POPUP (DISMISSES AFTER 60s / 1 MIN) */}
                     {pushAlert && (
-                        <div className="fixed bottom-6 right-6 z-50 max-w-sm w-full bg-white text-stone-900 rounded-2xl p-5 shadow-2xl border-2 border-yellow-400 animate-in slide-in-from-bottom-5 duration-200 space-y-3">
+                        <div className="fixed bottom-4 left-3 right-3 sm:left-auto sm:right-6 z-50 max-w-md w-auto sm:w-full bg-white text-stone-900 rounded-2xl p-4 sm:p-5 shadow-2xl border-2 border-yellow-400 animate-in slide-in-from-bottom-5 duration-200 space-y-3">
+                            
+                            {/* Header with 60s Decision Timer (1 minute) */}
                             <div className="flex items-center justify-between border-b border-stone-100 pb-2">
                                 <div className="flex items-center gap-2">
-                                    <div className="w-7 h-7 rounded-full bg-yellow-400 text-yellow-950 flex items-center justify-center font-bold text-xs shadow-2xs">
+                                    <div className="w-7 h-7 rounded-full bg-yellow-400 text-yellow-950 flex items-center justify-center font-bold text-xs shadow-2xs shrink-0">
                                         <Bell className="w-3.5 h-3.5 text-yellow-950" />
                                     </div>
-                                    <h4 className="font-bold text-xs text-stone-900">Nouvelle proposition de course !</h4>
+                                    <h4 className="font-bold text-xs text-stone-900 truncate">Nouvelle proposition de course !</h4>
                                 </div>
-                                <button onClick={() => setPushAlert(null)} className="text-stone-400 hover:text-stone-700">
-                                    <X className="w-4 h-4" />
-                                </button>
+
+                                <div className="flex items-center gap-1 bg-amber-50 text-amber-900 border border-amber-200 px-2.5 py-0.5 rounded-full font-mono text-[11px] font-bold shrink-0">
+                                    <Clock className="w-3 h-3 text-amber-600" />
+                                    <span>Expire dans {formatTimer(timerSeconds)}</span>
+                                </div>
                             </div>
 
+                            {/* Details */}
                             <div className="space-y-2 text-xs text-stone-700 font-normal">
                                 <div className="flex justify-between items-center bg-stone-50 border border-stone-200/80 p-2 rounded-xl">
                                     <span className="font-mono text-stone-600 font-bold">#{pushAlert.order_number}</span>
                                     <span className="text-yellow-700 font-extrabold">{pushAlert.distance} · {pushAlert.duration}</span>
                                 </div>
-                                <p><strong className="text-stone-900">Boutique :</strong> {pushAlert.shop_name}</p>
-                                <p><strong className="text-stone-900">Destination :</strong> {pushAlert.destination}</p>
+
+                                <div className="grid grid-cols-2 gap-2 text-[11px]">
+                                    <div className="p-2 bg-stone-50 rounded-lg border border-stone-200/60">
+                                        <span className="text-stone-400 block font-normal flex items-center gap-1">
+                                            <Lock className="w-3 h-3 text-stone-500 shrink-0" /> Escrow :
+                                        </span>
+                                        <strong className="text-stone-900 font-bold break-all">{Number(pushAlert.escrow_amount).toLocaleString('fr-FR')} F</strong>
+                                    </div>
+                                    <div className="p-2 bg-stone-50 rounded-lg border border-stone-200/60">
+                                        <span className="text-stone-400 block font-normal flex items-center gap-1">
+                                            <Package className="w-3 h-3 text-stone-500 shrink-0" /> Colis :
+                                        </span>
+                                        <strong className="text-stone-900 font-medium truncate block">{pushAlert.package_desc}</strong>
+                                    </div>
+                                </div>
+
+                                <p className="leading-snug"><strong className="text-stone-900">Retrait :</strong> {pushAlert.shop_name}</p>
+                                <p className="leading-snug"><strong className="text-stone-900">Destination :</strong> {pushAlert.destination}</p>
+                                
                                 <p className="text-emerald-600 font-bold text-sm pt-1">
-                                    Gains : +{pushAlert.fee.toLocaleString('fr-FR')} FCFA
+                                    Frais alloués : +{pushAlert.fee.toLocaleString('fr-FR')} FCFA
                                 </p>
                             </div>
 
+                            {/* Actions */}
                             <div className="flex gap-2 pt-2 border-t border-stone-100">
-                                <button
-                                    onClick={() => handleAcceptPush(pushAlert.order_number)}
-                                    className="flex-1 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors flex items-center justify-center gap-1 border border-yellow-500"
+                                <Link
+                                    href={route('driver.map', { order: pushAlert.order_number })}
+                                    onClick={handleDismissPush}
+                                    className="flex-1 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-bold text-xs rounded-xl shadow-2xs transition-colors flex items-center justify-center gap-1 border border-yellow-500 truncate"
                                 >
-                                    <span>Accepter la course</span>
-                                    <ArrowRight className="w-3.5 h-3.5" />
-                                </button>
+                                    <span>Voir sur la map</span>
+                                    <ArrowRight className="w-3.5 h-3.5 shrink-0" />
+                                </Link>
                                 <button
-                                    onClick={() => setPushAlert(null)}
-                                    className="px-3 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs rounded-xl border border-stone-200"
+                                    onClick={handleDismissPush}
+                                    className="px-3 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs rounded-xl border border-stone-200 shrink-0"
                                 >
-                                    Refuser
+                                    Ignorer
                                 </button>
                             </div>
                         </div>
@@ -373,6 +536,14 @@ export default function DriverLayout({ children, title }) {
 
                 </div>
             </div>
+
+            {/* REFUSAL JUSTIFICATION MODAL */}
+            {refuseModalOrderNumber && (
+                <RefuseDeliveryModal
+                    orderNumber={refuseModalOrderNumber}
+                    onClose={() => setRefuseModalOrderNumber(null)}
+                />
+            )}
 
             <AIAssistantWidget />
         </div>
