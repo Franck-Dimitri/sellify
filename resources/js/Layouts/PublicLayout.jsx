@@ -240,12 +240,29 @@ export default function PublicLayout({ children }) {
                         {/* Col 4 */}
                         <div className="space-y-3">
                             <h4 className="font-semibold text-stone-900 text-xs">Moyens de Paiement</h4>
-                            <div className="flex flex-wrap gap-1.5 pt-1 text-[10px] font-medium text-stone-600">
-                                <span className="px-2 py-1 bg-amber-50 text-amber-900 rounded-lg border border-amber-200">Orange Money</span>
-                                <span className="px-2 py-1 bg-yellow-100 text-yellow-900 rounded-lg border border-yellow-300">MTN MoMo</span>
-                                <span className="px-2 py-1 bg-blue-50 text-blue-900 rounded-lg border border-blue-200">Wave</span>
-                                <span className="px-2 py-1 bg-stone-100 text-stone-800 rounded-lg border border-stone-200">Carte Bancaire</span>
+                            <div className="flex items-center gap-2 pt-1">
+                                <img 
+                                    src="/images/payments/orange_money.jpg" 
+                                    alt="Orange Money" 
+                                    className="w-7 h-7 rounded-lg object-cover shadow-2xs border border-stone-200" 
+                                    title="Orange Money" 
+                                />
+                                <img 
+                                    src="/images/payments/mtn_momo.jpg" 
+                                    alt="MTN Mobile Money" 
+                                    className="w-7 h-7 rounded-lg object-cover shadow-2xs border border-stone-200" 
+                                    title="MTN Mobile Money" 
+                                />
+                                <img 
+                                    src="/images/payments/visa.jpg" 
+                                    alt="Visa" 
+                                    className="w-7 h-7 rounded-lg object-cover shadow-2xs border border-stone-200" 
+                                    title="Visa" 
+                                />
                             </div>
+                            <span className="text-[10px] text-stone-500 block leading-tight">
+                                Passerelle HR-Skills Pay v1 • Séquestre Escrow actif
+                            </span>
                         </div>
 
                     </div>

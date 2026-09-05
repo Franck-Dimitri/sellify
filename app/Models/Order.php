@@ -25,6 +25,10 @@ class Order extends Model
         'subtotal',
         'shipping_fee',
         'total_amount',
+        'payment_reference',
+        'payment_transaction_id',
+        'payment_gateway',
+        'payment_details',
         'payment_method',
         'payment_status',
         'delivery_status',
@@ -36,6 +40,7 @@ class Order extends Model
         'subtotal' => 'decimal:2',
         'shipping_fee' => 'decimal:2',
         'total_amount' => 'decimal:2',
+        'payment_details' => 'array',
         'delivered_at' => 'datetime',
     ];
 

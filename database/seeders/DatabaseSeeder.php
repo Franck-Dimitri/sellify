@@ -427,7 +427,8 @@ class DatabaseSeeder extends Seeder
                     ['product_id' => $createdProducts[2]->id, 'name' => 'Montre Connectée Smart Watch Ultra 2', 'price' => 35000, 'qty' => 1],
                     ['product_id' => $createdProducts[3]->id, 'name' => 'Power Bank 30 000 mAh Charge Rapide', 'price' => 18500, 'qty' => 1],
                 ],
-            ],
+            ],Poser une question à Sellify AI...
+
             [
                 'order_number' => 'SLF-2026-9815',
                 'user_id' => $customers[2]->id,

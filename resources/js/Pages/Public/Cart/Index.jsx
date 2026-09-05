@@ -311,21 +311,36 @@ export default function Index({ cartItems = [], groupedShops = {}, grandTotal = 
                                         </button>
                                     </Link>
 
-                                    {/* Accepted Mobile Money methods */}
+                                    {/* Accepted payment methods */}
                                     <div className="pt-2 text-center space-y-2">
                                         <span className="text-[10px] text-stone-400 font-normal block">
-                                            Paiement direct sécurisé sans carte bancaire :
+                                            Paiements directs sécurisés par HR-Skills Pay :
                                         </span>
-                                        <div className="flex items-center justify-center gap-2">
-                                            <span className="px-2.5 py-1 bg-amber-50 text-amber-900 text-[10px] font-semibold rounded-lg border border-amber-200">
-                                                Orange Money
-                                            </span>
-                                            <span className="px-2.5 py-1 bg-yellow-100 text-yellow-950 text-[10px] font-semibold rounded-lg border border-yellow-300">
-                                                MTN MoMo
-                                            </span>
-                                            <span className="px-2.5 py-1 bg-blue-50 text-blue-900 text-[10px] font-semibold rounded-lg border border-blue-200">
-                                                Wave
-                                            </span>
+                                        <div className="flex items-center justify-center gap-3">
+                                            <div className="flex items-center gap-1 px-2 py-1 bg-stone-50 border border-stone-200 rounded-lg shadow-2xs">
+                                                <img 
+                                                    src="/images/payments/orange_money.jpg" 
+                                                    alt="Orange Money" 
+                                                    className="w-4 h-4 rounded object-cover" 
+                                                />
+                                                <span className="text-[10px] font-semibold text-stone-800">Orange Money</span>
+                                            </div>
+                                            <div className="flex items-center gap-1 px-2 py-1 bg-stone-50 border border-stone-200 rounded-lg shadow-2xs">
+                                                <img 
+                                                    src="/images/payments/mtn_momo.jpg" 
+                                                    alt="MTN MoMo" 
+                                                    className="w-4 h-4 rounded object-cover" 
+                                                />
+                                                <span className="text-[10px] font-semibold text-stone-800">MTN MoMo</span>
+                                            </div>
+                                            <div className="flex items-center gap-1 px-2 py-1 bg-stone-50 border border-stone-200 rounded-lg shadow-2xs">
+                                                <img 
+                                                    src="/images/payments/visa.jpg" 
+                                                    alt="Visa" 
+                                                    className="w-4 h-4 rounded object-cover" 
+                                                />
+                                                <span className="text-[10px] font-semibold text-stone-800">Visa</span>
+                                            </div>
                                         </div>
                                     </div>
 

@@ -279,7 +279,14 @@ export default function Profile({ user, addresses = [] }) {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="p-3 bg-yellow-50/50 border border-yellow-200 rounded-xl space-y-1.5">
                                     <label className="font-bold text-stone-800 flex items-center justify-between">
-                                        <span>MTN Mobile Money (MoMo)</span>
+                                        <div className="flex items-center gap-2">
+                                            <img 
+                                                src="/images/payments/mtn_momo.jpg" 
+                                                alt="MTN MoMo" 
+                                                className="w-5 h-5 rounded object-cover shadow-2xs border border-stone-200" 
+                                            />
+                                            <span>MTN Mobile Money (MoMo)</span>
+                                        </div>
                                         <input
                                             type="radio"
                                             name="preferred_payment"
@@ -298,7 +305,14 @@ export default function Profile({ user, addresses = [] }) {
 
                                 <div className="p-3 bg-orange-50/50 border border-orange-200 rounded-xl space-y-1.5">
                                     <label className="font-bold text-stone-800 flex items-center justify-between">
-                                        <span>Orange Money (OM)</span>
+                                        <div className="flex items-center gap-2">
+                                            <img 
+                                                src="/images/payments/orange_money.jpg" 
+                                                alt="Orange Money" 
+                                                className="w-5 h-5 rounded object-cover shadow-2xs border border-stone-200" 
+                                            />
+                                            <span>Orange Money (OM)</span>
+                                        </div>
                                         <input
                                             type="radio"
                                             name="preferred_payment"

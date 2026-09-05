@@ -244,10 +244,10 @@ export default function FastCheckout({ smartLink, product, shop }) {
                             <h2 className="font-semibold text-stone-900 text-sm">Mode de Paiement Mobile Money</h2>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3.5">
-                            <label className={`p-3.5 rounded-xl border cursor-pointer transition-all flex flex-col items-center justify-center space-y-1.5 ${
+                        <div className="grid grid-cols-3 gap-3">
+                            <label className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col items-center justify-center space-y-2 ${
                                 paymentMethod === 'orange_money' 
-                                    ? 'border-yellow-500 bg-yellow-50/40 shadow-sm' 
+                                    ? 'border-yellow-500 bg-yellow-50/60 shadow-xs ring-2 ring-yellow-200' 
                                     : 'border-stone-200 bg-white hover:bg-stone-50'
                             }`}>
                                 <input
@@ -261,15 +261,17 @@ export default function FastCheckout({ smartLink, product, shop }) {
                                     }}
                                     className="sr-only"
                                 />
-                                <div className="w-9 h-9 bg-orange-500 text-white font-bold rounded-lg flex items-center justify-center text-xs">
-                                    OM
-                                </div>
-                                <span className="font-medium text-stone-900 text-xs">Orange Money</span>
+                                <img 
+                                    src="/images/payments/orange_money.jpg" 
+                                    alt="Orange Money" 
+                                    className="w-9 h-9 rounded-xl object-cover shadow-2xs border border-stone-200" 
+                                />
+                                <span className="font-semibold text-stone-900 text-xs text-center">Orange Money</span>
                             </label>
 
-                            <label className={`p-3.5 rounded-xl border cursor-pointer transition-all flex flex-col items-center justify-center space-y-1.5 ${
+                            <label className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col items-center justify-center space-y-2 ${
                                 paymentMethod === 'mtn_momo' 
-                                    ? 'border-yellow-500 bg-yellow-50/40 shadow-sm' 
+                                    ? 'border-yellow-500 bg-yellow-50/60 shadow-xs ring-2 ring-yellow-200' 
                                     : 'border-stone-200 bg-white hover:bg-stone-50'
                             }`}>
                                 <input
@@ -283,10 +285,36 @@ export default function FastCheckout({ smartLink, product, shop }) {
                                     }}
                                     className="sr-only"
                                 />
-                                <div className="w-9 h-9 bg-yellow-400 text-yellow-950 font-bold rounded-lg flex items-center justify-center text-xs">
-                                    MoMo
-                                </div>
-                                <span className="font-medium text-stone-900 text-xs">MTN MoMo</span>
+                                <img 
+                                    src="/images/payments/mtn_momo.jpg" 
+                                    alt="MTN MoMo" 
+                                    className="w-9 h-9 rounded-xl object-cover shadow-2xs border border-stone-200" 
+                                />
+                                <span className="font-semibold text-stone-900 text-xs text-center">MTN MoMo</span>
+                            </label>
+
+                            <label className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col items-center justify-center space-y-2 ${
+                                paymentMethod === 'card' 
+                                    ? 'border-blue-500 bg-blue-50/60 shadow-xs ring-2 ring-blue-200' 
+                                    : 'border-stone-200 bg-white hover:bg-stone-50'
+                            }`}>
+                                <input
+                                    type="radio"
+                                    name="payment_method"
+                                    value="card"
+                                    checked={paymentMethod === 'card'}
+                                    onChange={() => {
+                                        setPaymentMethod('card');
+                                        setData('payment_method', 'card');
+                                    }}
+                                    className="sr-only"
+                                />
+                                <img 
+                                    src="/images/payments/visa.jpg" 
+                                    alt="Visa" 
+                                    className="w-9 h-9 rounded-xl object-cover shadow-2xs border border-stone-200" 
+                                />
+                                <span className="font-semibold text-stone-900 text-xs text-center">Carte Visa</span>
                             </label>
                         </div>
 

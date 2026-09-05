@@ -53,8 +53,13 @@ Route::post('/cart/clear', [\App\Http\Controllers\Public\CartController::class, 
 // Public Checkout Routes
 Route::get('/checkout', [\App\Http\Controllers\Public\CheckoutController::class, 'show'])->name('public.checkout.index');
 Route::post('/checkout/process', [\App\Http\Controllers\Public\CheckoutController::class, 'process'])->name('public.checkout.process');
+Route::get('/checkout/payment/status/{reference}', [\App\Http\Controllers\Public\CheckoutController::class, 'checkStatus'])->name('public.checkout.payment.status');
+Route::get('/checkout/payment/card-callback', [\App\Http\Controllers\Public\CheckoutController::class, 'cardCallback'])->name('public.checkout.card.callback');
 Route::post('/checkout/promo/apply', [\App\Http\Controllers\Public\CheckoutController::class, 'applyPromoCode'])->name('public.checkout.promo.apply');
 Route::post('/checkout/promo/remove', [\App\Http\Controllers\Public\CheckoutController::class, 'removePromoCode'])->name('public.checkout.promo.remove');
+
+// HR-Skills Pay Webhook
+Route::post('/api/webhooks/hrpay', [\App\Http\Controllers\Payment\HrPayWebhookController::class, 'handle'])->name('webhooks.hrpay');
 
 // Fast Checkout via Smart-Link
 Route::get('/pay/{token}', [SmartLinkCheckoutController::class, 'show'])->name('smartlink.checkout');
