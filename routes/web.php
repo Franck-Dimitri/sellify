@@ -196,6 +196,25 @@ Route::middleware(['auth', 'account.active'])->group(function () {
                     ->take(10)
                     ->get();
 
+                // Compute exact per-shop stats so dropdown filtering shows authentic metrics
+                $perShopStats = [];
+                foreach ($shops as $s) {
+                    $sActiveProducts = $s->products->where('is_archived', false);
+                    $perShopStats[$s->id] = [
+                        'revenue' => (float)\App\Models\Order::where('shop_id', $s->id)
+                            ->whereIn('payment_status', ['escrow_held', 'released'])
+                            ->sum('total_amount'),
+                        'pendingOrdersCount' => \App\Models\Order::where('shop_id', $s->id)
+                            ->whereIn('delivery_status', ['pending', 'preparing'])
+                            ->count(),
+                        'deliveredOrdersCount' => \App\Models\Order::where('shop_id', $s->id)
+                            ->where('delivery_status', 'delivered')
+                            ->count(),
+                        'productsCount' => $sActiveProducts->count(),
+                        'stock' => (int)$sActiveProducts->sum('stock'),
+                    ];
+                }
+
                 return Inertia::render('Seller/Dashboard', [
                     'shopsData' => $shops,
                     'totalStock' => $totalStock,
@@ -205,6 +224,7 @@ Route::middleware(['auth', 'account.active'])->group(function () {
                     'deliveredOrdersCount' => $deliveredOrdersCount,
                     'recentOrders' => $recentOrders,
                     'activityLogs' => $logs,
+                    'perShopStats' => $perShopStats,
                 ]);
             })->name('dashboard');
 

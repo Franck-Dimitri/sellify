@@ -23,9 +23,13 @@ class FintechEngine
         $seniorityScore = min(25, $createdMonths * 8);
 
         // 2. GMV / Ventes score (max 40 pts)
-        // Simulated / calculated GMV based on seller products and activity
-        $totalStockValue = $seller->products()->sum(\DB::raw('price * stock'));
-        $estimatedMonthlyGmv = max(100000, $totalStockValue * 0.4); // Estimé selon stock si nouvelles transactions
+        // GMV calculated strictly from authentic seller orders over the last 90 days
+        $shopIds = $seller->shops()->pluck('id');
+        $realGmv90Days = (float)\App\Models\Order::whereIn('shop_id', $shopIds)
+            ->whereIn('payment_status', ['escrow_held', 'released'])
+            ->where('created_at', '>=', now()->subDays(90))
+            ->sum('total_amount');
+        $estimatedMonthlyGmv = $realGmv90Days > 0 ? ($realGmv90Days / 3) : 0;
         $gmvScore = min(40, ($estimatedMonthlyGmv / 500000) * 40);
 
         // 3. KYC & Pack bonus (max 20 pts)

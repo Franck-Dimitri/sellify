@@ -27,7 +27,8 @@ export default function Dashboard({
     pendingOrdersCount = 0,
     deliveredOrdersCount = 0,
     recentOrders = [], 
-    activityLogs = [] 
+    activityLogs = [],
+    perShopStats = {}
 }) {
     const { auth } = usePage().props;
     const user = auth.user;
@@ -40,6 +41,21 @@ export default function Dashboard({
     const displayedOrders = selectedShopId === 'general'
         ? recentOrders
         : recentOrders.filter(o => String(o.shop_id) === String(selectedShopId));
+
+    // Dynamic metrics based on shop selection
+    const activeStats = selectedShopId === 'general'
+        ? {
+            revenue: totalRevenue,
+            pendingOrdersCount: pendingOrdersCount,
+            productsCount: totalProducts,
+            stock: totalStock,
+        }
+        : (perShopStats[selectedShopId] || {
+            revenue: 0,
+            pendingOrdersCount: 0,
+            productsCount: selectedShop?.products?.length || 0,
+            stock: selectedShop?.products?.reduce((sum, p) => sum + (p.stock || 0), 0) || 0,
+        });
 
     const statusBadge = (status) => {
         const map = {
@@ -113,7 +129,7 @@ export default function Dashboard({
                             </div>
                         </div>
                         <p className="text-xl font-semibold text-stone-900">
-                            {Number(totalRevenue || 0).toLocaleString('fr-FR')} FCFA
+                            {Number(activeStats.revenue || 0).toLocaleString('fr-FR')} FCFA
                         </p>
                         <span className="text-[11px] text-emerald-600 font-medium flex items-center gap-1">
                             <ShieldCheck className="w-3 h-3" /> Escrow sécurisé
@@ -129,7 +145,7 @@ export default function Dashboard({
                             </div>
                         </div>
                         <p className="text-xl font-semibold text-blue-600">
-                            {pendingOrdersCount} commande(s)
+                            {activeStats.pendingOrdersCount} commande(s)
                         </p>
                         <span className="text-[11px] text-stone-400 font-normal">Colisage en cours</span>
                     </div>
@@ -142,20 +158,26 @@ export default function Dashboard({
                                 <Boxes className="w-3.5 h-3.5" />
                             </div>
                         </div>
-                        <p className="text-xl font-semibold text-stone-900">{totalProducts} produit(s)</p>
-                        <span className="text-[11px] text-stone-400 font-normal">Stock total : {totalStock} unités</span>
+                        <p className="text-xl font-semibold text-stone-900">{activeStats.productsCount} produit(s)</p>
+                        <span className="text-[11px] text-stone-400 font-normal">Stock total : {activeStats.stock} unités</span>
                     </div>
 
                     {/* Shops Count Card */}
                     <div className="bg-white border border-stone-200 p-4 rounded-xl shadow-xs space-y-1.5">
                         <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium text-stone-500">Boutiques Actives</span>
+                            <span className="text-xs font-medium text-stone-500">
+                                {selectedShopId === 'general' ? 'Boutiques Actives' : 'Boutique Sélectionnée'}
+                            </span>
                             <div className="w-7 h-7 bg-purple-50 rounded-lg flex items-center justify-center text-purple-600">
                                 <Store className="w-3.5 h-3.5" />
                             </div>
                         </div>
-                        <p className="text-xl font-semibold text-stone-900">{shops.length} boutique(s)</p>
-                        <span className="text-[11px] text-stone-400 font-normal">Pack {seller?.pack?.toUpperCase() || 'STARTER'}</span>
+                        <p className="text-xl font-semibold text-stone-900">
+                            {selectedShopId === 'general' ? `${shops.length} boutique(s)` : selectedShop?.name}
+                        </p>
+                        <span className="text-[11px] text-stone-400 font-normal">
+                            {selectedShopId === 'general' ? `Pack ${seller?.pack?.toUpperCase() || 'STARTER'}` : (selectedShop?.city || 'Boutique active')}
+                        </span>
                     </div>
                 </div>
 

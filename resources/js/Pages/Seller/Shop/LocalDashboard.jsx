@@ -31,10 +31,34 @@ export default function LocalDashboard({
     promotionsCount = 0, 
     totalRevenue = 0,
     recentOrders = [],
-    recentProducts = []
+    recentProducts = [],
+    weeklySales = []
 }) {
     const { auth } = usePage().props;
     const activeThemeColor = shop?.theme_color || '#F59E0B';
+
+    // Build dynamic points for the 7-day sales curve
+    const maxAmount = Math.max(...weeklySales.map(d => Number(d.amount) || 0), 0);
+    const chartPoints = (weeklySales.length === 7 ? weeklySales : [
+        { day: 'Lun', date: '', amount: 0 },
+        { day: 'Mar', date: '', amount: 0 },
+        { day: 'Mer', date: '', amount: 0 },
+        { day: 'Jeu', date: '', amount: 0 },
+        { day: 'Ven', date: '', amount: 0 },
+        { day: 'Sam', date: '', amount: 0 },
+        { day: 'Dim', date: '', amount: 0 }
+    ]).map((d, index) => {
+        const x = index * 100;
+        const y = maxAmount > 0 
+            ? Math.round(150 - ((Number(d.amount) || 0) / maxAmount) * 120) 
+            : 150;
+        return { x, y, ...d };
+    });
+
+    const pathD = chartPoints.reduce((acc, pt, idx) => {
+        return idx === 0 ? `M ${pt.x} ${pt.y}` : `${acc} L ${pt.x} ${pt.y}`;
+    }, '');
+    const areaD = `${pathD} L 600 180 L 0 180 Z`;
 
     return (
         <ShopConsoleLayout shop={shop} title={`Console Boutique - ${shop.name}`}>
@@ -196,11 +220,11 @@ export default function LocalDashboard({
                                     <line x1="0" y1="140" x2="600" y2="140" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3" />
 
                                     <path 
-                                        d="M 0 140 L 100 115 L 200 60 L 300 95 L 400 25 L 500 45 L 600 15 L 600 180 L 0 180 Z" 
+                                        d={areaD} 
                                         fill="url(#shop-gradient-clean)" 
                                     />
                                     <path 
-                                        d="M 0 140 L 100 115 L 200 60 L 300 95 L 400 25 L 500 45 L 600 15" 
+                                        d={pathD} 
                                         fill="none" 
                                         stroke={activeThemeColor} 
                                         strokeWidth="3" 
@@ -208,19 +232,29 @@ export default function LocalDashboard({
                                         strokeLinejoin="round" 
                                     />
                                     
-                                    <circle cx="200" cy="60" r="4" fill="white" stroke={activeThemeColor} strokeWidth="2.5" />
-                                    <circle cx="400" cy="25" r="4" fill="white" stroke={activeThemeColor} strokeWidth="2.5" />
-                                    <circle cx="600" cy="15" r="4" fill="white" stroke={activeThemeColor} strokeWidth="2.5" />
+                                    {chartPoints.map((pt, idx) => (
+                                        <g key={idx}>
+                                            <circle 
+                                                cx={pt.x} 
+                                                cy={pt.y} 
+                                                r="4" 
+                                                fill="white" 
+                                                stroke={activeThemeColor} 
+                                                strokeWidth="2.5" 
+                                            />
+                                        </g>
+                                    ))}
                                 </svg>
                             </div>
-                            <div className="flex justify-between items-center text-[10px] text-stone-400 font-normal uppercase tracking-wider pt-2 px-1">
-                                <span>Lun</span>
-                                <span>Mar</span>
-                                <span>Mer</span>
-                                <span>Jeu</span>
-                                <span>Ven</span>
-                                <span>Sam</span>
-                                <span>Dim</span>
+                            <div className="flex justify-between items-center text-[10px] text-stone-500 font-normal uppercase tracking-wider pt-2 px-1">
+                                {chartPoints.map((pt, idx) => (
+                                    <div key={idx} className="text-center">
+                                        <span className="block font-medium text-stone-600">{pt.day}</span>
+                                        <span className="block text-[9px] text-stone-400 font-mono">
+                                            {Number(pt.amount || 0) > 0 ? `${Number(pt.amount).toLocaleString()} F` : '0 F'}
+                                        </span>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>
@@ -305,35 +339,49 @@ export default function LocalDashboard({
                                         </td>
                                     </tr>
                                 ) : (
-                                    recentOrders.map(order => (
-                                        <tr key={order.id} className="hover:bg-stone-50/70 transition-colors">
-                                            <td className="px-5 py-3">
-                                                <span className="font-medium text-stone-900 block">{order.title}</span>
-                                                <span className="text-[10px] text-stone-400 font-mono">Code: {order.tracking_code || '---'}</span>
-                                            </td>
-                                            <td className="px-5 py-3 text-stone-800">
-                                                {order.delivery_info?.customer_name || 'Client anonyme'}
-                                            </td>
-                                            <td className="px-5 py-3 text-right font-medium text-stone-900">
-                                                {Number(order.total_price).toLocaleString()} FCFA
-                                            </td>
-                                            <td className="px-5 py-3">
-                                                <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-md text-[10px] font-medium">
-                                                    ✓ Payé (Séquestre)
-                                                </span>
-                                            </td>
-                                            <td className="px-5 py-3 text-right">
-                                                <a 
-                                                    href={route('public.order_tracking', order.tracking_code || '')}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-yellow-700 font-medium text-[11px] hover:underline"
-                                                >
-                                                    Suivre le colis
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    ))
+                                    recentOrders.map(order => {
+                                        const productNames = order.items && order.items.length > 0
+                                            ? order.items.map(it => it.product?.name || 'Produit').slice(0, 2).join(', ') + (order.items.length > 2 ? '...' : '')
+                                            : 'Commande directe';
+                                        return (
+                                            <tr key={order.id} className="hover:bg-stone-50/70 transition-colors">
+                                                <td className="px-5 py-3">
+                                                    <span className="font-medium text-stone-900 block">{order.order_number}</span>
+                                                    <span className="text-[10px] text-stone-400 truncate block max-w-xs">{productNames}</span>
+                                                </td>
+                                                <td className="px-5 py-3 text-stone-800">
+                                                    {order.customer_name || 'Client anonyme'}
+                                                    {order.customer_phone && <span className="block text-[10px] text-stone-400">{order.customer_phone}</span>}
+                                                </td>
+                                                <td className="px-5 py-3 text-right font-medium text-stone-900">
+                                                    {Number(order.total_amount || 0).toLocaleString()} FCFA
+                                                </td>
+                                                <td className="px-5 py-3">
+                                                    {order.payment_status === 'released' ? (
+                                                        <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-md text-[10px] font-medium">
+                                                            ✓ Libéré
+                                                        </span>
+                                                    ) : order.payment_status === 'escrow_held' ? (
+                                                        <span className="bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-md text-[10px] font-medium">
+                                                            ⏳ Séquestre
+                                                        </span>
+                                                    ) : (
+                                                        <span className="bg-stone-100 text-stone-600 border border-stone-200 px-2 py-0.5 rounded-md text-[10px] font-medium">
+                                                            {order.payment_status || 'En attente'}
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="px-5 py-3 text-right">
+                                                    <Link 
+                                                        href={route('seller.orders.show', order.order_number)}
+                                                        className="text-yellow-700 font-medium text-[11px] hover:underline inline-flex items-center gap-1"
+                                                    >
+                                                        Détails &rarr;
+                                                    </Link>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
                                 )}
                             </tbody>
                         </table>

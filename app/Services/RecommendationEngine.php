@@ -39,8 +39,17 @@ class RecommendationEngine
                 $tips[] = "Attention : stock sous le seuil critique (Alerte réapprovisionnement).";
             }
 
-            // Dynamic pricing suggestion
-            $suggestedPrice = round($product->price * (rand(0, 1) ? 0.95 : 1.05), -2);
+            // Dynamic pricing suggestion based on real stock velocity & active promotion
+            $hasActivePromo = $product->promotions && $product->promotions->where('is_active', true)->count() > 0;
+            if ($product->stock > 20 && !$hasActivePromo) {
+                // High stock without promotion: suggest 5% incentive discount to accelerate sales
+                $suggestedPrice = round($product->price * 0.95, -2);
+            } elseif ($product->stock <= $product->alert_threshold && $product->stock > 0) {
+                // Low stock high demand: suggest slight margin increase
+                $suggestedPrice = round($product->price * 1.05, -2);
+            } else {
+                $suggestedPrice = $product->price;
+            }
 
             $winningList[] = [
                 'id' => $product->id,

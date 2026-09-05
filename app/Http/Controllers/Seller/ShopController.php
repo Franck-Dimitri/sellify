@@ -134,17 +134,33 @@ class ShopController extends Controller
         $outOfStockCount = $products->where('stock', 0)->count();
         $promotionsCount = $products->filter(fn($p) => $p->promotions->where('is_active', true)->count() > 0)->count();
 
-        // Fetch recent smart links / orders for this shop's products
-        $productIds = $products->pluck('id');
-        $recentOrders = \App\Models\SmartLink::whereIn('product_id', $productIds)
-            ->where('status', 'paid')
+        // Fetch real orders for this shop
+        $recentOrders = \App\Models\Order::where('shop_id', $shop->id)
+            ->with(['items.product'])
             ->latest()
             ->take(6)
             ->get();
 
-        $totalRevenue = \App\Models\SmartLink::whereIn('product_id', $productIds)
-            ->where('status', 'paid')
-            ->sum('total_price');
+        $totalRevenue = (float)\App\Models\Order::where('shop_id', $shop->id)
+            ->whereIn('payment_status', ['escrow_held', 'released'])
+            ->sum('total_amount');
+
+        // Real 7-day sales breakdown
+        $weeklySales = [];
+        $dayNames = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i);
+            $dayRevenue = \App\Models\Order::where('shop_id', $shop->id)
+                ->whereIn('payment_status', ['escrow_held', 'released'])
+                ->whereDate('created_at', $date->toDateString())
+                ->sum('total_amount');
+
+            $weeklySales[] = [
+                'day' => $dayNames[$date->dayOfWeekIso - 1],
+                'date' => $date->format('d/m'),
+                'amount' => (float)$dayRevenue,
+            ];
+        }
 
         return Inertia::render('Seller/Shop/LocalDashboard', [
             'shop' => $shop,
@@ -155,6 +171,7 @@ class ShopController extends Controller
             'totalRevenue' => $totalRevenue,
             'recentOrders' => $recentOrders,
             'recentProducts' => $products->take(5),
+            'weeklySales' => $weeklySales,
         ]);
     }
 

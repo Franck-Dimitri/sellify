@@ -26,27 +26,38 @@ class WalletController extends Controller
 
         $wallet = SellerWallet::firstOrCreate(
             ['seller_id' => $seller->id],
-            ['balance' => 250000.00, 'pending_balance' => 45000.00, 'currency' => 'FCFA']
+            ['balance' => 0.00, 'pending_balance' => 0.00, 'currency' => 'FCFA']
         );
 
         $shops = $seller->shops()->with('products')->get();
-        
-        // Multi-shop breakdown calculation
-        $shopsBreakdown = [];
-        $totalShopsCount = $shops->count();
+        $shopIds = $shops->pluck('id');
 
-        foreach ($shops as $idx => $shop) {
-            // Distribute balance and pending balance proportionally across shops for demonstration
-            $ratio = $totalShopsCount > 0 ? (1 / $totalShopsCount) : 1;
-            $shopBalance = round($wallet->balance * $ratio, 2);
-            $shopPending = round($wallet->pending_balance * $ratio, 2);
+        // Sync pending_balance directly with real escrow_held orders
+        $actualPending = (float)\App\Models\Order::whereIn('shop_id', $shopIds)
+            ->where('payment_status', 'escrow_held')
+            ->sum('total_amount');
+        if ((float)$wallet->pending_balance !== $actualPending) {
+            $wallet->pending_balance = $actualPending;
+            $wallet->save();
+        }
+
+        // Multi-shop breakdown calculation based on authentic orders
+        $shopsBreakdown = [];
+
+        foreach ($shops as $shop) {
+            $shopReleased = (float)\App\Models\Order::where('shop_id', $shop->id)
+                ->where('payment_status', 'released')
+                ->sum('total_amount');
+            $shopPending = (float)\App\Models\Order::where('shop_id', $shop->id)
+                ->where('payment_status', 'escrow_held')
+                ->sum('total_amount');
             $productsCount = $shop->products->count();
 
             $shopsBreakdown[] = [
                 'id' => $shop->id,
                 'name' => $shop->name,
                 'slug' => $shop->slug,
-                'balance' => $shopBalance,
+                'balance' => $shopReleased,
                 'pending_balance' => $shopPending,
                 'products_count' => $productsCount,
                 'currency' => 'FCFA',
